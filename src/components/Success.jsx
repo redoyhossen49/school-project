@@ -30,7 +30,7 @@ export default function Success({ data }) {
       </div>
 
 
-      <div className=" font-bold my-6 ">
+      <div className=" font-bold my-6 text-sm md:text-base ">
         <p>------ Complete Your Admission ------</p>
       </div>
 

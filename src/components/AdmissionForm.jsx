@@ -183,7 +183,7 @@ export default function AdmissionForm() {
   return (
     <div className="max-w-md mx-auto bg-white rounded-xl  p-6">
       {/* Title */}
-      <h1 className="text-center text-3xl text-bold  mb-6 flex items-center justify-center gap-2">
+      <h1 className="text-center text-2xl text-bold  mb-6 flex items-center justify-center gap-2">
         <span className="text-slate-600">{stepTitles[step]}</span>
         
       </h1>

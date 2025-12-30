@@ -6,7 +6,7 @@ export default function Stepper({ activeStep = 0 }) {
     <div className="w-full max-w-md mx-auto mb-6">
       <div className="relative flex justify-between items-center">
         {/* background line */}
-        <div className="absolute top-[24px] left-16 right-16 h-[2px] bg-gray-300 -translate-y-1/2"    />
+        <div className="absolute left-8 right-8 top-[24px] md:left-16 md:right-16 h-[2px] bg-gray-300 -translate-y-1/2"    />
 
  
         {steps.map((label, index) => {
