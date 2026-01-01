@@ -53,10 +53,10 @@ export default function SchoolSuccess() {
 function Info({ label, value }) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      <div className="border border-white font-bold px-3 py-2 text-sm">
+      <div className="border border-white font-bold px-3 py-2 text-xs md:text-sm">
         {label}
       </div>
-      <div className="bg-white px-3 py-2 text-sm text-gray-700 break-all">
+      <div className="bg-white px-3 py-2 text-xs md:text-sm text-gray-700 break-all">
         {value}
       </div>
     </div>

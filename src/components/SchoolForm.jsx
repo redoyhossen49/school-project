@@ -1,6 +1,7 @@
 import { useState,useEffect} from "react";
 import Input from "./Input";
 import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function SchoolForm() {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ export default function SchoolForm() {
     confirmPassword: "",
     logo: null,
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -166,9 +170,26 @@ const successData = {
 
         <Input label="Mobile Number" name="mobile" value={formData.mobile} onChange={handleChange} />
         <Input label="Email Address" name="email" value={formData.email} onChange={handleChange} />
-
-        <Input type="password" label="Password" name="password" value={formData.password} onChange={handleChange} />
-        <Input type="password" label="Confirm Password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
+          <div className="relative">
+        <Input  type={showPassword ? "text" : "password"} label="Password" name="password" value={formData.password} onChange={handleChange} />
+         <span
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+           <div className="relative">
+        <Input  type={showConfirmPassword ? "text" : "password"} label="Confirm Password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
+        <span
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
+            onClick={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+          >
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
 
         {/* Upload */}
         <div className="relative">
