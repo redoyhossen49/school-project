@@ -12,9 +12,9 @@ export default function Step2({ formData, handleChange }) {
 
       {[
         { label: "Previous School", name: "previousSchool" },
-        { label: "School Name", name: "schoolName" },
         { label: "Class Name", name: "className" },
         { label: "Group Name", name: "groupName" },
+         { label: "Section", name: "sectionName" },
         { label: "Session Year", name: "sessionYear" },
         { label: "Last Result", name: "lastResult" },
       ].map((field) => (

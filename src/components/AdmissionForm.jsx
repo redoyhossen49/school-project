@@ -5,9 +5,11 @@ import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
-import Success from "./Success";
+import Button from "./Button";
+import { useNavigate } from "react-router-dom";
 
 export default function AdmissionForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -18,7 +20,7 @@ export default function AdmissionForm() {
     district: "",
     upazila: "",
     school: "",
-    className: "",
+    class: "",
     group: "",
     session: "",
     admissionFee: "",
@@ -26,9 +28,10 @@ export default function AdmissionForm() {
 
     // Step 2
     previousSchool: "",
-    schoolName: "",
+
     className: "",
     groupName: "",
+    sectionName: "",
     sessionYear: "",
     lastResult: "",
 
@@ -77,7 +80,7 @@ export default function AdmissionForm() {
       "district",
       "upazila",
       "school",
-      "className",
+      "class",
       "group",
       "session",
       "admissionFee",
@@ -86,9 +89,10 @@ export default function AdmissionForm() {
 
     1: [
       "previousSchool",
-      "schoolName",
+
       "className",
-      "groupName",
+
+      "sectionName",
       "sessionYear",
       "lastResult",
     ],
@@ -121,24 +125,27 @@ export default function AdmissionForm() {
     0: "New Student Admission",
     1: "Previous School Information",
     2: "Guardian Information",
-    3: "Student & Account Information",
+    3: "Student  Information",
   };
 
   const isStepValid = () => {
     const fields = stepRequiredFields[step] || [];
     for (let field of fields) {
       if (!formData[field] || formData[field].toString().trim() === "") {
-        setError("সব required field পূরণ করুন");
+        setError("All required fields must be completed before proceeding.");
+
         return false;
       }
     }
     if (step === 3) {
       if (formData.password.length < 6) {
-        setError("Password minimum 6 character হতে হবে");
+        setError("Password must be at least 6 characters long.");
+
         return false;
       }
       if (formData.password !== formData.newpassword) {
-        setError("Password match করতে হবে");
+        setError("Passwords do not match. Please try again.");
+
         return false;
       }
     }
@@ -151,7 +158,7 @@ export default function AdmissionForm() {
 
     if (step === 3) {
       // Generate student ID and show submission
-      const id = Math.floor(100000 + Math.random() * 900000);
+      const id = Math.floor(10000000 + Math.random() * 90000000);
       setFormData((prev) => ({ ...prev, idNumber: id }));
       setSubmitted({ ...formData, idNumber: id });
       setStep(step + 1);
@@ -172,20 +179,17 @@ export default function AdmissionForm() {
     const finalData = { ...formData, idNumber: generatedId };
 
     setFormData(finalData);
-    setSubmitted(finalData); // ✅ success trigger
+    setSubmitted(finalData);
+    navigate("/success", {
+      state: finalData,
+    });
   };
 
-  // SUCCESS PAGE ONLY
-  if (submitted) {
-    return <Success data={submitted} />;
-  }
-
   return (
-    <div className="max-w-md mx-auto bg-white rounded-xl  p-6">
+    <div className="max-w-md mx-auto bg-white   py-6">
       {/* Title */}
-      <h1 className="text-center text-2xl text-bold  mb-6 flex items-center justify-center gap-2">
+      <h1 className="text-center  md:text-2xl text-bold  mb-6 flex items-center justify-center gap-2">
         <span className="text-slate-600">{stepTitles[step]}</span>
-        
       </h1>
       <Stepper activeStep={step}></Stepper>
       {/* STEP CONTENT */}
@@ -204,7 +208,9 @@ export default function AdmissionForm() {
         )}
       </div>
 
-      {error && <p className="text-red-500 text-center mt-2">{error}</p>}
+      {error && (
+        <p className="text-red-500 text-sm  text-center mt-2">{error}</p>
+      )}
 
       <div className="flex gap-4 mt-8">
         {/* STEP 0 */}
@@ -212,61 +218,31 @@ export default function AdmissionForm() {
           <>
             <Link
               to="/"
-              className="w-1/2 bg-slate-600 border text-white py-3 text-center rounded-xl font-semibold
-                   hover:bg-blue-700 transition"
+              className="w-1/2 bg-blue-500 border text-white py-3 text-center  font-semibold
+                   hover:bg-slate-800 transition"
             >
               Login
             </Link>
 
-            <button
-              onClick={next}
-              className="w-1/2 bg-indigo-400 text-white py-3 rounded-xl font-semibold
-                   hover:bg-indigo-700 transition"
-            >
-              Next
-            </button>
+            <Button onClick={next} text="Next" />
           </>
         )}
 
         {/* STEP 1 & 2 */}
         {(step === 1 || step === 2) && (
           <>
-            <button
-              onClick={back}
-              className="w-1/2 bg-blue-600 text-white py-3 rounded-xl font-semibold
-                   hover:bg-blue-700 transition"
-            >
-              Back
-            </button>
+            <Button onClick={back} text="Back" />
 
-            <button
-              onClick={next}
-              className="w-1/2 bg-indigo-600 text-white py-3 rounded-xl font-semibold
-                   hover:bg-indigo-700 transition"
-            >
-              Next
-            </button>
+            <Button onClick={next} text="  Next" />
           </>
         )}
 
         {/* LAST STEP */}
         {step === 3 && (
           <>
-            <button
-              onClick={back}
-              className="w-1/2 bg-blue-600 text-white py-3 rounded-xl font-semibold
-                   hover:bg-blue-700 transition"
-            >
-              Back
-            </button>
+            <Button onClick={back} text="Back" />
 
-            <button
-              onClick={handleAdmission}
-              className="w-1/2 bg-green-600 text-white py-3 rounded-xl font-semibold
-                   hover:bg-green-700 transition"
-            >
-              Admission
-            </button>
+            <Button onClick={handleAdmission} text="Admission" />
           </>
         )}
       </div>
@@ -284,7 +260,7 @@ export default function AdmissionForm() {
 
       {/* Copyright */}
       <p className="text-center mt-6 text-xs text-gray-400">
-        Copyright © 2024 - Prekool
+        Copyright © 2025 - Astha Academy
       </p>
     </div>
   );

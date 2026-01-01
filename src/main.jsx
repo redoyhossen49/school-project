@@ -6,17 +6,29 @@ import DashboardLayout from "./Layouts/DashboardLayout";
 import { ThemeProvider } from "./context/ThemeContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import Dashboard from "./pages/Dashboard";
-
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SchoolForm from "./components/SchoolForm";
 import AdmissionForm from "./components/AdmissionForm";
+import StudentSuccess from "./pages/StudentSuccess";
+import SchoolSuccess from "./pages/SchoolSuccess";
+
 
 const router = createBrowserRouter([
   {
         path:"/",
         element:<Login></Login>,
       },
+
+      {
+        path: "/success",
+        element: <StudentSuccess />,
+      },
+      {
+        path: "/schoolsuccess",
+        element: <SchoolSuccess />,
+      },
+      
       {
         path:"/register",
         element:<Register></Register>,
@@ -29,6 +41,7 @@ const router = createBrowserRouter([
         path: "admission", 
         element: <AdmissionForm />,
       },
+      
     ],
       },
   {

@@ -37,7 +37,7 @@ export default function Step3({ formData, handleChange }) {
           name={name}
           value={formData[name] || ""}
           onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 my-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full  text-sm md:text-base border border-gray-300 px-4 py-3 my-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
           <option value="" disabled>
             {label}

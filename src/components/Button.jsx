@@ -8,7 +8,8 @@ export default function Button({
     <button
       type={type}
       onClick={onClick}
-      className={`bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-md font-medium transition ${className}`}
+      className={`w-1/2 bg-blue-500 text-white py-3  font-semibold
+                   hover:bg-slate-800 transition ${className}`}
     >
       {text}
     </button>

@@ -1,9 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link,useLocation } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 
-export default function Success({ data }) {
+export default function StudentSuccess() {
+    const { state } = useLocation();
+     if (!state) {
+    return (
+      <div className="text-center mt-10">
+        <h2>No admission data found</h2>
+        <Link to="/register">Go Back</Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-md mx-auto    p-4 text-center">
+    <div className="min-h-screen bg-gray-100  flex items-center justify-center py-8 px-4">
+    <div className="relative w-full max-w-md bg-white my-16 mx-auto text-center shadow-2xl px-8 py-16 transition-all duration-300 hover:scale-[1.01] ">
       
       {/* Logo / Icon */}
       <div className="flex justify-center mb-4 animate-fade-in-up ">
@@ -13,20 +24,20 @@ export default function Success({ data }) {
       {/* Title */}
       <h2 className=" text-xl md:text-2xl font-bold mb-2 text-blue-700">Congratulations!</h2>
       <p className="text-gray-600 text-sm md:text-base mb-6">
-        Dear <span className="font-semibold text-lg text-purple-600">{data.studentname}</span>,  
+        Dear <span className="font-semibold text-lg text-purple-600">{state.studentname}</span>,  
         Your registration has been successful.
       </p>
 
       {/* School */}
       <h3 className=" text-base md:text-lg font-semibold mb-6 text-indigo-600">
-         {data.school}
+         {state.school}
       </h3>
 
       {/* Info Box */}
       <div className="border bg-slate-400 text-white  p-4 space-y-3 text-left mb-6">
-        <Info label="ID Number" value={data.idNumber} />
-        <Info label="Mobile Number" value={data.mobileNumber} />
-        <Info label="Password" value={data.password} />
+        <Info label="ID Number" value={state.idNumber} />
+        <Info label="Mobile Number" value={state.mobileNumber} />
+        <Info label="Password" value={state.password} />
       </div>
 
 
@@ -54,6 +65,7 @@ export default function Success({ data }) {
         © 2024 ASTHA ACADEMY · EDUCATION FIRST
       </p>
     </div>
+    </div>
   );
 }
 
@@ -72,7 +84,7 @@ function Info({ label, value }) {
           {value}
         </p>
       </div>
-
+     
     </div>
   );
 }

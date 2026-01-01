@@ -1,54 +1,113 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaFacebookF, FaWhatsapp, FaEye, FaEyeSlash } from "react-icons/fa";
-import Button from "../components/Button";
-
-import login from "../assets//images/login.jpg";
-import { Link } from "react-router-dom";
 import LoginLogo from "../components/LoginLogo";
+import login from "../assets/images/login.jpg";
+import { Link } from "react-router-dom";
+import Input from "../components/Input";
 
 export default function Login() {
+  // ================= STATES =================
+  const [step, setStep] = useState("login"); // login | forget | otp | reset
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    idNumber: "",
+    password: "",
+  });
+
   const [formData, setFormData] = useState({
     idNumber: "",
     password: "",
   });
 
-  const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
+  const [forgetData, setForgetData] = useState({
+    idNumber: "",
+    contact: "", // email or phone
+  });
 
-  // handle input change
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [timer, setTimer] = useState(0);
+
+  // ================= OTP TIMER =================
+  useEffect(() => {
+    let interval;
+    if (step === "otp" && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((t) => t - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
+
+  // ================= HANDLERS =================
+  const handleLoginChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // validation
-  const validate = () => {
-    let newErrors = {};
-
-    if (!formData.idNumber.trim()) {
-      newErrors.idNumber = "ID Number is required";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleForgetChange = (e) => {
+    setForgetData({ ...forgetData, [e.target.name]: e.target.value });
   };
-
-  // submit
-  const handleSubmit = (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
 
-    if (validate()) {
-      console.log("Login Data:", formData);
-      alert("Login Successful ✅");
+    let tempErrors = {};
+    if (!formData.idNumber) tempErrors.idNumber = "ID Number required";
+    if (!formData.password) tempErrors.password = "Password required";
+
+    setErrors(tempErrors);
+
+    if (Object.keys(tempErrors).length > 0) return;
+
+    const savedPassword = localStorage.getItem("dummyPassword");
+    if (savedPassword && formData.password !== savedPassword) {
+      alert("Wrong password ❌");
+      return;
     }
+
+    alert("Login Successful ✅");
+  };
+
+  const generateOtp = () => {
+    const otpCode = "123456"; // dummy OTP
+    localStorage.setItem("dummyOtp", otpCode);
+    console.log("OTP:", otpCode);
+    setTimer(60);
+  };
+
+  const sendOtp = () => {
+    if (!forgetData.idNumber || !forgetData.contact) {
+      alert("ID Number and Email/Phone required");
+      return;
+    }
+
+    generateOtp();
+    alert("OTP sent (check console)");
+    setStep("otp");
+  };
+
+  const resendOtp = () => {
+    generateOtp();
+    alert("OTP resent");
+  };
+
+  const verifyOtp = () => {
+    if (otp === localStorage.getItem("dummyOtp")) {
+      alert("OTP verified ✅");
+      setStep("reset");
+    } else {
+      alert("Invalid OTP ❌");
+    }
+  };
+
+  const resetPassword = () => {
+    if (newPassword.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+
+    localStorage.setItem("dummyPassword", newPassword);
+    alert("Password reset successful ✅");
+    setStep("login");
   };
 
   return (
@@ -62,12 +121,10 @@ export default function Login() {
               style={{ textShadow: "3px 3px 5px yellow" }}
               className=" animate-glow ml-3"
             >
-              
-              <span className="text-indigo-800"> Pre</span>
-              <span className="text-gray-300">Skool</span>
+              <span className="text-indigo-800"> Astha</span>
+              <span className="text-gray-300">Academy</span>
             </span>
           </h1>
-         
 
           <p className="text-gray-600 mb-2">
             If you don’t have an account register
@@ -97,130 +154,184 @@ export default function Login() {
         </div>
 
         {/* Right Side Login Card */}
-        <div className="bg-white rounded-2xl shadow-lg px-8 py-12 animate-fade-in-up relative">
+        <div className="bg-white  shadow-lg px-8 py-12 animate-fade-in-up relative my-20">
           <LoginLogo></LoginLogo>
-          <h2 className="text-2xl text-gray-600  font-bold text-center my-6">
-            Login
-          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* ID Number */}
-            <div className="relative">
-              <input
-                type="text"
-                name="idNumber"
-                value={formData.idNumber}
-                onChange={handleChange}
-                placeholder=" "
-                className={`
-      peer w-full border px-4 py-2 rounded-md
-      focus:outline-none
-      focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]
-      placeholder:text-transparent
-      ${
-        errors.idNumber
-          ? "border-red-500"
-          : "border-gray-300 focus:border-blue-500"
-      }
-    `}
-              />
-              <label
-                className={`
-      absolute left-4 top-2 text-gray-400
-      text-sm pointer-events-none
-      transition-all duration-300
-      peer-placeholder-shown:top-2
-      peer-placeholder-shown:text-gray-400
-      peer-placeholder-shown:text-base
-      peer-focus:-top-3
-      peer-focus:text-xs
-      peer-focus:text-blue-600
-      peer-focus:bg-white
-      peer-not-placeholder-shown:-top-2
-      peer-not-placeholder-shown:text-xs
-      peer-not-placeholder-shown:text-gray-600
-      peer-not-placeholder-shown:bg-white
-      peer-not-placeholder-shown:px-1
-      peer-focus:px-1
-    `}
-              >
-                ID Number
-              </label>
-
-              {errors.idNumber && (
-                <p className="text-xs text-red-500 mt-1">{errors.idNumber}</p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder=" "
-                className={`peer w-full border px-4 py-2 rounded-md focus:outline-none focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)] placeholder-transparent
-      ${
-        errors.password
-          ? "border-red-500"
-          : "border-gray-300 focus:border-blue-500"
-      }`}
-              />
-              <label
-                htmlFor="password"
-                className={`absolute left-4 top-2 text-gray-400 text-sm transition-all duration-300
-      peer-placeholder-shown:top-2.5
-      peer-placeholder-shown:text-base
-      peer-placeholder-shown:text-gray-400
-      peer-focus:-top-2
-      peer-focus:text-xs
-      peer-focus:text-blue-600
-      peer-focus:bg-white
-      peer-focus:px-1
-      peer-not-placeholder-shown:-top-2
-      peer-not-placeholder-shown:text-xs
-      peer-not-placeholder-shown:text-gray-600
-      peer-not-placeholder-shown:bg-white
-      peer-not-placeholder-shown:px-1
-      pointer-events-none
-    `}
-              >
-                Password
-              </label>
-
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
-
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-4">
-              <button
-                type="button"
-                className="w-1/2 bg-blue-500 text-white py-2 rounded-md hover:bg-slate-700 hover:shadow-md hover:shadow-blue-800/50 transition-shadow duration-300"
-              >
-                Forget
-              </button>
-
-              <button
-                type="submit"
-                className="w-1/2 bg-blue-500 text-white py-2 rounded-md hover:bg-slate-700  hover:shadow-md hover:shadow-blue-800/50 transition-shadow duration-300"
-              >
+          {step === "login" && (
+            <div>
+              <h2 className="text-2xl text-gray-600  font-bold text-center my-6">
                 Login
+              </h2>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                {/* ID Number */}
+                <div className="relative">
+                  <Input
+                    name="idNumber"
+                    label="ID Number"
+                    value={forgetData.idNumber}
+                    onChange={handleLoginChange}
+                  />
+
+                  {errors.idNumber && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.idNumber}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div className="relative">
+                  <Input
+                    name="password"
+                    label="Password"
+                    type={showPassword ? "text" : "password"} 
+                    value={formData.password} 
+                    onChange={handleLoginChange}
+                  />
+
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+
+                  {errors.password && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep("forget")}
+                    className="w-1/2 bg-blue-500 text-white py-2"
+                  >
+                    Forget
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="w-1/2 bg-blue-400 text-white py-2  hover:bg-slate-800  hover:shadow-md hover:shadow-slate-800/50 transition-shadow duration-300"
+                  >
+                    Login
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* ============ FORGET ============ */}
+          {step === "forget" && (
+            <div className="">
+              <h2 className=" text-base md:text-xl font-bold text-center my-4">
+                Forget Password
+              </h2>
+              <div className="space-y-4">
+              <div className="relative">
+                <Input
+                  name="idNumber"
+                  label="ID Number"
+                  value={forgetData.idNumber}
+                  onChange={handleForgetChange}
+                />
+              </div>
+              <div className="relative">
+                <Input
+                  name="contact"
+                  label="Email or Phone"
+                  value={forgetData.contact}
+                  onChange={handleForgetChange}
+                 
+                />
+              </div>
+              
+              <button
+                onClick={sendOtp}
+                className="w-full text-sm md:text-base bg-blue-500 text-white py-2"
+              >
+                Send OTP
+              </button>
+              
+
+              <p
+                className="text-center text-sm  cursor-pointer text-blue-600"
+                onClick={() => setStep("login")}
+              >
+                Back to Login
+              </p>
+              </div>
+            </div>
+          )}
+          
+            {/* ============ OTP ============ */}
+          {step === "otp" && (
+            <div className="space-y-4 py-12 animate-fade-in-up ">
+              <h2 className=" text-base md:text-xl font-bold text-center mb-2">
+                Verify OTP
+              </h2>
+
+              <p className="text-center text-sm text-gray-500 mb-3">
+                Time left: {timer}s
+              </p>
+
+              <Input
+                label="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+               
+              />
+
+              <button
+                onClick={verifyOtp}
+                className="w-full text-sm md:text-base bg-blue-500 text-white py-2 mb-3"
+              >
+                Verify OTP
+              </button>
+
+              {timer === 0 && (
+                <p
+                  onClick={resendOtp}
+                  className="text-center text-sm text-blue-600 cursor-pointer"
+                >
+                  Resend OTP
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* ============ RESET ============ */}
+          {step === "reset" && (
+            <div className="space-y-4">
+              <h2 className="text-lg md:text-xl font-bold text-center mb-4">
+                New Password
+              </h2>
+
+              <Input
+                type="password"
+                label="New Password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+             
+              />
+
+              <button
+                onClick={resetPassword}
+                className="w-full bg-blue-500 text-sm md:text-base text-white py-2"
+              >
+                Reset Password
               </button>
             </div>
-          </form>
+          )}  
+
+
 
           {/* Register */}
-          <p className="text-center text-sm text-gray-500 mt-8 border py-2 rounded-lg border-gray-300">
+          <p className="text-center text-sm text-gray-500 mt-6 border py-2  border-gray-300">
             <Link to="register">
               Don’t have an account?
               <span className="text-blue-600 font-semibold ">Register</span>
@@ -228,13 +339,13 @@ export default function Login() {
           </p>
 
           {/* Social */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 mb-3">Join our Group</p>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-500 mb-5">Join our Group</p>
             <div className="flex justify-center gap-4">
-              <div className="bg-blue-600 text-white p-3 rounded-full cursor-pointer hover:scale-105 transition-all duration-500">
+              <div className="bg-blue-600 text-white p-3 md:p-5  rounded-full cursor-pointer hover:scale-105 transition-all duration-500">
                 <FaFacebookF />
               </div>
-              <div className="bg-green-500 text-white p-3 rounded-full cursor-pointer hover:scale-105 transition-all duration-500">
+              <div className="bg-green-500 text-white p-3 md:p-5 rounded-full cursor-pointer hover:scale-105 transition-all duration-500">
                 <FaWhatsapp />
               </div>
             </div>

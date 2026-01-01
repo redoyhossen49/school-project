@@ -17,7 +17,7 @@ export default function Input({
         onChange={onChange}
         placeholder=" "
         className={`
-          peer w-full border px-4 py-2 rounded-md
+          peer w-full border px-4 py-2
       focus:outline-none
       focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]
       placeholder:text-transparent
@@ -35,7 +35,8 @@ export default function Input({
           text-sm pointer-events-none
           transition-all duration-300
           peer-placeholder-shown:top-2
-          peer-placeholder-shown:text-base
+          peer-placeholder-shown:text-sm
+          md:peer-placeholder-shown:text-base
           peer-placeholder-shown:text-gray-400
           peer-focus:-top-3
           peer-focus:text-xs

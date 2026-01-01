@@ -24,7 +24,7 @@ export default function Step4({ formData, handleChange }) {
       handleChange({
         target: {
           name: "idNumber",
-          value: Math.floor(100000 + Math.random() * 900000),
+          value: Math.floor(10000000 + Math.random() * 90000000),
         },
       });
     }
@@ -33,7 +33,7 @@ export default function Step4({ formData, handleChange }) {
   return (
     <div className="space-y-4 animate-fadeIn">
       <p className="text-sm text-gray-500 text-center">
-        Please provide the student personal & account details.
+        Please provide the student information.
       </p>
 
       {/* Student Name */}
@@ -53,7 +53,7 @@ export default function Step4({ formData, handleChange }) {
       ))}
 
       {/* Current Location */}
-      <h2 className="text-center font-semibold text-gray-600 text-lg mb-4">
+      <h2 className="text-center text-base font-semibold text-gray-600 md:text-lg mb-4">
         Current Location
       </h2>
       {[
@@ -78,7 +78,7 @@ export default function Step4({ formData, handleChange }) {
           name={name}
           value={formData[name] || ""}
           onChange={handleChange}
-          className="w-full rounded-lg border px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full text-sm md:text-base border px-4 py-3 text-gray-400 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
           <option value="" disabled>
             {label}
@@ -92,7 +92,7 @@ export default function Step4({ formData, handleChange }) {
       ))}
 
       {/* Permanent Location */}
-      <h2 className="text-center font-semibold text-gray-600 text-lg mb-4">
+      <h2 className="text-center font-semibold text-gray-600 text-base md:text-lg mb-4">
         Permanent Location
       </h2>
       {[
@@ -117,7 +117,7 @@ export default function Step4({ formData, handleChange }) {
           name={name}
           value={formData[name] || ""}
           onChange={handleChange}
-          className="w-full rounded-lg border px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full text-sm md:text-base border px-4 py-3 text-gray-400 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
           <option value="" disabled>
             {label}
@@ -142,11 +142,11 @@ export default function Step4({ formData, handleChange }) {
             value={formData[field.name] || ""}
             onChange={handleChange}
             placeholder=" "
-            className="peer w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-transparent"
+            className="peer w-full border px-4 py-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-transparent"
           />
           <label
             className="absolute left-4 top-2 text-gray-400 text-sm pointer-events-none transition-all duration-300
-                       peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                       peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm md:peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
                        peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:bg-white peer-focus:px-1
                        peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-gray-600 peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
           >
@@ -167,11 +167,11 @@ export default function Step4({ formData, handleChange }) {
             value={formData[field.name] || ""}
             onChange={handleChange}
             placeholder=" "
-            className="peer w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-transparent"
+            className="peer w-full border px-4 py-2  focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-transparent"
           />
           <label
             className="absolute left-4 top-2 text-gray-400 text-sm pointer-events-none transition-all duration-300
-                       peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                       peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm md:peer-placeholder-shown:text-base  peer-placeholder-shown:text-gray-400
                        peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 peer-focus:bg-white peer-focus:px-1
                        peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-gray-600 peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
           >
@@ -191,7 +191,7 @@ export default function Step4({ formData, handleChange }) {
       <div className="my-4">
         {!preview ? (
           <div
-            className="border-2 border-dashed rounded-lg h-28 flex flex-col items-center justify-center
+            className="border-2 border-dashed  h-28 flex flex-col items-center justify-center
                     text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
           >
             <span className="text-sm">📷 Upload Photo</span>
