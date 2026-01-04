@@ -2,6 +2,7 @@ import { useState ,useEffect} from "react";
 import { FiBell, FiChevronDown, FiUser, FiLogOut,FiSearch, FiX, } from "react-icons/fi";
 import { useTheme } from "../context/ThemeContext";
 import { useSidebar } from "../context/SidebarContext";
+import { Link } from "react-router-dom";
 
 export default function TopNavbar() {
 
@@ -79,13 +80,13 @@ export default function TopNavbar() {
           {/* Search icon inside input (left) */}
           <FiSearch
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-600`}
           />
 
           {/* Cross icon inside input (right) */}
           <button
             onClick={() => setMobileSearchOpen(false)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 bg-gray-100 text-black rounded-full hover:bg-gray-100"
           >
             <FiX size={18} />
           </button>
@@ -133,7 +134,7 @@ export default function TopNavbar() {
                 <FiUser /> Profile
               </div>
               <div className="px-4 py-2 flex gap-2 text-red-600 hover:bg-red-50 cursor-pointer">
-                <FiLogOut /> Logout
+                <Link to="/" className="flex gap-2 items-center"><FiLogOut /><span> Logout</span></Link>
               </div>
             </div>
           )}
