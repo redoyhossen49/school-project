@@ -1,5 +1,6 @@
 import { NavLink, useMatch, Outlet } from "react-router-dom";
 import LoginLogo from "../components/LoginLogo";
+import Stepper from "../components/Stepper";
 
 export default function Register({submitted}) {
   const isAdmission = useMatch("/register/admission");
@@ -15,45 +16,41 @@ export default function Register({submitted}) {
           </div>
 
               {showTabs && !submitted && (
-          <div className="flex mt-12 mb-8  gap-2  p-1 ">
-            <NavLink
-              to="/register"
-              end
-              className={({ isActive }) =>
-                `w-1/2 text-center py-2 text-sm md:text-base font-semibold transition
-              ${
-                isActive
-                  ? "bg-sky-600 text-white "
-                  : "text-gray-600 bg-gray-300 hover:bg-purple-400"
-              }`
-              }
-            >
-              School
-            </NavLink>
+          <div className="flex w-full gap-3 mb-6">
+  <NavLink
+    to="/register"
+    end
+    className={({ isActive }) =>
+      `flex-1 text-center py-2 text-sm md:text-base font-semibold transition
+      ${isActive ? "bg-sky-600 text-white" : "bg-gray-300 text-gray-600 hover:bg-purple-400"}`
+    }
+  >
+    School
+  </NavLink>
 
-            <NavLink
-              to="/register/admission"
-              className={({ isActive }) =>
-                `w-1/2 text-center py-2 text-sm md:text-base font-semibold transition
-              ${
-                isActive
-                  ? "bg-sky-600 text-white "
-                  : "text-gray-600 bg-gray-300 hover:bg-purple-400"
-              }`
-              }
-            >
-              Admission
-            </NavLink>
-          </div>
+  <NavLink
+    to="/register/admission"
+    className={({ isActive }) =>
+      `flex-1 text-center py-2 text-sm md:text-base font-semibold transition
+      ${isActive ? "bg-sky-600 text-white" : "bg-gray-300 text-gray-600 hover:bg-purple-400"}`
+    }
+  >
+    Admission
+  </NavLink>
+</div>
+
             )}
 
 
           {!isAdmission && (
-            <h2 className="text-lg md:text-2xl font-bold text-slate-600 transition-all duration-300">
+            <h2 className="text-base md:text-2xl  text-slate-600 transition-all duration-300">
               New School Registration
             </h2>
           )}
         </div>
+
+          {/* Stepper */}
+         
 
         {/* Form */}
 

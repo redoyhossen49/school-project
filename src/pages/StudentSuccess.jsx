@@ -34,7 +34,7 @@ export default function StudentSuccess() {
       </h3>
 
       {/* Info Box */}
-      <div className="border bg-slate-400 text-white  p-4 space-y-3 text-left mb-6">
+      <div className="border shadow-lg  border-gray-200 text-white p-4 space-y-3 text-left mb-6">
         <Info label="ID Number" value={state.idNumber} />
         <Info label="Mobile Number" value={state.mobileNumber} />
         <Info label="Password" value={state.password} />
@@ -74,12 +74,12 @@ function Info({ label, value }) {
     <div className="grid grid-cols-2 gap-3">
       
       {/* Label */}
-      <div className="border border-white font-bold  px-3 py-2">
-        <p className=" text-xs md:text-sm text-white">{label}</p>
+      <div className="border border-black text-black font-bold px-3 py-2 text-xs md:text-sm">
+        {label}
       </div>
 
       {/* Value */}
-      <div className="border border-white/50  px-3 py-2 bg-white">
+      <div className="bg-gray-200 px-3 py-2 text-xs md:text-sm text-gray-700 break-all">
         <p className="text-xs md:text-smfont-semibold text-gray-700 break-all">
           {value}
         </p>

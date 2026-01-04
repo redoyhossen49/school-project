@@ -191,7 +191,9 @@ export default function AdmissionForm() {
       <h1 className="text-center  md:text-2xl text-bold  mb-6 flex items-center justify-center gap-2">
         <span className="text-slate-600">{stepTitles[step]}</span>
       </h1>
-      <Stepper activeStep={step}></Stepper>
+      
+        <Stepper activeStep={step}></Stepper>
+      
       {/* STEP CONTENT */}
       <div className="mt-6 transition-all duration-500">
         {step === 0 && (
@@ -212,13 +214,13 @@ export default function AdmissionForm() {
         <p className="text-red-500 text-sm  text-center mt-2">{error}</p>
       )}
 
-      <div className="flex gap-4 mt-8">
+      <div className="flex gap-4 mt-8 w-f">
         {/* STEP 0 */}
         {step === 0 && (
           <>
             <Link
               to="/"
-              className="w-1/2 bg-blue-500 border text-white py-3 text-center  font-semibold
+              className="w-1/2 bg-blue-500 border text-white text-sm md:text-base py-2   text-center  font-semibold
                    hover:bg-slate-800 transition"
             >
               Login

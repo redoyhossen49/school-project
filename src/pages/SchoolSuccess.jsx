@@ -29,10 +29,10 @@ export default function SchoolSuccess() {
           </span>
         </p>
 
-        <div className="border bg-slate-400 text-white p-4 space-y-3 text-left mb-6">
+        <div className="border shadow-lg  border-gray-200 text-white p-4 space-y-3 text-left mb-6">
           <Info label="School ID" value={state.id} />
           <Info label="Mobile" value={state.mobile} />
-          <Info label="Email" value={state.email} />
+          <Info label="Password" value={state.password} />
         </div>
 
         <Link
@@ -53,10 +53,10 @@ export default function SchoolSuccess() {
 function Info({ label, value }) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      <div className="border border-white font-bold px-3 py-2 text-xs md:text-sm">
+      <div className="border border-black text-black font-bold px-3 py-2 text-xs md:text-sm">
         {label}
       </div>
-      <div className="bg-white px-3 py-2 text-xs md:text-sm text-gray-700 break-all">
+      <div className="bg-gray-200 px-3 py-2 text-xs md:text-sm text-gray-700 break-all">
         {value}
       </div>
     </div>

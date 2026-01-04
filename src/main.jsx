@@ -45,17 +45,21 @@ const router = createBrowserRouter([
     ],
       },
   {
-    path: "/dashboard",
+    path: "/admin/dashboard",
     element: <DashboardLayout></DashboardLayout>,
-    children:[
-      {
-        index: true,
-        element: <Dashboard />,
-      },
-     
-      
-       
-    ]
+    
+  },
+   {
+    path: "/teacher/dashboard",
+    element: <DashboardLayout />,
+  },
+  {
+    path: "/student/dashboard",
+    element: <DashboardLayout />,
+  },
+  {
+    path: "/school/dashboard",
+    element: <DashboardLayout />,
   },
 ]);
 

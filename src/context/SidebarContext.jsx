@@ -1,22 +1,37 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const SidebarContext = createContext();
 
 export function SidebarProvider({ children }) {
-  const [open, setOpen] = useState(true);         // desktop
-  const [mobileOpen, setMobileOpen] = useState(false); // mobile
+  const [open, setOpen] = useState(true);      // desktop toggle
+  const [hovered, setHovered] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const toggleSidebar = () => setOpen(prev => !prev);
   const toggleMobileSidebar = () => setMobileOpen(prev => !prev);
+
+  // 🔥 IMPORTANT FIX
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileOpen(false);   // mobile state reset
+        setHovered(false);      // hover reset
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <SidebarContext.Provider
       value={{
         open,
-        toggleSidebar,
+        hovered,
+        setHovered,
         mobileOpen,
+        toggleSidebar,
         toggleMobileSidebar,
-        setMobileOpen
       }}
     >
       {children}

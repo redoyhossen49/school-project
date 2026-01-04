@@ -1,47 +1,32 @@
 export default function Stepper({ activeStep = 0 }) {
   const steps = ["Register", "School", "Guardian", "Student"];
-    
 
   return (
-    <div className="w-full  mb-6">
-      <div className="relative flex justify-between items-center">
-        {/* background line */}
-        <div className="absolute left-8 right-8 top-[24px] md:left-16 md:right-16 h-[2px] bg-gray-300 -translate-y-1/2"    />
+    <div className="mb-6 w-full relative">
+      {/* Background line */}
+      <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-300 z-0"></div>
 
- 
+      {/* Step circles */}
+      <div className="relative flex justify-between w-full z-10">
         {steps.map((label, index) => {
           const isActive = index === activeStep;
           const isCompleted = index < activeStep;
 
           return (
-            <div
-              key={index}
-              className="relative z-10 flex flex-col items-center w-1/4"
-            >
-              {/* circle */}
+            <div key={index} className="flex flex-col items-center">
+              {/* Circle */}
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold hover:bg-sky-400 hover:scale-105 transition-all duration-300 
-                ${
-                    isCompleted
-                      ? "bg-green-500 text-white"
-                      : isActive
-                      ? "bg-blue-600 text-white scale-110"
-                      : "bg-gray-300 text-gray-600"
-                  }`}
+                className={` w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center font-semibold transition-all duration-300 hover:bg-blue-600
+                ${isCompleted ? "bg-green-500 text-white" : isActive ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
               >
                 {isCompleted ? "✓" : index + 1}
               </div>
 
-              {/* label */}
+              {/* Label */}
               <span
-                className={`mt-2 text-xs font-medium
-                ${
-                    isActive
-                      ? "text-blue-600"
-                      : isCompleted
-                      ? "text-green-600"
-                      : "text-gray-500"
-                  }`}
+                className={`mt-2 text-xs font-medium ${
+                  isActive ? "text-blue-600" : isCompleted ? "text-green-600" : "text-gray-500"
+                }`}
               >
                 {label}
               </span>
@@ -50,6 +35,5 @@ export default function Stepper({ activeStep = 0 }) {
         })}
       </div>
     </div>
-    
   );
 }

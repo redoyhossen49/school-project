@@ -122,7 +122,7 @@ const successData = {
     schoolName: formData.schoolName,
     id: formData.id,
     mobile: formData.mobile,
-    email: formData.email,
+    password: formData.password,
   };
 
   navigate("/schoolsuccess", {
