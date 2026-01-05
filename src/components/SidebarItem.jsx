@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom"; 
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -29,17 +29,15 @@ export default function SidebarItem({
   // ================= With children =================
   if (item.children?.length) {
     return (
-      <div>
+      <div className="">
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           className={`flex items-center w-full px-3 py-2 rounded-lg transition
-            hover:bg-blue-50 hover:text-blue-600
-            ${open ? "text-blue-600" : ""}
+            hover:bg-blue-500 hover:text-gray-900
           `}
         >
           {Icon && <Icon size={18} />}
-
           {showText && (
             <>
               <span className="ml-3 flex-1 text-left text-sm font-medium">
@@ -57,24 +55,17 @@ export default function SidebarItem({
 
         {/* children menu */}
         {showText && open && (
-          <div className="ml-9 mt-1 space-y-1">
+          <div className="ml-9  mt-1 space-y-1">
             {item.children.map((sub, i) => (
               <NavLink
                 key={i}
                 to={sub.path}
-                className={({ isActive }) =>
-                  `block px-3 py-1.5 rounded-md text-sm transition
-                  ${
-                    isActive
-                      ? "bg-blue-50 text-blue-600 font-medium"
-                      : "hover:bg-blue-50 hover:text-blue-600"
-                  }`
-                }
+                className="block px-3 py-1.5 rounded-md text-sm transition hover:bg-blue-400 hover:text-gray-900"
               >
                 {sub.icon && (
                   <sub.icon size={16} className="inline-block mr-2" />
                 )}
-                {sub.title}
+                {sub.label || sub.title}
               </NavLink>
             ))}
           </div>
@@ -87,14 +78,7 @@ export default function SidebarItem({
   return (
     <NavLink
       to={item.path}
-      className={({ isActive }) =>
-        `flex items-center px-3 py-2 rounded-lg transition
-        ${
-          isActive
-            ? "bg-blue-200 text-blue-600 font-medium"
-            : "hover:bg-blue-200 hover:text-blue-600"
-        }`
-      }
+      className="flex items-center px-3 py-2  rounded-lg transition hover:bg-blue-500 hover:text-gray-900"
     >
       {Icon && <Icon size={18} />}
       {showText && (

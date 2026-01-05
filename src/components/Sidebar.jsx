@@ -46,7 +46,7 @@ export default function Sidebar({ role }) {
         className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 border-r border-amber-100
           ${darkMode ? "bg-slate-800 text-white" : "bg-white text-gray-700"}
           ${isExpanded ? "w-64" : "w-20"}
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 
         `}
       >
         {/* Header */}
@@ -79,7 +79,7 @@ export default function Sidebar({ role }) {
         </div>
 
         {/* Menu */}
-        <div className="p-3 space-y-2 overflow-y-auto h-[calc(100vh-64px)]">
+        <div className="px-4 py-2 pb-12  space-y-2 overflow-y-auto h-[calc(100vh-64px)]">
           {menuItems?.map((section, idx) => (
             <SidebarItem
               key={idx}
