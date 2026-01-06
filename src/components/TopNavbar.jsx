@@ -269,7 +269,7 @@ export default function TopNavbar() {
               </div>
 
               {/* Scrollable notifications list */}
-              <div className="flex-1 overflow-y-auto p-4 pb-8">
+              <div className="flex-1 p-4 pb-8">
                 <ul className="space-y-3">
                   {notifications.map((notif) => (
                     <li

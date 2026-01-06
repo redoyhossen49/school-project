@@ -57,10 +57,21 @@ export default function SidebarItem({
           }
         `}
       >
-        {Icon && <Icon size={20} />}
+        {Icon && <Icon size={16}  className={darkMode ? "text-white" : "text-gray-500"}  />}
+
+
+
+
+       {/* {Icon && collapsed && (
+            <Icon
+              size={20}
+              className={darkMode ? "text-white" : "text-gray-600"}
+            />
+          )}*/} 
+
         {showText && (
           <>
-            <span className="ml-3 flex-1 text-left text-sm font-medium">
+            <span className={`ml-3 flex-1 text-left text-sm font-medium ${darkMode?"text-white":"text-gray-600"}`}>
               {item.title}
             </span>
             <ChevronDown
@@ -131,9 +142,9 @@ export default function SidebarItem({
     <NavLink
       to={item.path}
      className={`flex items-center ${showText ? "justify-start" : "justify-center"} ${collapsed ? "px-2" : "px-3"} py-2 rounded-lg transition
-      ${darkMode ? "text-gray-200 hover:bg-blue-900" : "text-gray-800 hover:bg-blue-50"}`}
+      ${darkMode ? "text-white hover:bg-blue-900" : "text-gray-500 hover:bg-blue-50"}`}
     >
-      {Icon && <Icon size={20} />}
+      {Icon && <Icon size={16} />}
       {showText && (
         <span className="ml-3 text-sm font-medium">{item.title}</span>
       )}
