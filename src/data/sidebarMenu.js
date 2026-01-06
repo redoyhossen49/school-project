@@ -71,6 +71,7 @@ import {
   FaRegFilePdf,
   FaUsersSlash,
   FaFileMedicalAlt,
+  FaBookReader,
 } from "react-icons/fa";
 import {
   FaMoneyCheck,
@@ -83,10 +84,12 @@ import {
   FaUsersRays,
   FaUsersLine,
 } from "react-icons/fa6";
-import { IoCalendarNumberSharp, IoSchoolOutline } from "react-icons/io5";
+import { IoCalendarNumberSharp, IoExtensionPuzzleOutline, IoSchoolOutline } from "react-icons/io5";
 import { BiCategory, BiMailSend } from "react-icons/bi";
 import { RxIdCard } from "react-icons/rx";
 import {
+  MdOutlineDashboard,
+  MdOutlineFormatListNumberedRtl,
   MdOutlineGroupWork,
   MdOutlineProductionQuantityLimits,
   MdOutlineSendTimeExtension,
@@ -99,12 +102,13 @@ import {
   CiShoppingBasket,
 } from "react-icons/ci";
 import { BsCalendarDay, BsCollection } from "react-icons/bs";
-import { FcCollect, FcImageFile, FcMoneyTransfer } from "react-icons/fc";
+import { FcCalendar, FcCollect, FcImageFile, FcMoneyTransfer } from "react-icons/fc";
 import { VscCalendar } from "react-icons/vsc";
-import { RiAlignItemLeftFill, RiMoneyPoundBoxLine } from "react-icons/ri";
+import { RiAlignItemLeftFill, RiMoneyDollarCircleLine, RiMoneyPoundBoxLine } from "react-icons/ri";
 import { TbTruckLoading } from "react-icons/tb";
-import { GiTakeMyMoney } from "react-icons/gi";
+import { GiBookAura, GiTakeMyMoney } from "react-icons/gi";
 import { AiFillFileAdd } from "react-icons/ai";
+import { SlCalender } from "react-icons/sl";
 
 export const sidebarMenu = (role) => {
   // ================= Admin Menu =================
@@ -168,7 +172,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Financial & Profit",
-      icon: DollarSign,
+      icon:  RiMoneyDollarCircleLine,
       children: [
         { title: "Our Profit", path: "/financial/profit", icon: BarChart2 },
         {
@@ -185,7 +189,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Dashboard",
-      icon: Home,
+      icon: MdOutlineDashboard,
       children: [
         { title: "School", path: "/dashboard/school", icon: IoSchoolOutline },
         { title: "Teacher", path: "/dashboard/teacher", icon: FaRegUser },
@@ -194,7 +198,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Integration API",
-      icon: Layers,
+      icon: IoExtensionPuzzleOutline,
       children: [
         { title: "Add Payment", path: "/integration/payment", icon: Plus },
         { title: "Delivery API", path: "/integration/delivery", icon: Truck },
@@ -237,8 +241,8 @@ export const sidebarMenu = (role) => {
 
   // ================= School Menu =================
   const schoolMenu = [
-    { title: "Dashboard", icon: Home, path: "/dashboard" },
-    { title: "Membarship Plan", icon: FaCrown, path: "/membership" },
+    { title: "Dashboard", icon: MdOutlineDashboard, path: "/dashboard" },
+    { title: "Membarship Plan", icon: FiUsers, path: "/membership" },
 
     { title: "Principle", icon: FaUserTie, path: "/principle" },
 
@@ -253,11 +257,7 @@ export const sidebarMenu = (role) => {
           path: "/teacher/permission",
           icon: ShieldCheck,
         },
-        {
-          /* { title: "Assignment", path: "/teacher/assignment", icon: ClipboardList },
-      { title: "Live Class", path: "/teacher/live", icon: Video },
-      { title: "Attendance", path: "/teacher/attendance", icon: FileCheck },}*/
-        },
+        
       ],
     },
 
@@ -286,7 +286,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Academic",
-      icon: BookOpen,
+      icon:  GiBookAura,
       children: [
         { title: "Class", path: "/academic/class", icon: Layers },
         { title: "Group", path: "/academic/group", icon: Box },
@@ -300,7 +300,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Examination",
-      icon: Pencil,
+      icon: BookOpen,
       children: [
         { title: "Exam Name", path: "/exam/name", icon: FileText },
         { title: "Exam Routine", path: "/exam/routine", icon: AlertCircle },
@@ -316,7 +316,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Fee Management",
-      icon: Wallet,
+      icon: CreditCard,
       children: [
         {
           title: "Fees Collection",
@@ -364,7 +364,7 @@ export const sidebarMenu = (role) => {
     // Leaves Sub-section
     {
       title: "Leaves",
-      icon: VscCalendar, // section icon for leaves
+      icon: SlCalender, // section icon for leaves
       children: [
         {
           title: "List Of Leave",
@@ -376,13 +376,15 @@ export const sidebarMenu = (role) => {
           path: "/leaves/request",
           icon: BiMailSend, // request approval
         },
-        {
+       
+      ],
+    },
+
+     {
           title: "Holiday",
           path: "/leaves/holiday",
           icon: BsCalendarDay, // holiday calendar
         },
-      ],
-    },
 
     {
       title: "Financial & Account",
@@ -460,7 +462,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Details Item",
-      icon: Building2,
+      icon: MdOutlineFormatListNumberedRtl,
       children: [
         {
           title: "Academic Details",
@@ -477,7 +479,7 @@ export const sidebarMenu = (role) => {
   ];
   // ================= Teacher Menu =================
   const teacherMenu = [
-    { title: "Dashboard", icon: Home, path: "/dashboard" },
+    { title: "Dashboard", icon: MdOutlineDashboard, path: "/dashboard" },
 
     {
       title: "Teacher",
@@ -527,7 +529,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Academic",
-      icon: BookOpen,
+      icon: GiBookAura,
       children: [
         { title: "Class", path: "/academic/class", icon: Layers },
         { title: "Group", path: "/academic/group", icon: Box },
@@ -541,7 +543,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Examination",
-      icon: Pencil,
+      icon: BookOpen,
       children: [
         { title: "Exam Name", path: "/exam/name", icon: FileText },
         { title: "Exam Routine", path: "/exam/routine", icon: AlertCircle },
@@ -609,14 +611,15 @@ export const sidebarMenu = (role) => {
           icon: FaListOl, // approved leave list
         },
 
-        {
+       
+      ],
+    },
+    
+     {
           title: "Holiday",
           path: "/leaves/holiday",
           icon: BsCalendarDay, // holiday calendar
-        },
-      ],
-    },
-
+        }, 
     {
       title: "Tool",
       icon: Settings,
@@ -627,7 +630,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Details Item",
-      icon: RiAlignItemLeftFill,
+      icon: MdOutlineFormatListNumberedRtl,
       children: [
         { title: "Principle", path: "/details/principle", icon: UserCheck },
         { title: "Academic", path: "/details/academic", icon: FaBookAtlas },
@@ -642,7 +645,7 @@ export const sidebarMenu = (role) => {
 
   // ================= Student Menu =================
   const studentMenu = [
-    { title: "Dashboard", icon: Home, path: "/dashboard" },
+    { title: "Dashboard", icon: MdOutlineDashboard, path: "/dashboard" },
 
     {
       title: "Teacher",
@@ -676,7 +679,7 @@ export const sidebarMenu = (role) => {
   
     {
       title: "Academic",
-      icon: BookOpen,
+      icon: GiBookAura,
       children: [
         { title: "Class", path: "/academic/class", icon: Layers },
         { title: "Group", path: "/academic/group", icon: Box },
@@ -690,7 +693,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Examination",
-      icon: Pencil,
+      icon: BookOpen,
       children: [
         { title: "Exam Name", path: "/exam/name", icon: FileText },
         { title: "Exam Routine", path: "/exam/routine", icon: AlertCircle },
@@ -718,7 +721,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Attendance",
-      icon: FileCheck,
+      icon: FaListCheck,
       children: [
         { title: "Student", path: "/attendance/student", icon: FileCheck },
       ],
@@ -726,11 +729,11 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Leaves",
-      icon: FileText,
+      icon:  VscCalendar,
       children: [{ title: "Leave", path: "/leaves/leave", icon: FileText }],
     },
 
-    { title: "Holiday", icon: Calendar, path: "/holiday" },
+    { title: "Holiday", icon: BsCalendarDay, path: "/holiday" },
 
     {
       title: "Information",
@@ -742,7 +745,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Details Item",
-      icon: Layers,
+      icon: MdOutlineFormatListNumberedRtl,
       children: [
         { title: "Principle", path: "/details/principle", icon: UserCheck },
         { title: "Academic", path: "/details/academic", icon: BookOpen },

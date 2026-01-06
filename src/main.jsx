@@ -12,6 +12,7 @@ import SchoolForm from "./components/SchoolForm";
 import AdmissionForm from "./components/AdmissionForm";
 import StudentSuccess from "./pages/StudentSuccess";
 import SchoolSuccess from "./pages/SchoolSuccess";
+import SettingsPage from "./pages/SettingsPage";
 
 
 const router = createBrowserRouter([
@@ -46,20 +47,39 @@ const router = createBrowserRouter([
       },
   {
     path: "/admin/dashboard",
-    element: <DashboardLayout></DashboardLayout>,
-    
+    element: <DashboardLayout />,
+    children: [
+               // default page in dashboard
+      { path: "settings", element: <SettingsPage /> },    // /admin/dashboard/settings
+      // Add other nested routes here for admin dashboard
+    ],
   },
-   {
+  {
     path: "/teacher/dashboard",
     element: <DashboardLayout />,
+    children: [
+      
+      { path: "settings", element: <SettingsPage /> },
+      // other teacher routes
+    ],
   },
   {
     path: "/student/dashboard",
     element: <DashboardLayout />,
+    children: [
+      
+      { path: "settings", element: <SettingsPage /> },
+      // other student routes
+    ],
   },
   {
     path: "/school/dashboard",
     element: <DashboardLayout />,
+    children: [
+     
+      { path: "settings", element: <SettingsPage /> },
+      // other school routes
+    ],
   },
 ]);
 
@@ -72,3 +92,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ThemeProvider>
   </React.StrictMode>
 );
+
+
+
+
+

@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
-import AdminLogo from "../assets/images/admin.jpg";
+import AdminLogo from "../assets/images/adminLogo.webp";
 import SchoolLogo from "../assets/images/school.webp";
-import TeacherLogo from "../assets/images/teacher.png";
-import StudentLogo from "../assets/images/student.jpg";
+import TeacherLogo from "../assets/images/teacher.jpg";
+import StudentLogo from "../assets/images/student.avif";
 import {
   FiBell,
   FiChevronDown,
   FiSearch,
-  FiX,
   FiMoon,
   FiSun,
   FiShoppingCart,
@@ -19,24 +18,23 @@ import {
   FiChevronRight,
 } from "react-icons/fi";
 import { GiBookAura } from "react-icons/gi";
-import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useSidebar } from "../context/SidebarContext";
+import { GrEdit } from "react-icons/gr";
 
 export default function TopNavbar() {
-
   const navigate = useNavigate();
-
+  const location = useLocation();
   const role = localStorage.getItem("role") || "student";
 
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null); // "profile" | "notifications" | "settings" | null
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   const { darkMode, toggleTheme } = useTheme();
   const { toggleMobileSidebar, open, hovered } = useSidebar();
+  const sidebarWidth = open || hovered ? 256 : 80;
+
+  const isSchoolDashboard = location.pathname.includes("school/dashboard");
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
@@ -44,7 +42,12 @@ export default function TopNavbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const sidebarWidth = open || hovered ? 256 : 80;
+  // Close dropdowns on click outside
+  useEffect(() => {
+    const handleClickOutside = () => setOpenDropdown(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   // ================== ROLE CONFIG ==================
   const roleLogos = {
@@ -60,9 +63,9 @@ export default function TopNavbar() {
         { label: "My Profile", path: "/profile" },
         { label: "Admin Settings", path: "/admin/settings" },
       ],
-      extraMenu: [], // no extra icon
+      extraMenu: [],
       profileData: {
-        name: "Alice ",
+        name: "Alice",
         title: "System Administrator",
         avatar: "https://i.pravatar.cc/40?img=32",
       },
@@ -71,9 +74,7 @@ export default function TopNavbar() {
     },
     school: {
       profileMenu: [{ label: "School Profile", path: "/profile" }],
-      extraMenu: [
-        { icon: <FiShoppingCart />, path: "/school/ecommerce" }, // E-commerce icon
-      ],
+      extraMenu: [{ icon: <FiShoppingCart />, path: "/school/ecommerce" }],
       profileData: {
         name: "Sunshine High School",
         title: "School Account",
@@ -98,9 +99,7 @@ export default function TopNavbar() {
     },
     student: {
       profileMenu: [{ label: "My Profile", path: "/profile" }],
-      extraMenu: [
-        { icon: <GiBookAura />, path: "/student/courses" }, // Courses icon
-      ],
+      extraMenu: [{ icon: <GiBookAura />, path: "/student/courses" }],
       profileData: {
         name: "John Doe",
         title: "Student",
@@ -139,13 +138,67 @@ export default function TopNavbar() {
       ),
       time: "15 min ago",
     },
+
+    {
+      id: 3,
+      avatar: "https://i.pravatar.cc/40?img=32",
+      name: "Dr. Patel",
+      message: (
+        <>
+          completed a <strong>follow-up</strong> report for patient{" "}
+          <strong>Emily</strong>.
+        </>
+      ),
+      time: "8 min ago",
+    },
+    {
+      id: 4,
+      avatar: "https://i.pravatar.cc/40?img=12",
+      name: "Emily",
+      message: (
+        <>
+          booked an appointment with <strong>Dr. Patel</strong> for{" "}
+          <strong>April 15</strong>.
+        </>
+      ),
+      time: "15 min ago",
+    },
+    {
+      id: 5,
+      avatar: "https://i.pravatar.cc/40?img=32",
+      name: "Dr. Patel",
+      message: (
+        <>
+          completed a <strong>follow-up</strong> report for patient{" "}
+          <strong>Emily</strong>.
+        </>
+      ),
+      time: "8 min ago",
+    },
+    {
+      id: 6,
+      avatar: "https://i.pravatar.cc/40?img=12",
+      name: "Emily",
+      message: (
+        <>
+          booked an appointment with <strong>Dr. Patel</strong> for{" "}
+          <strong>April 15</strong>.
+        </>
+      ),
+      time: "15 min ago",
+    },
   ];
+
+  const toggleDropdown = (name) =>
+    setOpenDropdown(openDropdown === name ? null : name);
 
   return (
     <nav
-      className={`fixed top-0 z-20 h-16 border-b flex items-center justify-between px-4
-        transition-all duration-300
-        ${darkMode ? "bg-black text-white" : "bg-white text-gray-800"}`}
+      className={`fixed top-0 z-20 h-16 flex items-center justify-between px-4 transition-all duration-300 ${
+        darkMode
+          ? "bg-gray-900 border-b border-gray-700 text-gray-200"
+          : "bg-white text-gray-800 border-b border-gray-200"
+      }`}
       style={{
         left: isDesktop ? sidebarWidth : 0,
         width: isDesktop ? `calc(100% - ${sidebarWidth}px)` : "100%",
@@ -153,173 +206,45 @@ export default function TopNavbar() {
     >
       {/* LEFT SIDE */}
       <div className="flex items-center gap-4">
-        {/* Hamburger */}
         <button className="md:hidden text-xl" onClick={toggleMobileSidebar}>
           ☰
         </button>
         <img
           src={roleLogos[role]}
           alt={`${role} logo`}
-          className="w-10 h-10 md:w-12 md:h-12 object-contain "
+          className="w-8 h-8 md:w-10 md:h-10 mx-4 rounded-full object-contain "
         />
-
-        {/* Desktop Search */}
         <div className="hidden md:flex items-center relative ml-6">
           <FiSearch size={18} className="absolute left-3 text-gray-400" />
           <input
             type="text"
             placeholder={config.searchPlaceholder}
-            className="w-64 pl-9 pr-3 py-2 rounded-md
-              bg-white border border-gray-300
-              placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-64 pl-9 pr-3 py-2 rounded-md bg-white border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
       </div>
 
-     
-    
-
       {/* RIGHT SIDE */}
       <div className="flex items-center gap-3 md:gap-4">
-       
-        {/* Dark/Light Toggle */}
+        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2 border rounded-full flex items-center justify-center text-yellow-700 hover:bg-gray-100 "
+          className="p-2 border rounded-full flex items-center justify-center hover:bg-gray-100"
         >
           {darkMode ? (
-            <FiSun size={10} className="md:w-4 md:h-4" />
+            <FiSun className=" w-3 h-3 md:w-5 md:h-5" />
           ) : (
-            <FiMoon size={10} className="md:w-5 md:h-5" />
+            <FiMoon className="w-3 h-3 md:w-5 md:h-5" />
           )}
         </button>
 
-        {/* Global Settings (Always Visible) */}
-        {/* Global Settings */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setSettingsOpen(!settingsOpen);
-              setNotificationOpen(false);
-              setProfileOpen(false);
-            }}
-            className="border rounded-full p-2 text-yellow-700 hover:bg-gray-100
-               flex items-center justify-center"
-            aria-label="Settings"
-          >
-            <FiSettings size={10} className="md:w-5 md:h-5" />
-          </button>
-
-          {settingsOpen && (
-            <div
-              className={`fixed md:absolute
-      ${
-        isDesktop
-          ? "md:right-4 md:top-12 md:mt-4"
-          : "top-24 left-1/2 -translate-x-1/2"
-      }
-      bg-white rounded shadow-lg w-80 z-50
-      max-h-[80vh] flex flex-col p-4
-    `}
-            >
-              {/* HEADER */}
-              <div className="px-4 py-3 border-b font-semibold text-gray-700 shrink-0">
-                Settings
-              </div>
-
-              {/* CONTENT (ONLY THIS SCROLLS) */}
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-                {/* Profile Image */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Profile Image <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={config.profileData.avatar}
-                      alt="avatar"
-                      className="w-14 h-14 rounded-full object-cover border"
-                    />
-                    <button className="text-sm text-indigo-600 hover:underline">
-                      Change
-                    </button>
-                  </div>
-                </div>
-
-                {/* First Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-500 rounded px-3 py-2 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Last Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-500 rounded px-3 py-2 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full border border-gray-500  rounded px-3 py-2 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-500 rounded px-3 py-2 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-
-              {/* FOOTER */}
-              <div className="px-4 py-3 border-t flex justify-end gap-2">
-                <button
-                  onClick={() => setSettingsOpen(false)}
-                  className="px-4 py-2 text-sm rounded text-black border border-gray-500 hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button className="px-4 py-2 text-sm rounded bg-indigo-600 text-white">
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Notifications */}
-        <div className="relative">
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={() => setNotificationOpen(!notificationOpen)}
-            className="border rounded-full p-2 relative text-yellow-700 hover:bg-gray-100 "
-            aria-label="Notifications"
+            onClick={() => toggleDropdown("notifications")}
+            className="border rounded-full p-2 relative  hover:bg-gray-100"
           >
-            <FiBell size={10} className=" md:w-5 md:h-5" />
+            <FiBell className="w-3 h-3 md:w-5 md:h-5" />
             {notifications.length > 0 && (
               <span className="absolute -top-1 -right-1 text-[10px] bg-red-500 text-white px-1 rounded">
                 {notifications.length}
@@ -327,158 +252,245 @@ export default function TopNavbar() {
             )}
           </button>
 
-          {notificationOpen && (
+          {openDropdown === "notifications" && (
             <div
-              className={`fixed md:absolute
-                ${
-                  isDesktop
-                    ? "md:right-4 md:top-12 md:mt-4"
-                    : "top-24 left-1/2 w-64 -translate-x-1/2"
-                }
-                bg-white rounded shadow-lg px-4 py-8 z-50 text-center w-72`}
+              className={`fixed md:absolute ${
+                isDesktop
+                  ? "md:right-4 md:top-12 md:mt-4"
+                  : "top-24 left-1/2 w-64 -translate-x-1/2"
+              } ${
+                darkMode
+                  ? "bg-gray-800 border border-gray-600 text-white shadow-[0_4px_20px_rgba(255,255,255,0.05)]"
+                  : "bg-white border border-gray-200 text-gray-700 shadow-lg"
+              } px-4 py-4 z-50 w-72 flex flex-col max-h-[80vh]`}
             >
-              <div className="font-semibold text-gray-700 mb-3 border-b pb-2">
+              <div className="font-semibold  text-center mb-3  pt-4 pb-2">
                 Notifications
               </div>
-              <ul>
-                {notifications.map((notif) => (
-                  <li
-                    key={notif.id}
-                    className="flex gap-3 mb-4 last:mb-0 cursor-pointer hover:bg-gray-100 p-2 rounded"
-                  >
-                    <img
-                      src={notif.avatar}
-                      alt={notif.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div className="flex flex-col text-left">
-                      <span className="font-semibold text-gray-800">
-                        {notif.name}
-                      </span>
-                      <span className="text-gray-600 text-sm">
-                        {notif.message}
-                      </span>
-                      <span className="text-xs text-gray-400 mt-1">
-                        {notif.time}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4 border-t pt-3 text-center">
-                <Link
-                  to="/notifications"
-                  className="text-indigo-600 hover:underline font-semibold text-sm"
-                >
-                  View All Notifications
-                </Link>
+
+              {/* Scrollable notifications list */}
+              <div className="flex-1 overflow-y-auto p-4 pb-8">
+                <ul className="space-y-3">
+                  {notifications.map((notif) => (
+                    <li
+                      key={notif.id}
+                      className="flex gap-3 cursor-pointer hover:bg-gray-500 p-2 rounded"
+                    >
+                      <img
+                        src={notif.avatar}
+                        alt={notif.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div className="flex flex-col text-left">
+                        <span className="font-semibold ">{notif.name}</span>
+                        <span className=" text-sm">{notif.message}</span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          {notif.time}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           )}
         </div>
-        {/* Extra Menu Items */}
+
+        {/* Extra Menu */}
         {config.extraMenu.map((item, index) => (
           <Link
             key={index}
             to={item.path}
-            className="border rounded-full p-1 md:p-2 hover:bg-gray-100 flex items-center justify-center text-yellow-700 transition-colors"
+            className="
+      border rounded-full p-2 hover:bg-gray-100
+    "
           >
-            {item.icon}
+            <span className="w-3 h-3 md:w-5 md:h-5 flex items-center justify-center">
+              {item.icon}
+            </span>
           </Link>
         ))}
-        {/* Profile Dropdown */}
-        <div className="relative">
+
+        {/* Profile */}
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center  gap-2 text-yellow-700 "
-            aria-label="Profile Menu"
+            onClick={() => toggleDropdown("profile")}
+            className="flex items-center gap-2"
           >
             <img
               src={config.profileData.avatar}
               alt={config.profileData.name}
-              className="w-7 h-7 md:w-10 md:h-10 border-1 p-[2px] hover:bg-gray-100  border-yellow-700 rounded-full"
+              className="w-7 h-7 md:w-10 md:h-10 border-1 p-[2px] hover:bg-gray-100  rounded-full"
             />
             <FiChevronDown size={14} className="hidden md:block" />
           </button>
 
-          {profileOpen && (
+          {openDropdown === "profile" && (
             <div
-              className={`fixed md:absolute
-      ${
-        isDesktop
-          ? "md:right-4 md:top-12 md:mt-4"
-          : "top-24 left-1/2 -translate-x-1/2"
-      }
-      bg-white rounded shadow-lg px-4 py-6 w-72 z-50`}
+              className={`fixed md:absolute ${
+                isDesktop
+                  ? "md:right-4 md:top-12 md:mt-4"
+                  : "top-24 left-1/2 -translate-x-1/2"
+              }  ${
+                darkMode
+                  ? "bg-gray-800 border border-gray-600 text-white shadow-[0_4px_20px_rgba(255,255,255,0.05)]"
+                  : "bg-white border border-gray-200 text-gray-700 shadow-lg"
+              } px-4 py-6 w-72 z-50`}
             >
-              {/* Profile Info */}
-              <div className="flex flex-col items-center space-y-2 mb-4 text-center">
+              <div className="flex flex-col items-center mb-4">
                 <img
                   src={config.profileData.avatar}
                   alt={config.profileData.name}
-                  className="w-16 h-16 rounded-full object-cover"
+                  className="w-16 h-16 rounded-full object-cover mb-2"
                 />
-
-                <div className="w-64 border-b my-2" />
-
                 <div className="font-semibold text-lg">
                   {config.profileData.name}
                 </div>
-
-                <div className="text-sm text-gray-600">
-                  {config.profileData.title}
-                </div>
+                <div className="text-sm ">{config.profileData.title}</div>
               </div>
 
-              {/* Actions */}
-              <div className="flex flex-col text-sm">
-                {/* Profile Settings */}
-                <Link
-                  to="/profile/settings"
-                  onClick={() => setProfileOpen(false)}
-                  className="flex items-center justify-between px-4 py-2 rounded
-                   hover:bg-gray-100 text-gray-800"
+              <div className="flex flex-col text-sm space-y-1">
+                {/* Edit Profile opens Settings */}
+                <button
+                  onClick={() => setOpenDropdown("settings")}
+                  className="flex items-center justify-between px-4 py-2 rounded hover:bg-gray-500 w-full text-left"
                 >
                   <span className="flex items-center gap-2">
-                    <FiSettings className="text-lg" />
-                    Profile Settings
+                    <GrEdit className="text-lg" /> Edit Profile
+                  </span>
+                  <FiChevronRight />
+                </button>
+
+                <Link
+                  to={`/${role}/dashboard/settings`} // role can be "admin", "teacher", etc.
+                  onClick={() => setOpenDropdown(null)}
+                  className="flex items-center justify-between px-4 py-2 rounded hover:bg-gray-500"
+                >
+                  <span className="flex items-center gap-2">
+                    <FiSettings className="text-lg" /> Profile Settings
                   </span>
                   <FiChevronRight />
                 </Link>
 
-                {/* Principal Select */}
-                <Link
-                  to="/principal/select"
-                  onClick={() => setProfileOpen(false)}
-                  className="flex items-center justify-between px-4 py-2 rounded
-                   hover:bg-gray-100 text-gray-800"
-                >
-                  <span className="flex items-center gap-2">
-                    <FiUsers className="text-lg" />
-                    Principal Select
-                  </span>
-                  <FiChevronRight />
-                </Link>
+                {isSchoolDashboard && (
+                  <Link
+                    to="/principal/select"
+                    onClick={() => setOpenDropdown(null)}
+                    className="flex items-center justify-between px-4 py-2 rounded hover:bg-gray-500"
+                  >
+                    <span className="flex items-center gap-2">
+                      <FiUsers className="text-lg" /> Principal Select
+                    </span>
+                    <FiChevronRight />
+                  </Link>
+                )}
 
-                <div className="border-t my-2" />
-
-                {/* Logout */}
                 <button
                   onClick={() => {
-                    setProfileOpen(false);
-                     navigate("/");
-                    // logout logic
+                    setOpenDropdown(null);
+                    navigate("/");
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2 rounded
-                   text-red-600 hover:bg-red-50"
+                  className="flex items-center gap-2 px-4 py-2 rounded text-red-600 hover:bg-red-300"
                 >
-                  <FiLogOut className="text-lg" />
-                  Log Out
+                  <FiLogOut className="text-lg" /> Log Out
                 </button>
               </div>
             </div>
           )}
         </div>
+
+        {/* Settings Dropdown */}
+        {openDropdown === "settings" && (
+          <div
+            className={`fixed md:absolute ${
+              isDesktop
+                ? "md:right-8 md:top-16 md:mt-4"
+                : "top-24 left-1/2 -translate-x-1/2"
+            }  ${
+              darkMode
+                ? "bg-gray-800 border border-gray-600 text-white shadow-[0_4px_20px_rgba(255,255,255,0.05)]"
+                : "bg-white border border-gray-200 text-gray-700 shadow-lg"
+            } w-80 z-50 max-h-[80vh] flex flex-col p-4`}
+          >
+            {/* HEADER */}
+            <div className="px-4 py-3 border-b font-semibold  shrink-0">
+              Settings
+            </div>
+
+            {/* CONTENT */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+              {/* Profile Image */}
+              <div>
+                <label className="block text-sm font-medium  mb-1">
+                  Profile Image <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={config.profileData.avatar}
+                    alt="avatar"
+                    className="w-14 h-14 rounded-full object-cover border"
+                  />
+                  <button className="text-sm text-indigo-600 hover:underline">
+                    Change
+                  </button>
+                </div>
+              </div>
+              {/* First Name */}
+              <div>
+                <label className="block text-sm font-medium  mb-1">
+                  First Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-500 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              {/* Last Name */}
+              <div>
+                <label className="block text-sm font-medium  mb-1">
+                  Last Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-500 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium  mb-1">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  className="w-full border border-gray-500 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium  mb-1">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-500 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* FOOTER */}
+            <div className="px-4 py-3 border-t flex justify-end gap-2">
+              <button
+                onClick={() => setOpenDropdown(null)}
+                className="px-4 py-2 text-sm rounded text-black border border-gray-500 hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button className="px-4 py-2 text-sm rounded bg-indigo-600 text-white">
+                Save
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
