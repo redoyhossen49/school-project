@@ -44,7 +44,7 @@ export default function Sidebar({ role }) {
           }
         }}
         className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 border-r border-amber-100
-          ${darkMode ? "bg-slate-800 text-white" : "bg-white text-gray-700"}
+          ${darkMode ? "bg-black text-white shadow-lg" : "bg-white text-gray-700"}
           ${isExpanded ? "w-64" : "w-20"}
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 
         `}

@@ -145,7 +145,7 @@ export default function TopNavbar() {
     <nav
       className={`fixed top-0 z-20 h-16 border-b flex items-center justify-between px-4
         transition-all duration-300
-        ${darkMode ? "bg-slate-900 text-white" : "bg-white text-gray-800"}`}
+        ${darkMode ? "bg-black text-white" : "bg-white text-gray-800"}`}
       style={{
         left: isDesktop ? sidebarWidth : 0,
         width: isDesktop ? `calc(100% - ${sidebarWidth}px)` : "100%",
@@ -160,7 +160,7 @@ export default function TopNavbar() {
         <img
           src={roleLogos[role]}
           alt={`${role} logo`}
-          className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full border border-yellow-700"
+          className="w-10 h-10 md:w-12 md:h-12 object-contain "
         />
 
         {/* Desktop Search */}
@@ -177,47 +177,12 @@ export default function TopNavbar() {
         </div>
       </div>
 
-      {/* MOBILE SEARCH */}
-      <div
-        className={`absolute top-0 left-0 right-0 z-50 md:hidden flex items-center
-          transition-all duration-300
-          ${
-            mobileSearchOpen
-              ? "h-16 opacity-100 py-2 px-4"
-              : "h-0 opacity-0 py-0 px-0 pointer-events-none"
-          }`}
-      >
-        <div className="relative flex-1 bg-white rounded-full">
-          <input
-            autoFocus={mobileSearchOpen}
-            type="text"
-            placeholder={config.searchPlaceholder}
-            className="w-full pl-10 pr-10 py-2 rounded-full border
-              focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <FiSearch
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-          />
-          <button
-            onClick={() => setMobileSearchOpen(false)}
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-          >
-            <FiX size={18} />
-          </button>
-        </div>
-      </div>
+     
+    
 
       {/* RIGHT SIDE */}
       <div className="flex items-center gap-3 md:gap-4">
-        {/* Mobile Search Icon */}
-        <button
-          onClick={() => setMobileSearchOpen(true)}
-          className="md:hidden p-2 border rounded-full text-yellow-700 hover:bg-gray-100 "
-        >
-          <FiSearch size={10} className=" md:w-5 md:h-5" />
-        </button>
-
+       
         {/* Dark/Light Toggle */}
         <button
           onClick={toggleTheme}

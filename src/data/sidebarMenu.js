@@ -15,7 +15,6 @@ import {
   Layers,
   Archive,
   Clipboard,
-  ClipboardList,
   Truck,
   ShoppingCart,
   Box,
@@ -29,14 +28,83 @@ import {
   Building2,
   IdCard,
   Video,
+  Plus,
+  HandCoins,
+  PackageCheck,
+  UserCircle,
+  ClipboardList,
+  Eye,
+  Star,
+  Clock,
+  Book,
+  Pencil,
+  AlertCircle,
+  Hash,
+  Send,
+  Search,
+  Award,
+  Percent,
+  TrendingUp,
+  RotateCw,
+  Trash2,
 } from "lucide-react";
-import { FiUsers ,FiMinusCircle,FiPlusCircle,FiKey ,FiRefreshCw } from "react-icons/fi";
-import { FaSchool ,FaRegUser } from "react-icons/fa";
-import { FaMoneyCheck } from "react-icons/fa6";
-import { IoSchoolOutline } from "react-icons/io5";
-import { BiCategory } from "react-icons/bi";
-
-
+import {
+  FiUsers,
+  FiMinusCircle,
+  FiPlusCircle,
+  FiKey,
+  FiRefreshCw,
+  FiBell,
+  FiMessageSquare,
+} from "react-icons/fi";
+import {
+  FaSchool,
+  FaRegUser,
+  FaCrown,
+  FaMoneyBillWave,
+  FaWallet,
+  FaUserTie,
+  FaIdBadge,
+  FaLevelUpAlt,
+  FaCheck,
+  FaCheckDouble,
+  FaRegFilePdf,
+  FaUsersSlash,
+  FaFileMedicalAlt,
+} from "react-icons/fa";
+import {
+  FaMoneyCheck,
+  FaPersonWalkingArrowRight,
+  FaUsersBetweenLines,
+  FaListCheck,
+  FaListOl,
+  FaFilterCircleDollar,
+  FaBookAtlas,
+  FaUsersRays,
+  FaUsersLine,
+} from "react-icons/fa6";
+import { IoCalendarNumberSharp, IoSchoolOutline } from "react-icons/io5";
+import { BiCategory, BiMailSend } from "react-icons/bi";
+import { RxIdCard } from "react-icons/rx";
+import {
+  MdOutlineGroupWork,
+  MdOutlineProductionQuantityLimits,
+  MdOutlineSendTimeExtension,
+} from "react-icons/md";
+import { LuLayoutList, LuType } from "react-icons/lu";
+import {
+  CiBoxList,
+  CiCalendarDate,
+  CiCreditCardOff,
+  CiShoppingBasket,
+} from "react-icons/ci";
+import { BsCalendarDay, BsCollection } from "react-icons/bs";
+import { FcCollect, FcImageFile, FcMoneyTransfer } from "react-icons/fc";
+import { VscCalendar } from "react-icons/vsc";
+import { RiAlignItemLeftFill, RiMoneyPoundBoxLine } from "react-icons/ri";
+import { TbTruckLoading } from "react-icons/tb";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { AiFillFileAdd } from "react-icons/ai";
 
 export const sidebarMenu = (role) => {
   // ================= Admin Menu =================
@@ -52,11 +120,15 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Member Ship",
-      icon: FiUsers ,
+      icon: FiUsers,
       children: [
-        { title: "Member Ship Plan", path: "/membership/plan", icon: FileText },
-        { title: "Active Plan", path: "/membership/active", icon: UserCheck },
-        { title: "Unactive Plan", path: "/membership/unactive", icon: UserMinus },
+        { title: "Member Ship Plan", path: "/membership/plan", icon: FaCrown },
+        { title: "Active Plan", path: "/membership/active", icon: UserCircle },
+        {
+          title: "Unactive Plan",
+          path: "/membership/unactive",
+          icon: UserMinus,
+        },
       ],
     },
     {
@@ -71,11 +143,27 @@ export const sidebarMenu = (role) => {
       title: "Transaction",
       icon: CreditCard,
       children: [
-        { title: "Cash In History", path: "/transaction/cashin", icon: FiPlusCircle},
-        { title: "Cash Out History", path: "/transaction/cashout", icon: FiMinusCircle  },
-        { title: "Profit History", path: "/transaction/profit", icon: BarChart2 },
-        { title: "Cash Out Request", path: "/transaction/request", icon: FileText },
-        { title: "Cash Out", path: "/transaction/out", icon: DollarSign },
+        {
+          title: "Cash In History",
+          path: "/transaction/cashin",
+          icon: FiPlusCircle,
+        },
+        {
+          title: "Cash Out History",
+          path: "/transaction/cashout",
+          icon: FiMinusCircle,
+        },
+        {
+          title: "Profit History",
+          path: "/transaction/profit",
+          icon: BarChart2,
+        },
+        {
+          title: "Cash Out Request",
+          path: "/transaction/request",
+          icon: HandCoins,
+        },
+        { title: "Cash Out", path: "/transaction/out", icon: FaMoneyBillWave },
       ],
     },
     {
@@ -83,24 +171,32 @@ export const sidebarMenu = (role) => {
       icon: DollarSign,
       children: [
         { title: "Our Profit", path: "/financial/profit", icon: BarChart2 },
-        { title: "Our Balance", path: "/financial/balance", icon: FaMoneyCheck },
-        { title: "Member Balance", path: "/financial/memberbalance", icon: UserCheck },
+        {
+          title: "Our Balance",
+          path: "/financial/balance",
+          icon: FaMoneyCheck,
+        },
+        {
+          title: "Member Balance",
+          path: "/financial/memberbalance",
+          icon: FaWallet,
+        },
       ],
     },
     {
       title: "Dashboard",
       icon: Home,
       children: [
-        { title: "School", path: "/dashboard/school", icon: IoSchoolOutline},
-        { title: "Teacher", path: "/dashboard/teacher", icon: FaRegUser  },
-        { title: "Student", path: "/dashboard/student", icon: Users },
+        { title: "School", path: "/dashboard/school", icon: IoSchoolOutline },
+        { title: "Teacher", path: "/dashboard/teacher", icon: FaRegUser },
+        { title: "Student", path: "/dashboard/student", icon: IdCard },
       ],
     },
     {
       title: "Integration API",
       icon: Layers,
       children: [
-        { title: "Add Payment", path: "/integration/payment", icon: DollarSign },
+        { title: "Add Payment", path: "/integration/payment", icon: Plus },
         { title: "Delivery API", path: "/integration/delivery", icon: Truck },
       ],
     },
@@ -111,9 +207,21 @@ export const sidebarMenu = (role) => {
         { title: "Category", path: "/ecommerce/category", icon: BiCategory },
         { title: "Product", path: "/ecommerce/product", icon: Box },
         { title: "Product List", path: "/ecommerce/list", icon: FileText },
-        { title: "Order Receive", path: "/ecommerce/order/receive", icon: FileCheck },
-        { title: "Order Process", path: "/ecommerce/order/process", icon: Clipboard },
-        { title: "Order Delivery", path: "/ecommerce/order/delivery", icon: Truck },
+        {
+          title: "Order Receive",
+          path: "/ecommerce/order/receive",
+          icon: FileCheck,
+        },
+        {
+          title: "Order Process",
+          path: "/ecommerce/order/process",
+          icon: Clipboard,
+        },
+        {
+          title: "Order Delivery",
+          path: "/ecommerce/order/delivery",
+          icon: PackageCheck,
+        },
       ],
     },
     {
@@ -121,308 +229,527 @@ export const sidebarMenu = (role) => {
       icon: Settings,
       children: [
         { title: "Profile", path: "/profile", icon: UserCheck },
-        { title: "Forget", path: "/profile/forget", icon:FiKey  },
-        { title: "Reset", path: "/profile/reset", icon: FiRefreshCw},
+        { title: "Forget", path: "/profile/forget", icon: FiKey },
+        { title: "Reset", path: "/profile/reset", icon: FiRefreshCw },
       ],
     },
   ];
 
   // ================= School Menu =================
   const schoolMenu = [
-  { title: "Dashboard", icon: Home, path: "/dashboard" },
+    { title: "Dashboard", icon: Home, path: "/dashboard" },
+    { title: "Membarship Plan", icon: FaCrown, path: "/membership" },
 
-  { title: "Principle", icon: UserCheck, path: "/principle" },
+    { title: "Principle", icon: FaUserTie, path: "/principle" },
 
-  {
-    title: "Teacher",
-    icon: GraduationCap,
-    children: [
-      { title: "Teacher List", path: "/teacher/list", icon: Users },
-      { title: "Teacher ID", path: "/teacher/id", icon: IdCard },
-      { title: "Class Permission", path: "/teacher/permission", icon: ShieldCheck },
-      { title: "Assignment", path: "/teacher/assignment", icon: ClipboardList },
+    {
+      title: "Teacher",
+      icon: UserCog,
+      children: [
+        { title: "Teacher List", path: "/teacher/list", icon: ClipboardList },
+        { title: "Teacher ID", path: "/teacher/id", icon: IdCard },
+        {
+          title: "Class Permission",
+          path: "/teacher/permission",
+          icon: ShieldCheck,
+        },
+        {
+          /* { title: "Assignment", path: "/teacher/assignment", icon: ClipboardList },
       { title: "Live Class", path: "/teacher/live", icon: Video },
-      { title: "Attendance", path: "/teacher/attendance", icon: FileCheck },
-    ],
-  },
+      { title: "Attendance", path: "/teacher/attendance", icon: FileCheck },}*/
+        },
+      ],
+    },
 
-  {
-    title: "Student",
-    icon: Users,
-    children: [
-      { title: "Student List", path: "/student/list", icon: Users },
-      { title: "Student ID", path: "/student/id", icon: IdCard },
-      { title: "Class Time", path: "/student/time", icon: Calendar },
-      { title: "Class Promote", path: "/student/promote", icon: Layers },
-      { title: "Assignment", path: "/student/assignment", icon: ClipboardList },
-      { title: "Live Class", path: "/student/live", icon: Video },
-    ],
-  },
+    {
+      title: "Student",
+      icon: GraduationCap,
+      children: [
+        { title: "Student List", path: "/student/list", icon: Users },
+        { title: "Student ID", path: "/student/id", icon: FaIdBadge },
+        { title: "Class Time", path: "/student/time", icon: Calendar },
+        {
+          title: "Class Promote",
+          path: "/student/promote",
+          icon: FaLevelUpAlt,
+        },
+      ],
+    },
 
-  {
-    title: "Guardian",
-    icon: UserCog,
-    children: [
-      { title: "Guardian List", path: "/guardian/list", icon: Users },
-      { title: "Complain", path: "/guardian/complain", icon: FileText },
-    ],
-  },
+    {
+      title: "Guardian",
+      icon: FaUsersSlash,
+      children: [
+        { title: "Guardian List", path: "/guardian/list", icon: FaUsersRays },
+      ],
+    },
 
-  {
-    title: "Academic",
-    icon: BookOpen,
-    children: [
-      { title: "Class", path: "/academic/class", icon: Layers },
-      { title: "Group", path: "/academic/group", icon: Layers },
-      { title: "Section", path: "/academic/section", icon: Layers },
-      { title: "Session", path: "/academic/session", icon: Calendar },
-      { title: "Subject", path: "/academic/subject", icon: BookOpen },
-      { title: "Syllabus", path: "/academic/syllabus", icon: ClipboardList },
-      { title: "Class Routine", path: "/academic/routine", icon: Calendar },
-    ],
-  },
+    {
+      title: "Academic",
+      icon: BookOpen,
+      children: [
+        { title: "Class", path: "/academic/class", icon: Layers },
+        { title: "Group", path: "/academic/group", icon: Box },
+        { title: "Section", path: "/academic/section", icon: FileCheck },
+        { title: "Session", path: "/academic/session", icon: Calendar },
+        { title: "Subject", path: "/academic/subject", icon: Book },
+        { title: "Syllabus", path: "/academic/syllabus", icon: Archive },
+        { title: "Class Routine", path: "/academic/routine", icon: Clock },
+      ],
+    },
 
-  {
-    title: "Examination",
-    icon: ClipboardList,
-    children: [
-      { title: "Exam Name", path: "/exam/name", icon: FileText },
-      { title: "Exam Routine", path: "/exam/routine", icon: Calendar },
-      { title: "Grade", path: "/exam/grade", icon: BadgeCheck },
-      { title: "Admit Card", path: "/exam/admit", icon: IdCard },
-      { title: "Set Number", path: "/exam/setnumber", icon: Layers },
-      { title: "Mark Submit", path: "/exam/marksubmit", icon: FileCheck },
-      { title: "OMR Submit", path: "/exam/omrsubmit", icon: FileCheck },
-      { title: "Result Find", path: "/exam/result", icon: BadgeCheck },
-      { title: "Certificate", path: "/exam/certificate", icon: FileText },
-    ],
-  },
+    {
+      title: "Examination",
+      icon: Pencil,
+      children: [
+        { title: "Exam Name", path: "/exam/name", icon: FileText },
+        { title: "Exam Routine", path: "/exam/routine", icon: AlertCircle },
+        { title: "Grade", path: "/exam/grade", icon: BadgeCheck },
+        { title: "Admit Card", path: "/exam/admit", icon: RxIdCard },
+        { title: "Set Number", path: "/exam/setnumber", icon: Hash },
+        { title: "Mark Submit", path: "/exam/marksubmit", icon: FileCheck },
+        { title: "OMR Submit", path: "/exam/omrsubmit", icon: Send },
+        { title: "Result Find", path: "/exam/result", icon: Search },
+        { title: "Certificate", path: "/exam/certificate", icon: Award },
+      ],
+    },
 
-  {
-    title: "Fee Management",
-    icon: Wallet,
-    children: [
-      { title: "Fee List", path: "/fee/list", icon: FileText },
-      { title: "Pay Fee", path: "/fee/pay", icon: CreditCard },
-      { title: "Pay Slip", path: "/fee/payslip", icon: FileText },
-      { title: "Collection", path: "/fee/collection", icon: DollarSign },
-    ],
-  },
+    {
+      title: "Fee Management",
+      icon: Wallet,
+      children: [
+        {
+          title: "Fees Collection",
+          path: "/fee/collection-main",
+          icon: DollarSign,
+        },
+        { title: "Fees Group", path: "/fee/group", icon: MdOutlineGroupWork },
+        { title: "Fees Type", path: "/fee/type", icon: LuType },
+        { title: "Discount", path: "/fee/discount", icon: Percent },
+        { title: "Fee List", path: "/fee/list", icon: CiBoxList },
+        { title: "Collection", path: "/fee/collection", icon: BsCollection },
+      ],
+    },
 
-  {
-    title: "HRM",
-    icon: Users,
-    children: [
-      { title: "Employee", path: "/hrm/employee", icon: Users },
-      { title: "Payroll", path: "/hrm/payroll", icon: DollarSign },
-      { title: "Attendance Teacher", path: "/hrm/attendance/teacher", icon: FileCheck },
-      { title: "Attendance Student", path: "/hrm/attendance/student", icon: FileCheck },
-      { title: "Leaves", path: "/hrm/leaves", icon: ClipboardList },
-      { title: "Holiday", path: "/hrm/holiday", icon: Calendar },
-    ],
-  },
+    {
+      title: "HRM",
+      icon: FaUsersBetweenLines,
+      children: [
+        {
+          title: "Employee",
+          path: "/hrm/employee",
+          icon: FaPersonWalkingArrowRight,
+        },
+        { title: "Payroll", path: "/hrm/payroll", icon: FcMoneyTransfer },
+      ],
+    },
 
-  {
-    title: "Tools",
-    icon: Settings,
-    children: [
-      { title: "Forget / Reset", path: "/tool/forget", icon: RefreshCw },
-    ],
-  },
+    {
+      title: "Attendance",
+      icon: FaListCheck, // group icon for attendance section
+      children: [
+        {
+          title: "Teacher Attendance",
+          path: "/attendance/teacher",
+          icon: FaCheckDouble, // verified document
+        },
+        {
+          title: "Student Attendance",
+          path: "/attendance/student",
+          icon: FaCheck, // writing / marking attendance
+        },
+      ],
+    },
 
-  {
-    title: "Details Item",
-    icon: Building2,
-    children: [
-      { title: "Principle Details", path: "/details/principle", icon: UserCheck },
-      { title: "Academic Details", path: "/details/academic", icon: BookOpen },
-      { title: "School List", path: "/details/schoollist", icon: School },
-    ],
-  },
-];
+    // Leaves Sub-section
+    {
+      title: "Leaves",
+      icon: VscCalendar, // section icon for leaves
+      children: [
+        {
+          title: "List Of Leave",
+          path: "/leaves/list",
+          icon: FaListOl, // approved leave list
+        },
+        {
+          title: "Request",
+          path: "/leaves/request",
+          icon: BiMailSend, // request approval
+        },
+        {
+          title: "Holiday",
+          path: "/leaves/holiday",
+          icon: BsCalendarDay, // holiday calendar
+        },
+      ],
+    },
+
+    {
+      title: "Financial & Account",
+      icon: Wallet, // Main section icon
+      children: [
+        {
+          title: "Income",
+          path: "/financial/income",
+          icon: RiMoneyPoundBoxLine,
+        },
+        { title: "Expense", path: "/financial/expense", icon: CiCreditCardOff },
+        {
+          title: "Product",
+          path: "/financial/product",
+          icon: MdOutlineProductionQuantityLimits,
+        },
+        {
+          title: "Supplier",
+          path: "/financial/supplier",
+          icon: TbTruckLoading,
+        },
+        { title: "Purchase", path: "/financial/purchase", icon: ShoppingCart },
+        { title: "Return", path: "/financial/return", icon: PackageCheck },
+        { title: "Payment", path: "/financial/payment", icon: GiTakeMyMoney },
+      ],
+    },
+
+    {
+      title: "Announcement",
+      icon: FiBell,
+      children: [
+        {
+          title: "Send Notice",
+          path: "/notice",
+          icon: MdOutlineSendTimeExtension,
+        },
+      ],
+    },
+
+    {
+      title: "Report",
+      icon: FaRegFilePdf, // Example icon for reports
+      children: [
+        { title: "Today", path: "/report/today", icon: CiCalendarDate },
+        {
+          title: "Monthly",
+          path: "/report/monthly",
+          icon: IoCalendarNumberSharp,
+        },
+        {
+          title: "Cash In",
+          path: "/report/cash-in",
+          icon: FaFilterCircleDollar,
+        },
+        { title: "Cash Out", path: "/report/cash-out", icon: CreditCard },
+        {
+          title: "Order Process",
+          path: "/report/order-process",
+          icon: CiShoppingBasket,
+        },
+        { title: "Collection", path: "/report/collection", icon: FcCollect },
+        { title: "Profit Loss", path: "/report/profit-loss", icon: TrendingUp },
+      ],
+    },
+
+    {
+      title: "Tools",
+      icon: Settings, // Main section icon
+      children: [
+        { title: "Forget", path: "/tool/forget", icon: RefreshCw }, // Feather refresh icon
+        { title: "Reset", path: "/tool/reset", icon: RotateCw }, // Feather rotate icon
+        { title: "Delete", path: "/tool/delete", icon: Trash2 }, // Feather trash icon
+      ],
+    },
+
+    {
+      title: "Details Item",
+      icon: Building2,
+      children: [
+        {
+          title: "Academic Details",
+          path: "/details/academic",
+          icon: FaBookAtlas,
+        },
+        {
+          title: " List of Ranking",
+          path: "/details/schoollist",
+          icon: School,
+        },
+      ],
+    },
+  ];
   // ================= Teacher Menu =================
- const teacherMenu = [
-  { title: "Dashboard", icon: Home, path: "/dashboard" },
+  const teacherMenu = [
+    { title: "Dashboard", icon: Home, path: "/dashboard" },
 
-  {
-    title: "Teacher",
-    icon: GraduationCap,
-    children: [
-      { title: "Teacher List", path: "/teacher/list", icon: Users },
-      { title: "Teacher ID", path: "/teacher/id", icon: IdCard },
-      { title: "Class Permission", path: "/teacher/permission", icon: ShieldCheck },
-      { title: "Assignment", path: "/teacher/assignment", icon: ClipboardList },
-      { title: "Live Class", path: "/teacher/live", icon: Video },
-      { title: "Attendance", path: "/teacher/attendance", icon: FileCheck },
-    ],
-  },
+    {
+      title: "Teacher",
+      icon: UserCog,
+      children: [
+        { title: "Teacher List", path: "/teacher/list", icon: ClipboardList },
+        { title: "Teacher ID", path: "/teacher/id", icon: IdCard },
+        {
+          title: "Class Permission",
+          path: "/teacher/permission",
+          icon: ShieldCheck,
+        },
+        {
+          title: "Assignment",
+          path: "/teacher/assignment",
+          icon: LuLayoutList,
+        },
+        { title: "Live Class", path: "/teacher/live", icon: Video },
+        { title: "Attendance", path: "/teacher/attendance", icon: FileCheck },
+      ],
+    },
 
-  {
-    title: "Student",
-    icon: Users,
-    children: [
-      { title: "Student List", path: "/student/list", icon: Users },
-      { title: "Student ID", path: "/student/id", icon: IdCard },
-      { title: "Class Time", path: "/student/time", icon: Calendar },
-      { title: "Class Promote", path: "/student/promote", icon: Layers },
-      { title: "Assignment", path: "/student/assignment", icon: ClipboardList },
-      { title: "Live Class", path: "/student/live", icon: Video },
-    ],
-  },
+    {
+      title: "Student",
+      icon:GraduationCap,
+      children: [
+        { title: "Student List", path: "/student/list", icon: Users },
+        { title: "Student ID", path: "/student/id", icon: FaIdBadge },
+        { title: "Class Time", path: "/student/time", icon: Calendar },
 
-  {
-    title: "Guardian",
-    icon: Users,
-    children: [
-      { title: "Guardian List", path: "/guardian/list", icon: Users },
-      { title: "Complain", path: "/guardian/complain", icon: FileText },
-    ],
-  },
+        { title: "Attendance", path: "/student/attendance", icon: FaListCheck },
+      ],
+    },
 
-  {
-    title: "Academic",
-    icon: BookOpen,
-    children: [
-      { title: "Class", path: "/academic/class", icon: Layers },
-      { title: "Group", path: "/academic/group", icon: Layers },
-      { title: "Section", path: "/academic/section", icon: Layers },
-      { title: "Session", path: "/academic/session", icon: Calendar },
-      { title: "Subject", path: "/academic/subject", icon: BookOpen },
-      { title: "Syllabus", path: "/academic/syllabus", icon: ClipboardList },
-      { title: "Class Routine", path: "/academic/routine", icon: Calendar },
-    ],
-  },
+    {
+      title: "Guardian",
+      icon: FaUsersSlash,
+      children: [
+        { title: "Guardian List", path: "/guardian/list", icon: FaUsersLine },
+        {
+          title: "Complain",
+          path: "/guardian/complain",
+          icon: FiMessageSquare,
+        },
+      ],
+    },
 
-  {
-    title: "Examination",
-    icon: BadgeCheck,
-    children: [
-      { title: "Exam Name", path: "/exam/name", icon: FileText },
-      { title: "Exam Routine", path: "/exam/routine", icon: Calendar },
-      { title: "Grade", path: "/exam/grade", icon: BadgeCheck },
-      { title: "Admit Card", path: "/exam/admit", icon: IdCard },
-      { title: "Set Number", path: "/exam/setnumber", icon: Layers },
-      { title: "Mark Submit", path: "/exam/marksubmit", icon: FileCheck },
-      { title: "OMR Submit", path: "/exam/omrsubmit", icon: FileCheck },
-      { title: "Result Find", path: "/exam/result", icon: BadgeCheck },
-      { title: "Certificate", path: "/exam/certificate", icon: FileText },
-    ],
-  },
+    {
+      title: "Academic",
+      icon: BookOpen,
+      children: [
+        { title: "Class", path: "/academic/class", icon: Layers },
+        { title: "Group", path: "/academic/group", icon: Box },
+        { title: "Section", path: "/academic/section", icon: FileCheck },
+        { title: "Session", path: "/academic/session", icon: Calendar },
+        { title: "Subject", path: "/academic/subject", icon: Book },
+        { title: "Syllabus", path: "/academic/syllabus", icon: Archive },
+        { title: "Class Routine", path: "/academic/routine", icon: Clock },
+      ],
+    },
 
-  {
-    title: "Fee Management",
-    icon: CreditCard,
-    children: [
-      { title: "Fee List", path: "/fee/list", icon: FileText },
-      { title: "Pay Fee", path: "/fee/pay", icon: DollarSign },
-      { title: "Pay Slip", path: "/fee/payslip", icon: FileText },
-      { title: "Collection", path: "/fee/collection", icon: DollarSign },
-    ],
-  },
-];
+    {
+      title: "Examination",
+      icon: Pencil,
+      children: [
+        { title: "Exam Name", path: "/exam/name", icon: FileText },
+        { title: "Exam Routine", path: "/exam/routine", icon: AlertCircle },
+        { title: "Grade", path: "/exam/grade", icon: BadgeCheck },
+        { title: "Admit Card", path: "/exam/admit", icon: RxIdCard },
+        { title: "Set Number", path: "/exam/setnumber", icon: Hash },
+        { title: "Mark Submit", path: "/exam/marksubmit", icon: FileCheck },
+        { title: "OMR Submit", path: "/exam/omrsubmit", icon: Send },
+        { title: "Result Find", path: "/exam/result", icon: Search },
+        { title: "Certificate", path: "/exam/certificate", icon: Award },
+      ],
+    },
 
+    {
+      title: "Fee Management",
+      icon: Wallet,
+      children: [
+        {
+          title: "Fees Collection",
+          path: "/fee/collection-main",
+          icon: DollarSign,
+        },
+        { title: "Fee List", path: "/fee/list", icon: CiBoxList },
+        { title: "Collection", path: "/fee/collection", icon: BsCollection },
+      ],
+    },
+    {
+      title: "HRM",
+      icon: FaUsersBetweenLines,
+      children: [
+        {
+          title: "Employee",
+          path: "/hrm/employee",
+          icon: FaPersonWalkingArrowRight,
+        },
+        { title: "Payroll", path: "/hrm/payroll", icon: FcMoneyTransfer },
+      ],
+    },
+
+    {
+      title: "Attendance",
+      icon: FaListCheck, // group icon for attendance section
+      children: [
+        {
+          title: "Teacher Attendance",
+          path: "/attendance/teacher",
+          icon: FaCheckDouble, // verified document
+        },
+        {
+          title: "Student Attendance",
+          path: "/attendance/student",
+          icon: FaCheck, // writing / marking attendance
+        },
+      ],
+    },
+
+    // Leaves Sub-section
+    {
+      title: "Leaves",
+      icon: VscCalendar, // section icon for leaves
+      children: [
+        {
+          title: "List Of Leave",
+          path: "/leaves/list",
+          icon: FaListOl, // approved leave list
+        },
+
+        {
+          title: "Holiday",
+          path: "/leaves/holiday",
+          icon: BsCalendarDay, // holiday calendar
+        },
+      ],
+    },
+
+    {
+      title: "Tool",
+      icon: Settings,
+      children: [
+        { title: "Forget", path: "/information/forget", icon: BadgeCheck },
+      ],
+    },
+
+    {
+      title: "Details Item",
+      icon: RiAlignItemLeftFill,
+      children: [
+        { title: "Principle", path: "/details/principle", icon: UserCheck },
+        { title: "Academic", path: "/details/academic", icon: FaBookAtlas },
+        {
+          title: "School List",
+          path: "/details/schoollist",
+          icon: FaFileMedicalAlt,
+        },
+      ],
+    },
+  ];
 
   // ================= Student Menu =================
- const studentMenu = [
-  { title: "Dashboard", icon: Home, path: "/dashboard" },
+  const studentMenu = [
+    { title: "Dashboard", icon: Home, path: "/dashboard" },
 
-  {
-    title: "Teacher",
-    icon: GraduationCap,
-    children: [
-      { title: "Teacher List", path: "/teacher/list", icon: Users },
-    ],
-  },
+    {
+      title: "Teacher",
+      icon:UserCog ,
+      children: [{ title: "Teacher List", path: "/teacher/list", icon: ClipboardList }],
+    },
 
-  {
-    title: "Student",
-    icon: Users,
-    children: [
-      { title: "Student List", path: "/student/list", icon: Users },
-      { title: "Student ID", path: "/student/id", icon: IdCard },
-      { title: "Class Time", path: "/student/time", icon: Calendar },
-      { title: "Class Promote", path: "/student/promote", icon: Layers },
-      { title: "Assignment", path: "/student/assignment", icon: ClipboardList },
-      { title: "Live Class", path: "/student/live", icon: Video },
-    ],
-  },
 
-  {
-    title: "Academic",
-    icon: BookOpen,
-    children: [
-      { title: "Class", path: "/academic/class", icon: Layers },
-      { title: "Group", path: "/academic/group", icon: Layers },
-      { title: "Section", path: "/academic/section", icon: Layers },
-      { title: "Session", path: "/academic/session", icon: Calendar },
-      { title: "Subject", path: "/academic/subject", icon: BookOpen },
-      { title: "Syllabus", path: "/academic/syllabus", icon: ClipboardList },
-      { title: "Class Routine", path: "/academic/routine", icon: Calendar },
-    ],
-  },
+    {
+      title: "Student",
+      icon: GraduationCap,
+      children: [
+        { title: "Student List", path: "/student/list", icon: Users },
+        { title: "Student ID", path: "/student/id", icon: FaIdBadge },
+        { title: "Class Time", path: "/student/time", icon: Calendar },
+        {
+          title: "Class Promote",
+          path: "/student/promote",
+          icon: FaLevelUpAlt,
+        },
+        {
+          title: "Assignment",
+          path: "/teacher/assignment",
+          icon: LuLayoutList,
+        },
 
-  {
-    title: "Examination",
-    icon: BadgeCheck,
-    children: [
-      { title: "Exam Name", path: "/exam/name", icon: FileText },
-      { title: "Exam Routine", path: "/exam/routine", icon: Calendar },
-      { title: "Grade", path: "/exam/grade", icon: BadgeCheck },
-      { title: "Admit Card", path: "/exam/admit", icon: IdCard },
-      { title: "Set Number", path: "/exam/setnumber", icon: Layers },
-      { title: "Result Find", path: "/exam/result", icon: BadgeCheck },
-      { title: "Certificate", path: "/exam/certificate", icon: FileText },
-    ],
-  },
+        { title: "Live Class", path: "/student/live", icon: Video },
+      ],
+    },
 
-  {
-    title: "Fee Management",
-    icon: CreditCard,
-    children: [
-      { title: "Fee List", path: "/fee/list", icon: FileText },
-      { title: "Pay Fee", path: "/fee/pay", icon: DollarSign },
-      { title: "Pay Slip", path: "/fee/payslip", icon: FileText },
-      { title: "Collection", path: "/fee/collection", icon: DollarSign },
-    ],
-  },
+  
+    {
+      title: "Academic",
+      icon: BookOpen,
+      children: [
+        { title: "Class", path: "/academic/class", icon: Layers },
+        { title: "Group", path: "/academic/group", icon: Box },
+        { title: "Section", path: "/academic/section", icon: FileCheck },
+        { title: "Session", path: "/academic/session", icon: Calendar },
+        { title: "Subject", path: "/academic/subject", icon: Book },
+        { title: "Syllabus", path: "/academic/syllabus", icon: Archive },
+        { title: "Class Routine", path: "/academic/routine", icon: Clock },
+      ],
+    },
 
-  {
-    title: "Attendance",
-    icon: FileCheck,
-    children: [
-      { title: "Student", path: "/attendance/student", icon: FileCheck },
-    ],
-  },
+    {
+      title: "Examination",
+      icon: Pencil,
+      children: [
+        { title: "Exam Name", path: "/exam/name", icon: FileText },
+        { title: "Exam Routine", path: "/exam/routine", icon: AlertCircle },
+        { title: "Grade", path: "/exam/grade", icon: BadgeCheck },
+        { title: "Admit Card", path: "/exam/admit", icon: RxIdCard },
+        { title: "Set Number", path: "/exam/setnumber", icon: Hash },
+        { title: "Mark Submit", path: "/exam/marksubmit", icon: FileCheck },
+        { title: "OMR Submit", path: "/exam/omrsubmit", icon: Send },
+        { title: "Result Find", path: "/exam/result", icon: Search },
+        { title: "Certificate", path: "/exam/certificate", icon: Award },
+      ],
+    },
 
-  {
-    title: "Leaves",
-    icon: FileText,
-    children: [
-      { title: "Leave", path: "/leaves/leave", icon: FileText },
-    ],
-  },
 
-  { title: "Holiday", icon: Calendar, path: "/holiday" },
+    {
+      title: "Fee Management",
+      icon: Wallet,
+      children: [
+        { title: "Fee List", path: "/fee/list", icon: CiBoxList },
+        { title: "Pay Fee", path: "/fee/pay", icon: DollarSign },
+        { title: "Pay Slip", path: "/fee/payslip", icon: FileText },
+        
+      ],
+    },
 
-  {
-    title: "Information",
-    icon: Settings,
-    children: [
-      { title: "Forget", path: "/information/forget", icon: BadgeCheck },
-    ],
-  },
+    {
+      title: "Attendance",
+      icon: FileCheck,
+      children: [
+        { title: "Student", path: "/attendance/student", icon: FileCheck },
+      ],
+    },
 
-  {
-    title: "Details Item",
-    icon: Layers,
-    children: [
-      { title: "Principle", path: "/details/principle", icon: UserCheck },
-      { title: "Academic", path: "/details/academic", icon: BookOpen },
-      { title: "School List", path: "/details/schoollist", icon: FileText },
-    ],
-  },
-];
+    {
+      title: "Leaves",
+      icon: FileText,
+      children: [{ title: "Leave", path: "/leaves/leave", icon: FileText }],
+    },
 
+    { title: "Holiday", icon: Calendar, path: "/holiday" },
+
+    {
+      title: "Information",
+      icon: Settings,
+      children: [
+        { title: "Forget", path: "/information/forget", icon: BadgeCheck },
+      ],
+    },
+
+    {
+      title: "Details Item",
+      icon: Layers,
+      children: [
+        { title: "Principle", path: "/details/principle", icon: UserCheck },
+        { title: "Academic", path: "/details/academic", icon: BookOpen },
+        { title: "School List", path: "/details/schoollist", icon: FileText },
+      ],
+    },
+  ];
 
   if (role === "admin") return adminMenu;
   if (role === "school") return schoolMenu;
