@@ -16,9 +16,6 @@ export default function SidebarItem({
   const collapsed = desktopCollapsed && !forceExpand;
   const showText = !collapsed;
 
-  
-  
-
   useEffect(() => {
     if (item.children?.length) {
       const active = item.children.some((child) =>
@@ -30,14 +27,13 @@ export default function SidebarItem({
 
   /* ================= WITH CHILDREN ================= */
   if (item.children?.length) {
-    
     return (
-       <div>
-      {/* Parent */}
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className={`
+      <div>
+        {/* Parent */}
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className={`
           flex items-center ${showText ? "justify-start" : "justify-center"}
           w-full px-3 py-1 rounded-md transition
           ${darkMode ? "text-gray-200" : "text-gray-800"}
@@ -56,51 +52,52 @@ export default function SidebarItem({
               : "hover:bg-blue-50 hover:border-blue-500"
           }
         `}
-      >
-        {Icon && <Icon size={16}  className={darkMode ? "text-white" : "text-gray-500"}  />}
+        >
+          {/*  {Icon && <Icon size={16}  className={darkMode ? "text-white" : "text-gray-500"}  />} */}
 
-
-
-
-       {/* {Icon && collapsed && (
+          {Icon && collapsed && (
             <Icon
-              size={20}
+              size={16}
               className={darkMode ? "text-white" : "text-gray-600"}
             />
-          )}*/} 
+          )}
 
-        {showText && (
-          <>
-            <span className={`ml-3 flex-1 text-left text-sm font-medium ${darkMode?"text-white":"text-gray-600"}`}>
-              {item.title}
-            </span>
-            <ChevronDown
-              size={16}
-              className={`transition-transform ${open ? "rotate-180" : ""}`}
+          {showText && (
+            <>
+              <span
+                className={`ml-3 flex-1 text-left text-sm font-medium ${
+                  darkMode ? "text-white" : "text-gray-600"
+                }`}
+              >
+                {item.title}
+              </span>
+              <ChevronDown
+                size={16}
+                className={`transition-transform ${open ? "rotate-180" : ""}`}
+              />
+            </>
+          )}
+        </button>
+
+        {/* Children */}
+        {showText && open && (
+          <div className="relative ml-[26px] mt-1">
+            {/* vertical line */}
+            <span
+              className={`absolute left-[6px] top-0 h-full w-px ${
+                darkMode ? "bg-gray-600" : "bg-gray-300"
+              }`}
             />
-          </>
-        )}
-      </button>
 
-      {/* Children */}
-      {showText && open && (
-        <div className="relative ml-[26px] mt-1">
-          {/* vertical line */}
-          <span
-            className={`absolute left-[6px] top-0 h-full w-px ${
-              darkMode ? "bg-gray-600" : "bg-gray-300"
-            }`}
-          />
+            <div className="space-y-[2px]">
+              {item.children.map((sub, i) => {
+                const isActive = location.pathname.startsWith(sub.path);
 
-          <div className="space-y-[2px]">
-            {item.children.map((sub, i) => {
-              const isActive = location.pathname.startsWith(sub.path);
-
-              return (
-                <NavLink
-                  key={i}
-                  to={sub.path}
-                  className={`
+                return (
+                  <NavLink
+                    key={i}
+                    to={sub.path}
+                    className={`
                     group relative flex items-center pl-[22px] pr-2 py-[6px] text-[13px] rounded-md transition
                     ${
                       isActive
@@ -111,9 +108,9 @@ export default function SidebarItem({
                     }
                     hover:text-blue-600
                   `}
-                >
-                  <span
-                    className={`
+                  >
+                    <span
+                      className={`
                       absolute left-[3px] top-1/2 -translate-y-1/2
                       w-[6px] h-[6px] rounded-full transition-colors
                       ${
@@ -124,27 +121,34 @@ export default function SidebarItem({
                           : "bg-gray-400 group-hover:bg-blue-600"
                       }
                     `}
-                  />
-                  {sub.title}
-                </NavLink>
-              );
-            })}
+                    />
+                    {sub.title}
+                  </NavLink>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     );
   }
-
 
   /* ================= WITHOUT CHILDREN ================= */
   return (
     <NavLink
       to={item.path}
-     className={`flex items-center ${showText ? "justify-start" : "justify-center"} ${collapsed ? "px-2" : "px-3"} py-2 rounded-lg transition
-      ${darkMode ? "text-white hover:bg-blue-900" : "text-gray-500 hover:bg-blue-50"}`}
+      className={`flex items-center ${
+        showText ? "justify-start" : "justify-center"
+      } ${collapsed ? "px-2" : "px-3"} py-2 rounded-lg transition
+      ${
+        darkMode
+          ? "text-white hover:bg-blue-900"
+          : "text-gray-500 hover:bg-blue-50"
+      }`}
     >
-      {Icon && <Icon size={16} />}
+      {Icon && collapsed && (
+        <Icon size={16} className={darkMode ? "text-white" : "text-gray-600"} />
+      )}
       {showText && (
         <span className="ml-3 text-sm font-medium">{item.title}</span>
       )}
