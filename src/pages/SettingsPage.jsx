@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme } from "../context/ThemeContext";
 
 const countries = ["India", "USA", "UK"];
 const states = ["Maharashtra", "California", "London"];
@@ -12,6 +13,7 @@ export default function SettingsPage() {
   const [selectedCountry, setSelectedCountry] = React.useState("");
   const [selectedState, setSelectedState] = React.useState("");
   const [selectedCity, setSelectedCity] = React.useState("");
+  const { darkMode } = useTheme();
 
   // Update cities when country/state changes
   React.useEffect(() => {
@@ -24,7 +26,11 @@ export default function SettingsPage() {
   }, [selectedState]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8 max-w-5xl mx-auto">
+    <div
+      className={`${
+        darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-700"
+      } rounded-lg shadow-md p-8 max-w-5xl mx-auto`}
+    >
       {/* Title */}
       <h1 className="text-2xl font-bold mb-8 border-b border-gray-200 pb-4">
         Settings
@@ -37,7 +43,7 @@ export default function SettingsPage() {
         <div className="flex items-center space-x-6 mb-8">
           <label
             htmlFor="profileImage"
-            className="block text-sm font-medium text-gray-700 w-36"
+            className="block text-sm font-medium  w-36"
           >
             Profile Image <span className="text-red-600">*</span>
           </label>
@@ -50,7 +56,7 @@ export default function SettingsPage() {
             />
             <button
               type="button"
-              className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-1 shadow"
+              className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 rounded-full p-1 shadow"
               aria-label="Change Profile Image"
               title="Change Profile Image"
             >
@@ -61,10 +67,7 @@ export default function SettingsPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6">
           <div>
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="firstName" className="block text-sm font-medium ">
               First Name <span className="text-red-600">*</span>
             </label>
             <input
@@ -77,10 +80,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="lastName" className="block text-sm font-medium ">
               Last Name <span className="text-red-600">*</span>
             </label>
             <input
@@ -93,10 +93,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium ">
               Email <span className="text-red-600">*</span>
             </label>
             <input
@@ -109,10 +106,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="phone" className="block text-sm font-medium ">
               Phone Number <span className="text-red-600">*</span>
             </label>
             <input
@@ -132,10 +126,7 @@ export default function SettingsPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6">
           <div>
-            <label
-              htmlFor="address1"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="address1" className="block text-sm font-medium ">
               Address Line 1
             </label>
             <input
@@ -162,10 +153,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="country"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="country" className="block text-sm font-medium ">
               Country
             </label>
             <select
@@ -174,9 +162,16 @@ export default function SettingsPage() {
               onChange={(e) => setSelectedCountry(e.target.value)}
               className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="">Select</option>
+              <option
+                value=""
+                className={`${
+                  darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
+                }`}
+              >
+                Select
+              </option>
               {countries.map((country) => (
-                <option key={country} value={country}>
+                <option key={country} value={country}  className={`${darkMode? "bg-gray-700 text-white":"bg-white text-gray-700"}`}>
                   {country}
                 </option>
               ))}
@@ -184,10 +179,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="state"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="state" className="block text-sm font-medium ">
               State
             </label>
             <select
@@ -195,9 +187,9 @@ export default function SettingsPage() {
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
               className="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              disabled={!selectedCountry}
+              
             >
-              <option value="">Select</option>
+              <option value=""  className={`${darkMode? "bg-gray-700 text-white":"bg-white text-gray-700"}`}>Select</option>
               {states
                 .filter((state) =>
                   selectedCountry
@@ -206,7 +198,7 @@ export default function SettingsPage() {
                     : false
                 )
                 .map((state) => (
-                  <option key={state} value={state}>
+                  <option key={state} value={state}  className={`${darkMode? "bg-gray-700 text-white":"bg-white text-gray-700"}`}>
                     {state}
                   </option>
                 ))}
@@ -214,10 +206,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="city"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="city" className="block text-sm font-medium ">
               City
             </label>
             <select

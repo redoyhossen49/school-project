@@ -76,7 +76,7 @@ export default function TopNavbar() {
       profileMenu: [{ label: "School Profile", path: "/profile" }],
       extraMenu: [{ icon: <FiShoppingCart />, path: "/school/ecommerce" }],
       profileData: {
-        name: "Sunshine High School",
+        name: " Sunshine High School Sunshine High School",
         title: "School Account",
         avatar: "https://i.pravatar.cc/40?img=50",
       },
@@ -212,7 +212,7 @@ export default function TopNavbar() {
         <img
           src={roleLogos[role]}
           alt={`${role} logo`}
-          className="w-8 h-8 md:w-10 md:h-10 mx-4 rounded-full object-contain "
+          className="w-8 h-8 md:w-10 md:h-10 mx-8 rounded-full object-contain "
         />
         <div className="hidden md:flex items-center relative ml-6">
           <FiSearch size={18} className="absolute left-3 text-gray-400" />
@@ -257,19 +257,19 @@ export default function TopNavbar() {
               className={`fixed md:absolute ${
                 isDesktop
                   ? "md:right-4 md:top-12 md:mt-4"
-                  : "top-24 left-1/2 w-64 -translate-x-1/2"
+                  : "top-[72px] left-1/2 w-64 -translate-x-1/2"
               } ${
                 darkMode
                   ? "bg-gray-800 border border-gray-600 text-white shadow-[0_4px_20px_rgba(255,255,255,0.05)]"
                   : "bg-white border border-gray-200 text-gray-700 shadow-lg"
-              } px-4 py-4 z-50 w-72 flex flex-col max-h-[80vh]`}
+              } px-4 py-4 z-50 w-72 flex flex-col max-h-[80vh] overflow-y-auto`}
             >
-              <div className="font-semibold  text-center mb-3  pt-4 pb-2">
+              <div className="font-semibold  text-center mb-3   pb-2">
                 Notifications
               </div>
 
               {/* Scrollable notifications list */}
-              <div className="flex-1 p-4 pb-8">
+              <div className="flex-1 p-2 pb-8 ">
                 <ul className="space-y-3">
                   {notifications.map((notif) => (
                     <li
@@ -330,69 +330,71 @@ export default function TopNavbar() {
               className={`fixed md:absolute ${
                 isDesktop
                   ? "md:right-4 md:top-12 md:mt-4"
-                  : "top-24 left-1/2 -translate-x-1/2"
-              }  ${
+                  : "top-[72px] left-1/2 -translate-x-1/2"
+              } ${
                 darkMode
-                  ? "bg-gray-800 border border-gray-600 text-white shadow-[0_4px_20px_rgba(255,255,255,0.05)]"
-                  : "bg-white border border-gray-200 text-gray-700 shadow-lg"
-              } px-4 py-6 w-72 z-50`}
+                  ? "bg-gray-900 border border-gray-700 text-white shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+                  : "bg-white border border-gray-300 text-gray-800 shadow-[0_8px_24px_rgba(0,0,0,0.1)]"
+              } px-6 py-6 w-72 z-50 rounded-xl transition-all duration-300`}
             >
-              <div className="flex flex-col items-center mb-4">
+              {/* Profile Section */}
+              <div className="flex flex-col items-center mb-6">
                 <img
                   src={config.profileData.avatar}
                   alt={config.profileData.name}
-                  className="w-16 h-16 rounded-full object-cover mb-2"
+                  className="w-16 h-16 rounded-full object-cover mb-3 ring-2 ring-indigo-500"
                 />
-                <div className="font-semibold text-lg">
+
+                {/* Profile Name Card */}
+                <div className="text-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm text-sm font-semibold text-gray-800 dark:text-white w-full">
                   {config.profileData.name}
                 </div>
-                <div className="text-sm ">{config.profileData.title}</div>
+
+                <div className="w-56 h-[2px] my-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-full"></div>
               </div>
 
-              <div className="flex flex-col text-sm space-y-1">
-                {/* Edit Profile opens Settings */}
+              {/* Menu Options */}
+              <div className="flex flex-col text-sm space-y-2">
+                {/* Profile Button */}
                 <button
                   onClick={() => setOpenDropdown("settings")}
-                  className="flex items-center justify-between px-4 py-2 rounded hover:bg-gray-500 w-full text-left"
+                  className="flex items-center justify-between px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-indigo-500 hover:text-white transition-all duration-200 shadow-sm"
                 >
-                  <span className="flex items-center gap-2">
-                    <GrEdit className="text-lg" /> Edit Profile
-                  </span>
+                  <span className="flex items-center gap-2">Profile</span>
                   <FiChevronRight />
                 </button>
 
+                {/* Settings Link */}
                 <Link
-                  to={`/${role}/dashboard/settings`} // role can be "admin", "teacher", etc.
+                  to={`/${role}/dashboard/settings`}
                   onClick={() => setOpenDropdown(null)}
-                  className="flex items-center justify-between px-4 py-2 rounded hover:bg-gray-500"
+                  className="flex items-center justify-between px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-indigo-500 hover:text-white transition-all duration-200 shadow-sm"
                 >
-                  <span className="flex items-center gap-2">
-                    <FiSettings className="text-lg" /> Profile Settings
-                  </span>
+                  <span className="flex items-center gap-2">Settings</span>
                   <FiChevronRight />
                 </Link>
 
+                {/* Only show Principal for School Dashboard */}
                 {isSchoolDashboard && (
                   <Link
                     to="/principal/select"
                     onClick={() => setOpenDropdown(null)}
-                    className="flex items-center justify-between px-4 py-2 rounded hover:bg-gray-500"
+                    className="flex items-center justify-between px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-indigo-500 hover:text-white transition-all duration-200 shadow-sm"
                   >
-                    <span className="flex items-center gap-2">
-                      <FiUsers className="text-lg" /> Principal Select
-                    </span>
+                    <span className="flex items-center gap-2">Principal</span>
                     <FiChevronRight />
                   </Link>
                 )}
 
+                {/* Logout Button */}
                 <button
                   onClick={() => {
                     setOpenDropdown(null);
                     navigate("/");
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded text-red-600 hover:bg-red-300"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 transition-all duration-200 shadow-sm"
                 >
-                  <FiLogOut className="text-lg" /> Log Out
+                  Log Out
                 </button>
               </div>
             </div>

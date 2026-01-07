@@ -53,14 +53,19 @@ export default function SidebarItem({
           }
         `}
         >
-          {/*  {Icon && <Icon size={16}  className={darkMode ? "text-white" : "text-gray-500"}  />} */}
-
-          {Icon && collapsed && (
+          {Icon && (
             <Icon
               size={16}
-              className={darkMode ? "text-white" : "text-gray-600"}
+              className={darkMode ? "text-white" : "text-gray-500"}
             />
           )}
+
+          {/* {Icon && collapsed && (
+            <Icon
+              size={20}
+              className={darkMode ? "text-white" : "text-gray-600"}
+            />
+          )}*/}
 
           {showText && (
             <>
@@ -137,18 +142,24 @@ export default function SidebarItem({
   return (
     <NavLink
       to={item.path}
-      className={`flex items-center ${
-        showText ? "justify-start" : "justify-center"
-      } ${collapsed ? "px-2" : "px-3"} py-2 rounded-lg transition
-      ${
-        darkMode
-          ? "text-white hover:bg-blue-900"
-          : "text-gray-500 hover:bg-blue-50"
-      }`}
+      end
+  className={({ isActive }) => `
+    flex items-center
+    ${showText ? "justify-start" : "justify-center"}
+    ${collapsed ? "px-2" : "px-3"} py-2 rounded-lg transition
+
+    ${
+      isActive
+        ? darkMode
+          ? "bg-blue-900 text-white border border-blue-500"
+          : "bg-blue-50 text-blue-600 border border-blue-500"
+        : darkMode
+        ? "text-gray-400 hover:bg-blue-900"
+        : "text-gray-500 hover:bg-blue-50"
+    }
+  `}
     >
-      {Icon && collapsed && (
-        <Icon size={16} className={darkMode ? "text-white" : "text-gray-600"} />
-      )}
+      {Icon && <Icon size={16} />}
       {showText && (
         <span className="ml-3 text-sm font-medium">{item.title}</span>
       )}

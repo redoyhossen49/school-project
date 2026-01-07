@@ -38,19 +38,30 @@ export const sidebarMenu = (role) => {
   // ================= Admin Menu =================
   const adminMenu = [
     {
+      title: "Dashboard",
+      icon: RxDashboard,
+      children: [
+        { title: "Admin", path: "/admin/dashboard" },
+        { title: "School", path: "/school/dashboard" },
+        { title: "Teacher", path: "/teacher/dashboard" },
+        { title: "Student", path: "/student/dashboard" },
+      ],
+    },
+    {
       title: "Landing Page",
       icon: Home,
+
       children: [
-        { title: "See", path: "/landing/see" },
-        { title: "Edit", path: "/landing/edit" },
-        { title: "Add", path: "/landing/add" },
+        { title: "view", path: "/landing/see" },
+        { title: "Edit Page", path: "/landing/edit" },
+        { title: "Add Page", path: "/landing/add" },
       ],
     },
     {
       title: "Member Ship",
       icon: FiUsers,
       children: [
-        { title: "Member Ship Plan", path: "/membership/plan" },
+        { title: "Create Plan", path: "/membership/plan" },
         { title: "Active Plan", path: "/membership/active" },
         {
           title: "Unactive Plan",
@@ -63,7 +74,7 @@ export const sidebarMenu = (role) => {
       icon: BiSolidSchool,
       children: [
         { title: "School List", path: "/school/list" },
-        { title: "Pending", path: "/school/pending" },
+        { title: "Pending List", path: "/school/pending" },
       ],
     },
     {
@@ -72,9 +83,8 @@ export const sidebarMenu = (role) => {
       children: [
         { title: "Cash In History", path: "/transaction/cashin" },
         { title: "Cash Out History", path: "/transaction/cashout" },
-        { title: "Profit History", path: "/transaction/profit" },
+        { title: "Profit history", path: "/transaction/profit" },
         { title: "Cash Out Request", path: "/transaction/request" },
-        { title: "Cash Out", path: "/transaction/out" },
       ],
     },
     {
@@ -86,20 +96,12 @@ export const sidebarMenu = (role) => {
         { title: "Member Balance", path: "/financial/memberbalance" },
       ],
     },
-    {
-      title: "Dashboard",
-      icon: RxDashboard,
-      children: [
-        { title: "School", path: "/dashboard/school" },
-        { title: "Teacher", path: "/dashboard/teacher" },
-        { title: "Student", path: "/dashboard/student" },
-      ],
-    },
+
     {
       title: "Integration API",
       icon: IoExtensionPuzzleOutline,
       children: [
-        { title: "Add Payment", path: "/integration/payment" },
+        { title: " Payment API", path: "/integration/payment" },
         { title: "Delivery API", path: "/integration/delivery" },
       ],
     },
@@ -109,7 +111,6 @@ export const sidebarMenu = (role) => {
       children: [
         { title: "Category", path: "/ecommerce/category" },
         { title: "Product", path: "/ecommerce/product" },
-        { title: "Product List", path: "/ecommerce/list" },
         { title: "Order Receive", path: "/ecommerce/order/receive" },
         { title: "Order Process", path: "/ecommerce/order/process" },
         { title: "Order Delivery", path: "/ecommerce/order/delivery" },
@@ -119,7 +120,6 @@ export const sidebarMenu = (role) => {
       title: "Profile Tool",
       icon: Settings,
       children: [
-        { title: "Profile", path: "/profile" },
         { title: "Forget", path: "/profile/forget" },
         { title: "Reset", path: "/profile/reset" },
       ],
@@ -128,10 +128,10 @@ export const sidebarMenu = (role) => {
 
   // ================= School Menu =================
   const schoolMenu = [
-    { title: "Dashboard", icon:  RxDashboard, path: "/dashboard" },
+    { title: "Dashboard", icon: RxDashboard, path: "/school/dashboard" },
     { title: "Membarship Plan", icon: FiUsers, path: "/membership" },
 
-    { title: "Principle", icon: FaUserTie, path: "/principle" },
+    { title: "principal", icon: FaUserTie, path: "/principal" },
 
     {
       title: "Teacher",
@@ -154,7 +154,7 @@ export const sidebarMenu = (role) => {
         { title: "Student ID", path: "/student/id" },
         { title: "Class Time", path: "/student/time" },
         {
-          title: "Class Promote",
+          title: " Promote Request",
           path: "/student/promote",
         },
       ],
@@ -188,9 +188,9 @@ export const sidebarMenu = (role) => {
         { title: "Exam Routine", path: "/exam/routine" },
         { title: "Grade", path: "/exam/grade" },
         { title: "Admit Card", path: "/exam/admit" },
-        { title: "Set Number", path: "/exam/setnumber" },
-        { title: "Mark Submit", path: "/exam/marksubmit" },
-        { title: "OMR Submit", path: "/exam/omrsubmit" },
+        { title: "Sit Number", path: "/exam/setnumber" },
+
+        { title: "Schedule", path: "/exam/schedule" },
         { title: "Result Find", path: "/exam/result" },
         { title: "Certificate", path: "/exam/certificate" },
       ],
@@ -200,11 +200,10 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: CreditCard,
       children: [
-        { title: "Fees Collection", path: "/fee/collection-main" },
         { title: "Fees Group", path: "/fee/group" },
         { title: "Fees Type", path: "/fee/type" },
         { title: "Discount", path: "/fee/discount" },
-        { title: "Fee List", path: "/fee/list" },
+        { title: "Fees List", path: "/fee/list" },
         { title: "Collection", path: "/fee/collection" },
       ],
     },
@@ -226,11 +225,11 @@ export const sidebarMenu = (role) => {
       icon: FaListCheck, // group icon for attendance section
       children: [
         {
-          title: "Teacher Attendance",
+          title: "Teacher ",
           path: "/attendance/teacher",
         },
         {
-          title: "Student Attendance",
+          title: "Student ",
           path: "/attendance/student",
         },
       ],
@@ -242,19 +241,19 @@ export const sidebarMenu = (role) => {
       icon: SlCalender, // section icon for leaves
       children: [
         {
-          title: "List Of Leave",
-          path: "/leaves/list",
-        },
-        {
           title: "Request",
           path: "/leaves/request",
+        },
+        {
+          title: "Leave List  ",
+          path: "/leaves/list",
         },
       ],
     },
 
     {
       title: "Holiday",
-      path: "/leaves/holiday",
+      path: "/holiday",
       icon: BsCalendarDay, // holiday calendar
     },
 
@@ -321,11 +320,11 @@ export const sidebarMenu = (role) => {
       icon: MdOutlineFormatListNumberedRtl,
       children: [
         {
-          title: "Academic Details",
+          title: "Academic ",
           path: "/details/academic",
         },
         {
-          title: " List of Ranking",
+          title: "School List ",
           path: "/details/schoollist",
         },
       ],
@@ -333,7 +332,7 @@ export const sidebarMenu = (role) => {
   ];
   // ================= Teacher Menu =================
   const teacherMenu = [
-    { title: "Dashboard", icon:  RxDashboard, path: "/dashboard" },
+    { title: "Dashboard", icon: RxDashboard, path: "/teacher/dashboard" },
 
     {
       title: "Teacher",
@@ -400,9 +399,8 @@ export const sidebarMenu = (role) => {
         { title: "Exam Routine", path: "/exam/routine" },
         { title: "Grade", path: "/exam/grade" },
         { title: "Admit Card", path: "/exam/admit" },
-        { title: "Set Number", path: "/exam/setnumber" },
+        { title: "Sit Number", path: "/exam/sitnumber" },
         { title: "Mark Submit", path: "/exam/marksubmit" },
-        { title: "OMR Submit", path: "/exam/omrsubmit" },
         { title: "Result Find", path: "/exam/result" },
         { title: "Certificate", path: "/exam/certificate" },
       ],
@@ -412,12 +410,8 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: Wallet,
       children: [
-        {
-          title: "Fees Collection",
-          path: "/fee/collection-main",
-        },
-        { title: "Fee List", path: "/fee/list" },
-        { title: "Collection", path: "/fee/collection" },
+        { title: "Fees List", path: "/fee/list" },
+        { title: "Payment", path: "/fee/payment" },
       ],
     },
     {
@@ -437,11 +431,11 @@ export const sidebarMenu = (role) => {
       icon: FaListCheck,
       children: [
         {
-          title: "Teacher Attendance",
+          title: "Teacher ",
           path: "/attendance/teacher",
         },
         {
-          title: "Student Attendance",
+          title: "Student ",
           path: "/attendance/student",
         },
       ],
@@ -453,7 +447,7 @@ export const sidebarMenu = (role) => {
       icon: VscCalendar, // section icon for leaves
       children: [
         {
-          title: "List Of Leave",
+          title: "Leave Request",
           path: "/leaves/list",
         },
       ],
@@ -474,7 +468,7 @@ export const sidebarMenu = (role) => {
       title: "Details Item",
       icon: MdOutlineFormatListNumberedRtl,
       children: [
-        { title: "Principle", path: "/details/principle" },
+        { title: "Principal", path: "/details/principle" },
         { title: "Academic", path: "/details/academic" },
         {
           title: "School List",
@@ -486,7 +480,11 @@ export const sidebarMenu = (role) => {
 
   // ================= Student Menu =================
   const studentMenu = [
-    { title: "Dashboard", icon:  RxDashboard, path: "/dashboard" },
+    {
+      title: "Dashboard",
+      icon: RxDashboard,
+      path: "/student/dashboard",
+    },
 
     {
       title: "Teacher",
@@ -498,20 +496,12 @@ export const sidebarMenu = (role) => {
       title: "Student",
       icon: GraduationCap,
       children: [
-        [
-          { title: "Student List", path: "/student/list" },
-          { title: "Student ID", path: "/student/id" },
-          { title: "Class Time", path: "/student/time" },
-          {
-            title: "Class Promote",
-            path: "/student/promote",
-          },
-          {
-            title: "Assignment",
-            path: "/teacher/assignment",
-          },
-          { title: "Live Class", path: "/student/live" },
-        ],
+        { title: "Student List", path: "/student/list" },
+        { title: "Student ID", path: "/student/id" },
+        { title: "Class Time", path: "/student/time" },
+        { title: "Class Promote", path: "/student/promote" },
+        { title: "Assignment", path: "/teacher/assignment" },
+        { title: "Live Class", path: "/student/live" },
       ],
     },
 
@@ -537,9 +527,8 @@ export const sidebarMenu = (role) => {
         { title: "Exam Routine", path: "/exam/routine" },
         { title: "Grade", path: "/exam/grade" },
         { title: "Admit Card", path: "/exam/admit" },
-        { title: "Set Number", path: "/exam/setnumber" },
-        { title: "Mark Submit", path: "/exam/marksubmit" },
-        { title: "OMR Submit", path: "/exam/omrsubmit" },
+        { title: "Sit Number", path: "/exam/setnumber" },
+
         { title: "Result Find", path: "/exam/result" },
         { title: "Certificate", path: "/exam/certificate" },
       ],
@@ -549,7 +538,7 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: Wallet,
       children: [
-        { title: "Fee List", path: "/fee/list" },
+        { title: "Fees List", path: "/fee/list" },
         { title: "Pay Fee", path: "/fee/pay" },
         { title: "Pay Slip", path: "/fee/payslip" },
       ],
@@ -558,7 +547,7 @@ export const sidebarMenu = (role) => {
     {
       title: "Attendance",
       icon: FaListCheck,
-      children: [{ title: "Student", path: "/attendance/student" }],
+      children: [{ title: "Student ", path: "/attendance/student" }],
     },
 
     {
@@ -567,7 +556,11 @@ export const sidebarMenu = (role) => {
       children: [{ title: "Leave", path: "/leaves/leave" }],
     },
 
-    { title: "Holiday", icon: BsCalendarDay, path: "/holiday" },
+    {
+      title: "Holiday",
+      icon: BsCalendarDay,
+      path: "/holiday",
+    },
 
     {
       title: "Information",

@@ -1,12 +1,35 @@
-export const stats = [
-  { title: "Revenue", value: "$46,200", change: "+12%", color: "green" },
-  { title: "Orders", value: "1,245", change: "+8%", color: "blue" },
-  { title: "Customers", value: "892", change: "+5%", color: "purple" },
-  { title: "Conversion", value: "3.2%", change: "+1.1%", color: "orange" },
-];
+export const dashboardData = {
+  admin: [
+    { title: "Total School", value: 3654, active: 3643, inactive: 11 },
+    { title: "Total Students", value: 284, active: 254, inactive: 30 },
+   {
+  title: "Total Revenue Income",
+  value: 162,       // total expected income
+  collected: 161,   // collected so far
+  due: 1,           // remaining
+},
 
-export const orders = [
-  { id: 1, product: "iPhone 15 Pro", customer: "Rahim", price: "$1200", status: "Delivered" },
-  { id: 2, product: "MacBook Air", customer: "Karim", price: "$1500", status: "Pending" },
-  { id: 3, product: "AirPods Pro", customer: "Sadia", price: "$249", status: "Cancelled" },
-];
+    { title: "Customer Balance", value: 82, request: 81, },
+  ],
+
+  teacher: [
+    { title: "My Students", value: 120, active: 118, inactive: 2 },
+    { title: "My Classes", value: 6, active: 6, inactive: 0 },
+    { title: "My Subjects", value: 4, active: 4, inactive: 0 },
+    { title: "Attendance Taken", value: "95%", active: "-", inactive: "-" },
+  ],
+
+  school: [
+    { title: "Total Teachers", value: 75, active: 70, inactive: 5 },
+    { title: "Total Students", value: 1800, active: 1750, inactive: 50 },
+    { title: "Total Classes", value: 45, active: 45, inactive: 0 },
+    { title: "Total Departments", value: 8, active: 8, inactive: 0 },
+  ],
+
+  student: [
+    { title: "My Subjects", value: 6, active: 6, inactive: 0 },
+    { title: "My Teachers", value: 8, active: 8, inactive: 0 },
+    { title: "Attendance", value: "92%", active: "-", inactive: "-" },
+    { title: "Pending Fees", value: "৳ 2000", active: "-", inactive: "-" },
+  ],
+};

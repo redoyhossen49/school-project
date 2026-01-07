@@ -5,7 +5,6 @@ import "./index.css";
 import DashboardLayout from "./Layouts/DashboardLayout";
 import { ThemeProvider } from "./context/ThemeContext";
 import { SidebarProvider } from "./context/SidebarContext";
-import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SchoolForm from "./components/SchoolForm";
@@ -13,62 +12,60 @@ import AdmissionForm from "./components/AdmissionForm";
 import StudentSuccess from "./pages/StudentSuccess";
 import SchoolSuccess from "./pages/SchoolSuccess";
 import SettingsPage from "./pages/SettingsPage";
-
+import DashboardPage from "./pages/DashboardPage";
 
 const router = createBrowserRouter([
   {
-        path:"/",
-        element:<Login></Login>,
-      },
+    path: "/",
+    element: <Login></Login>,
+  },
 
+  {
+    path: "/success",
+    element: <StudentSuccess />,
+  },
+  {
+    path: "/schoolsuccess",
+    element: <SchoolSuccess />,
+  },
+
+  {
+    path: "/register",
+    element: <Register></Register>,
+    children: [
       {
-        path: "/success",
-        element: <StudentSuccess />,
+        index: true,
+        element: <SchoolForm />,
       },
       {
-        path: "/schoolsuccess",
-        element: <SchoolSuccess />,
-      },
-      
-      {
-        path:"/register",
-        element:<Register></Register>,
-         children: [
-      {
-        index: true, 
-        element: <SchoolForm/>,
-      },
-      {
-        path: "admission", 
+        path: "admission",
         element: <AdmissionForm />,
       },
-      
     ],
-      },
+  },
   {
     path: "/admin/dashboard",
     element: <DashboardLayout />,
     children: [
-               // default page in dashboard
-      { path: "settings", element: <SettingsPage /> },    // /admin/dashboard/settings
-      // Add other nested routes here for admin dashboard
+      // default page in dashboard
+      { path: "settings", element: <SettingsPage /> }, // /admin/dashboard/settings
+      { index: true, element: <DashboardPage></DashboardPage> },
     ],
   },
   {
     path: "/teacher/dashboard",
     element: <DashboardLayout />,
     children: [
-      
       { path: "settings", element: <SettingsPage /> },
-      // other teacher routes
+      { index: true, element: <DashboardPage></DashboardPage> },
     ],
   },
   {
     path: "/student/dashboard",
     element: <DashboardLayout />,
     children: [
-      
       { path: "settings", element: <SettingsPage /> },
+      { index: true, element: <DashboardPage></DashboardPage> },
       // other student routes
     ],
   },
@@ -76,9 +73,8 @@ const router = createBrowserRouter([
     path: "/school/dashboard",
     element: <DashboardLayout />,
     children: [
-     
       { path: "settings", element: <SettingsPage /> },
-      // other school routes
+      { index: true, element: <DashboardPage></DashboardPage> },
     ],
   },
 ]);
@@ -92,8 +88,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ThemeProvider>
   </React.StrictMode>
 );
-
-
-
-
-
