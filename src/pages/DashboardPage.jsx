@@ -3,7 +3,7 @@ import FeeStatistics from "../components/school/FeeStatistics";
 import SchoolCalendar from "../components/school/SchoolCalendar";
 import StatCard from "../components/StatCard";
 import { dashboardData } from "../data/dashBoardData";
-import { statCardBgColors } from "../utils/StatCardBgColors";
+import { statCardBgColors } from "../utils/statCardBgColors";
 
 export default function DashboardPage() {
   const role = localStorage.getItem("role") || "student";
