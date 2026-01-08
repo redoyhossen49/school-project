@@ -49,7 +49,7 @@ export default function SchoolCalendar() {
                 {apt.date}
               </p>
             </div>
-            <div className="flex -space-x-2">
+            <div className="flex space-x-2">
               {apt.avatars.map((av, i) => (
                 <img
                   key={i}
