@@ -41,9 +41,7 @@ export default function DashboardLayout() {
             darkMode ? "bg-gray-800 text-gray-200" : "bg-gray-50 text-gray-800"
           }`}
         >
-          <h1 className="text-2xl font-bold mb-4 text-left">
-            {role.charAt(0).toUpperCase() + role.slice(1)} Dashboard
-          </h1>
+          
 
           <Outlet />
         </main>

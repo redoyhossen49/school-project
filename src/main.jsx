@@ -13,6 +13,7 @@ import StudentSuccess from "./pages/StudentSuccess";
 import SchoolSuccess from "./pages/SchoolSuccess";
 import SettingsPage from "./pages/SettingsPage";
 import DashboardPage from "./pages/DashboardPage";
+import StudentList from "./pages/StudentList";
 
 const router = createBrowserRouter([
   {
@@ -75,6 +76,16 @@ const router = createBrowserRouter([
     children: [
       { path: "settings", element: <SettingsPage /> },
       { index: true, element: <DashboardPage></DashboardPage> },
+    ],
+  },
+   {
+    path: "/student/list",
+    element: <DashboardLayout />,
+    children: [
+      {
+        index: true,
+        element: <StudentList />,
+      },
     ],
   },
 ]);

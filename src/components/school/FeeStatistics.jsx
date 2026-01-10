@@ -1,5 +1,5 @@
-// src/components/school/FeeStatistics.jsx
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { feeStatsData } from "../../data/feeStatsData";
 import { calculateSummary } from "../../utils/feeUtils";
 import FeeSummaryCard from "../FeeSummaryCard";
@@ -7,73 +7,176 @@ import FeeChart from "./FeeChart";
 import { useTheme } from "../../context/ThemeContext";
 
 export default function FeeStatistics() {
-  const [filter, setFilter] = useState("today");
-  const [session, setSession] = useState("2024-25");
-  const  {darkMode }=useTheme();
+  const { darkMode } = useTheme();
 
-  const rawData =
-    filter === "session"
-      ? feeStatsData.session?.[session]
-      : feeStatsData?.[filter];
+  const [open, setOpen] = useState(false);
+  const [showSession, setShowSession] = useState(false);
+  const [filter, setFilter] = useState("today");
+
+  const dropdownRef = useRef(null);
+  const sessionKeys = Object.keys(feeStatsData.session);
+
+  // close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+        setShowSession(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // resolve data
+  let rawData;
+  if (["today", "weekly", "monthly"].includes(filter)) {
+    rawData = feeStatsData[filter];
+  } else if (sessionKeys.includes(filter)) {
+    rawData = feeStatsData.session[filter];
+  }
 
   if (!rawData || !rawData.fees) {
-    return (
-      <div className="bg-white  shadow p-4 md:p-6">
-        <p className="text-gray-500 text-sm">No fee data found</p>
-      </div>
-    );
+    return <p className="text-sm text-gray-500">No fee data found</p>;
   }
 
   const summary = calculateSummary(rawData.fees);
 
+  const labelMap = {
+    today: "Today",
+    weekly: "Last 7 Days",
+    monthly: "Monthly",
+  };
+
+  const selectedLabel = sessionKeys.includes(filter)
+    ? `Session : ${filter}`
+    : labelMap[filter];
+
   return (
-    <div className={`${darkMode? "bg-gray-900 text-gray-200": "bg-white text-gray-900"} shadow p-4 md:p-6 space-y-6`}>
-      {/* Header */}
-      <div className="flex  gap-3 items-center justify-between">
-        <h2 className="font-semibold  text-xs md:text-lg">
+    <div
+      className={`shadow p-4 md:p-6 space-y-6 rounded-lg
+        ${darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-900"}
+      `}
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-sm md:text-lg">
           Fee Statistics
         </h2>
 
-        <div className="flex gap-2  items-center">
-          <select
-            className="border rounded px-2 py-1 md:px-3 md:py-2 text-sm w-full "
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+        {/* DROPDOWN */}
+        <div className="relative" ref={dropdownRef}>
+          {/* MAIN BUTTON */}
+          <button
+            onClick={() => setOpen(!open)}
+            className={`flex items-center justify-between gap-2
+              min-w-[200px] px-4 py-2 rounded-lg border text-sm transition
+              ${darkMode
+                ? "bg-gray-800 border-gray-700 hover:bg-gray-700"
+                : "bg-white border-gray-300 hover:bg-gray-50"
+              }
+            `}
           >
-            <option value="today">Today</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="session">Session Wise</option>
-          </select>
+            <span>{selectedLabel}</span>
+            <ChevronDown
+              size={16}
+              className={`transition ${open ? "rotate-180" : ""}`}
+            />
+          </button>
 
-          {filter === "session" && (
-            <select
-              className="border rounded px-3 py-2 text-sm w-full sm:w-auto"
-              value={session}
-              onChange={(e) => setSession(e.target.value)}
+          {/* DROPDOWN MENU */}
+          {open && (
+            <div
+              className={`absolute right-0 mt-2 w-full rounded-lg shadow-lg z-30 overflow-hidden
+                ${darkMode
+                  ? "bg-gray-800 border border-gray-700"
+                  : "bg-white border"
+                }
+              `}
             >
-              {Object.keys(feeStatsData.session).map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
+              {/* MAIN OPTIONS */}
+              {[
+                { label: "Today", value: "today" },
+                { label: "Last 7 Days", value: "weekly" },
+                { label: "Monthly", value: "monthly" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setFilter(opt.value);
+                    setOpen(false);
+                    setShowSession(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-2 text-sm
+                    transition
+                    ${darkMode
+                      ? "hover:bg-gray-700"
+                      : "hover:bg-gray-100"
+                    }
+                  `}
+                >
+                  {opt.label}
+                  <ChevronRight size={14} />
+                </button>
               ))}
-            </select>
+
+              {/* SESSION BUTTON */}
+              <button
+                onClick={() => setShowSession(!showSession)}
+                className={`w-full flex items-center justify-between px-4 py-2 text-sm font-medium
+                  transition
+                  ${darkMode
+                    ? "hover:bg-gray-700"
+                    : "hover:bg-gray-100"
+                  }
+                `}
+              >
+                Session
+                <ChevronRight
+                  size={14}
+                  className={`transition ${showSession ? "rotate-90" : ""}`}
+                />
+              </button>
+
+              {/* SESSION OPTIONS */}
+              {showSession && (
+                <div className={`${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+                  {sessionKeys.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => {
+                        setFilter(s);
+                        setOpen(false);
+                        setShowSession(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-6 py-2 text-sm
+                        transition
+                        ${darkMode
+                          ? "hover:bg-blue-900"
+                          : "hover:bg-blue-50"
+                        }
+                      `}
+                    >
+                      {s}
+                      <ChevronRight size={14} />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-4">
+      {/* SUMMARY CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <FeeSummaryCard title="Total Fees" value={summary.total} />
         <FeeSummaryCard title="Collected Fees" value={summary.collected} />
         <FeeSummaryCard title="Due Fees" value={summary.due} />
-       
       </div>
 
-      {/* Fee Chart */}
-      {rawData.fees && rawData.fees.length > 0 && (
-        <FeeChart data={rawData.fees} />
-      )}
+      {/* CHART */}
+      <FeeChart data={rawData.fees} />
     </div>
   );
 }

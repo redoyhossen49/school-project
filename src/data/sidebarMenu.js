@@ -8,7 +8,7 @@ import {
   Wallet,
   Settings,
 } from "lucide-react";
-import { FiUsers, FiBell } from "react-icons/fi";
+import { FiUsers, FiBell, FiCalendar } from "react-icons/fi";
 import {
   FaSchool,
   FaUserTie,
@@ -21,6 +21,7 @@ import { IoExtensionPuzzleOutline } from "react-icons/io5";
 import {
   MdOutlineDashboard,
   MdOutlineFormatListNumberedRtl,
+  MdOutlineShoppingBag,
 } from "react-icons/md";
 
 import { BsCalendarDay } from "react-icons/bs";
@@ -31,15 +32,18 @@ import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { GiBookAura } from "react-icons/gi";
 
 import { SlCalender } from "react-icons/sl";
-import { BiSolidSchool } from "react-icons/bi";
+import { BiReset, BiSolidCalendarExclamation, BiSolidSchool } from "react-icons/bi";
 import { RxDashboard } from "react-icons/rx";
+import { LuCalendarCheck2, LuCalendarClock, LuLayoutDashboard, LuUserRoundPlus, LuUsers } from "react-icons/lu";
+import { TbAddressBook, TbApiApp, TbList, TbReportMoney, TbSchoolBell, TbUsersGroup, TbUserShield } from "react-icons/tb";
+import { GrTransaction } from "react-icons/gr";
 
 export const sidebarMenu = (role) => {
   // ================= Admin Menu =================
   const adminMenu = [
     {
       title: "Dashboard",
-      icon: RxDashboard,
+      icon:  LuLayoutDashboard,
       children: [
         { title: "Admin", path: "/admin/dashboard" },
         { title: "School", path: "/school/dashboard" },
@@ -59,7 +63,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Member Ship",
-      icon: FiUsers,
+      icon: LuUserRoundPlus,
       children: [
         { title: "Create Plan", path: "/membership/plan" },
         { title: "Active Plan", path: "/membership/active" },
@@ -71,7 +75,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "School Details",
-      icon: BiSolidSchool,
+      icon:  TbSchoolBell,
       children: [
         { title: "School List", path: "/school/list" },
         { title: "Pending List", path: "/school/pending" },
@@ -79,7 +83,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Transaction",
-      icon: CreditCard,
+      icon: GrTransaction,
       children: [
         { title: "Cash In History", path: "/transaction/cashin" },
         { title: "Cash Out History", path: "/transaction/cashout" },
@@ -89,7 +93,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Financial & Profit",
-      icon: RiMoneyDollarCircleLine,
+      icon:  TbReportMoney,
       children: [
         { title: "Our Profit", path: "/financial/profit" },
         { title: "Our Balance", path: "/financial/balance" },
@@ -99,7 +103,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Integration API",
-      icon: IoExtensionPuzzleOutline,
+      icon: TbApiApp,
       children: [
         { title: " Payment API", path: "/integration/payment" },
         { title: "Delivery API", path: "/integration/delivery" },
@@ -107,7 +111,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "E-commerce",
-      icon: ShoppingCart,
+      icon: MdOutlineShoppingBag,
       children: [
         { title: "Category", path: "/ecommerce/category" },
         { title: "Product", path: "/ecommerce/product" },
@@ -118,7 +122,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Profile Tool",
-      icon: Settings,
+      icon:  BiReset,
       children: [
         { title: "Forget", path: "/profile/forget" },
         { title: "Reset", path: "/profile/reset" },
@@ -128,14 +132,14 @@ export const sidebarMenu = (role) => {
 
   // ================= School Menu =================
   const schoolMenu = [
-    { title: "Dashboard", icon: RxDashboard, path: "/school/dashboard" },
-    { title: "Membarship Plan", icon: FiUsers, path: "/membership" },
+    { title: "Dashboard", icon: LuLayoutDashboard, path: "/school/dashboard" },
+    
 
-    { title: "principal", icon: FaUserTie, path: "/principal" },
+   
 
     {
       title: "Teacher",
-      icon: UserCog,
+      icon: LuUsers,
       children: [
         { title: "Teacher List", path: "/teacher/list" },
         { title: "Teacher ID", path: "/teacher/id" },
@@ -162,13 +166,13 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Guardian",
-      icon: FaUsersSlash,
+      icon: TbUserShield,
       children: [{ title: "Guardian List", path: "/guardian/list" }],
     },
 
     {
       title: "Academic",
-      icon: GiBookAura,
+      icon: TbAddressBook,
       children: [
         { title: "Class", path: "/academic/class" },
         { title: "Group", path: "/academic/group" },
@@ -210,7 +214,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "HRM",
-      icon: FaUsersBetweenLines,
+      icon: TbUsersGroup ,
       children: [
         {
           title: "Employee",
@@ -222,7 +226,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Attendance",
-      icon: FaListCheck, // group icon for attendance section
+      icon: LuCalendarCheck2, // group icon for attendance section
       children: [
         {
           title: "Teacher ",
@@ -238,7 +242,7 @@ export const sidebarMenu = (role) => {
     // Leaves Sub-section
     {
       title: "Leaves",
-      icon: SlCalender, // section icon for leaves
+      icon: LuCalendarClock , // section icon for leaves
       children: [
         {
           title: "Request",
@@ -254,7 +258,7 @@ export const sidebarMenu = (role) => {
     {
       title: "Holiday",
       path: "/holiday",
-      icon: BsCalendarDay, // holiday calendar
+      icon: FiCalendar, // holiday calendar
     },
 
     {
@@ -284,7 +288,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Report",
-      icon: FaRegFilePdf, // Example icon for reports
+      icon: BiSolidCalendarExclamation, // Example icon for reports
       children: [
         { title: "Today", path: "/report/today" },
         {
@@ -307,7 +311,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Tools",
-      icon: Settings, // Main section icon
+      icon: BiReset, // Main section icon
       children: [
         { title: "Forget", path: "/tool/forget" }, // Feather refresh icon
         { title: "Reset", path: "/tool/reset" }, // Feather rotate icon
@@ -317,12 +321,13 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Details Item",
-      icon: MdOutlineFormatListNumberedRtl,
+      icon: TbList,
       children: [
         {
           title: "Academic ",
           path: "/details/academic",
         },
+         { title: "Principal", icon: FaUserTie, path: "/principal" },
         {
           title: "School List ",
           path: "/details/schoollist",
@@ -336,7 +341,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Teacher",
-      icon: UserCog,
+      icon:  LuUsers,
       children: [
         { title: "Teacher List", path: "/teacher/list" },
         { title: "Teacher ID", path: "/teacher/id" },
@@ -367,7 +372,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Guardian",
-      icon: FaUsersSlash,
+      icon: TbUserShield,
       children: [
         { title: "Guardian List", path: "/guardian/list" },
         {
@@ -379,7 +384,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Academic",
-      icon: GiBookAura,
+      icon: TbAddressBook,
       children: [
         { title: "Class", path: "/academic/class" },
         { title: "Group", path: "/academic/group" },
@@ -416,7 +421,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "HRM",
-      icon: FaUsersBetweenLines,
+      icon: TbUsersGroup,
       children: [
         {
           title: "Employee",
@@ -428,7 +433,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Attendance",
-      icon: FaListCheck,
+      icon: LuCalendarCheck2,
       children: [
         {
           title: "Teacher ",
@@ -444,7 +449,7 @@ export const sidebarMenu = (role) => {
     // Leaves Sub-section
     {
       title: "Leaves",
-      icon: VscCalendar, // section icon for leaves
+      icon:LuCalendarClock , // section icon for leaves
       children: [
         {
           title: "Leave Request",
@@ -456,17 +461,17 @@ export const sidebarMenu = (role) => {
     {
       title: "Holiday",
       path: "/leaves/holiday",
-      icon: BsCalendarDay, // holiday calendar
+      icon: FiCalendar, // holiday calendar
     },
     {
       title: "Tool",
-      icon: Settings,
+      icon: BiReset,
       children: [{ title: "Forget", path: "/information/forget" }],
     },
 
     {
       title: "Details Item",
-      icon: MdOutlineFormatListNumberedRtl,
+      icon:  TbList,
       children: [
         { title: "Principal", path: "/details/principle" },
         { title: "Academic", path: "/details/academic" },
@@ -546,19 +551,19 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Attendance",
-      icon: FaListCheck,
+      icon: LuCalendarCheck2,
       children: [{ title: "Student ", path: "/attendance/student" }],
     },
 
     {
       title: "Leaves",
-      icon: VscCalendar,
+      icon: LuCalendarClock,
       children: [{ title: "Leave", path: "/leaves/leave" }],
     },
 
     {
       title: "Holiday",
-      icon: BsCalendarDay,
+      icon: FiCalendar,
       path: "/holiday",
     },
 
@@ -570,7 +575,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Details Item",
-      icon: MdOutlineFormatListNumberedRtl,
+      icon: TbList,
       children: [
         { title: "Principle", path: "/details/principle" },
         { title: "Academic", path: "/details/academic" },

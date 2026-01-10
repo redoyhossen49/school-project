@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const cards = dashboardData[role] || [];
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-8 mt-8">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-indigo-900 to-blue-800 text-white rounded-xl p-6">
         <h2 className="text-xl font-semibold">
