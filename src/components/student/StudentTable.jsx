@@ -1,13 +1,21 @@
-// src/components/student/StudentTable.jsx
 import { useTheme } from "../../context/ThemeContext";
 import StudentActions from "./StudentActions";
 
 export default function StudentTable({ data }) {
-    const {darkMode}=useTheme();
+  const { darkMode } = useTheme();
+
   return (
-    <div className={`${darkMode?"bg-gray-900 text-gray-200":"bg-white text-gray-900"} border border-gray-200 overflow-x-auto`}>
-      <table className="w-full min-w-[1000px] text-sm">
-        <thead className={`${darkMode?"bg-gray-600 text-gray-100":"bg-gray-100 text-gray-900"}`}>
+    <div
+      className={`${
+        darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-900"
+      } border border-gray-200 overflow-x-auto`}
+    >
+      <table className="w-full min-w-[1000px] text-sm table-auto">
+        <thead
+          className={`${
+            darkMode ? "bg-gray-600 text-gray-100" : "bg-gray-100 text-gray-900"
+          }`}
+        >
           <tr>
             {[
               "Admission No",
@@ -23,7 +31,7 @@ export default function StudentTable({ data }) {
             ].map((h) => (
               <th
                 key={h}
-                className="px-4 py-3 text-left font-medium whitespace-nowrap"
+                className="px-3 py-1 text-left font-medium whitespace-nowrap"
               >
                 {h}
               </th>
@@ -34,7 +42,7 @@ export default function StudentTable({ data }) {
         <tbody>
           {data.length === 0 && (
             <tr>
-              <td colSpan="10" className="text-center py-6 text-gray-500">
+              <td colSpan="10" className="text-center py-2 text-gray-500">
                 No students found
               </td>
             </tr>
@@ -43,19 +51,21 @@ export default function StudentTable({ data }) {
           {data.map((s) => (
             <tr
               key={s.id}
-              className={`border-t border-gray-200 ${darkMode?"hover:bg-slate-500 ":"hover:bg-slate-100 "} transition`}
+              className={`border-t border-gray-200 ${
+                darkMode ? "hover:bg-slate-500 " : "hover:bg-slate-100 "
+              } transition`}
             >
-              <td className="px-4 py-3 text-blue-600 font-medium">
+              <td className="px-3 py-1 text-blue-600 font-medium whitespace-nowrap">
                 {s.admissionNo}
               </td>
-              <td className="px-4 py-3">{s.rollNo}</td>
-              <td className="px-4 py-3">{s.name}</td>
-              <td className="px-4 py-3">{s.className}</td>
-              <td className="px-4 py-3">{s.section}</td>
-              <td className="px-4 py-3">{s.gender}</td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-1 whitespace-nowrap">{s.rollNo}</td>
+              <td className="px-3 py-1 whitespace-nowrap">{s.name}</td>
+              <td className="px-3 py-1 whitespace-nowrap">{s.className}</td>
+              <td className="px-3 py-1 whitespace-nowrap">{s.section}</td>
+              <td className="px-3 py-1 whitespace-nowrap">{s.gender}</td>
+              <td className="px-3 py-1 whitespace-nowrap">
                 <span
-                  className={`px-2 py-1 rounded text-xs font-medium ${
+                  className={`px-2 py-0.5 rounded text-xs font-medium ${
                     s.status === "Active"
                       ? "bg-green-100 text-green-700"
                       : "bg-red-100 text-red-700"
@@ -64,9 +74,9 @@ export default function StudentTable({ data }) {
                   ● {s.status}
                 </span>
               </td>
-              <td className="px-4 py-3">{s.joinDate}</td>
-              <td className="px-4 py-3">{s.dob}</td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-1 whitespace-nowrap">{s.joinDate}</td>
+              <td className="px-3 py-1 whitespace-nowrap">{s.dob}</td>
+              <td className="px-3 py-1 whitespace-nowrap">
                 <StudentActions />
               </td>
             </tr>
