@@ -109,7 +109,7 @@ export default function StudentList() {
 
   return (
     <div
-      className={`space-y-5 my-8 ${
+      className={`space-y-5 my-8  ${
         darkMode ? "text-gray-100" : "text-gray-600"
       }`}
     >
@@ -126,7 +126,7 @@ export default function StudentList() {
         <div className="flex items-center w-full md:w-auto gap-2">
           <button
             title="Refresh"
-            className={`flex-1 flex items-center justify-center p-1 md:px-2 ${
+            className={`flex-1 flex items-center rounded shadow-sm justify-center p-1 md:px-2 ${
               darkMode
                 ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                 : "border-gray-200 bg-white hover:bg-gray-100"
@@ -144,11 +144,11 @@ export default function StudentList() {
           <div className="relative flex-1 md:flex-none" ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full flex items-center justify-center p-1 md:px-2 border ${
+              className={`w-full flex items-center justify-center p-1 rounded shadow-sm  md:px-2 border ${
                 darkMode
                   ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                   : "border-gray-200 bg-white hover:bg-gray-100"
-              } shadow-2xl text-xs md:text-sm hover:bg-gray-200`}
+              } text-xs md:text-sm hover:bg-gray-200`}
             >
               Export
               <BiChevronDown className="ml-[2px]" />
@@ -196,7 +196,7 @@ export default function StudentList() {
           {/* Add Student only for school */}
           {canEdit && (
             <button
-              className="flex-none flex items-center justify-center px-2 py-1 text-xs md:text-sm shadow-2xl bg-blue-600 text-white hover:bg-blue-700"
+              className="flex-none flex items-center justify-center px-2 py-1 text-xs md:text-sm rounded shadow-sm bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => setAddOpen(true)}
             >
               + Add Student
@@ -217,7 +217,7 @@ export default function StudentList() {
                 darkMode
                   ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                   : "border-gray-200 bg-white hover:bg-gray-100"
-              } shadow-2xl text-xs md:text-sm`}
+              } rounded shadow-sm text-xs md:text-sm`}
             >
               {selectedDate}
               <BiChevronDown className="ml-[2px]" />
@@ -292,159 +292,165 @@ export default function StudentList() {
                 darkMode
                   ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                   : "border-gray-200 bg-white hover:bg-gray-100"
-              } shadow-2xl text-xs md:text-sm`}
+              } rounded shadow-sm text-xs md:text-sm`}
             >
               <FiFilter className="mr-1" /> Filter
               <BiChevronDown className="ml-1" />
             </button>
-
-            {filterOpen && (
-              <div
-                className={`absolute left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-60 md:w-80 p-3 border shadow-lg z-40
+{filterOpen && (
+  <div
+    className={`absolute left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-64 md:w-80 p-4 z-40
+      rounded-xl shadow-xl border
       ${
         darkMode
-          ? "bg-gray-700 text-gray-100 border-gray-500"
-          : "bg-white text-gray-800 border-gray-300"
+          ? "bg-gray-700 text-gray-100 border-gray-600"
+          : "bg-white text-gray-800 border-gray-200"
       }
     `}
-              >
-                <h3 className="font-semibold text-xs md:text-sm mb-2">
-                  Filter
-                </h3>
+  >
+    {/* Header */}
+    <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
+      <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-200">
+        Filter Students
+      </h3>
+    </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs md:text-sm">
-                  {/* Class */}
-                  <div>
-                    <label className="block mb-1 text-xs md:text-sm">
-                      Class
-                    </label>
-                    <select
-                      className={`w-full px-2 py-1 border text-xs md:text-sm
+    {/* Form */}
+    <div className="grid grid-cols-2 gap-3 text-xs md:text-sm">
+      {/* Class */}
+      <div>
+        <label className="block mb-1 font-medium text-gray-600 dark:text-gray-300">
+          Class
+        </label>
+        <select
+          className={`w-full px-2 py-1.5 rounded-md border shadow-sm
             ${
               darkMode
-                ? "bg-gray-600 border-gray-500 text-gray-100 placeholder-gray-300"
-                : "bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-500"
+                ? "bg-gray-600 border-gray-500 text-gray-100"
+                : "bg-gray-50 border-gray-300 text-gray-800"
             }
             focus:outline-none focus:ring-1 focus:ring-blue-500
           `}
-                    >
-                      <option>Select</option>
-                      <option>One</option>
-                      <option>Two</option>
-                    </select>
-                  </div>
+        >
+          <option>Select</option>
+          <option>One</option>
+          <option>Two</option>
+        </select>
+      </div>
 
-                  {/* Section */}
-                  <div>
-                    <label className="block mb-1 text-xs md:text-sm">
-                      Section
-                    </label>
-                    <select
-                      className={`w-full px-2 py-1 border text-xs md:text-sm
+      {/* Section */}
+      <div>
+        <label className="block mb-1 font-medium text-gray-600 dark:text-gray-300">
+          Section
+        </label>
+        <select
+          className={`w-full px-2 py-1.5 rounded-md border shadow-sm
             ${
               darkMode
-                ? "bg-gray-600 border-gray-500 text-gray-100 placeholder-gray-300"
-                : "bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-500"
+                ? "bg-gray-600 border-gray-500 text-gray-100"
+                : "bg-gray-50 border-gray-300 text-gray-800"
             }
             focus:outline-none focus:ring-1 focus:ring-blue-500
           `}
-                    >
-                      <option>Select</option>
-                      <option>A</option>
-                      <option>B</option>
-                    </select>
-                  </div>
+        >
+          <option>Select</option>
+          <option>A</option>
+          <option>B</option>
+        </select>
+      </div>
 
-                  {/* Name */}
-                  <div className="col-span-2">
-                    <label className="block mb-1 text-xs md:text-sm">
-                      Name
-                    </label>
-                    <select
-                      className={`w-full px-2 py-1 border text-xs md:text-sm
+      {/* Name */}
+      <div className="col-span-2">
+        <label className="block mb-1 font-medium text-gray-600 dark:text-gray-300">
+          Name
+        </label>
+        <select
+          className={`w-full px-2 py-1.5 rounded-md border shadow-sm
             ${
               darkMode
-                ? "bg-gray-600 border-gray-500 text-gray-100 placeholder-gray-300"
-                : "bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-500"
+                ? "bg-gray-600 border-gray-500 text-gray-100"
+                : "bg-gray-50 border-gray-300 text-gray-800"
             }
             focus:outline-none focus:ring-1 focus:ring-blue-500
           `}
-                    >
-                      <option>Select</option>
-                    </select>
-                  </div>
+        >
+          <option>Select</option>
+        </select>
+      </div>
 
-                  {/* Gender */}
-                  <div>
-                    <label className="block mb-1 text-xs md:text-sm">
-                      Gender
-                    </label>
-                    <select
-                      className={`w-full px-2 py-1 border text-xs md:text-sm
+      {/* Gender */}
+      <div>
+        <label className="block mb-1 font-medium text-gray-600 dark:text-gray-300">
+          Gender
+        </label>
+        <select
+          className={`w-full px-2 py-1.5 rounded-md border shadow-sm
             ${
               darkMode
-                ? "bg-gray-600 border-gray-500 text-gray-100 placeholder-gray-300"
-                : "bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-500"
+                ? "bg-gray-600 border-gray-500 text-gray-100"
+                : "bg-gray-50 border-gray-300 text-gray-800"
             }
             focus:outline-none focus:ring-1 focus:ring-blue-500
           `}
-                    >
-                      <option>Select</option>
-                      <option>Male</option>
-                      <option>Female</option>
-                    </select>
-                  </div>
+        >
+          <option>Select</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+      </div>
 
-                  {/* Status */}
-                  <div>
-                    <label className="block mb-1 text-xs md:text-sm">
-                      Status
-                    </label>
-                    <select
-                      className={`w-full px-2 py-1 border text-xs md:text-sm
+      {/* Status */}
+      <div>
+        <label className="block mb-1 font-medium text-gray-600 dark:text-gray-300">
+          Status
+        </label>
+        <select
+          className={`w-full px-2 py-1.5 rounded-md border shadow-sm
             ${
               darkMode
-                ? "bg-gray-600 border-gray-500 text-gray-100 placeholder-gray-300"
-                : "bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-500"
+                ? "bg-gray-600 border-gray-500 text-gray-100"
+                : "bg-gray-50 border-gray-300 text-gray-800"
             }
             focus:outline-none focus:ring-1 focus:ring-blue-500
           `}
-                    >
-                      <option>Select</option>
-                      <option>Active</option>
-                      <option>Inactive</option>
-                    </select>
-                  </div>
-                </div>
+        >
+          <option>Select</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+    </div>
 
-                {/* Buttons */}
-                <div className="flex justify-end gap-2 mt-3">
-                  <button
-                    onClick={() => setFilterOpen(false)}
-                    className={`px-3 py-1 text-xs md:text-sm border transition
+    {/* Buttons */}
+    <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
+      <button
+        onClick={() => setFilterOpen(false)}
+        className={`px-3 py-1.5 text-xs md:text-sm rounded-md border transition
           ${
             darkMode
               ? "border-gray-500 text-gray-200 hover:bg-gray-600"
               : "border-gray-300 text-gray-700 hover:bg-gray-100"
           }
         `}
-                  >
-                    Reset
-                  </button>
-                  <button
-                    className={`px-3 py-1 text-xs md:text-sm transition
+      >
+        Reset
+      </button>
+      <button
+        className={`px-3 py-1.5 text-xs md:text-sm rounded-md transition
           ${
             darkMode
               ? "bg-blue-500 hover:bg-blue-600 text-white"
               : "bg-blue-600 hover:bg-blue-700 text-white"
           }
+          shadow-sm
         `}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            )}
+      >
+        Apply
+      </button>
+    </div>
+  </div>
+)}
+
           </div>
 
           {/* Sort Dropdown */}
@@ -455,7 +461,7 @@ export default function StudentList() {
                 darkMode
                   ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                   : "border-gray-200 bg-white hover:bg-gray-100"
-              } shadow-2xl text-xs md:text-sm`}
+              } rounded shadow-sm text-xs md:text-sm`}
             >
               Sort By
               <BiChevronDown className="ml-[2px]" />
@@ -504,25 +510,27 @@ export default function StudentList() {
 
         {/* Search input */}
         <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 mt-0">
-          <input
-            type="text"
-            placeholder="Search by student name..."
-            className={`h-7 px-[2px] md:px-3 text-xs border w-44 ${
-              darkMode
-                ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
-                : "border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm`}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+           <input
+        type="text"
+        placeholder="Search by student name..."
+        className={`h-7 px-2 md:px-3 text-xs border rounded shadow-sm   w-full 
+          ${darkMode
+            ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
+            : "border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
+          }
+          focus:outline-none focus:ring-2 focus:ring-blue-500
+        `}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-          <div className="flex flex-grow items-center h-9">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
+      <div className="flex items-center flex-1">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
         </div>
       </div>
 

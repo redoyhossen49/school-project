@@ -3,6 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 
 export default function AddStudentModal({ open, onClose, onAdd }) {
   const { darkMode } = useTheme();
+
   const [form, setForm] = useState({
     admissionNo: "",
     rollNo: "",
@@ -21,12 +22,14 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     onAdd({
       id: Date.now(),
       ...form,
       joinDate: new Date().toLocaleDateString(),
       dob: "N/A",
     });
+
     onClose();
     setForm({
       admissionNo: "",
@@ -42,7 +45,8 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex mt-28 md:mb-28  items-center justify-center md:justify-end p-4 bg-black/30"
+      className="fixed inset-0 z-50  flex mt-24 md:mb-28 items-center justify-center md:justify-end p-4 
+     "
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -51,14 +55,22 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
           w-3/4 md:w-96
           p-5 md:p-6
           max-h-[90vh] overflow-y-auto
-           shadow-xl
+          rounded-xl
+          shadow-2xl
+          border
+          ${darkMode ? "border-gray-600" : "border-gray-200"}
+          transition-all duration-300
         `}
       >
-        <h2 className={`text-lg md:text-xl font-semibold mb-5 ${darkMode ? "text-blue-300" : "text-blue-700"} text-center sm:text-left`}>
+        <h2
+          className={`text-lg md:text-xl font-semibold mb-5 
+          ${darkMode ? "text-blue-300" : "text-blue-700"} 
+          text-center sm:text-left`}
+        >
           Add Student
         </h2>
 
-       <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {/* Admission + Roll */}
           <div className="flex flex-col md:flex-row gap-2">
             <input
@@ -66,24 +78,28 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
               placeholder="Admission No"
               value={form.admissionNo}
               onChange={handleChange}
+              required
               className={`
-                w-full px-2 py-1 text-xs border 
-                ${darkMode ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100" : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
+                w-full px-2 py-1 text-xs border rounded-md shadow-sm
+                ${darkMode
+                  ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100"
+                  : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
                 focus:outline-none focus:ring-1 focus:ring-blue-500
               `}
-              required
             />
             <input
               name="rollNo"
               placeholder="Roll No"
               value={form.rollNo}
               onChange={handleChange}
+              required
               className={`
-                w-full px-2 py-1 text-xs border 
-                ${darkMode ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100" : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
+                w-full px-2 py-1 text-xs border rounded-md shadow-sm
+                ${darkMode
+                  ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100"
+                  : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
                 focus:outline-none focus:ring-1 focus:ring-blue-500
               `}
-              required
             />
           </div>
 
@@ -93,24 +109,28 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
             placeholder="Student Name"
             value={form.name}
             onChange={handleChange}
+            required
             className={`
-              w-full px-2 py-1 text-xs border 
-              ${darkMode ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100" : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
+              w-full px-2 py-1 text-xs border rounded-md shadow-sm
+              ${darkMode
+                ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100"
+                : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
               focus:outline-none focus:ring-1 focus:ring-blue-500
             `}
-            required
           />
 
           {/* Class + Section */}
-          <div className="flex  gap-2">
+          <div className="flex gap-2">
             <input
               name="className"
               placeholder="Class"
               value={form.className}
               onChange={handleChange}
               className={`
-                w-full px-2 py-1 text-xs border 
-                ${darkMode ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100" : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
+                w-full px-2 py-1 text-xs border rounded-md shadow-sm
+                ${darkMode
+                  ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100"
+                  : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
                 focus:outline-none focus:ring-1 focus:ring-blue-500
               `}
             />
@@ -120,8 +140,10 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
               value={form.section}
               onChange={handleChange}
               className={`
-                w-full px-2 py-1 text-xs border 
-                ${darkMode ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100" : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
+                w-full px-2 py-1 text-xs border rounded-md shadow-sm
+                ${darkMode
+                  ? "bg-gray-600 border-gray-500 placeholder-gray-300 text-gray-100"
+                  : "bg-gray-50 border-gray-300 placeholder-gray-500 text-gray-800"}
                 focus:outline-none focus:ring-1 focus:ring-blue-500
               `}
             />
@@ -133,8 +155,10 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
             value={form.gender}
             onChange={handleChange}
             className={`
-              w-full px-2 py-1 text-xs border 
-              ${darkMode ? "bg-gray-600 border-gray-500 text-gray-100" : "bg-gray-50 border-gray-300 text-gray-800"}
+              w-full px-2 py-1 text-xs border rounded-md shadow-sm
+              ${darkMode
+                ? "bg-gray-600 border-gray-500 text-gray-100"
+                : "bg-gray-50 border-gray-300 text-gray-800"}
               focus:outline-none focus:ring-1 focus:ring-blue-500
             `}
           >
@@ -143,13 +167,15 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
           </select>
 
           {/* Buttons */}
-          <div className="flex  justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-3">
             <button
               type="button"
               onClick={onClose}
               className={`
-                w-full sm:w-auto px-3 py-1 text-xs font-medium border 
-                ${darkMode ? "border-gray-500 text-gray-200 hover:bg-gray-600" : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-gray-200"}
+                w-full sm:w-auto px-3 py-1 text-xs font-medium border rounded-md
+                ${darkMode
+                  ? "border-gray-500 text-gray-200 hover:bg-gray-600"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-gray-200"}
                 transition
               `}
             >
@@ -158,9 +184,11 @@ export default function AddStudentModal({ open, onClose, onAdd }) {
             <button
               type="submit"
               className={`
-                w-full sm:w-auto px-3 py-1 text-xs font-medium 
-                ${darkMode ? "bg-blue-500 hover:bg-blue-600 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
-                transition
+                w-full sm:w-auto px-3 py-1 text-xs font-medium rounded-md
+                ${darkMode
+                  ? "bg-blue-500 hover:bg-blue-600 text-white"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"}
+                shadow-md transition
               `}
             >
               Save
