@@ -263,10 +263,8 @@ export default function AddStudentPage() {
               </select>
             ))}
           </div>
-        </section>
 
-        {/* Buttons */}
-        {/* Buttons */}
+               {/* Buttons */}
 <div className="flex  md:justify-end gap-3">
   <button
     type="reset"
@@ -284,6 +282,10 @@ export default function AddStudentPage() {
     Save 
   </button>
 </div>
+        </section>
+
+        {/* Buttons */}
+   
 
       </form>
     </div>
