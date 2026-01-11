@@ -281,7 +281,7 @@ export default function StudentList() {
 
               {filterOpen && (
                 <div
-                  className="fixed inset-0 z-50 flex md:mb-20 items-center justify-center md:-left-[78px] p-4"
+                  className="fixed inset-0 z-50 flex mt-4 md:mb-20 items-center justify-center md:-left-[78px] p-4"
                   onClick={() => setFilterOpen(false)}
                 >
                   <div
