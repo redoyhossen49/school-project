@@ -59,6 +59,7 @@ const router = createBrowserRouter([
     children: [
       { path: "settings", element: <SettingsPage /> },
       { index: true, element: <DashboardPage></DashboardPage> },
+       { path: "studentlist", element: <StudentList /> },
     ],
   },
   {
@@ -67,6 +68,7 @@ const router = createBrowserRouter([
     children: [
       { path: "settings", element: <SettingsPage /> },
       { index: true, element: <DashboardPage></DashboardPage> },
+       { path: "studentlist", element: <StudentList /> },
       // other student routes
     ],
   },
@@ -76,18 +78,10 @@ const router = createBrowserRouter([
     children: [
       { path: "settings", element: <SettingsPage /> },
       { index: true, element: <DashboardPage></DashboardPage> },
+       { path: "studentlist", element: <StudentList /> },
     ],
   },
-   {
-    path: "/student/list",
-    element: <DashboardLayout />,
-    children: [
-      {
-        index: true,
-        element: <StudentList />,
-      },
-    ],
-  },
+  
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

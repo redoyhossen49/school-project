@@ -16,21 +16,27 @@ export default function SidebarItem({
   const collapsed = desktopCollapsed && !forceExpand;
   const showText = !collapsed;
 
-  // Auto-open parent if any child is active
+  /* ================= DASHBOARD BASE PATH ================= */
+  // /teacher/dashboard
+  // /student/dashboard
+  // /school/dashboard
+  const basePath = location.pathname.split("/").slice(0, 3).join("/");
+
+  /* ================= AUTO OPEN IF CHILD ACTIVE ================= */
   useEffect(() => {
     if (item.children?.length) {
       const active = item.children.some((child) =>
-        location.pathname.startsWith(child.path)
+        location.pathname.startsWith(`${basePath}/${child.path}`)
       );
       if (active) setOpen(true);
     }
-  }, [location.pathname, item.children]);
+  }, [location.pathname, item.children, basePath]);
 
   /* ================= WITH CHILDREN ================= */
   if (item.children?.length) {
     return (
       <div>
-        {/* Parent button */}
+        {/* Parent Button */}
         <button
           type="button"
           onClick={() => setOpen(!open)}
@@ -41,31 +47,25 @@ export default function SidebarItem({
             ${
               open
                 ? darkMode
-                  ? "bg-blue-900  "
-                  : "bg-blue-50 "
+                  ? "bg-blue-900"
+                  : "bg-blue-50"
                 : ""
             }
-            ${
-              darkMode
-                ? "hover:bg-blue-900 "
-                : "hover:bg-blue-50"
-            }
+            ${darkMode ? "hover:bg-blue-900" : "hover:bg-blue-50"}
           `}
         >
           {/* Icon */}
           {Icon && (
             <span
-              className={`inline-flex items-center justify-center rounded 
-                ${darkMode ? " bg-gray-700" : " bg-gray-200"}
-                p-1
+              className={`inline-flex items-center justify-center rounded p-1
+                ${darkMode ? "bg-gray-700" : "bg-gray-200"}
               `}
             >
               <Icon
                 size={16}
                 className={
                   open
-                    ? 
-                       "text-blue-600"
+                    ? "text-blue-600"
                     : darkMode
                     ? "text-white"
                     : "text-gray-600"
@@ -74,7 +74,7 @@ export default function SidebarItem({
             </span>
           )}
 
-          {/* Text + Chevron */}
+          {/* Text & Chevron */}
           {showText && (
             <>
               <span
@@ -86,7 +86,9 @@ export default function SidebarItem({
               </span>
               <ChevronDown
                 size={16}
-                className={`transition-transform ${open ? "rotate-180" : ""}`}
+                className={`transition-transform ${
+                  open ? "rotate-180" : ""
+                }`}
               />
             </>
           )}
@@ -95,22 +97,25 @@ export default function SidebarItem({
         {/* Children */}
         {showText && open && (
           <div className="relative ml-[26px] mt-1">
-            {/* vertical line */}
+            {/* Vertical line */}
             <span
               className={`absolute left-[6px] top-0 h-full w-px ${
                 darkMode ? "bg-gray-600" : "bg-gray-300"
               }`}
             />
+
             <div className="space-y-[2px]">
               {item.children.map((sub, i) => {
-                const isActive = location.pathname.startsWith(sub.path);
+                const fullPath = `${basePath}/${sub.path}`;
+                const isActive = location.pathname.startsWith(fullPath);
 
                 return (
                   <NavLink
                     key={i}
-                    to={sub.path}
+                    to={fullPath}
                     className={`
-                      group relative flex items-center pl-[22px] pr-2 py-[6px] text-[13px] rounded-md transition
+                      group relative flex items-center pl-[22px] pr-2 py-[6px]
+                      text-[13px] rounded-md transition
                       ${
                         isActive
                           ? "text-blue-600 font-medium"
@@ -121,7 +126,7 @@ export default function SidebarItem({
                       hover:text-blue-600
                     `}
                   >
-                    {/* Small dot */}
+                    {/* Dot */}
                     <span
                       className={`
                         absolute left-[3px] top-1/2 -translate-y-1/2
@@ -149,7 +154,7 @@ export default function SidebarItem({
   /* ================= WITHOUT CHILDREN ================= */
   return (
     <NavLink
-      to={item.path}
+      to={`${basePath}/${item.path}`}
       end
       className={({ isActive }) => `
         flex items-center
@@ -158,7 +163,7 @@ export default function SidebarItem({
         ${
           isActive
             ? darkMode
-              ? "bg-blue-900 text-white "
+              ? "bg-blue-900 text-white"
               : "bg-blue-50 text-blue-600"
             : darkMode
             ? "text-white hover:bg-blue-900"
@@ -168,24 +173,17 @@ export default function SidebarItem({
     >
       {({ isActive }) => (
         <div className="flex items-center">
-          {/* Icon with static bg/border */}
           {Icon && (
             <span
-              className={`inline-flex items-center justify-center rounded 
-                ${
-                  darkMode
-                    ? " bg-gray-700"
-                    : " bg-gray-200"
-                }
-                p-1
+              className={`inline-flex items-center justify-center rounded p-1
+                ${darkMode ? "bg-gray-700" : "bg-gray-200"}
               `}
             >
               <Icon
                 size={16}
                 className={
                   isActive
-                    ? 
-                      "text-blue-600"
+                    ? "text-blue-600"
                     : darkMode
                     ? "text-white"
                     : "text-gray-600"
@@ -194,7 +192,6 @@ export default function SidebarItem({
             </span>
           )}
 
-          {/* Text */}
           {showText && (
             <span className="ml-3 text-sm font-medium">{item.title}</span>
           )}

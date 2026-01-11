@@ -32,10 +32,28 @@ import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { GiBookAura } from "react-icons/gi";
 
 import { SlCalender } from "react-icons/sl";
-import { BiReset, BiSolidCalendarExclamation, BiSolidSchool } from "react-icons/bi";
+import {
+  BiReset,
+  BiSolidCalendarExclamation,
+  BiSolidSchool,
+} from "react-icons/bi";
 import { RxDashboard } from "react-icons/rx";
-import { LuCalendarCheck2, LuCalendarClock, LuLayoutDashboard, LuUserRoundPlus, LuUsers } from "react-icons/lu";
-import { TbAddressBook, TbApiApp, TbList, TbReportMoney, TbSchoolBell, TbUsersGroup, TbUserShield } from "react-icons/tb";
+import {
+  LuCalendarCheck2,
+  LuCalendarClock,
+  LuLayoutDashboard,
+  LuUserRoundPlus,
+  LuUsers,
+} from "react-icons/lu";
+import {
+  TbAddressBook,
+  TbApiApp,
+  TbList,
+  TbReportMoney,
+  TbSchoolBell,
+  TbUsersGroup,
+  TbUserShield,
+} from "react-icons/tb";
 import { GrTransaction } from "react-icons/gr";
 
 export const sidebarMenu = (role) => {
@@ -43,7 +61,7 @@ export const sidebarMenu = (role) => {
   const adminMenu = [
     {
       title: "Dashboard",
-      icon:  LuLayoutDashboard,
+      icon: LuLayoutDashboard,
       children: [
         { title: "Admin", path: "/admin/dashboard" },
         { title: "School", path: "/school/dashboard" },
@@ -75,7 +93,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "School Details",
-      icon:  TbSchoolBell,
+      icon: TbSchoolBell,
       children: [
         { title: "School List", path: "/school/list" },
         { title: "Pending List", path: "/school/pending" },
@@ -93,7 +111,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Financial & Profit",
-      icon:  TbReportMoney,
+      icon: TbReportMoney,
       children: [
         { title: "Our Profit", path: "/financial/profit" },
         { title: "Our Balance", path: "/financial/balance" },
@@ -122,7 +140,7 @@ export const sidebarMenu = (role) => {
     },
     {
       title: "Profile Tool",
-      icon:  BiReset,
+      icon: BiReset,
       children: [
         { title: "Forget", path: "/profile/forget" },
         { title: "Reset", path: "/profile/reset" },
@@ -133,9 +151,6 @@ export const sidebarMenu = (role) => {
   // ================= School Menu =================
   const schoolMenu = [
     { title: "Dashboard", icon: LuLayoutDashboard, path: "/school/dashboard" },
-    
-
-   
 
     {
       title: "Teacher",
@@ -154,12 +169,12 @@ export const sidebarMenu = (role) => {
       title: "Student",
       icon: GraduationCap,
       children: [
-        { title: "Student List", path: "/student/list" },
-        { title: "Student ID", path: "/student/id" },
-        { title: "Class Time", path: "/student/time" },
+        { title: "Student List", path: "studentlist" },
+        { title: "Student ID", path: "studentid" },
+        { title: "Class Time", path: "studenttime" },
         {
-          title: " Promote Request",
-          path: "/student/promote",
+          title: "Promote Request",
+          path: "/school/dashboard/studentpromote",
         },
       ],
     },
@@ -214,7 +229,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "HRM",
-      icon: TbUsersGroup ,
+      icon: TbUsersGroup,
       children: [
         {
           title: "Employee",
@@ -242,7 +257,7 @@ export const sidebarMenu = (role) => {
     // Leaves Sub-section
     {
       title: "Leaves",
-      icon: LuCalendarClock , // section icon for leaves
+      icon: LuCalendarClock, // section icon for leaves
       children: [
         {
           title: "Request",
@@ -327,7 +342,7 @@ export const sidebarMenu = (role) => {
           title: "Academic ",
           path: "/details/academic",
         },
-         { title: "Principal", icon: FaUserTie, path: "/principal" },
+        { title: "Principal", icon: FaUserTie, path: "/principal" },
         {
           title: "School List ",
           path: "/details/schoollist",
@@ -341,7 +356,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Teacher",
-      icon:  LuUsers,
+      icon: LuUsers,
       children: [
         { title: "Teacher List", path: "/teacher/list" },
         { title: "Teacher ID", path: "/teacher/id" },
@@ -359,16 +374,16 @@ export const sidebarMenu = (role) => {
     },
 
     {
-      title: "Student",
-      icon: GraduationCap,
-      children: [
-        { title: "Student List", path: "/student/list" },
-        { title: "Student ID", path: "/student/id" },
-        { title: "Class Time", path: "/student/time" },
+  title: "Student",
+  icon: GraduationCap,
+  children: [
+    { title: "Student List", path: "studentlist" },
+    { title: "Student ID", path: "studentid" },
+    { title: "Class Time", path: "studenttime" },
+    { title: "Attendance", path: "studentattendance" },
+  ],
+},
 
-        { title: "Attendance", path: "/student/attendance" },
-      ],
-    },
 
     {
       title: "Guardian",
@@ -449,7 +464,7 @@ export const sidebarMenu = (role) => {
     // Leaves Sub-section
     {
       title: "Leaves",
-      icon:LuCalendarClock , // section icon for leaves
+      icon: LuCalendarClock, // section icon for leaves
       children: [
         {
           title: "Leave Request",
@@ -471,7 +486,7 @@ export const sidebarMenu = (role) => {
 
     {
       title: "Details Item",
-      icon:  TbList,
+      icon: TbList,
       children: [
         { title: "Principal", path: "/details/principle" },
         { title: "Academic", path: "/details/academic" },
@@ -498,17 +513,18 @@ export const sidebarMenu = (role) => {
     },
 
     {
-      title: "Student",
-      icon: GraduationCap,
-      children: [
-        { title: "Student List", path: "/student/list" },
-        { title: "Student ID", path: "/student/id" },
-        { title: "Class Time", path: "/student/time" },
-        { title: "Class Promote", path: "/student/promote" },
-        { title: "Assignment", path: "/teacher/assignment" },
-        { title: "Live Class", path: "/student/live" },
-      ],
-    },
+  title: "Student",
+  icon: GraduationCap,
+  children: [
+    { title: "Student List", path: "studentlist" },
+    { title: "Student ID", path: "studentid" },
+    { title: "Class Time", path: "studenttime" },
+    { title: "Class Promote", path: "studentpromote" },
+    { title: "Assignment", path: "studentassignment" },
+    { title: "Live Class", path: "studentlive" },
+  ],
+},
+
 
     {
       title: "Academic",
