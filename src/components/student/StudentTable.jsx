@@ -42,7 +42,7 @@ export default function StudentTable({ data, setData,onEdit }) {
 
   return (
     <div
-      className={`border min-h-screen rounded ${
+      className={`border  rounded ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
@@ -62,14 +62,14 @@ export default function StudentTable({ data, setData,onEdit }) {
               <th
                 key={h}
                 className={`px-3 h-7 text-left font-semibold whitespace-nowrap align-middle ${
-                  i !== headers.length - 1 ? `border-r ${borderCol}` : ""
+                  i !== headers.length  ? `border-r ${borderCol}` : ""
                 }`}
               >
                 {h}
               </th>
             ))}
             {showAction && (
-              <th className="px-3 h-7 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-7 w-16 text-left font-semibold whitespace-nowrap">
                 Action
               </th>
             )}
@@ -137,7 +137,7 @@ export default function StudentTable({ data, setData,onEdit }) {
               </td>
 
               {showAction && (
-                <td className="px-3 h-7 whitespace-nowrap">
+                <td className="px-3 h-7 w-8 whitespace-nowrap">
                   <StudentActions
                     student={s}
                     onEdit={handleEdit}

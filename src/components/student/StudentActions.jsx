@@ -28,8 +28,8 @@ export default function StudentActions({ student, onEdit, onDelete }) {
 
       {open && (
         <div
-          className={`absolute right-0 top-full mt-1 w-32 ${
-            darkMode ? "bg-gray-500 text-gray-100" : "bg-white text-gray-900"
+          className={`absolute right-8 top-full  w-24 ${
+            darkMode ? "bg-gray-500 text-gray-100" : "bg-gray-50 text-gray-900"
           } border border-gray-200 shadow-lg z-50`}
         >
           <button

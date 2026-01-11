@@ -28,13 +28,13 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       <button
         onClick={() => handlePageClick(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`h-7 px-2 md:px-3 text-xs border ${baseBorder} ${baseBg} disabled:opacity-50 disabled:cursor-not-allowed ${hoverBg} transition-colors duration-150 flex items-center justify-center select-none`}
+        className={`h-9 w-12 px-1 md:px-3 text-xs border rounded shadow-sm ${baseBorder} ${baseBg} disabled:opacity-50 disabled:cursor-not-allowed ${hoverBg} transition-colors duration-150 flex items-center justify-center select-none`}
       >
         Prev
       </button>
 
       <span
-        className={`h-7 px-2 md:px-3 text-xs border ${activeBg} border-b-2 border-r-2 flex items-center justify-center select-none`}
+        className={`h-9 w-12 px-1 md:px-3 text-xs border rounded shadow-sm ${activeBg} border-b-2 border-r-2 flex items-center justify-center select-none`}
       >
         {currentPage}
       </span>
@@ -42,7 +42,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       <button
         onClick={() => handlePageClick(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`h-7 px-2 md:px-3 text-xs border ${baseBorder} ${baseBg} disabled:opacity-50 disabled:cursor-not-allowed ${hoverBg} transition-colors duration-150 flex items-center justify-center select-none`}
+        className={`h-9 w-12 px-1 md:px-3 text-xs border rounded shadow-sm ${baseBorder} ${baseBg} disabled:opacity-50 disabled:cursor-not-allowed ${hoverBg} transition-colors duration-150 flex items-center justify-center select-none`}
       >
         Next
       </button>
