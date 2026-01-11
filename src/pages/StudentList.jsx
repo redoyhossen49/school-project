@@ -3,13 +3,16 @@ import { studentData } from "../data/studentData";
 import StudentTable from "../components/student/StudentTable.jsx";
 import Pagination from "../components/Pagination.jsx";
 import AddStudentModal from "../components/student/AddStudentModal.jsx";
-
+import { useNavigate } from "react-router-dom";
 import { FiRefreshCw, FiFilter } from "react-icons/fi";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
+import { Link } from "react-router-dom";
+
 import { useTheme } from "../context/ThemeContext.jsx";
 import EditStudentModal from "../components/student/EditStudentModal.jsx";
 
 export default function StudentList() {
+  const navigate = useNavigate();
   const { darkMode } = useTheme();
   const [students, setStudents] = useState(studentData);
   const [search, setSearch] = useState("");
@@ -109,30 +112,44 @@ export default function StudentList() {
 
   return (
     <div
-      className={`space-y-3 p-2 min-h-screen  ${
+      className={`space-y-3 py-2 px-1 min-h-screen  ${
         darkMode ? "text-gray-100" : "text-gray-600"
       }`}
     >
       {/* Header */}
-      <div className="bg-white p-3 rounded ">
+      <div className={`${darkMode? "bg-gray-900":"bg-white"} p-2 rounded `}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           {/* LEFT SIDE: Title + Breadcrumb */}
-          <div>
-            <h1 className="text-xl font-bold">Students List</h1>
-            <nav className="text-sm w-full mb-2 truncate">
-              Dashboard / Student / Student List
+          <div className="md:mb-3">
+            <h1 className="text-base font-bold">Students List</h1>
+            <nav className="text-sm w-full  truncate">
+             
+          <Link to="/school/dashboard" className="hover:text-indigo-600 transition">
+            Dashboard
+          </Link>
+
+          <span className="mx-1">/</span>
+
+          <Link to="/student" className="hover:text-indigo-600 transition">
+            Students
+          </Link>
+           <span className="mx-1">/</span>
+          <Link to="/students" className="hover:text-indigo-600 transition">
+            Student List
+          </Link>
+        
             </nav>
           </div>
 
           {/* RIGHT SIDE: Buttons (UNCHANGED DESIGN) */}
-          <div className="grid grid-cols-3 items-center w-full md:w-auto mb-3 gap-[6px]">
+          <div className="flex flex-wrap md:flex-nowrap mb-3 items-center w-full md:w-auto gap-[6px] md:gap-3">
             {/* Refresh */}
             <button
               title="Refresh"
-              className={`flex-1 flex items-center rounded shadow-sm justify-center px-1 py-2 md:px-2 ${
+              className={`flex-1 flex items-center rounded shadow-sm justify-center px-1 py-[6px] md:px-2 ${
                 darkMode
                   ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
-                  : "border-gray-200 bg-white hover:bg-gray-100"
+                  : "border-gray-300 bg-gray-50 hover:bg-gray-100"
               } border hover:bg-gray-100`}
               onClick={() => {
                 setStudents(studentData);
@@ -146,10 +163,10 @@ export default function StudentList() {
             <div className="relative flex-1 md:flex-none" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`w-full flex items-center justify-center px-1 py-2 rounded shadow-sm md:px-2 border ${
+                className={`w-full flex items-center justify-center px-1 py-[6px] rounded shadow-sm md:px-2 border ${
                   darkMode
                     ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
-                    : "border-gray-200 bg-white hover:bg-gray-100"
+                    : "border-gray-300 bg-gray-50 hover:bg-gray-100"
                 } text-xs md:text-sm hover:bg-gray-200`}
               >
                 Export
@@ -158,7 +175,7 @@ export default function StudentList() {
 
               {exportOpen && (
                 <div
-                  className={`absolute mt-2 w-24 z-40 border rounded ${
+                  className={`absolute mt-2 w-32 z-40 border rounded ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -188,8 +205,8 @@ export default function StudentList() {
             {/* Add Student */}
             {canEdit && (
               <button
-                className="flex-none flex items-center justify-center px-1 py-2 text-xs md:text-sm rounded shadow-sm bg-blue-600 text-white hover:bg-blue-700"
-                onClick={() => setAddOpen(true)}
+                className="flex-none flex items-center justify-center px-1 py-[6px] text-xs md:text-sm rounded shadow-sm bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => navigate("/school/dashboard/addstudent")}
               >
                 + Add Student
               </button>
@@ -205,10 +222,10 @@ export default function StudentList() {
             <div className="relative flex-1 md:flex-none" ref={dateDropdownRef}>
               <button
                 onClick={() => setDateOpen(!dateOpen)}
-                className={`w-full flex items-center justify-center px-1 py-2 rounded shadow-sm md:px-2 border ${
+                className={`w-full flex items-center justify-center px-1 py-[6px] rounded shadow-sm md:px-2 border ${
                   darkMode
                     ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
-                    : "border-gray-200 bg-white hover:bg-gray-100"
+                    : "border-gray-300 bg-gray-50 hover:bg-gray-100"
                 } text-xs md:text-sm hover:bg-gray-200`}
               >
                 {selectedDate}
@@ -280,10 +297,10 @@ export default function StudentList() {
             <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className={`w-full flex items-center justify-center px-1 py-2  rounded shadow-sm md:px-2 border ${
+                className={`w-full flex items-center justify-center px-1 py-[6px]  rounded shadow-sm md:px-2 border ${
                   darkMode
                     ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
-                    : "border-gray-200 bg-white hover:bg-gray-100"
+                    : "border-gray-300 bg-gray-50 hover:bg-gray-100"
                 } text-xs md:text-sm hover:bg-gray-200`}
               >
                 <FiFilter className="mr-1" /> Filter
@@ -291,20 +308,20 @@ export default function StudentList() {
               </button>
               {filterOpen && (
                 <div
-                  className="fixed inset-0 z-50 flex mt-20 md:mb-28 items-center justify-center md:justify-end p-4"
+                  className="fixed inset-0 z-50 flex mt-36 md:mb-20 items-center justify-center md:-left-[78px]  p-4"
                   onClick={() => setFilterOpen(false)}
                 >
                   <div
                     onClick={(e) => e.stopPropagation()}
                     className={`
-          ${darkMode ? "bg-gray-700 text-gray-100" : "bg-white text-gray-800"}
-          w-3/4 md:w-96
-          p-5 md:p-6
-          max-h-[75vh] overflow-y-auto
-          rounded-md shadow-sm
-          border ${darkMode ? "border-gray-600" : "border-gray-200"}
-          transition-all duration-300
-        `}
+        ${darkMode ? "bg-gray-700 text-gray-100" : "bg-white text-gray-800"}
+        w-10/12 md:w-96
+        p-3 md:p-5
+        max-h-[80vh] overflow-y-auto
+        rounded-md shadow-sm
+        border ${darkMode ? "border-gray-600" : "border-gray-200"}
+        transition-all duration-300
+      `}
                   >
                     <h2
                       className={`text-lg md:text-xl font-semibold mb-3 text-left
@@ -314,105 +331,128 @@ export default function StudentList() {
                       Filter Students
                     </h2>
 
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-3">
                       {/* Class */}
-                      <div>
-                        <label className="block mb-1 font-medium">Class</label>
-                        <select
-                          className={`w-full px-2 py-1.5 rounded border shadow-sm bg-transparent
+                      <div className="relative">
+                        <label
+                          className={`absolute -top-2 left-2 px-1 text-[10px]
               ${
                 darkMode
-                  ? "border-gray-500 text-gray-100"
-                  : "border-gray-300 text-gray-800"
+                  ? "bg-gray-700 text-blue-300"
+                  : "bg-white text-blue-500"
               }
-              focus:outline-none focus:ring-1 focus:ring-blue-500
             `}
                         >
-                          <option>Select</option>
+                          Class
+                        </label>
+                        <select
+                          className={`w-full px-2 py-1.5 text-xs rounded border bg-transparent
+              ${
+                darkMode
+                  ? "border-gray-400 text-gray-100"
+                  : "border-gray-300 text-gray-800"
+              }
+              focus:outline-none focus:ring-1 focus:ring-blue-400
+            `}
+                        >
+                          <option className="text-xs">Select</option>
                           <option>One</option>
                           <option>Two</option>
                         </select>
                       </div>
 
+                       <div className="relative">
+                        <label
+                          className={`absolute -top-2 left-2 px-1 text-[10px]
+              ${
+                darkMode
+                  ? "bg-gray-700 text-blue-300"
+                  : "bg-white text-blue-500"
+              }
+            `}
+                        >
+                          Group
+                        </label>
+                        <select
+                          className={`w-full px-2 py-1.5 text-xs rounded border bg-transparent
+              ${
+                darkMode
+                  ? "border-gray-400 text-gray-100"
+                  : "border-gray-300 text-gray-800"
+              }
+              focus:outline-none focus:ring-1 focus:ring-blue-400
+            `}
+                        >
+                          <option className="text-xs">Select</option>
+                          <option>Science</option>
+                          <option>Arts</option>
+                        </select>
+                      </div>
+
                       {/* Section */}
-                      <div>
-                        <label className="block mb-1 font-medium">
+                      <div className="relative">
+                        <label
+                          className={`absolute -top-2 left-2 px-1 text-[10px]
+              ${
+                darkMode
+                  ? "bg-gray-700 text-blue-300"
+                  : "bg-white text-blue-500"
+              }
+            `}
+                        >
                           Section
                         </label>
                         <select
-                          className={`w-full px-2 py-1.5 rounded border shadow-sm bg-transparent
+                          className={`w-full px-2 py-1.5 text-xs rounded border bg-transparent
               ${
                 darkMode
-                  ? "border-gray-500 text-gray-100"
+                  ? "border-gray-400 text-gray-100"
                   : "border-gray-300 text-gray-800"
               }
-              focus:outline-none focus:ring-1 focus:ring-blue-500
+              focus:outline-none focus:ring-1 focus:ring-blue-400
             `}
                         >
-                          <option>Select</option>
+                          <option className="text-xs">Select</option>
                           <option>A</option>
                           <option>B</option>
                         </select>
                       </div>
 
                       {/* Name */}
-                      <div>
-                        <label className="block mb-1 font-medium">Name</label>
-                        <select
-                          className={`w-full px-2 py-1.5 rounded border shadow-sm bg-transparent
+                      <div className="relative">
+                        <label
+                          className={`absolute -top-2 left-2 px-1 text-[10px]
               ${
                 darkMode
-                  ? "border-gray-500 text-gray-100"
-                  : "border-gray-300 text-gray-800"
+                  ? "bg-gray-700 text-blue-300"
+                  : "bg-white text-blue-500"
               }
-              focus:outline-none focus:ring-1 focus:ring-blue-500
             `}
                         >
-                          <option>Select</option>
+                          Session
+                        </label>
+                        <select
+                          className={`w-full px-2 py-1.5 text-xs rounded border bg-transparent
+              ${
+                darkMode
+                  ? "border-gray-400 text-gray-100"
+                  : "border-gray-300 text-gray-800"
+              }
+              focus:outline-none focus:ring-1 focus:ring-blue-400
+            `}
+                        >
+                          <option className="text-xs">Select</option>
+                          <option>2024-25</option>
+                          <option>2025-26</option>
                         </select>
                       </div>
 
-                      {/* Gender */}
-                      <div>
-                        <label className="block mb-1 font-medium">Gender</label>
-                        <select
-                          className={`w-full px-2 py-1.5 rounded border shadow-sm bg-transparent
-              ${
-                darkMode
-                  ? "border-gray-500 text-gray-100"
-                  : "border-gray-300 text-gray-800"
-              }
-              focus:outline-none focus:ring-1 focus:ring-blue-500
-            `}
-                        >
-                          <option>Select</option>
-                          <option>Male</option>
-                          <option>Female</option>
-                        </select>
-                      </div>
-
-                      {/* Status */}
-                      <div>
-                        <label className="block mb-1 font-medium">Status</label>
-                        <select
-                          className={`w-full px-2 py-1.5 rounded border shadow-sm bg-transparent
-              ${
-                darkMode
-                  ? "border-gray-500 text-gray-100"
-                  : "border-gray-300 text-gray-600"
-              }
-              focus:outline-none focus:ring-1 focus:ring-blue-500
-            `}
-                        >
-                          <option>Select</option>
-                          <option>Active</option>
-                          <option>Inactive</option>
-                        </select>
-                      </div>
+                    
+                    
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex justify-end gap-2 pt-3 mt-3">
+                    <div className="flex justify-end gap-2 pt-2 mt-1">
                       <button
                         onClick={() => setFilterOpen(false)}
                         className={`w-full sm:w-auto px-3 py-1 text-xs font-medium border rounded
@@ -448,10 +488,10 @@ export default function StudentList() {
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
-                className={`w-full flex items-center justify-center px-1 py-2  rounded shadow-sm md:px-2 border ${
+                className={`w-full flex items-center justify-center px-1 py-[6px]  rounded shadow-sm md:px-2 border ${
                   darkMode
                     ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
-                    : "border-gray-200 bg-white hover:bg-gray-100"
+                    : "border-gray-300 bg-gray-50 hover:bg-gray-100"
                 } text-xs md:text-sm hover:bg-gray-200`}
               >
                 Sort By
@@ -460,7 +500,7 @@ export default function StudentList() {
 
               {sortOpen && (
                 <div
-                  className={`absolute mt-2 w-24 z-40 border rounded ${
+                  className={`absolute mt-2 w-[106px]  z-40 border rounded ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -497,12 +537,12 @@ export default function StudentList() {
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 mt-0">
             <input
               type="text"
-              placeholder="Search by student name..."
-              className={`h-9 px-2 py-2  md:px-3 text-xs border rounded shadow-sm   w-full 
+              placeholder="Search by name..."
+              className={`h-8 px-2 py-2  md:px-3 text-xs border rounded shadow-sm   w-full 
           ${
             darkMode
               ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
-              : "border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
+              : "border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400"
           }
           focus:outline-none focus:ring-2 focus:ring-blue-500
         `}
@@ -521,7 +561,7 @@ export default function StudentList() {
         </div>
       </div>
 
-      <div className="p-3 bg-white rounded">
+      <div className={`p-2  ${darkMode? "bg-gray-900":"bg-white"} rounded`}>
         {/* Student Table */}
         <StudentTable
           data={currentStudents}
@@ -548,17 +588,8 @@ export default function StudentList() {
       {/* Pagination 
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} /> */}
 
-      {/* Add Student Modal */}
-      {canEdit && (
-        <AddStudentModal
-          open={addOpen}
-          onClose={() => setAddOpen(false)}
-          onAdd={(newStudent) => {
-            setStudents((prev) => [newStudent, ...prev]);
-            setCurrentPage(1);
-          }}
-        />
-      )}
+     
+     
     </div>
   );
 }

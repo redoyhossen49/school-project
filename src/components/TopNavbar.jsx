@@ -346,11 +346,11 @@ export default function TopNavbar() {
                 />
 
                 {/* Profile Name Card */}
-                <div className="text-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm text-sm font-semibold text-gray-800 dark:text-white w-full">
+                <div className="text-center px-4 py-2    text-sm font-semibold  bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent w-full">
                   {config.profileData.name}
                 </div>
 
-                <div className="w-56 h-[2px] my-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-full"></div>
+              
               </div>
 
               {/* Menu Options */}
@@ -358,7 +358,7 @@ export default function TopNavbar() {
                 {/* Profile Button */}
                 <button
                   onClick={() => setOpenDropdown("settings")}
-                  className="flex items-center justify-between px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-indigo-500 hover:text-white transition-all duration-200 shadow-sm"
+                  className="flex items-center justify-between px-4 py-2  transition-all duration-200 "
                 >
                   <span className="flex items-center gap-2">Profile</span>
                   <FiChevronRight />
@@ -368,7 +368,7 @@ export default function TopNavbar() {
                 <Link
                   to={`/${role}/dashboard/settings`}
                   onClick={() => setOpenDropdown(null)}
-                  className="flex items-center justify-between px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-indigo-500 hover:text-white transition-all duration-200 shadow-sm"
+                  className="flex items-center justify-between px-4 py-2 transition-all duration-200 "
                 >
                   <span className="flex items-center gap-2">Settings</span>
                   <FiChevronRight />
@@ -379,7 +379,7 @@ export default function TopNavbar() {
                   <Link
                     to="/principal/select"
                     onClick={() => setOpenDropdown(null)}
-                    className="flex items-center justify-between px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-indigo-500 hover:text-white transition-all duration-200 shadow-sm"
+                    className="flex items-center justify-between px-4 py-2  transition-all duration-200 "
                   >
                     <span className="flex items-center gap-2">Principal</span>
                     <FiChevronRight />
@@ -392,9 +392,10 @@ export default function TopNavbar() {
                     setOpenDropdown(null);
                     navigate("/");
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 transition-all duration-200 shadow-sm"
+                  className="flex items-center justify-between px-4 py-2 text-red-600 hover:bg-red-100 hover:text-red-700 transition-all duration-200 "
                 >
                   Log Out
+                  <FiChevronRight />
                 </button>
               </div>
             </div>

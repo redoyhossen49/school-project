@@ -1,120 +1,290 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { Link } from "react-router-dom";
 
-export default function AddStudentPage({ onBack, onAdd }) {
+
+export default function AddStudentPage() {
   const { darkMode } = useTheme();
 
-  const [studentInfo, setStudentInfo] = useState({
-    firstName: "",
-    lastName: "",
-    dob: "",
-    admissionNo: "",
-    admissionDate: "",
-    rollNo: "",
+  const [form, setForm] = useState({
+    // ===== Student Info =====
+    studentname: "",
+    father: "",
+    mother: "",
+
+    currentDivision: "",
+    currentDistrict: "",
+    currentUpazila: "",
+
+    permanentDivision: "",
+    permanentDistrict: "",
+    permanentUpazila: "",
+
+    idNumber: "",
+    mobileNumber: "",
+
+    // ===== Previous School Info =====
+    previousSchool: "",
     className: "",
-    section: "",
-    gender: "",
-    status: "",
+    groupName: "",
+    sectionName: "",
+    sessionYear: "",
+    lastResult: "",
+
+    // ===== Guardian Info =====
+    guardianname: "",
+    relation: "",
+    guardianMobile: "",
+    guardianDivision: "",
+    guardianDistrict: "",
+    guardianUpazila: "",
   });
 
-  const [guardianInfo, setGuardianInfo] = useState({
-    fatherName: "",
-    fatherEmail: "",
-    fatherPhone: "",
-    fatherOccupation: "",
-    motherName: "",
-    motherEmail: "",
-    motherPhone: "",
-    motherOccupation: "",
-  });
+  // Auto generate ID
+  useEffect(() => {
+    if (!form.idNumber) {
+      setForm((prev) => ({
+        ...prev,
+        idNumber: Math.floor(10000000 + Math.random() * 90000000),
+      }));
+    }
+  }, []);
 
-  const handleStudentChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setStudentInfo((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleGuardianChange = (e) => {
-    const { name, value } = e.target;
-    setGuardianInfo((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Combine both info
-    onAdd({ id: Date.now(), ...studentInfo, ...guardianInfo });
+    console.log("Add Student Data:", form);
+    alert("Student Added ✅ (check console)");
   };
 
-  const inputClass = `w-full px-3 py-2 border rounded shadow-sm bg-transparent
-    ${darkMode ? "border-gray-500 text-gray-100" : "border-gray-300 text-gray-800"}
-    focus:outline-none focus:ring-1 focus:ring-blue-500`;
+  const floatingInput =
+    "peer w-full border border-gray-200 px-3 py-2 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-transparent rounded";
+
+  const floatingLabel =
+    "absolute left-3 top-2 text-gray-400 text-xs pointer-events-none transition-all duration-300 \
+     peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm \
+     peer-focus:-top-2 peer-focus:text-xs peer-focus:text-indigo-600 peer-focus:bg-white peer-focus:px-1 \
+     peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1";
+
+  const selectClass =
+    "w-full border border-gray-200 px-3 py-2 text-sm text-gray-600 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-indigo-400";
 
   return (
-    <div className={`min-h-screen p-4 space-y-6 ${darkMode ? "text-gray-100" : "text-gray-900"}`}>
+    <div className="space-y-6 py-4 min-h-[80vh]">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold">Add Student</h1>
-        <nav className="text-sm text-gray-500">
-          Dashboard / Students / Add Student
-        </nav>
+      <div className="ml-1">
+        <h1 className="text-base font-bold">Add Student</h1>
+        <p className="text-sm text-gray-500">
+          <Link to="/dashboard" className="hover:text-indigo-600 transition">
+            Dashboard
+          </Link>
+
+          <span className="mx-1">/</span>
+
+          <Link to="/students" className="hover:text-indigo-600 transition">
+            Students
+          </Link>
+           <span className="mx-1">/</span>
+          <Link to="/students" className="hover:text-indigo-600 transition">
+            Student List
+          </Link>
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Student Information Section */}
-        <section className="p-4 border rounded-md space-y-4 bg-gray-50 dark:bg-gray-800">
-          <h2 className="font-semibold text-lg">Student Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input name="firstName" placeholder="First Name" value={studentInfo.firstName} onChange={handleStudentChange} className={inputClass} />
-            <input name="lastName" placeholder="Last Name" value={studentInfo.lastName} onChange={handleStudentChange} className={inputClass} />
-            <input type="date" name="dob" placeholder="Date of Birth" value={studentInfo.dob} onChange={handleStudentChange} className={inputClass} />
-            <input name="admissionNo" placeholder="Admission Number" value={studentInfo.admissionNo} onChange={handleStudentChange} className={inputClass} />
-            <input type="date" name="admissionDate" placeholder="Admission Date" value={studentInfo.admissionDate} onChange={handleStudentChange} className={inputClass} />
-            <input name="rollNo" placeholder="Roll Number" value={studentInfo.rollNo} onChange={handleStudentChange} className={inputClass} />
-            <select name="className" value={studentInfo.className} onChange={handleStudentChange} className={inputClass}>
-              <option>Select Class</option>
-              <option>One</option>
-              <option>Two</option>
-            </select>
-            <select name="section" value={studentInfo.section} onChange={handleStudentChange} className={inputClass}>
-              <option>Select Section</option>
-              <option>A</option>
-              <option>B</option>
-            </select>
-            <select name="gender" value={studentInfo.gender} onChange={handleStudentChange} className={inputClass}>
-              <option>Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-            <select name="status" value={studentInfo.status} onChange={handleStudentChange} className={inputClass}>
-              <option>Select Status</option>
-              <option>Active</option>
-              <option>Inactive</option>
-            </select>
+        {/* ================= Student Information ================= */}
+        <section className="p-4 bg-white dark:bg-gray-700 rounded-md border border-gray-200 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-600 text-center">
+            Student Information
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { label: "Student Name", name: "studentname" },
+              { label: "Father Name", name: "father" },
+              { label: "Mother Name", name: "mother" },
+            ].map((field) => (
+              <div className="relative" key={field.name}>
+                <input
+                  name={field.name}
+                  value={form[field.name]}
+                  onChange={handleChange}
+                  placeholder=" "
+                  className={floatingInput}
+                />
+                <label className={floatingLabel}>{field.label}</label>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              {
+                name: "currentDivision",
+                label: "Current Division",
+                options: ["Dhaka", "Chattogram"],
+              },
+              {
+                name: "currentDistrict",
+                label: "Current District",
+                options: ["Gazipur", "Comilla"],
+              },
+              {
+                name: "currentUpazila",
+                label: "Current Upazila",
+                options: ["Savar", "Sonargaon"],
+              },
+            ].map(({ name, label, options }) => (
+              <select
+                key={name}
+                name={name}
+                value={form[name]}
+                onChange={handleChange}
+                className={selectClass}
+              >
+                <option value="" disabled>
+                  {label}
+                </option>
+                {options.map((opt) => (
+                  <option key={opt}>{opt}</option>
+                ))}
+              </select>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {[
+              { label: "ID Number", name: "idNumber" },
+              { label: "Mobile Number", name: "mobileNumber" },
+            ].map((field) => (
+              <div className="relative" key={field.name}>
+                <input
+                  name={field.name}
+                  value={form[field.name]}
+                  onChange={handleChange}
+                  placeholder=" "
+                  className={floatingInput}
+                />
+                <label className={floatingLabel}>{field.label}</label>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Guardian Information Section */}
-        <section className="p-4 border rounded-md space-y-4 bg-gray-50 dark:bg-gray-800">
-          <h2 className="font-semibold text-lg">Parents & Guardian Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Father Info */}
-            <input name="fatherName" placeholder="Father Name" value={guardianInfo.fatherName} onChange={handleGuardianChange} className={inputClass} />
-            <input name="fatherEmail" placeholder="Father Email" value={guardianInfo.fatherEmail} onChange={handleGuardianChange} className={inputClass} />
-            <input name="fatherPhone" placeholder="Father Phone" value={guardianInfo.fatherPhone} onChange={handleGuardianChange} className={inputClass} />
-            <input name="fatherOccupation" placeholder="Father Occupation" value={guardianInfo.fatherOccupation} onChange={handleGuardianChange} className={inputClass} />
+        {/* ================= Previous School Information ================= */}
+        <section className="p-4 bg-white dark:bg-gray-700 rounded-md border border-gray-200 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-600 text-center">
+            Previous School Information
+          </h2>
 
-            {/* Mother Info */}
-            <input name="motherName" placeholder="Mother Name" value={guardianInfo.motherName} onChange={handleGuardianChange} className={inputClass} />
-            <input name="motherEmail" placeholder="Mother Email" value={guardianInfo.motherEmail} onChange={handleGuardianChange} className={inputClass} />
-            <input name="motherPhone" placeholder="Mother Phone" value={guardianInfo.motherPhone} onChange={handleGuardianChange} className={inputClass} />
-            <input name="motherOccupation" placeholder="Mother Occupation" value={guardianInfo.motherOccupation} onChange={handleGuardianChange} className={inputClass} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {[
+              { label: "Previous School", name: "previousSchool" },
+              { label: "Class Name", name: "className" },
+              { label: "Group Name", name: "groupName" },
+              { label: "Section", name: "sectionName" },
+              { label: "Session Year", name: "sessionYear" },
+              { label: "Last Result", name: "lastResult" },
+            ].map((field) => (
+              <div className="relative" key={field.name}>
+                <input
+                  name={field.name}
+                  value={form[field.name]}
+                  onChange={handleChange}
+                  placeholder=" "
+                  className={floatingInput}
+                />
+                <label className={floatingLabel}>{field.label}</label>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= Guardian Information ================= */}
+        <section className="p-4 bg-white dark:bg-gray-700 rounded-md border border-gray-200 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-600 text-center">
+            Guardian Information
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { label: "Guardian Name", name: "guardianname" },
+              { label: "Relation", name: "relation" },
+              { label: "Mobile Number", name: "guardianMobile" },
+            ].map((field) => (
+              <div className="relative" key={field.name}>
+                <input
+                  name={field.name}
+                  value={form[field.name]}
+                  onChange={handleChange}
+                  placeholder=" "
+                  className={floatingInput}
+                />
+                <label className={floatingLabel}>{field.label}</label>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              {
+                name: "guardianDivision",
+                label: "Division",
+                options: ["Dhaka", "Chattogram"],
+              },
+              {
+                name: "guardianDistrict",
+                label: "District",
+                options: ["Gazipur", "Comilla"],
+              },
+              {
+                name: "guardianUpazila",
+                label: "Upazila",
+                options: ["Savar", "Sonargaon"],
+              },
+            ].map(({ name, label, options }) => (
+              <select
+                key={name}
+                name={name}
+                value={form[name]}
+                onChange={handleChange}
+                className={selectClass}
+              >
+                <option value="" disabled>
+                  {label}
+                </option>
+                {options.map((opt) => (
+                  <option key={opt}>{opt}</option>
+                ))}
+              </select>
+            ))}
           </div>
         </section>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-4">
-          <button type="button" onClick={onBack} className="px-4 py-2 border rounded-md">Cancel</button>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">Save</button>
-        </div>
+        {/* Buttons */}
+<div className="flex  md:justify-end gap-3">
+  <button
+    type="reset"
+    className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded
+               hover:bg-gray-100 transition"
+  >
+    Cancel
+  </button>
+
+  <button
+    type="submit"
+    className="w-full md:w-auto px-4 py-2 bg-indigo-600 text-white rounded
+               hover:bg-indigo-700 transition"
+  >
+    Save 
+  </button>
+</div>
+
       </form>
     </div>
   );

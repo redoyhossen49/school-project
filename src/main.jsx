@@ -14,6 +14,7 @@ import SchoolSuccess from "./pages/SchoolSuccess";
 import SettingsPage from "./pages/SettingsPage";
 import DashboardPage from "./pages/DashboardPage";
 import StudentList from "./pages/StudentList";
+import AddStudentPage from "./pages/AddStudentPage";
 
 const router = createBrowserRouter([
   {
@@ -79,6 +80,7 @@ const router = createBrowserRouter([
       { path: "settings", element: <SettingsPage /> },
       { index: true, element: <DashboardPage></DashboardPage> },
        { path: "studentlist", element: <StudentList /> },
+        { path: "addstudent", element: <AddStudentPage /> },
     ],
   },
   
