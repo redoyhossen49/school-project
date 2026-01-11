@@ -109,28 +109,28 @@ export default function StudentList() {
 
   return (
     <div
-      className={`space-y-5 my-8  ${
+      className={`space-y-3 p-2   ${
         darkMode ? "text-gray-100" : "text-gray-600"
       }`}
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="flex flex-col  bg-white p-2 rounded md:flex-row md:items-center md:justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold">Students List</h1>
-          <nav className="text-sm w-full mt-1 truncate">
-            Dashboard / Students / All Students
+          <nav className="text-sm w-full mb-2 truncate">
+            Dashboard / Student / Student List
           </nav>
-        </div>
+        
 
         {/* Buttons */}
-        <div className="flex items-center w-full md:w-auto gap-2">
+        <div className="grid grid-cols-3 items-center w-full md:w-auto gap-[6px]">
           <button
             title="Refresh"
             className={`flex-1 flex items-center rounded shadow-sm justify-center p-1 md:px-2 ${
               darkMode
                 ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                 : "border-gray-200 bg-white hover:bg-gray-100"
-            } border shadow-2xl hover:bg-gray-100`}
+            } border  hover:bg-gray-100`}
             onClick={() => {
               setStudents(studentData);
               setSearch("");
@@ -513,7 +513,7 @@ export default function StudentList() {
            <input
         type="text"
         placeholder="Search by student name..."
-        className={`h-7 px-2 md:px-3 text-xs border rounded shadow-sm   w-full 
+        className={`h-7 px-3 py-1  md:px-3 text-xs border rounded shadow-sm   w-full 
           ${darkMode
             ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
             : "border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
@@ -533,8 +533,10 @@ export default function StudentList() {
       </div>
         </div>
       </div>
+      </div>
 
-      {/* Student Table */}
+       <div className="p-2 bg-white rounded">
+         {/* Student Table */}
       <StudentTable
         data={currentStudents}
         setData={setStudents}
@@ -542,6 +544,7 @@ export default function StudentList() {
         canEdit={canEdit}
         onEdit={(student) => setEditingStudent(student)} // ✅ Add this
       />
+       </div>
 
         {editingStudent && (
         <EditStudentModal
@@ -557,6 +560,7 @@ export default function StudentList() {
           }}
         />
       )}
+      
 
       {/* Pagination 
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} /> */}

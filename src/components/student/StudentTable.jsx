@@ -42,7 +42,7 @@ export default function StudentTable({ data, setData,onEdit }) {
 
   return (
     <div
-      className={`border ${
+      className={`border min-h-screen rounded ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
