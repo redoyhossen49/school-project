@@ -1,23 +1,20 @@
 import { useState, useRef, useEffect } from "react";
-import { studentData } from "../data/studentData";
-import StudentTable from "../components/student/StudentTable.jsx";
+import { studentData } from "../data/studentData"; // guardian info is inside studentData
+import GuardianTable from "../components/guardian/GuardianTable.jsx";
 import Pagination from "../components/Pagination.jsx";
-import AddStudentModal from "../components/student/AddStudentModal.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { FiRefreshCw, FiFilter } from "react-icons/fi";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
-import EditStudentModal from "../components/student/EditStudentModal.jsx";
 
-export default function StudentList() {
+export default function GuardianList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [students, setStudents] = useState(studentData);
+  const [guardians, setGuardians] = useState(studentData);
   const [search, setSearch] = useState("");
-  const [view, setView] = useState("table");
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = 20;
+  const guardiansPerPage = 20;
 
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
@@ -28,7 +25,6 @@ export default function StudentList() {
   const [showSession, setShowSession] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
-  const [editingStudent, setEditingStudent] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const dateDropdownRef = useRef(null);
@@ -44,6 +40,7 @@ export default function StudentList() {
 
   const sessionKeys = ["Session 1", "Session 2", "Session 3"];
 
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -64,11 +61,15 @@ export default function StudentList() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredStudents = students
-    .filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
-    .filter((s) => {
+  // Filtering and sorting guardians
+  const filteredGuardians = guardians
+    .filter((g) =>
+      g.guardian?.name.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((g) => {
+      if (!g.joinDate) return true;
       const today = new Date();
-      const joinDate = new Date(s.joinDate);
+      const joinDate = new Date(g.joinDate);
 
       if (selectedDate === "Today")
         return joinDate.toDateString() === today.toDateString();
@@ -82,25 +83,25 @@ export default function StudentList() {
           joinDate.getMonth() === today.getMonth() &&
           joinDate.getFullYear() === today.getFullYear()
         );
-      if (sessionKeys.includes(selectedDate)) return s.session === selectedDate;
+      if (sessionKeys.includes(selectedDate)) return g.session === selectedDate;
       return true;
     })
     .sort((a, b) => {
-      const d1 = new Date(a.joinDate);
-      const d2 = new Date(b.joinDate);
+      const d1 = new Date(a.joinDate || 0);
+      const d2 = new Date(b.joinDate || 0);
       return sortOrder === "oldest" ? d1 - d2 : d2 - d1;
     });
 
-  const totalStudents = filteredStudents.length;
-  const totalPages = Math.ceil(totalStudents / studentsPerPage);
-  const indexOfLastStudent = currentPage * studentsPerPage;
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-  const currentStudents = filteredStudents.slice(
-    indexOfFirstStudent,
-    indexOfLastStudent
+  const totalGuardians = filteredGuardians.length;
+  const totalPages = Math.ceil(totalGuardians / guardiansPerPage);
+  const indexOfLastGuardian = currentPage * guardiansPerPage;
+  const indexOfFirstGuardian = indexOfLastGuardian - guardiansPerPage;
+  const currentGuardians = filteredGuardians.slice(
+    indexOfFirstGuardian,
+    indexOfLastGuardian
   );
 
-  const buttonBaseClasses = `flex-1 flex items-center shadow-[0_1px_2px_0_rgba(255,255,255,0.5)] justify-center py-1.5 rounded  text-xs md:text-sm border transition`;
+  const buttonBaseClasses = `flex-1 flex items-center justify-center py-1.5 shadow-[0_1px_2px_0_rgba(255,255,255,0.5)]  rounded text-xs md:text-sm border transition`;
 
   return (
     <div
@@ -113,7 +114,7 @@ export default function StudentList() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           {/* Title + Breadcrumb */}
           <div className="md:mb-3">
-            <h1 className="text-base font-bold">Students List</h1>
+            <h1 className="text-base font-bold">Guardians List</h1>
             <nav className="text-sm w-full truncate">
               <Link
                 to="/school/dashboard"
@@ -122,38 +123,41 @@ export default function StudentList() {
                 Dashboard
               </Link>
               <span className="mx-1">/</span>
-              <Link to="/student" className="hover:text-indigo-600 transition">
-                Students
+              <Link to="/guardian" className="hover:text-indigo-600 transition">
+                Guardian
               </Link>
               <span className="mx-1">/</span>
-              <Link to="/students" className="hover:text-indigo-600 transition">
-                Student List
+              <Link
+                to="/guardians"
+                className="hover:text-indigo-600 transition"
+              >
+                Guardian List
               </Link>
             </nav>
           </div>
 
           {/* Top Buttons */}
           <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
-            
             <button
               title="Refresh"
-              className={`${buttonBaseClasses}  flex gap-1 px-0.5 md:px-2  ${
+              className={`${buttonBaseClasses} px-0.5 md:px-2 flex gap-1 ${
                 darkMode
                   ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                   : "border-gray-300 bg-white hover:bg-gray-100"
               }`}
               onClick={() => {
-                setStudents(studentData);
+                setGuardians(studentData);
                 setSearch("");
               }}
             >
-              <FiRefreshCw /> Refresh
+            <FiRefreshCw />   Refresh
             </button>
 
+            {/* Export */}
             <div className="relative flex-1 md:flex-none" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`${buttonBaseClasses}  px-1 md:px-2 ${
+                className={`${buttonBaseClasses} px-1 md:px-2 ${
                   darkMode
                     ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
                     : "border-gray-300 bg-white hover:bg-gray-100"
@@ -161,7 +165,6 @@ export default function StudentList() {
               >
                 Export <BiChevronDown className="ml-1" />
               </button>
-
               {exportOpen && (
                 <div
                   className={`absolute mt-2 w-32 z-40 border rounded ${
@@ -189,9 +192,9 @@ export default function StudentList() {
             {canEdit && (
               <button
                 className="flex-1 md:flex-none flex items-center justify-center px-0.5 md:px-2 py-1.5 text-xs md:text-sm rounded shadow-sm bg-blue-600 text-white hover:bg-blue-700"
-                onClick={() => navigate("/school/dashboard/addstudent")}
+                onClick={() => navigate("/school/dashboard/addguardian")}
               >
-                + Add Student
+                + Add Guardian
               </button>
             )}
           </div>
@@ -228,7 +231,7 @@ export default function StudentList() {
                         setDateOpen(false);
                         setShowSession(false);
                       }}
-                      className={`w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition`}
+                      className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
                     >
                       <span>{opt.label}</span>
                       <BiChevronRight size={12} />
@@ -290,7 +293,7 @@ export default function StudentList() {
                       darkMode
                         ? "bg-gray-700 text-gray-100"
                         : "bg-white text-gray-800"
-                    } w-8/12 md:w-96 p-3  md:p-5 max-h-[80vh] overflow-y-auto rounded-md shadow-sm border ${
+                    } w-8/12 md:w-96 p-3 md:p-5 max-h-[80vh] overflow-y-auto rounded-md shadow-sm border ${
                       darkMode ? "border-gray-600" : "border-gray-200"
                     } transition-all duration-300`}
                   >
@@ -299,9 +302,9 @@ export default function StudentList() {
                         darkMode ? "text-gray-200" : "text-gray-700"
                       }`}
                     >
-                      Filter Students
+                      Filter Guardians
                     </h2>
-                    {/* Filter selects here */}
+                    {/* Example Filter selects */}
                     <div className="flex mx-2 flex-col gap-3">
                       <div className="relative">
                         <label
@@ -453,10 +456,10 @@ export default function StudentList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 mt-2 md:mt-0">
             <input
               type="text"
-              placeholder="Search by name..."
+              placeholder="Search by guardian name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={`h-8 px-2 md:px-3 w-full text-xs rounded border shadow-sm ${
@@ -478,27 +481,8 @@ export default function StudentList() {
 
       {/* Table */}
       <div className={`p-2 ${darkMode ? "bg-gray-900" : "bg-white"} rounded`}>
-        <StudentTable
-          data={currentStudents}
-          setData={setStudents}
-          view={view}
-          canEdit={canEdit}
-          onEdit={(student) => setEditingStudent(student)}
-        />
+        <GuardianTable data={currentGuardians} setData={setGuardians} />
       </div>
-
-      {editingStudent && (
-        <EditStudentModal
-          student={editingStudent}
-          onClose={() => setEditingStudent(null)}
-          onSave={(updatedStudent) => {
-            setStudents((prev) =>
-              prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
-            );
-            setEditingStudent(null);
-          }}
-        />
-      )}
     </div>
   );
 }

@@ -15,6 +15,11 @@ import SettingsPage from "./pages/SettingsPage";
 import DashboardPage from "./pages/DashboardPage";
 import StudentList from "./pages/StudentList";
 import AddStudentPage from "./pages/AddStudentPage";
+import GuardianList from "./pages/GuardianList";
+import TeacherList from "./pages/TeacherList";
+import AddTeacherPage from "./pages/AddTeacherPage";
+import AddGuardianPage from "./pages/AddGuardianPage";
+import ClassTimeList from "./pages/ClassTimeList";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +86,11 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardPage></DashboardPage> },
        { path: "studentlist", element: <StudentList /> },
         { path: "addstudent", element: <AddStudentPage /> },
+        { path: "addteacher", element: <AddTeacherPage/> },
+        { path: "addguardian", element: <AddGuardianPage/> },
+        { path: "guardianlist", element: <GuardianList /> },
+        { path: "teacherlist", element: <TeacherList /> },
+        { path: "classtime", element: <ClassTimeList /> },
     ],
   },
   

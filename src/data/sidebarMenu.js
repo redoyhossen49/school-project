@@ -156,7 +156,7 @@ export const sidebarMenu = (role) => {
       title: "Teacher",
       icon: LuUsers,
       children: [
-        { title: "Teacher List", path: "/teacher/list" },
+        { title: "Teacher List", path: "teacherlist" },
         { title: "Teacher ID", path: "/teacher/id" },
         {
           title: "Class Permission",
@@ -171,7 +171,7 @@ export const sidebarMenu = (role) => {
       children: [
         { title: "Student List", path: "studentlist" },
         { title: "Student ID", path: "studentid" },
-        { title: "Class Time", path: "studenttime" },
+        { title: "Class Time", path: "classtime" },
         {
           title: "Promote Request",
           path: "/school/dashboard/studentpromote",
@@ -182,7 +182,7 @@ export const sidebarMenu = (role) => {
     {
       title: "Guardian",
       icon: TbUserShield,
-      children: [{ title: "Guardian List", path: "/guardian/list" }],
+      children: [{ title: "Guardian List", path: "guardianlist" }],
     },
 
     {
