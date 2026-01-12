@@ -19,7 +19,7 @@ export default function ClassPermissionList() {
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
-  const [selectedSection, setSelectedSection] = useState("All Sections");
+  const [selectedSection, setSelectedSection] = useState("All ");
   const [sectionOpen, setSectionOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -31,7 +31,7 @@ export default function ClassPermissionList() {
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const sectionOptions = ["All Sections", "Morning", "Day", "Evening"];
+  const sectionOptions = ["All", "Morning", "Day", "Evening"];
 
   useEffect(() => {
     const handler = (e) => {
@@ -52,7 +52,7 @@ export default function ClassPermissionList() {
   const filteredPermissions = permissions
     .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
     .filter((p) =>
-      selectedSection === "All Sections" ? true : p.section === selectedSection
+      selectedSection === "All " ? true : p.section === selectedSection
     )
     .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
 
@@ -133,7 +133,7 @@ export default function ClassPermissionList() {
               setPermissions(classPermissionData);
               setSearch("");
             }}
-            className="flex items-center  gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
+            className="flex items-center  gap-2 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
           >
             <FiRefreshCw className="text-sm" /> Refresh
           </button>
@@ -143,7 +143,7 @@ export default function ClassPermissionList() {
               onClick={() => setExportOpen((prev) => !prev)}
               className="flex items-center gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
             >
-              Export <BiChevronDown className="text-sm" />
+              Export <BiChevronDown className="text-sm ml-2" />
             </button>
             {exportOpen && (
               <div className="absolute top-full left-0 mt-1 w-full z-40 rounded border border-gray-200 shadow-sm bg-white text-gray-900">

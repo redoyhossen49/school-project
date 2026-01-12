@@ -201,7 +201,7 @@ export default function TeacherList() {
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={() => setTeachers(teacherData)}
-            className="w-full flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-3 py-2 text-xs"
+            className="w-full flex items-center gap-2 rounded border border-gray-200 shadow-sm bg-white px-3 py-2 text-xs"
           >
             <FiRefreshCw /> Refresh
           </button>
@@ -236,7 +236,7 @@ export default function TeacherList() {
               onClick={() => navigate("/school/dashboard/addteacher")}
               className="w-full flex items-center gap-1 rounded bg-blue-600 px-3 py-2 text-xs text-white"
             >
-              + Add Teacher
+              + Teacher
             </button>
           )}
         </div>

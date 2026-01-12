@@ -214,7 +214,7 @@ export default function GuardianList() {
               onClick={() => navigate("/school/dashboard/addguardian")}
               className="flex items-center  gap-1 w-full rounded bg-blue-600 px-2 py-2 text-xs text-white shadow-sm"
             >
-              + Add Guardian
+              + Guardian
             </button>
           )}
         </div>

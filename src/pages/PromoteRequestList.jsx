@@ -31,8 +31,8 @@ export default function PromoteRequestList() {
   const sortRef = useRef(null);
 
   /* ================= Filters ================= */
-  const sectionOptions = ["All Sections", "Science", "Commerce", "Arts"];
-  const [selectedSection, setSelectedSection] = useState("All Sections");
+  const sectionOptions = ["All", "Science", "Commerce", "Arts"];
+  const [selectedSection, setSelectedSection] = useState("All ");
   const [sortOrder, setSortOrder] = useState("asc");
 
   /* ================= Outside Click ================= */
@@ -55,7 +55,7 @@ export default function PromoteRequestList() {
   const filteredRequests = requests
     .filter((r) => r.studentName.toLowerCase().includes(search.toLowerCase()))
     .filter((r) =>
-      selectedSection === "All Sections"
+      selectedSection === "All "
         ? true
         : r.fromGroup === selectedSection
     )

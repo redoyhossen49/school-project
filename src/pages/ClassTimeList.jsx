@@ -20,7 +20,7 @@ export default function ClassTimeList() {
   const canEdit = userRole === "school";
 
   // Dropdowns
-  const [selectedSection, setSelectedSection] = useState("All Sections");
+  const [selectedSection, setSelectedSection] = useState("All");
   const [sectionOpen, setSectionOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -32,7 +32,7 @@ export default function ClassTimeList() {
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const sectionOptions = ["All Sections", "Morning", "Day", "Evening"];
+  const sectionOptions = ["All", "Morning", "Day", "Evening"];
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function ClassTimeList() {
   const filteredClassTimes = classTimes
     .filter((c) => c.className.toLowerCase().includes(search.toLowerCase()))
     .filter((c) =>
-      selectedSection === "All Sections" ? true : c.section === selectedSection
+      selectedSection === "All " ? true : c.section === selectedSection
     )
     .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
 
@@ -137,7 +137,7 @@ export default function ClassTimeList() {
               setClassTimes(classTimeData);
               setSearch("");
             }}
-            className="flex items-center  gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
+            className="flex items-center  gap-2 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
           >
             <FiRefreshCw className="text-sm" /> Refresh
           </button>
@@ -147,7 +147,7 @@ export default function ClassTimeList() {
               onClick={() => setExportOpen((prev) => !prev)}
               className="flex items-center gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
             >
-              Export <BiChevronDown className="text-sm" />
+              Export <BiChevronDown className="text-sm ml-2" />
             </button>
             {exportOpen && (
               <div className="absolute top-full left-0 mt-1 w-full z-40 rounded border border-gray-200 shadow-sm bg-white text-gray-900">
