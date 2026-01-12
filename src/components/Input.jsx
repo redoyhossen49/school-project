@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Input({
   label,
   type = "text",
@@ -7,6 +5,7 @@ export default function Input({
   value,
   onChange,
   error,
+  inputClassName = "",
 }) {
   return (
     <div className="relative">
@@ -17,10 +16,11 @@ export default function Input({
         onChange={onChange}
         placeholder=" "
         className={`
-          peer w-full border px-4 py-2
-      focus:outline-none
-      focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]
-      placeholder:text-transparent
+          peer w-full border px-4
+          ${inputClassName || "py-2"}   /* ✅ default fallback */
+          focus:outline-none
+          focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]
+          placeholder:text-transparent
           ${
             error
               ? "border-red-500"
@@ -43,10 +43,10 @@ export default function Input({
           peer-focus:text-indigo-600
           peer-focus:bg-white
           peer-not-placeholder-shown:-top-2
-      peer-not-placeholder-shown:text-xs
-      peer-not-placeholder-shown:text-gray-600
-      peer-not-placeholder-shown:bg-white
-      peer-not-placeholder-shown:px-1
+          peer-not-placeholder-shown:text-xs
+          peer-not-placeholder-shown:text-gray-600
+          peer-not-placeholder-shown:bg-white
+          peer-not-placeholder-shown:px-1
           peer-focus:px-1
         "
       >

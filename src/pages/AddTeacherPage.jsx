@@ -59,18 +59,24 @@ export default function AddTeacherPage() {
   return (
     <div className="py-4 px-4 mx-6 md:mx-0  min-h-screen">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-6 bg-white p-6 rounded">
         <h1 className="text-base font-bold">Add Teacher</h1>
         <p className="text-sm text-gray-500 mt-1">
-          <Link to="/dashboard" className="hover:text-indigo-600">
+          <Link
+            to="/school/dashboard"
+            className="hover:text-indigo-600 transition"
+          >
             Dashboard
           </Link>
           <span className="mx-1">/</span>
-          <Link to="/teachers" className="hover:text-indigo-600">
+          <Link
+            to="/school/dashboard/teacherlist"
+            className="hover:text-indigo-600 transition"
+          >
             Teachers
           </Link>
           <span className="mx-1">/</span>
-          <span className="text-gray-400">Add Teacher</span>
+          <span className="truncate">Teacher List</span>
         </p>
       </div>
 
@@ -81,15 +87,15 @@ export default function AddTeacherPage() {
           darkMode ? "bg-gray-700 text-white" : "bg-white"
         }`}
       >
-         <h2 className="">Teacher Information</h2>
+        <h2 className="text-center">Teacher Information</h2>
         {/* Grid layout for text inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-           
           <Input
             label="Teacher Name"
             name="teacherName"
             value={formData.teacherName}
             onChange={handleChange}
+            inputClassName="py-1"
           />
 
           <Input
@@ -97,6 +103,7 @@ export default function AddTeacherPage() {
             name="designation"
             value={formData.designation}
             onChange={handleChange}
+            inputClassName="py-1"
           />
 
           <Input
@@ -106,6 +113,7 @@ export default function AddTeacherPage() {
             onChange={handleChange}
             type="text"
             disabled
+            inputClassName="py-1"
           />
 
           <Input
@@ -113,6 +121,7 @@ export default function AddTeacherPage() {
             name="mobileNumber"
             value={formData.mobileNumber}
             onChange={handleChange}
+            inputClassName="py-1"
           />
 
           <Input
@@ -121,6 +130,7 @@ export default function AddTeacherPage() {
             type="email"
             value={formData.email}
             onChange={handleChange}
+            inputClassName="py-1"
           />
 
           <Input
@@ -129,6 +139,7 @@ export default function AddTeacherPage() {
             type="password"
             value={formData.password}
             onChange={handleChange}
+            inputClassName="py-1"
           />
 
           <Input
@@ -137,6 +148,7 @@ export default function AddTeacherPage() {
             type="date"
             value={formData.dateOfBirth}
             onChange={handleChange}
+            inputClassName="py-1"
           />
 
           <Input
@@ -145,13 +157,14 @@ export default function AddTeacherPage() {
             type="date"
             value={formData.joinDate}
             onChange={handleChange}
+            inputClassName="py-1"
           />
         </div>
 
         {/* Upload Section */}
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-xs font-medium mb-1">
               Upload Photo
             </label>
             <input
@@ -159,12 +172,12 @@ export default function AddTeacherPage() {
               name="photo"
               accept="image/*"
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded px-3 py-1"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-xs font-medium mb-1">
               Upload Signature
             </label>
             <input
@@ -172,7 +185,7 @@ export default function AddTeacherPage() {
               name="signature"
               accept="image/*"
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded px-3 py-1"
             />
           </div>
         </div>
@@ -181,14 +194,14 @@ export default function AddTeacherPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-2 border w-full md:w-auto rounded hover:bg-gray-100 transition"
+            className="px-6 py-1 border w-full md:w-auto rounded hover:bg-gray-100 transition"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-6 py-2 w-full md:w-auto bg-green-600 text-white rounded hover:bg-green-700 transition"
+            className="px-6 py-1 w-full md:w-auto bg-green-600 text-white rounded hover:bg-green-700 transition"
           >
             Save
           </button>

@@ -160,7 +160,7 @@ export const sidebarMenu = (role) => {
         { title: "Teacher ID", path: "/teacher/id" },
         {
           title: "Class Permission",
-          path: "/teacher/permission",
+          path: "permissionlist",
         },
       ],
     },
@@ -171,10 +171,10 @@ export const sidebarMenu = (role) => {
       children: [
         { title: "Student List", path: "studentlist" },
         { title: "Student ID", path: "studentid" },
-        { title: "Class Time", path: "classtime" },
+        { title: "Class Time", path: "classtimelist" },
         {
           title: "Promote Request",
-          path: "/school/dashboard/studentpromote",
+          path: "promoterequest",
         },
       ],
     },

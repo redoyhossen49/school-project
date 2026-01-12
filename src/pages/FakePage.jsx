@@ -1,20 +1,23 @@
 import { useState, useRef, useEffect } from "react";
-import { studentData } from "../data/studentData"; // guardian info is inside studentData
-import GuardianTable from "../components/guardian/GuardianTable.jsx";
+import { studentData } from "../data/studentData";
+import StudentTable from "../components/student/StudentTable.jsx";
 import Pagination from "../components/Pagination.jsx";
+import AddStudentModal from "../components/student/AddStudentModal.jsx";
 import { useNavigate, Link } from "react-router-dom";
 import { FiRefreshCw, FiFilter } from "react-icons/fi";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
+import EditStudentModal from "../components/student/EditStudentModal.jsx";
 
-export default function GuardianList() {
+export default function FakePage() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [guardians, setGuardians] = useState(studentData);
+  const [students, setStudents] = useState(studentData);
   const [search, setSearch] = useState("");
+  const [view, setView] = useState("table");
   const [currentPage, setCurrentPage] = useState(1);
-  const guardiansPerPage = 20;
+  const studentsPerPage = 20;
 
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
@@ -25,6 +28,7 @@ export default function GuardianList() {
   const [showSession, setShowSession] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
+  const [editingStudent, setEditingStudent] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const dateDropdownRef = useRef(null);
@@ -40,7 +44,6 @@ export default function GuardianList() {
 
   const sessionKeys = ["Session 1", "Session 2", "Session 3"];
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -61,15 +64,11 @@ export default function GuardianList() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filtering and sorting guardians
-  const filteredGuardians = guardians
-    .filter((g) =>
-      g.guardian?.name.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter((g) => {
-      if (!g.joinDate) return true;
+  const filteredStudents = students
+    .filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
+    .filter((s) => {
       const today = new Date();
-      const joinDate = new Date(g.joinDate);
+      const joinDate = new Date(s.joinDate);
 
       if (selectedDate === "Today")
         return joinDate.toDateString() === today.toDateString();
@@ -83,38 +82,38 @@ export default function GuardianList() {
           joinDate.getMonth() === today.getMonth() &&
           joinDate.getFullYear() === today.getFullYear()
         );
-      if (sessionKeys.includes(selectedDate)) return g.session === selectedDate;
+      if (sessionKeys.includes(selectedDate)) return s.session === selectedDate;
       return true;
     })
     .sort((a, b) => {
-      const d1 = new Date(a.joinDate || 0);
-      const d2 = new Date(b.joinDate || 0);
+      const d1 = new Date(a.joinDate);
+      const d2 = new Date(b.joinDate);
       return sortOrder === "oldest" ? d1 - d2 : d2 - d1;
     });
 
-  const totalGuardians = filteredGuardians.length;
-  const totalPages = Math.ceil(totalGuardians / guardiansPerPage);
-  const indexOfLastGuardian = currentPage * guardiansPerPage;
-  const indexOfFirstGuardian = indexOfLastGuardian - guardiansPerPage;
-  const currentGuardians = filteredGuardians.slice(
-    indexOfFirstGuardian,
-    indexOfLastGuardian
+  const totalStudents = filteredStudents.length;
+  const totalPages = Math.ceil(totalStudents / studentsPerPage);
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = filteredStudents.slice(
+    indexOfFirstStudent,
+    indexOfLastStudent
   );
 
-  const buttonBaseClasses = `flex-1 flex items-center justify-center py-1.5 shadow-[0_1px_2px_0_rgba(255,255,255,0.5)]  rounded text-xs md:text-sm border transition`;
-  // Button base class for exact StudentList style
-  const buttonClass =
-    "flex items-center justify-center gap-2 w-28 rounded border border-gray-200 px-3 py-2 text-xs bg-white shadow-sm hover:bg-gray-100";
+  const buttonBaseClasses = `flex-1 flex items-center shadow-[0_1px_2px_0_rgba(255,255,255,0.5)] justify-center py-1.5 rounded  text-xs md:text-sm border transition`;
 
   return (
-    <div className="p-3 space-y-4 min-h-screen">
-      {/* ================= HEADER ================= */}
-      <div className="space-y-4 rounded-md bg-white p-3">
-        {/* Title */}
-        <div className="md:flex md:items-center md:justify-between gap-3">
+    <div
+      className={`space-y-3 py-1 px-1 min-h-screen ${
+        darkMode ? "text-gray-100" : "text-gray-600"
+      }`}
+    >
+      {/* Header */}
+      <div className={`${darkMode ? "bg-gray-900" : "bg-white"} p-3 rounded`}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           {/* Title + Breadcrumb */}
           <div className="md:mb-3">
-            <h1 className="text-base font-bold">Guardians List</h1>
+            <h1 className="text-base font-bold">Students List</h1>
             <nav className="text-sm w-full truncate">
               <Link
                 to="/school/dashboard"
@@ -123,44 +122,64 @@ export default function GuardianList() {
                 Dashboard
               </Link>
               <span className="mx-1">/</span>
-              <Link to="/guardian" className="hover:text-indigo-600 transition">
-                Guardian
+              <Link to="/student" className="hover:text-indigo-600 transition">
+                Students
               </Link>
               <span className="mx-1">/</span>
-              <Link
-                to="/guardians"
-                className="hover:text-indigo-600 transition"
-              >
-                Guardian List
+              <Link to="/students" className="hover:text-indigo-600 transition">
+                Student List
               </Link>
             </nav>
           </div>
 
-          {/* Buttons (Desktop) */}
-          <div className="hidden md:flex gap-2 w-full md:w-auto">
+          {/* Top Buttons */}
+          <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
+            
             <button
+              title="Refresh"
+              className={`${buttonBaseClasses}  px-0.5 md:px-2  ${
+                darkMode
+                  ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                  : "border-gray-300 bg-white hover:bg-gray-100"
+              }`}
               onClick={() => {
-                setGuardians(studentData);
+                setStudents(studentData);
                 setSearch("");
               }}
-              className={buttonClass}
             >
-              <FiRefreshCw /> Refresh
+              <FiRefreshCw />
             </button>
 
-            <div className="relative w-28" ref={exportRef}>
+            <div className="relative flex-1 md:flex-none" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={buttonClass}
+                className={`${buttonBaseClasses}  px-1 md:px-2 ${
+                  darkMode
+                    ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                    : "border-gray-300 bg-white hover:bg-gray-100"
+                } w-full`}
               >
-                Export <BiChevronDown />
+                Export <BiChevronDown className="ml-1" />
               </button>
+
               {exportOpen && (
-                <div className="absolute top-full left-0 mt-1 w-28 z-40 rounded border shadow-sm bg-white text-gray-900">
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                <div
+                  className={`absolute mt-2 w-32 z-40 border rounded ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  } shadow-sm`}
+                >
+                  <button
+                    onClick={() => setExportOpen(false)}
+                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                  >
                     Export PDF
                   </button>
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                  <button
+                    onClick={() => setExportOpen(false)}
+                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                  >
                     Export Excel
                   </button>
                 </div>
@@ -169,64 +188,27 @@ export default function GuardianList() {
 
             {canEdit && (
               <button
-                onClick={() => navigate("/school/dashboard/addguardian")}
-                className="flex items-center justify-center gap-1 w-28 rounded bg-blue-600 px-3 py-2 text-xs text-white shadow-sm hover:bg-blue-700"
+                className="flex-1 md:flex-none flex items-center justify-center px-0.5 md:px-2 py-1.5 text-xs md:text-sm rounded shadow-sm bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => navigate("/school/dashboard/addstudent")}
               >
-                + Add Guardian
+                + Add Student
               </button>
             )}
           </div>
         </div>
 
-        {/* Mobile Buttons */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={() => {
-              setGuardians(studentData);
-              setSearch("");
-            }}
-            className="flex items-center  gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
-          >
-            <FiRefreshCw className="text-sm" /> Refresh
-          </button>
-
-          <div className="relative w-full" ref={exportRef}>
-            <button
-              onClick={() => setExportOpen((prev) => !prev)}
-              className="flex items-center gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
-            >
-              Export <BiChevronDown className="text-sm" />
-            </button>
-            {exportOpen && (
-              <div className="absolute top-full left-0 mt-1 w-full z-40 rounded border border-gray-200 shadow-sm bg-white text-gray-900">
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
-                  Export PDF
-                </button>
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
-                  Export Excel
-                </button>
-              </div>
-            )}
-          </div>
-
-          {canEdit && (
-            <button
-              onClick={() => navigate("/school/dashboard/addguardian")}
-              className="flex items-center  gap-1 w-full rounded bg-blue-600 px-2 py-2 text-xs text-white shadow-sm"
-            >
-              + Add Guardian
-            </button>
-          )}
-        </div>
-
         {/* Controls: Date, Filter, Sort + Search */}
-        <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-3 mt-3">
+          <div className="flex flex-wrap md:flex-nowrap w-full md:w-auto gap-2 md:gap-3">
             {/* Date */}
-            <div className="relative " ref={dateDropdownRef}>
+            <div className="relative flex-1 md:flex-none" ref={dateDropdownRef}>
               <button
                 onClick={() => setDateOpen(!dateOpen)}
-                className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                className={`${buttonBaseClasses} md:px-2 ${
+                  darkMode
+                    ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                    : "border-gray-300 bg-white hover:bg-gray-100"
+                } w-full`}
               >
                 {selectedDate} <BiChevronDown className="ml-1" />
               </button>
@@ -246,7 +228,7 @@ export default function GuardianList() {
                         setDateOpen(false);
                         setShowSession(false);
                       }}
-                      className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
+                      className={`w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition`}
                     >
                       <span>{opt.label}</span>
                       <BiChevronRight size={12} />
@@ -284,10 +266,14 @@ export default function GuardianList() {
             </div>
 
             {/* Filter */}
-            <div className="relative " ref={filterRef}>
+            <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                className={`${buttonBaseClasses} md:px-2 ${
+                  darkMode
+                    ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                    : "border-gray-300 bg-white hover:bg-gray-100"
+                } w-full`}
               >
                 <FiFilter className="mr-1" /> Filter{" "}
                 <BiChevronDown className="ml-1" />
@@ -304,7 +290,7 @@ export default function GuardianList() {
                       darkMode
                         ? "bg-gray-700 text-gray-100"
                         : "bg-white text-gray-800"
-                    } w-8/12 md:w-96 p-3 md:p-5 max-h-[80vh] overflow-y-auto rounded-md shadow-sm border ${
+                    } w-8/12 md:w-96 p-3  md:p-5 max-h-[80vh] overflow-y-auto rounded-md shadow-sm border ${
                       darkMode ? "border-gray-600" : "border-gray-200"
                     } transition-all duration-300`}
                   >
@@ -313,9 +299,9 @@ export default function GuardianList() {
                         darkMode ? "text-gray-200" : "text-gray-700"
                       }`}
                     >
-                      Filter Guardians
+                      Filter Students
                     </h2>
-                    {/* Example Filter selects */}
+                    {/* Filter selects here */}
                     <div className="flex mx-2 flex-col gap-3">
                       <div className="relative">
                         <label
@@ -424,10 +410,14 @@ export default function GuardianList() {
             </div>
 
             {/* Sort */}
-            <div className="relative " ref={sortRef}>
+            <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
-                 className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                className={`${buttonBaseClasses} md:px-2 ${
+                  darkMode
+                    ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                    : "border-gray-300 bg-gray-50 hover:bg-gray-100"
+                } w-full`}
               >
                 Sort By <BiChevronDown className="ml-1" />
               </button>
@@ -463,16 +453,16 @@ export default function GuardianList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 mt-2 md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
             <input
               type="text"
-              placeholder="Search by guardian name..."
+              placeholder="Search by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={`h-8 px-2 md:px-3 w-full text-xs rounded border shadow-sm ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
-                  : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
+                  : "border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400"
               } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <div className="flex items-center flex-1">
@@ -488,8 +478,27 @@ export default function GuardianList() {
 
       {/* Table */}
       <div className={`p-2 ${darkMode ? "bg-gray-900" : "bg-white"} rounded`}>
-        <GuardianTable data={currentGuardians} setData={setGuardians} />
+        <StudentTable
+          data={currentStudents}
+          setData={setStudents}
+          view={view}
+          canEdit={canEdit}
+          onEdit={(student) => setEditingStudent(student)}
+        />
       </div>
+
+      {editingStudent && (
+        <EditStudentModal
+          student={editingStudent}
+          onClose={() => setEditingStudent(null)}
+          onSave={(updatedStudent) => {
+            setStudents((prev) =>
+              prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
+            );
+            setEditingStudent(null);
+          }}
+        />
+      )}
     </div>
   );
 }

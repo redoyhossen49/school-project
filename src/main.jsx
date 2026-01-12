@@ -20,6 +20,11 @@ import TeacherList from "./pages/TeacherList";
 import AddTeacherPage from "./pages/AddTeacherPage";
 import AddGuardianPage from "./pages/AddGuardianPage";
 import ClassTimeList from "./pages/ClassTimeList";
+import AddClassTimePage from "./pages/AddClassTimePage";
+import AddPromoteRequestPage from "./pages/AddPromoteRequestPage";
+import PromoteRequestList from "./pages/PromoteRequestList";
+import ClassPermissionList from "./pages/ClassPermissionList";
+import AddClassPermissionPage from "./pages/AddClassPermissionPage";
 
 const router = createBrowserRouter([
   {
@@ -86,11 +91,16 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardPage></DashboardPage> },
        { path: "studentlist", element: <StudentList /> },
         { path: "addstudent", element: <AddStudentPage /> },
+        { path: "promoterequest", element: <PromoteRequestList /> },
+          { path: "addpromoterequest", element: <AddPromoteRequestPage/> },
+          { path: "addclasstime", element: <AddClassTimePage /> },
         { path: "addteacher", element: <AddTeacherPage/> },
         { path: "addguardian", element: <AddGuardianPage/> },
         { path: "guardianlist", element: <GuardianList /> },
         { path: "teacherlist", element: <TeacherList /> },
-        { path: "classtime", element: <ClassTimeList /> },
+        { path: "classtimelist", element: <ClassTimeList /> },
+        { path: "permissionlist", element: <ClassPermissionList /> },
+        { path: "addclasspermission", element: <AddClassPermissionPage/> },
     ],
   },
   
