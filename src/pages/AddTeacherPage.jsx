@@ -22,6 +22,29 @@ export default function AddTeacherPage() {
 
   const [photoPreview, setPhotoPreview] = useState(null);
   const [signaturePreview, setSignaturePreview] = useState(null);
+  
+
+const handleImageChange = (e, type) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const previewURL = URL.createObjectURL(file);
+
+  if (type === "photo") {
+    setPhotoPreview(previewURL);
+  } else {
+    setSignaturePreview(previewURL);
+  }
+};
+
+const removeImage = (type) => {
+  if (type === "photo") {
+    setPhotoPreview(null);
+  } else {
+    setSignaturePreview(null);
+  }
+};
+
 
   // Auto-generate ID on mount
   useEffect(() => {
@@ -59,9 +82,13 @@ export default function AddTeacherPage() {
   return (
     <div className="py-4 px-4 mx-6 md:mx-0  min-h-screen">
       {/* Header */}
-      <div className="mb-6 bg-white p-6 rounded">
+      <div
+        className={`mb-6  ${
+          darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
+        } p-6 rounded`}
+      >
         <h1 className="text-base font-bold">Add Teacher</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-xs text-indigo-600 mt-1">
           <Link
             to="/school/dashboard"
             className="hover:text-indigo-600 transition"
@@ -73,10 +100,8 @@ export default function AddTeacherPage() {
             to="/school/dashboard/teacherlist"
             className="hover:text-indigo-600 transition"
           >
-            Teachers
+            Teacher list
           </Link>
-          <span className="mx-1">/</span>
-          <span className="truncate">Teacher List</span>
         </p>
       </div>
 
@@ -84,7 +109,7 @@ export default function AddTeacherPage() {
       <form
         onSubmit={handleSave}
         className={`p-6 rounded shadow-md space-y-6 overflow-y-auto ${
-          darkMode ? "bg-gray-700 text-white" : "bg-white"
+          darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
         }`}
       >
         <h2 className="text-center">Teacher Information</h2>
@@ -162,33 +187,87 @@ export default function AddTeacherPage() {
         </div>
 
         {/* Upload Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Upload Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+          {/* Photo Upload */}
           <div>
             <label className="block text-xs font-medium mb-1">
               Upload Photo
             </label>
-            <input
-              type="file"
-              name="photo"
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-1"
-            />
+
+            {!photoPreview ? (
+              <div
+                className="border-2 border-dashed h-28 flex flex-col items-center justify-center
+        text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
+              >
+                <span className="text-sm">📷 Upload Photo</span>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e, "photo")}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                />
+              </div>
+            ) : (
+              <div className="relative h-28 w-full border rounded-lg overflow-hidden">
+                <img
+                  src={photoPreview}
+                  alt="Photo Preview"
+                  className="w-full h-full object-cover"
+                />
+
+                <button
+                  onClick={() => removeImage("photo")}
+                  className="absolute top-2 right-2 bg-black/60 text-white rounded-full
+          w-7 h-7 flex items-center justify-center hover:bg-red-600 transition"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
 
+          {/* Signature Upload */}
           <div>
             <label className="block text-xs font-medium mb-1">
               Upload Signature
             </label>
-            <input
-              type="file"
-              name="signature"
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-1"
-            />
+
+            {!signaturePreview ? (
+              <div
+                className="border-2 border-dashed h-28 flex flex-col items-center justify-center
+        text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
+              >
+                <span className="text-sm">✍️ Upload Signature</span>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e, "signature")}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                />
+              </div>
+            ) : (
+              <div className="relative h-28 w-full border rounded-lg overflow-hidden">
+                <img
+                  src={signaturePreview}
+                  alt="Signature Preview"
+                  className="w-full h-full object-cover"
+                />
+
+                <button
+                  onClick={() => removeImage("signature")}
+                  className="absolute top-2 right-2 bg-black/60 text-white rounded-full
+          w-7 h-7 flex items-center justify-center hover:bg-red-600 transition"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
         {/* Action Buttons */}
         <div className="flex w-full gap-4 md:justify-end mt-4">
           <button

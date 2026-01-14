@@ -16,8 +16,8 @@ export default function Input({
         onChange={onChange}
         placeholder=" "
         className={`
-          peer w-full border px-4
-          ${inputClassName || "py-2"}   /* ✅ default fallback */
+          peer w-full border px-3
+          ${inputClassName || "py-1"}   /* ✅ default fallback */
           focus:outline-none
           focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]
           placeholder:text-transparent

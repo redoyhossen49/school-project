@@ -1,20 +1,28 @@
 import Input from "./Input";
-import { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Step2({ formData, handleChange }) {
+  const { darkMode } = useTheme();
 
-   
   return (
-    <div className="space-y-4 animate-fadeIn">
-      <p className="text-sm text-gray-500 text-center">
-        Please provide the details of the previously school.
+    <div
+      className={`space-y-4 mb-6 animate-fadeIn ${
+        darkMode ? "text-gray-200" : "text-gray-700"
+      }`}
+    >
+      <p
+        className={`text-sm text-center ${
+          darkMode ? "text-gray-400" : "text-gray-500"
+        }`}
+      >
+        Please provide the details of the previous school.
       </p>
 
       {[
         { label: "Previous School", name: "previousSchool" },
         { label: "Class Name", name: "className" },
         { label: "Group Name", name: "groupName" },
-         { label: "Section", name: "sectionName" },
+        { label: "Section", name: "sectionName" },
         { label: "Session Year", name: "sessionYear" },
         { label: "Last Result", name: "lastResult" },
       ].map((field) => (
@@ -25,6 +33,12 @@ export default function Step2({ formData, handleChange }) {
           placeholder={field.label}
           value={formData[field.name]}
           onChange={handleChange}
+          inputClassName={`py-1 ${
+            darkMode
+              ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+              : "bg-white border-gray-300 text-gray-700 placeholder-gray-400"
+          }`}
+          labelClassName={darkMode ? "text-gray-300" : "text-gray-600"}
         />
       ))}
     </div>

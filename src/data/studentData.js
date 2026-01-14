@@ -1,5 +1,5 @@
-// helper function to format date
-const formatDate = (dateStr) => {
+// helper function to format date for UI
+export const formatDate = (dateStr) => {
   const date = new Date(dateStr);
   const options = { day: "2-digit", month: "short", year: "numeric" };
   return date.toLocaleDateString("en-US", options); // e.g., "10 Jan 2026"
@@ -25,8 +25,8 @@ export const studentData = [
     feesDue: 1200,
     gender: "Female",
     status: "Active",
-    joinDate: formatDate("2026-01-10"),
-    dob: formatDate("2015-01-10"),
+    joinDate: "2026-01-10", // raw ISO string
+    dob: "2015-01-10",      // raw ISO string
     guardian: {
       name: "Robert Smith",
       relation: "Father",
@@ -58,8 +58,8 @@ export const studentData = [
     feesDue: 0,
     gender: "Male",
     status: "Active",
-    joinDate: formatDate("2026-01-09"),
-    dob: formatDate("2014-08-19"),
+    joinDate: "2026-01-09",
+    dob: "2014-08-19",
     guardian: {
       name: "Sara Miller",
       relation: "Mother",
@@ -97,8 +97,8 @@ export const studentData = [
       feesDue: id % 2 === 0 ? 0 : 1500,
       gender: id % 2 === 0 ? "Male" : "Female",
       status: id % 3 === 0 ? "Inactive" : "Active",
-      joinDate: formatDate(`2025-12-${joinDay}`),
-      dob: formatDate(`2014-${dobMonth}-15`),
+      joinDate: `2025-12-${joinDay}`, // raw ISO string
+      dob: `2014-${dobMonth}-15`,      // raw ISO string
       guardian: {
         name: `Guardian ${id}`,
         relation: id % 2 === 0 ? "Father" : "Mother",

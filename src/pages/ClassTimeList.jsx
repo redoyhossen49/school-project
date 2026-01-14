@@ -6,6 +6,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { FiRefreshCw, FiFilter } from "react-icons/fi";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { utils, writeFile } from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function ClassTimeList() {
   const navigate = useNavigate();
@@ -19,7 +22,6 @@ export default function ClassTimeList() {
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
-  // Dropdowns
   const [selectedSection, setSelectedSection] = useState("All");
   const [sectionOpen, setSectionOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -57,7 +59,7 @@ export default function ClassTimeList() {
   const filteredClassTimes = classTimes
     .filter((c) => c.className.toLowerCase().includes(search.toLowerCase()))
     .filter((c) =>
-      selectedSection === "All " ? true : c.section === selectedSection
+      selectedSection === "All" ? true : c.section === selectedSection
     )
     .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
 
@@ -67,17 +69,59 @@ export default function ClassTimeList() {
   const indexOfFirst = indexOfLast - classTimesPerPage;
   const currentClassTimes = filteredClassTimes.slice(indexOfFirst, indexOfLast);
 
-  // All buttons same width like TeacherList
+  // ---------- Export ----------
+  const exportExcel = (data) => {
+    if (!data.length) return;
+    const wsData = data.map((c, i) => ({
+      Sl: i + 1,
+      Class: c.className,
+      Section: c.section,
+      Subject: c.subject || "-",
+      Time: c.time || "-",
+    }));
+    const ws = utils.json_to_sheet(wsData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "ClassTimes");
+    writeFile(wb, "ClassTimes.xlsx");
+  };
 
-  const buttonClass =
-    "flex items-center  gap-2 w-28 rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm hover:bg-gray-100";
+  const exportPDF = (data) => {
+    if (!data.length) return;
+    const doc = new jsPDF("landscape", "pt", "a4");
+    const columns = ["Sl", "Class", "Section", "Subject", "Time"];
+    const rows = data.map((c, i) => [
+      i + 1,
+      c.className,
+      c.section,
+      c.subject || "-",
+      c.time || "-",
+    ]);
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [30, 144, 255] },
+    });
+    doc.save("ClassTimes.pdf");
+  };
+
+  // Button base class
+  const buttonClass = `flex items-center justify-between w-28 rounded px-3 py-2 text-xs shadow-sm hover:bg-gray-100 ${
+    darkMode
+      ? "border bg-gray-700 border-gray-500 text-gray-100"
+      : "border bg-white border-gray-200 text-gray-900"
+  }`;
 
   return (
     <div className="p-3 space-y-4 min-h-screen">
       {/* Header */}
-      {/* ================= HEADER ================= */}
-      <div className="space-y-4 rounded-md bg-white p-3">
-        {/* Title */}
+      <div
+        className={`rounded-md p-3 space-y-3 ${
+          darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-700"
+        }`}
+      >
         <div className="md:flex md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Class Time List</h2>
@@ -97,22 +141,34 @@ export default function ClassTimeList() {
               }}
               className={buttonClass}
             >
-              <FiRefreshCw /> Refresh
+             Refresh
             </button>
 
-            <div className="relative w-28" ref={exportRef}>
+            <div className="relative" ref={exportRef}>
               <button
-                onClick={() => setExportOpen((prev) => !prev)}
+                onClick={() => setExportOpen(!exportOpen)}
                 className={buttonClass}
               >
                 Export <BiChevronDown />
               </button>
               {exportOpen && (
-                <div className="absolute top-full left-0 mt-1 w-28 z-40 rounded border shadow-sm bg-white text-gray-900">
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                <div
+                  className={`absolute left-0 z-50 top-full mt-1 w-28 rounded border shadow-sm ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+                  <button
+                    onClick={() => exportPDF(filteredClassTimes)}
+                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                  >
                     Export PDF
                   </button>
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                  <button
+                    onClick={() => exportExcel(filteredClassTimes)}
+                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                  >
                     Export Excel
                   </button>
                 </div>
@@ -122,9 +178,9 @@ export default function ClassTimeList() {
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addclasstime")}
-                className="flex items-center justify-center gap-1 w-28 rounded bg-blue-600 px-3 py-2 text-xs text-white shadow-sm hover:bg-blue-700"
+                className="flex items-center  gap-1 w-28 rounded bg-blue-600 px-3 py-2 text-xs text-white shadow-sm hover:bg-blue-700"
               >
-                + Class Time
+                Class Time
               </button>
             )}
           </div>
@@ -137,24 +193,44 @@ export default function ClassTimeList() {
               setClassTimes(classTimeData);
               setSearch("");
             }}
-            className="flex items-center  gap-2 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
+            className={`flex items-center  w-full rounded border px-2 py-2 text-xs shadow-sm ${
+              darkMode
+                ? "border-gray-500 bg-gray-700 text-gray-100"
+                : "border-gray-200 bg-white text-gray-900"
+            }`}
           >
-            <FiRefreshCw className="text-sm" /> Refresh
+            Refresh
           </button>
 
-          <div className="relative w-full" ref={exportRef}>
+          <div className="relative" ref={exportRef}>
             <button
-              onClick={() => setExportOpen((prev) => !prev)}
-              className="flex items-center gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
+              onClick={() => setExportOpen(!exportOpen)}
+              className={`flex items-center justify-between w-full rounded border px-2 py-2 text-xs shadow-sm ${
+                darkMode
+                  ? "border-gray-500 bg-gray-700 text-gray-100"
+                  : "border-gray-200 bg-white text-gray-900"
+              }`}
             >
-              Export <BiChevronDown className="text-sm ml-2" />
+              Export <BiChevronDown />
             </button>
             {exportOpen && (
-              <div className="absolute top-full left-0 mt-1 w-full z-40 rounded border border-gray-200 shadow-sm bg-white text-gray-900">
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
+              <div
+                className={`absolute left-0 z-50 top-full mt-1 w-full rounded border shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <button
+                  onClick={() => exportPDF(filteredClassTimes)}
+                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                >
                   Export PDF
                 </button>
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
+                <button
+                  onClick={() => exportExcel(filteredClassTimes)}
+                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                >
                   Export Excel
                 </button>
               </div>
@@ -164,21 +240,25 @@ export default function ClassTimeList() {
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addclasstime")}
-              className="flex items-center  gap-1 w-full rounded bg-blue-600 px-2 py-2 text-xs text-white shadow-sm"
+              className="flex items-center  w-full rounded bg-blue-600 px-2 py-2 text-xs text-white shadow-sm"
             >
-              + Class Time
+               Class Time
             </button>
           )}
         </div>
 
-        {/* Controls: Section, Filter, Sort + Search */}
-        <div className="space-y-2 md:flex md:items-center  md:justify-between md:gap-4">
+        {/* Controls */}
+        <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
           <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
             {/* Section Dropdown */}
-            <div className="relative " ref={sectionDropdownRef}>
+            <div className="relative" ref={sectionDropdownRef}>
               <button
-                onClick={() => setSectionOpen((prev) => !prev)}
-                className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                onClick={() => setSectionOpen(!sectionOpen)}
+                className={`flex items-center justify-between w-full md:w-28 rounded border px-2 py-2 text-xs shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-900"
+                }`}
               >
                 {selectedSection} <BiChevronDown />
               </button>
@@ -207,36 +287,36 @@ export default function ClassTimeList() {
             </div>
 
             {/* Filter */}
-            <div className="relative " ref={filterRef}>
+            <div className="relative" ref={filterRef}>
               <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`flex items-center justify-between w-full md:w-28 rounded border px-2 py-2 text-xs shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-900"
+                }`}
               >
-                <FiFilter className="mr-1" /> Filter <BiChevronDown />
+                Filter <BiChevronDown />
               </button>
               {filterOpen && (
                 <div
-                  className="fixed inset-0 z-50 flex items-center justify-center p-4 "
+                  className="fixed inset-0 z-50 flex items-center justify-center p-6"
                   onClick={() => setFilterOpen(false)}
                 >
                   <div
                     onClick={(e) => e.stopPropagation()}
-                    className={`${
+                    className={`w-8/12 md:w-96 max-h-[80vh] overflow-y-auto p-6 rounded shadow-lg border ${
                       darkMode
                         ? "bg-gray-700 text-gray-100 border-gray-600"
                         : "bg-white text-gray-800 border-gray-200"
-                    } w-8/12 md:w-96 p-6 max-h-[80vh] overflow-y-auto rounded shadow-lg border`}
+                    }`}
                   >
-                    <h2
-                      className={`text-lg font-semibold mb-4 ${
-                        darkMode ? "text-gray-200" : "text-gray-800"
-                      }`}
-                    >
+                    <h2 className="text-lg font-semibold mb-4">
                       Filter Class Times
                     </h2>
-
+                    {/* Example filter inputs */}
                     <div className="flex flex-col gap-3">
-                      {["Class", "Group", "Section"].map((field) => (
+                      {["Class", "Section"].map((field) => (
                         <div key={field} className="relative">
                           <label
                             className={`absolute -top-2 left-2 px-1 text-[10px] ${
@@ -248,7 +328,7 @@ export default function ClassTimeList() {
                             {field}
                           </label>
                           <select
-                            className={`w-full px-2 py-1.5 text-xs rounded border focus:outline-none focus:ring-1 focus:ring-blue-400 ${
+                            className={`w-full px-2 py-1.5 text-xs rounded border ${
                               darkMode
                                 ? "bg-gray-600 border-gray-500 text-gray-100"
                                 : "bg-white border-gray-300 text-gray-800"
@@ -260,7 +340,7 @@ export default function ClassTimeList() {
                                 classTimes.map((c) =>
                                   field.toLowerCase() === "class"
                                     ? c.className
-                                    : c[field.toLowerCase()]
+                                    : c.section
                                 )
                               ),
                             ].map((val) => (
@@ -270,16 +350,14 @@ export default function ClassTimeList() {
                         </div>
                       ))}
                     </div>
-
-                    {/* Buttons */}
                     <div className="flex flex-wrap gap-2 justify-end mt-4">
                       <button
                         onClick={() => setFilterOpen(false)}
-                        className="flex-1 sm:flex-none px-3 py-1 text-xs rounded border bg-gray-200 hover:bg-gray-300"
+                        className={`px-3 py-1 text-xs rounded border bg-gray-200 hover:bg-gray-300 ${darkMode? "bg-gray-600 border-gray-200":"bg-gray-200 border-gray-600"}`}
                       >
                         Reset
                       </button>
-                      <button className="flex-1 sm:flex-none px-3 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white">
+                      <button className="px-3 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white">
                         Apply
                       </button>
                     </div>
@@ -289,16 +367,20 @@ export default function ClassTimeList() {
             </div>
 
             {/* Sort */}
-            <div className="relative " ref={sortRef}>
+            <div className="relative" ref={sortRef}>
               <button
-                onClick={() => setSortOpen((prev) => !prev)}
-                className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center justify-between w-full md:w-28 rounded border px-2 py-2 text-xs shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-900"
+                }`}
               >
                 Sort By <BiChevronDown />
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-28 shadow-sm z-40 rounded border ${
+                  className={`absolute left-0 mt-2 w-28 rounded border shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -328,16 +410,16 @@ export default function ClassTimeList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 mt-2 md:mt-0">
             <input
               type="text"
+              placeholder="Search by class..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by class..."
-              className={`w-full px-3 py-2 text-xs rounded border shadow-sm ${
+              className={`h-8 px-2 md:px-3 w-full text-xs rounded border shadow-sm ${
                 darkMode
-                  ? "border-gray-500 bg-gray-700 text-gray-100"
-                  : "border-gray-300 bg-white text-gray-900"
+                  ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
+                  : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
               } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <Pagination

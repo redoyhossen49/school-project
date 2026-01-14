@@ -6,6 +6,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { FiRefreshCw, FiFilter } from "react-icons/fi";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { utils, writeFile } from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function GuardianList() {
   const navigate = useNavigate();
@@ -100,16 +103,75 @@ export default function GuardianList() {
     indexOfFirstGuardian,
     indexOfLastGuardian
   );
+  // ---------- Export ----------
+  const exportExcel = (data) => {
+    if (!data.length) return;
+    const wsData = data.map((g, i) => ({
+      Sl: i + 1,
+      Guardian: g.guardian?.name,
+      Phone: g.guardian?.phone || "-",
+      Email: g.guardian?.email || "-",
+      Class: g.class || "-",
+      Section: g.section || "-",
+      Session: g.session || "-",
+      JoinDate: g.joinDate || "-",
+    }));
+    const ws = utils.json_to_sheet(wsData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Guardians");
+    writeFile(wb, "Guardians.xlsx");
+  };
 
-  const buttonBaseClasses = `flex-1 flex items-center justify-center py-1.5 shadow-[0_1px_2px_0_rgba(255,255,255,0.5)]  rounded text-xs md:text-sm border transition`;
+  const exportPDF = (data) => {
+    if (!data.length) return;
+    const doc = new jsPDF("landscape", "pt", "a4");
+    const columns = [
+      "Sl",
+      "Guardian",
+      "Phone",
+      "Email",
+      "Class",
+      "Section",
+      "Session",
+      "Join Date",
+    ];
+    const rows = data.map((g, i) => [
+      i + 1,
+      g.guardian?.name,
+      g.guardian?.phone || "-",
+      g.guardian?.email || "-",
+      g.class || "-",
+      g.section || "-",
+      g.session || "-",
+      g.joinDate || "-",
+    ]);
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [30, 144, 255] },
+    });
+    doc.save("Guardians.pdf");
+  };
+
   // Button base class for exact StudentList style
-  const buttonClass =
-    "flex items-center justify-center gap-2 w-28 rounded border border-gray-200 px-3 py-2 text-xs bg-white shadow-sm hover:bg-gray-100";
+  const buttonClass = `flex items-center   w-28 rounded   px-3 py-2 text-xs shadow-sm hover:bg-gray-100 ${
+    darkMode
+      ? " border bg-gray-700 border-gray-500"
+      : "border  bg-white border-gray-200"
+  }`;
 
   return (
     <div className="p-3 space-y-4 min-h-screen">
       {/* ================= HEADER ================= */}
-      <div className="space-y-4 rounded-md bg-white p-3">
+
+      <div
+        className={`rounded-md p-3 space-y-3 ${
+          darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-700"
+        }`}
+      >
         {/* Title */}
         <div className="md:flex md:items-center md:justify-between gap-3">
           {/* Title + Breadcrumb */}
@@ -122,17 +184,7 @@ export default function GuardianList() {
               >
                 Dashboard
               </Link>
-              <span className="mx-1">/</span>
-              <Link to="/guardian" className="hover:text-indigo-600 transition">
-                Guardian
-              </Link>
-              <span className="mx-1">/</span>
-              <Link
-                to="/guardians"
-                className="hover:text-indigo-600 transition"
-              >
-                Guardian List
-              </Link>
+              / Guardian List
             </nav>
           </div>
 
@@ -145,7 +197,7 @@ export default function GuardianList() {
               }}
               className={buttonClass}
             >
-              <FiRefreshCw /> Refresh
+              Refresh
             </button>
 
             <div className="relative w-28" ref={exportRef}>
@@ -156,11 +208,15 @@ export default function GuardianList() {
                 Export <BiChevronDown />
               </button>
               {exportOpen && (
-                <div className="absolute top-full left-0 mt-1 w-28 z-40 rounded border shadow-sm bg-white text-gray-900">
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                <div  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700"
+                      : "border-gray-200 bg-white"
+                  }`}>
+                  <button onClick={() => exportPDF(filteredGuardians)} className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
                     Export PDF
                   </button>
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                  <button onClick={() => exportPDF(filteredGuardians)} className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
                     Export Excel
                   </button>
                 </div>
@@ -185,24 +241,44 @@ export default function GuardianList() {
               setGuardians(studentData);
               setSearch("");
             }}
-            className="flex items-center  gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
+            className={`flex items-center  gap-1 w-full rounded border  px-2 py-2 text-xs  shadow-sm ${
+              darkMode
+                ? "border-gray-500 bg-gray-700 text-gray-100"
+                : "border-gray-200 bg-white text-gray-800"
+            }`}
           >
-            <FiRefreshCw className="text-sm" /> Refresh
+            Refresh
           </button>
 
           <div className="relative w-full" ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className="flex items-center gap-1 w-full rounded border border-gray-200 px-2 py-2 text-xs bg-white shadow-sm"
+              className={`flex items-center justify-between   w-full rounded border  px-2 py-2 text-xs  shadow-sm ${
+                darkMode
+                  ? "border-gray-500 bg-gray-700 text-gray-100"
+                  : "border-gray-200 bg-white text-gray-800"
+              }`}
             >
-              Export <BiChevronDown className="text-sm" />
+              Export <BiChevronDown />
             </button>
             {exportOpen && (
-              <div className="absolute top-full left-0 mt-1 w-full z-40 rounded border border-gray-200 shadow-sm bg-white text-gray-900">
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
+              <div
+                className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <button
+                  onClick={() => exportPDF(filteredGuardians)}
+                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                >
                   Export PDF
                 </button>
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
+                <button
+                  onClick={() => exportExcel(filteredGuardians)}
+                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                >
                   Export Excel
                 </button>
               </div>
@@ -214,7 +290,7 @@ export default function GuardianList() {
               onClick={() => navigate("/school/dashboard/addguardian")}
               className="flex items-center  gap-1 w-full rounded bg-blue-600 px-2 py-2 text-xs text-white shadow-sm"
             >
-              + Guardian
+              Guardian
             </button>
           )}
         </div>
@@ -226,7 +302,11 @@ export default function GuardianList() {
             <div className="relative " ref={dateDropdownRef}>
               <button
                 onClick={() => setDateOpen(!dateOpen)}
-                className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                className={`flex items-center  md:w-28 justify-between w-full rounded border  px-2 py-2 text-xs  shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
               >
                 {selectedDate} <BiChevronDown className="ml-1" />
               </button>
@@ -287,10 +367,13 @@ export default function GuardianList() {
             <div className="relative " ref={filterRef}>
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                className={`flex items-center  md:w-28 justify-between w-full rounded border  px-2 py-2 text-xs  shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
               >
-                <FiFilter className="mr-1" /> Filter{" "}
-                <BiChevronDown className="ml-1" />
+                Filter <BiChevronDown />
               </button>
 
               {filterOpen && (
@@ -427,7 +510,11 @@ export default function GuardianList() {
             <div className="relative " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
-                 className="flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-2 py-2 text-xs w-full md:px-3  md:w-28"
+                className={`flex items-center  md:w-28 justify-between w-full rounded border  px-2 py-2 text-xs  shadow-sm ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
               >
                 Sort By <BiChevronDown className="ml-1" />
               </button>

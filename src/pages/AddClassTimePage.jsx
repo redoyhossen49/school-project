@@ -33,31 +33,28 @@ export default function AddClassTimePage() {
   };
 
   return (
-    <div className="py-4 px-4 mx-6 md:mx-0 min-h-screen">
+    <div className={`py-4 px-4 mx-6 md:mx-0 min-h-screen ${darkMode ? "bg-gray-800" : "bg-gray-50"}`}>
       {/* ===== Header ===== */}
-      <div className="mb-4 bg-white p-6 rounded">
+      <div className={`mb-4 p-6 rounded ${darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"}`}>
         <h1 className="text-base font-bold">Add Class Time</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          <Link to="/school/dashboard" className="hover:text-indigo-600">
-            Dashboard
-          </Link>
+        <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+          <Link to="/school/dashboard" className="hover:text-indigo-600">Dashboard</Link>
           <span className="mx-1">/</span>
-          <Link to="/classtime" className="hover:text-indigo-600">
-            Class Time
-          </Link>
-          <span className="mx-1">/</span>
-          <span className="text-gray-400">Add Class Time</span>
+          <Link to="/school/dashboard/classtimelist" className="hover:text-indigo-600">Class Time list</Link>
+          
         </p>
       </div>
 
       {/* ===== Form ===== */}
       <form
         onSubmit={handleSave}
-        className={`p-6 rounded shadow-md space-y-6 overflow-y-auto ${
-          darkMode ? "bg-gray-700 text-white" : "bg-white"
+        className={`p-6 rounded shadow-md space-y-6 overflow-y-auto transition-colors duration-300 ${
+          darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"
         }`}
       >
-        <h2 className="text-center ">Class Time Information</h2>
+        <h2 className={`text-center font-semibold ${darkMode ? "text-gray-200" : "text-gray-800"}`}>
+          Class Time Information
+        </h2>
 
         {/* ===== Grid ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -67,7 +64,7 @@ export default function AddClassTimePage() {
             name="className"
             value={formData.className}
             onChange={handleChange}
-            inputClassName="py-1"
+            inputClassName={`py-1 ${darkMode ? "bg-gray-600 text-white placeholder-gray-400 border-gray-500" : "bg-white text-gray-800 placeholder-gray-500 border-gray-300"}`}
           />
 
           {/* Group (Optional) */}
@@ -76,7 +73,7 @@ export default function AddClassTimePage() {
             name="group"
             value={formData.group}
             onChange={handleChange}
-            inputClassName="py-1"
+            inputClassName={`py-1 ${darkMode ? "bg-gray-600 text-white placeholder-gray-400 border-gray-500" : "bg-white text-gray-800 placeholder-gray-500 border-gray-300"}`}
           />
 
           {/* Section (Optional) */}
@@ -85,7 +82,7 @@ export default function AddClassTimePage() {
             name="section"
             value={formData.section}
             onChange={handleChange}
-            inputClassName="py-1"
+            inputClassName={`py-1 ${darkMode ? "bg-gray-600 text-white placeholder-gray-400 border-gray-500" : "bg-white text-gray-800 placeholder-gray-500 border-gray-300"}`}
           />
 
           {/* Start Time */}
@@ -95,7 +92,7 @@ export default function AddClassTimePage() {
             type="time"
             value={formData.startTime}
             onChange={handleChange}
-            inputClassName="py-1"
+            inputClassName={`py-1 ${darkMode ? "bg-gray-600 text-white border-gray-500" : "bg-white text-gray-800 border-gray-300"}`}
           />
 
           {/* Last Time */}
@@ -105,7 +102,7 @@ export default function AddClassTimePage() {
             type="time"
             value={formData.lastTime}
             onChange={handleChange}
-            inputClassName="py-1"
+            inputClassName={`py-1 ${darkMode ? "bg-gray-600 text-white border-gray-500" : "bg-white text-gray-800 border-gray-300"}`}
           />
 
           {/* End Time */}
@@ -115,7 +112,7 @@ export default function AddClassTimePage() {
             type="time"
             value={formData.endTime}
             onChange={handleChange}
-            inputClassName="py-1"
+            inputClassName={`py-1 ${darkMode ? "bg-gray-600 text-white border-gray-500" : "bg-white text-gray-800 border-gray-300"}`}
           />
         </div>
 
@@ -124,7 +121,11 @@ export default function AddClassTimePage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-1 border w-full md:w-auto rounded hover:bg-gray-100 transition"
+            className={`px-6 py-1 w-full md:w-auto rounded transition ${
+              darkMode
+                ? "border border-gray-500 text-gray-200 hover:bg-gray-600"
+                : "border border-gray-300 text-gray-800 hover:bg-gray-100"
+            }`}
           >
             Cancel
           </button>

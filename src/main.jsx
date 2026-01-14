@@ -25,6 +25,13 @@ import AddPromoteRequestPage from "./pages/AddPromoteRequestPage";
 import PromoteRequestList from "./pages/PromoteRequestList";
 import ClassPermissionList from "./pages/ClassPermissionList";
 import AddClassPermissionPage from "./pages/AddClassPermissionPage";
+import ClassListPage from "./pages/ClassListPage";
+import GroupListPage from "./pages/GroupListpage";
+import SectionListPage from "./pages/SectionListPage";
+import SessionListPage from "./pages/SessionListPage";
+import SubjectListPage from "./pages/SubjectListPage";
+import SyllabusPage from "./pages/SyllabusPage";
+import ClassRoutinePage from "./pages/ClassRoutinePage";
 
 const router = createBrowserRouter([
   {
@@ -99,6 +106,13 @@ const router = createBrowserRouter([
         { path: "guardianlist", element: <GuardianList /> },
         { path: "teacherlist", element: <TeacherList /> },
         { path: "classtimelist", element: <ClassTimeList /> },
+        { path: "classlist", element: <ClassListPage /> },
+         { path: "grouplist", element: <GroupListPage /> },
+             { path: "sectionlist", element: <SectionListPage /> },
+             { path: "sessionlist", element: <SessionListPage /> },
+              { path: "subjectlist", element: <SubjectListPage /> },
+              { path: "syllabus", element: <SyllabusPage/> },
+              { path: "routine", element: <ClassRoutinePage/> },
         { path: "permissionlist", element: <ClassPermissionList /> },
         { path: "addclasspermission", element: <AddClassPermissionPage/> },
     ],

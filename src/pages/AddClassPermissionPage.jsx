@@ -36,18 +36,17 @@ export default function AddClassPermissionPage() {
   return (
     <div className="py-4 px-4 mx-6 md:mx-0 min-h-screen">
       {/* ===== Header ===== */}
-      <div className="mb-4 bg-white p-6 rounded">
+      <div className={`mb-4 ${darkMode?"bg-gray-700 text-gray-200":"bg-white text-gray-800"} p-6 rounded`}>
         <h1 className="text-base font-bold">Add Class Permission</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-xs text-indigo-600 mt-1">
           <Link to="/school/dashboard" className="hover:text-indigo-600">
             Dashboard
           </Link>
           <span className="mx-1">/</span>
-          <Link to="/classpermission" className="hover:text-indigo-600">
-            Class Permission
+          <Link to="/school/dashboard/permissionlist" className="hover:text-indigo-600">
+            Class Permission  list
           </Link>
-          <span className="mx-1">/</span>
-          <span className="text-gray-400">Add Class Permission</span>
+          
         </p>
       </div>
 

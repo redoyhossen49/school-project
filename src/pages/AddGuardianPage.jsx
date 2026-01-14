@@ -137,23 +137,43 @@ export default function AddGuardianPage() {
         {/* Upload Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Upload Photo</label>
-            <input
-              type="file"
-              name="photo"
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-            />
-            {photoPreview && (
-              <img
-                src={photoPreview}
-                alt="Preview"
-                className="mt-2 w-20 h-20 object-cover rounded"
-              />
+            <label className="block text-xs font-medium mb-1">
+              Upload Photo
+            </label>
+
+            {!photoPreview ? (
+              <div
+                className="border-2 border-dashed h-28 flex flex-col items-center justify-center
+        text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
+              >
+                <span className="text-sm">📷 Upload Photo</span>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e, "photo")}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                />
+              </div>
+            ) : (
+              <div className="relative h-28 w-full border rounded-lg overflow-hidden">
+                <img
+                  src={photoPreview}
+                  alt="Photo Preview"
+                  className="w-full h-full object-cover"
+                />
+
+                <button
+                  onClick={() => removeImage("photo")}
+                  className="absolute top-2 right-2 bg-black/60 text-white rounded-full
+          w-7 h-7 flex items-center justify-center hover:bg-red-600 transition"
+                >
+                  ✕
+                </button>
+              </div>
             )}
           </div>
-        </div>
+          </div>
 
         {/* Action Buttons */}
         <div className="flex w-full gap-4 md:justify-end mt-4">

@@ -6,6 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { FiRefreshCw, FiFilter } from "react-icons/fi";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
+import ClassPaymentTable from "../components/academic/ClassPaymentTable.jsx";
 
 export default function TeacherList() {
   const navigate = useNavigate();
@@ -21,50 +22,53 @@ export default function TeacherList() {
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
-  // Dropdown states
-  const [selectedDate, setSelectedDate] = useState("Monthly");
-  const [dateOpen, setDateOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [showSession, setShowSession] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState("newest");
-  const [filterOpen, setFilterOpen] = useState(false);
+ 
 
-  // Filter values
-  const [filterValues, setFilterValues] = useState({
+ 
+const [designationOpen, setDesignationOpen] = useState(false);
+
+const [designationFilter, setDesignationFilter] = useState("");
+
+
+  // Dropdown states
+  const [attendanceOpen, setAttendanceOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState("newest");
+  // Get all unique designations dynamically from teacherData
+  const uniqueDesignations = Array.from(
+    new Set(teachers.map((t) => t.designation))
+  );
+
+  // Modal-এর temporary values
+  const [tempFilterValues, setTempFilterValues] = useState({
     designation: "",
-    session: "",
   });
 
-  const dateDropdownRef = useRef(null);
-  const exportRef = useRef(null);
-  const sortRef = useRef(null);
+  const [attendanceFilter, setAttendanceFilter] = useState(""); // selected attendance filter
+  const [filterValues, setFilterValues] = useState({
+    designation: "",
+  });
+
+  const attendanceRef = useRef(null);
   const filterRef = useRef(null);
+  const sortRef = useRef(null);
+  const exportRef = useRef(null);
 
-  const dateOptions = [
-    { label: "Today", value: "today" },
-    { label: "Last 7 Days", value: "weekly" },
-    { label: "This Month", value: "monthly" },
-  ];
-
-  const sessionKeys = ["Session 1", "Session 2", "Session 3"];
+  const attendanceOptions = ["Presence", "Absence", "Late", "Leave"];
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        dateDropdownRef.current &&
-        !dateDropdownRef.current.contains(e.target)
-      ) {
-        setDateOpen(false);
-        setShowSession(false);
-      }
-      if (exportRef.current && !exportRef.current.contains(e.target))
-        setExportOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
+      if (attendanceRef.current && !attendanceRef.current.contains(e.target))
+        setAttendanceOpen(false);
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
+      if (sortRef.current && !sortRef.current.contains(e.target))
+        setSortOpen(false);
+      if (exportRef.current && !exportRef.current.contains(e.target))
+        setExportOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -72,52 +76,64 @@ export default function TeacherList() {
 
   // Open only one dropdown at a time
   const handleDropdownClick = (type) => {
-    setDateOpen(false);
+    setAttendanceOpen(false);
     setFilterOpen(false);
     setSortOpen(false);
+    setExportOpen(false);
 
-    if (type === "date") setDateOpen(true);
+    if (type === "attendance") setAttendanceOpen(true);
     if (type === "filter") setFilterOpen(true);
     if (type === "sort") setSortOpen(true);
+    if (type === "export") setExportOpen(true);
   };
 
-  // Filter + Sort + Search logic
   const filteredTeachers = teachers
+
+  .filter((t) =>
+    designationFilter ? t.designation === designationFilter : true
+  )
+    // 1️⃣ Search by name
     .filter((t) => t.teacherName.toLowerCase().includes(search.toLowerCase()))
+
+    // 2️⃣ Filter by designation
     .filter((t) => {
-      // Filter modal
       if (
         filterValues.designation &&
         t.designation !== filterValues.designation
       )
         return false;
-      if (filterValues.session && t.session !== filterValues.session)
-        return false;
 
-      // Date filter
-      const today = new Date();
-      const joinDate = new Date(t.joinDate);
-      if (selectedDate === "Today")
-        return joinDate.toDateString() === today.toDateString();
-      if (selectedDate === "Last 7 Days") {
-        const weekAgo = new Date();
-        weekAgo.setDate(today.getDate() - 7);
-        return joinDate >= weekAgo && joinDate <= today;
+      // Attendance filter
+      if (attendanceFilter) {
+        switch (attendanceFilter) {
+          case "Presence":
+            return t.present > 0;
+          case "Absence":
+            return t.absence > 0;
+          case "Late":
+            return t.late > 0;
+          case "Leave":
+            return t.leave > 0;
+          default:
+            return true;
+        }
       }
-      if (selectedDate === "This Month")
-        return (
-          joinDate.getMonth() === today.getMonth() &&
-          joinDate.getFullYear() === today.getFullYear()
-        );
-      if (sessionKeys.includes(selectedDate)) return t.session === selectedDate;
 
       return true;
     })
+
+    // 3️⃣ Sort
     .sort((a, b) => {
-      const d1 = new Date(a.joinDate);
-      const d2 = new Date(b.joinDate);
-      return sortOrder === "oldest" ? d1 - d2 : d2 - d1;
+      if (sortOrder === "newest") return b.id - a.id; // newest = higher ID first
+      if (sortOrder === "oldest") return a.id - b.id; // oldest = lower ID first
+      return 0;
     });
+
+     const designationOptions = Array.from(
+    new Set(teacherData.map((t) => t.designation))
+  );
+
+ 
 
   const totalTeachers = filteredTeachers.length;
   const totalPages = Math.ceil(totalTeachers / teachersPerPage);
@@ -147,24 +163,39 @@ export default function TeacherList() {
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
-              </Link>{" "}
-              / Teachers / Teacher List
+              </Link>
+              / Teacher List
             </p>
           </div>
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2">
             <button
-              onClick={() => setTeachers(teacherData)}
-              className="w-24 flex items-center justify-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-3 py-2 text-xs"
+              onClick={() => {
+                setTeachers(teacherData); // reset teacher list
+                setFilterValues({ designation: "" }); // reset applied filter
+                setTempFilterValues({ designation: "" }); // reset modal temp
+                setAttendanceFilter(""); // reset attendance filter
+                setSearch(""); // optional: reset search too
+                setCurrentPage(1); // optional: go back to first page
+              }}
+              className={`w-28 flex items-center  gap-1 rounded border  shadow-sm ${
+                darkMode
+                  ? "bg-gray-700 border-gray-500"
+                  : "bg-white border-gray-200"
+              } px-3 py-2 text-xs`}
             >
-              <FiRefreshCw /> Refresh
+              Refresh
             </button>
 
             <div className="relative" ref={exportRef}>
               <button
-                onClick={() => setExportOpen((prev) => !prev)}
-                className="w-28 flex items-center justify-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-3 py-2 text-xs"
+                onClick={() => handleDropdownClick("export")}
+                className={`w-28 flex items-center justify-between   rounded border  shadow-sm ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-500"
+                    : "bg-white border-gray-200"
+                } px-3 py-2 text-xs`}
               >
                 Export <BiChevronDown />
               </button>
@@ -189,9 +220,9 @@ export default function TeacherList() {
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addteacher")}
-                className="w-28 flex items-center justify-center gap-1 rounded bg-blue-600 px-3 py-2 text-xs text-white"
+                className="w-28 flex items-center gap-1 rounded bg-blue-600 px-3 py-2 text-xs text-white"
               >
-                + Add Teacher
+                Add Teacher
               </button>
             )}
           </div>
@@ -200,16 +231,31 @@ export default function TeacherList() {
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
-            onClick={() => setTeachers(teacherData)}
-            className="w-full flex items-center gap-2 rounded border border-gray-200 shadow-sm bg-white px-3 py-2 text-xs"
+            onClick={() => {
+              setTeachers(teacherData); // reset teacher list
+              setFilterValues({ designation: "" }); // reset applied filter
+              setTempFilterValues({ designation: "" }); // reset modal temp
+              setAttendanceFilter(""); // reset attendance filter
+              setSearch(""); // optional: reset search too
+              setCurrentPage(1); // optional: go back to first page
+            }}
+            className={`w-full flex items-center gap-2 rounded border ${
+              darkMode
+                ? "bg-gray-700 border-gray-500"
+                : "bg-white border-gray-200"
+            } shadow-sm  px-3 py-2 text-xs`}
           >
-            <FiRefreshCw /> Refresh
+            Refresh
           </button>
 
           <div className="relative w-full" ref={exportRef}>
             <button
-              onClick={() => setExportOpen((prev) => !prev)}
-              className="w-full flex items-center gap-1 rounded border border-gray-200 shadow-sm bg-white px-3 py-2 text-xs"
+              onClick={() => handleDropdownClick("export")}
+              className={`w-full flex items-center justify-between gap-2 rounded border ${
+                darkMode
+                  ? "bg-gray-700 border-gray-500"
+                  : "bg-white border-gray-200"
+              } shadow-sm  px-3 py-2 text-xs`}
             >
               Export <BiChevronDown />
             </button>
@@ -236,75 +282,48 @@ export default function TeacherList() {
               onClick={() => navigate("/school/dashboard/addteacher")}
               className="w-full flex items-center gap-1 rounded bg-blue-600 px-3 py-2 text-xs text-white"
             >
-              + Teacher
+              Teacher
             </button>
           )}
         </div>
 
-        {/* Controls: Date, Filter, Sort + Search */}
+        {/* Controls: Attendance Dropdown, Filter, Sort + Search */}
         <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-3 mt-3">
           <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
-            {/* Date Dropdown */}
-            <div className="relative flex-1 md:flex-none" ref={dateDropdownRef}>
+            {/* Attendance Dropdown */}
+            <div className="relative flex-1 md:flex-none" ref={attendanceRef}>
               <button
-                onClick={() => handleDropdownClick("date")}
-                className={`w-full flex items-center rounded border px-3 py-2 text-xs shadow-sm ${
+                onClick={() => handleDropdownClick("attendance")}
+                className={`w-full md:w-28 flex items-center justify-between rounded border px-2 py-2 text-xs shadow-sm ${
                   darkMode
-                    ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                {selectedDate} <BiChevronDown className="ml-4" />
+                {attendanceFilter || "Attendance"} <BiChevronDown className="" />
               </button>
-              {dateOpen && (
+
+              {attendanceOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-36 shadow-lg z-30 overflow-hidden ${
+                  className={`absolute left-0 mt-2 w-36 shadow-lg z-40 overflow-hidden flex flex-col ${
                     darkMode
-                      ? "bg-gray-600 text-gray-100 border border-gray-700"
+                      ? "bg-gray-800 text-gray-100 border border-gray-700"
                       : "bg-white text-gray-900 border border-gray-200"
-                  } flex flex-col`}
+                  }`}
                 >
-                  {dateOptions.map((opt) => (
+                  {attendanceOptions.map((opt) => (
                     <div
-                      key={opt.value}
+                      key={opt}
                       onClick={() => {
-                        setSelectedDate(opt.label);
-                        setDateOpen(false);
-                        setShowSession(false);
+                        setAttendanceFilter(opt);
+                        setAttendanceOpen(false);
                       }}
                       className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
                     >
-                      <span>{opt.label}</span>
+                      <span>{opt}</span>
                       <BiChevronRight size={12} />
                     </div>
                   ))}
-                  <div
-                    onClick={() => setShowSession(!showSession)}
-                    className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
-                  >
-                    <span>Session</span>
-                    <BiChevronRight
-                      size={14}
-                      className={`${
-                        showSession ? "rotate-90" : ""
-                      } transition-transform`}
-                    />
-                  </div>
-                  {showSession &&
-                    sessionKeys.map((s) => (
-                      <div
-                        key={s}
-                        onClick={() => {
-                          setSelectedDate(s);
-                          setDateOpen(false);
-                          setShowSession(false);
-                        }}
-                        className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
-                      >
-                        <span>{s}</span>
-                        <BiChevronRight size={14} />
-                      </div>
-                    ))}
                 </div>
               )}
             </div>
@@ -313,109 +332,67 @@ export default function TeacherList() {
             <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
                 onClick={() => handleDropdownClick("filter")}
-                className={`w-full flex items-center rounded border px-3 py-2 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center justify-between rounded border px-3 py-2 text-xs shadow-sm ${
                   darkMode
-                    ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                <FiFilter className="mr-1" /> Filter{" "}
-                <BiChevronDown className="ml-4" />
+                Filter <BiChevronDown />
               </button>
 
-              {/* Filter Modal */}
               {filterOpen && (
                 <div
-                  className="fixed inset-0 z-50 flex items-center justify-center p-6"
-                  onClick={() => setFilterOpen(false)}
+                  className={`absolute top-full z-50 mt-2 w-56 rounded border
+    left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0
+    max-h-60 overflow-y-auto shadow-md p-3 space-y-2
+    ${darkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"}`}
                 >
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className={`${
-                      darkMode
-                        ? "bg-gray-700 text-gray-100"
-                        : "bg-white text-gray-800"
-                    } w-8/12 md:w-96 p-6 max-h-[80vh] overflow-y-auto rounded shadow-sm border ${
-                      darkMode ? "border-gray-600" : "border-gray-200"
-                    } transition-all duration-300 md:fixed md:top-48 md:left-102`}
-                  >
-                    <h2
-                      className={`text-lg md:text-xl mx-2 font-semibold mb-3 text-left ${
-                        darkMode ? "text-gray-200" : "text-gray-700"
-                      }`}
+                  {/* Designation */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setDesignationOpen((prev) => !prev)}
+                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center
+        ${
+          darkMode
+            ? "bg-gray-700 border-gray-600 text-gray-100"
+            : "bg-white border-gray-200"
+        }`}
                     >
-                      Filter Teachers
-                    </h2>
+                      {designationFilter || "All Designations"}{" "}
+                      <BiChevronDown />
+                    </button>
 
-                    <div className="flex flex-col gap-3 mx-2">
-                      {["Designation", "Session"].map((field) => (
-                        <div key={field} className="relative">
-                          <label
-                            className={`absolute -top-2 left-2 px-1 text-[10px] ${
-                              darkMode
-                                ? "bg-gray-700 text-blue-300"
-                                : "bg-white text-blue-500"
-                            }`}
-                          >
-                            {field}
-                          </label>
-                          <select
-                            value={
-                              field === "Designation"
-                                ? filterValues.designation
-                                : filterValues.session
-                            }
-                            onChange={(e) =>
-                              setFilterValues((prev) => ({
-                                ...prev,
-                                [field === "Designation"
-                                  ? "designation"
-                                  : "session"]: e.target.value,
-                              }))
-                            }
-                            className={`w-full px-2 py-1.5 text-xs rounded border bg-transparent ${
-                              darkMode
-                                ? "border-gray-400 text-gray-100"
-                                : "border-gray-300 text-gray-800"
-                            } focus:outline-none focus:ring-1 focus:ring-blue-400`}
-                          >
-                            <option value="">Select</option>
-                            {field === "Designation" && (
-                              <>
-                                <option value="Teacher">Teacher</option>
-                                <option value="Head Teacher">
-                                  Head Teacher
-                                </option>
-                              </>
-                            )}
-                            {field === "Session" && (
-                              <>
-                                <option value="2024-25">2024-25</option>
-                                <option value="2025-26">2025-26</option>
-                              </>
-                            )}
-                          </select>
-                        </div>
+                    {designationOpen &&
+                      designationOptions.map((d) => (
+                        <button
+                          key={d}
+                          onClick={() => {
+                            setDesignationFilter(d);
+                            setDesignationOpen(false);
+                            setCurrentPage(1);
+                          }}
+                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
+            ${
+              designationFilter === d
+                ? "bg-blue-100 text-blue-700 font-medium"
+                : darkMode
+                ? "text-gray-200"
+                : "text-gray-700"
+            }`}
+                        >
+                          {d}
+                        </button>
                       ))}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 justify-end pt-2 mt-1 mx-2">
-                      <button
-                        onClick={() =>
-                          setFilterValues({ designation: "", session: "" })
-                        }
-                        className="flex-1 sm:flex-none px-3 py-1 text-xs font-medium border rounded bg-gray-200 hover:bg-gray-300"
-                      >
-                        Reset
-                      </button>
-                      <button
-                        onClick={() => setFilterOpen(false)}
-                        className="flex-1 sm:flex-none px-3 py-1 text-xs font-medium rounded bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        Apply
-                      </button>
-                    </div>
                   </div>
+
+                  {/* Apply */}
+                  <button
+                    onClick={() => setFilterOpen(false)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 rounded"
+                  >
+                    Apply
+                  </button>
                 </div>
               )}
             </div>
@@ -424,17 +401,17 @@ export default function TeacherList() {
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => handleDropdownClick("sort")}
-                className={`w-full flex items-center rounded border px-3 py-2 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center justify-between rounded border px-3 py-2 text-xs shadow-sm ${
                   darkMode
-                    ? "bg-gray-800 border-gray-600 hover:bg-gray-500"
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Sort By <BiChevronDown className="ml-4" />
+                Sort By <BiChevronDown />
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-36 shadow-sm z-40 rounded border ${
+                  className={`absolute left-0 mt-2 w-25 md:w-36 shadow-sm z-40 rounded border ${
                     darkMode
                       ? "bg-gray-800 text-gray-100 border-gray-700"
                       : "bg-white text-gray-900 border-gray-200"
@@ -445,18 +422,18 @@ export default function TeacherList() {
                       setSortOpen(false);
                       setSortOrder("newest");
                     }}
-                    className="w-full px-3 py-1 text-left hover:bg-gray-100"
+                    className="w-full px-3 py-1 text-xs text-left hover:bg-gray-100"
                   >
-                    Newest
+                    First
                   </button>
                   <button
                     onClick={() => {
                       setSortOpen(false);
                       setSortOrder("oldest");
                     }}
-                    className="w-full px-3 py-1 text-left hover:bg-gray-100"
+                    className="w-full px-3 py-1 text-xs text-left hover:bg-gray-100"
                   >
-                    Oldest
+                    Last
                   </button>
                 </div>
               )}
@@ -490,7 +467,7 @@ export default function TeacherList() {
         className={`rounded-md p-2 ${darkMode ? "bg-gray-900" : "bg-white"}`}
       >
         <TeacherTable
-          data={currentTeachers}
+          data={filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher)}
           setData={setTeachers}
           canEdit={canEdit}
         />
