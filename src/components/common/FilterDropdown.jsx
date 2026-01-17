@@ -3,7 +3,7 @@ import { BiChevronDown } from "react-icons/bi";
 
 export default function FilterDropdown({
   title = "Filter",
-  fields = [], // [{ key, label, options, placeholder }]
+  fields = [],
   selected = {},
   setSelected = () => {},
   darkMode = false,
@@ -11,10 +11,9 @@ export default function FilterDropdown({
   onClose = () => {},
   onApply = () => {},
 }) {
-  const [openKey, setOpenKey] = useState(null); // which nested dropdown open
-  const [tempValues, setTempValues] = useState({}); // temp filters
+  const [openKey, setOpenKey] = useState(null);
+  const [tempValues, setTempValues] = useState({});
 
-  // reset temp when open
   useEffect(() => {
     if (isOpen) {
       setTempValues(selected || {});
@@ -40,81 +39,77 @@ export default function FilterDropdown({
       </h3>
 
       {/* Fields */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {fields.map((field) => (
           <div key={field.key} className="relative">
-            {/* Select button */}
+            {/* Select Button */}
             <button
               onClick={() =>
                 setOpenKey(openKey === field.key ? null : field.key)
               }
-              className={`w-full h-8 px-3 text-xs flex justify-between items-center border font-medium
+              className={`w-full h-8 px-3 text-xs flex justify-between items-center border rounded
               ${
                 darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100"
-                  : "bg-white border-gray-300 text-gray-700"
+                  ? "bg-gray-800 border-gray-600 text-gray-100"
+                  : "bg-white border-gray-300 text-gray-800"
               }`}
             >
-             
-                <span className="font-semibold">
-                  {tempValues[field.key] || field.placeholder}
-                
+              <span>
+                {tempValues[field.key] || field.placeholder}
               </span>
               <BiChevronDown size={16} />
             </button>
 
-            {/* Options */}
+            {/* Options dropdown (MATCH SELECT STYLE) */}
             {openKey === field.key && (
               <div
-                className={`absolute bottom-full left-0 mb-1 w-full max-h-44 
-                overflow-y-auto border shadow-lg z-50
+                className={`absolute top-full left-0 mt-1 w-full max-h-44 overflow-y-auto
+                border rounded shadow-sm z-50
                 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-200"
                 }`}
               >
-                {/* All option */}
+                {/* Placeholder / All */}
                 <button
                   onClick={() => {
-                    setTempValues((prev) => ({
-                      ...prev,
-                      [field.key]: "",
-                    }));
+                    setTempValues((p) => ({ ...p, [field.key]: "" }));
                     setOpenKey(null);
                   }}
-                  className={`w-full h-8 px-3 text-left text-xs
-                  hover:bg-blue-400 hover:text-blue-600
+                  className={`w-full px-3 py-1.5 text-xs text-left
+                  hover:bg-blue-100
                   ${
                     !tempValues[field.key]
-                      ? "bg-blue-700 text-white font-semibold"
+                      ? darkMode
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-100 text-blue-600 font-medium"
                       : darkMode
                       ? "text-gray-200"
-                      : "text-gray-700"
+                      : "text-gray-800"
                   }`}
                 >
                   {field.placeholder}
                 </button>
 
-                {/* Dynamic options */}
+                {/* Options */}
                 {field.options.map((opt) => (
                   <button
                     key={opt}
                     onClick={() => {
-                      setTempValues((prev) => ({
-                        ...prev,
-                        [field.key]: opt,
-                      }));
+                      setTempValues((p) => ({ ...p, [field.key]: opt }));
                       setOpenKey(null);
                     }}
-                    className={`w-full h-8 px-3 text-left text-xs
-                    hover:bg-blue-50 hover:text-blue-600
+                    className={`w-full px-3 py-1.5 text-xs text-left
+                    hover:bg-blue-100
                     ${
                       tempValues[field.key] === opt
-                        ? "bg-blue-700 text-white font-semibold"
+                        ? darkMode
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-100 text-blue-600 font-medium"
                         : darkMode
                         ? "text-gray-200"
-                        : "text-gray-700"
+                        : "text-gray-800"
                     }`}
                   >
                     {opt}
@@ -128,10 +123,9 @@ export default function FilterDropdown({
 
       {/* Actions */}
       <div className="flex gap-2 mt-4">
-        {/* Reset */}
         <button
           onClick={() => setTempValues({})}
-          className={`flex-1 h-8 text-xs border
+          className={`flex-1 h-8 text-xs border rounded
           ${
             darkMode
               ? "bg-gray-700 border-gray-600 text-gray-200"
@@ -141,16 +135,14 @@ export default function FilterDropdown({
           Reset
         </button>
 
-        {/* Apply */}
         <button
           onClick={() => {
             setSelected(tempValues);
             onApply(tempValues);
             onClose();
           }}
-          className="flex-1 h-8 text-xs text-white font-medium
-          bg-gradient-to-r from-blue-500 to-indigo-600
-          hover:from-blue-600 hover:to-indigo-700"
+          className="flex-1 h-8 text-xs text-white font-medium rounded
+          bg-blue-600 hover:bg-blue-700"
         >
           Apply
         </button>
