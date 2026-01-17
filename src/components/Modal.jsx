@@ -21,12 +21,7 @@ export default function Modal({
         {/* Header */}
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-semibold">{title}</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500"
-          >
-            ✕
-          </button>
+         
         </div>
 
         {/* Body */}

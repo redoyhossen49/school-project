@@ -10,7 +10,7 @@ import EditStudentModal from "../components/student/EditStudentModal.jsx";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function StudentsList() {
   const navigate = useNavigate();
@@ -120,65 +120,65 @@ export default function StudentsList() {
     (currentPage - 1) * studentsPerPage,
     currentPage * studentsPerPage
   );
-// ===== EXPORT EXCEL =====
-const exportExcel = (data) => {
-  if (!data.length) return;
+  // ===== EXPORT EXCEL =====
+  const exportExcel = (data) => {
+    if (!data.length) return;
 
-  const sheetData = data.map((s, i) => ({
-    Sl: i + 1,
-    Name: s.name,
-    Roll: s.roll,
-    Class: s.className,
-    Group: s.group,
-    Section: s.section,
-    Session: s.session,
-    JoinDate: s.joinDate,
-  }));
+    const sheetData = data.map((s, i) => ({
+      Sl: i + 1,
+      Name: s.name,
+      Roll: s.roll,
+      Class: s.className,
+      Group: s.group,
+      Section: s.section,
+      Session: s.session,
+      JoinDate: s.joinDate,
+    }));
 
-  const ws = utils.json_to_sheet(sheetData);
-  const wb = utils.book_new();
-  utils.book_append_sheet(wb, ws, "Students");
-  writeFile(wb, "Students_List.xlsx");
-};
+    const ws = utils.json_to_sheet(sheetData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Students");
+    writeFile(wb, "Students_List.xlsx");
+  };
 
-// ===== EXPORT PDF =====
-const exportPDF = (data) => {
-  if (!data.length) return;
+  // ===== EXPORT PDF =====
+  const exportPDF = (data) => {
+    if (!data.length) return;
 
-  const doc = new jsPDF("landscape", "pt", "a4");
+    const doc = new jsPDF("landscape", "pt", "a4");
 
-  const columns = [
-    "Sl",
-    "Name",
-    "Roll",
-    "Class",
-    "Group",
-    "Section",
-    "Session",
-    "Join Date",
-  ];
+    const columns = [
+      "Sl",
+      "Name",
+      "Roll",
+      "Class",
+      "Group",
+      "Section",
+      "Session",
+      "Join Date",
+    ];
 
-  const rows = data.map((s, i) => [
-    i + 1,
-    s.name,
-    s.roll,
-    s.className,
-    s.group,
-    s.section,
-    s.session,
-    s.joinDate,
-  ]);
+    const rows = data.map((s, i) => [
+      i + 1,
+      s.name,
+      s.roll,
+      s.className,
+      s.group,
+      s.section,
+      s.session,
+      s.joinDate,
+    ]);
 
-  autoTable(doc, {
-    head: [columns],
-    body: rows,
-    startY: 20,
-    styles: { fontSize: 8 },
-    headStyles: { fillColor: [37, 99, 235] }, // blue
-  });
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 20,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [37, 99, 235] }, // blue
+    });
 
-  doc.save("Students_List.pdf");
-};
+    doc.save("Students_List.pdf");
+  };
 
   const handleRefresh = () => {
     setStudents(studentData);
@@ -189,42 +189,49 @@ const exportPDF = (data) => {
     setSelectedDate("Monthly");
     setCurrentPage(1);
   };
+  // Generate dynamic options from studentData
+  const getUniqueOptions = (data, key) => {
+    return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
+  };
+
+  // Example usage in parent component
+  const classOptions = getUniqueOptions(studentData, "className"); // ["I", "II", "III", ...]
+  const groupOptions = getUniqueOptions(studentData, "group"); // ["N/A", "Science", ...]
+  const sectionOptions = getUniqueOptions(studentData, "section"); // ["A", "B", "C", ...]
+  const sessionOptions = getUniqueOptions(studentData, "session"); // ["2025-26", ...]
 
   const cardBg = darkMode
-  ? "bg-gray-800 text-gray-100"
-  : "bg-white text-gray-800";
+    ? "bg-gray-800 text-gray-100"
+    : "bg-white text-gray-800";
 
-const borderClr = darkMode
-  ? "border-gray-600"
-  : "border-gray-200";
+  const borderClr = darkMode ? "border-gray-600" : "border-gray-200";
 
-const inputBg = darkMode
-  ? "bg-gray-700 text-gray-100"
-  : "bg-white text-gray-800";
+  const inputBg = darkMode
+    ? "bg-gray-700 text-gray-100"
+    : "bg-white text-gray-800";
 
-const dropdownBg = darkMode
-  ? "bg-gray-800 text-gray-100"
-  : "bg-white text-gray-900";
-
+  const dropdownBg = darkMode
+    ? "bg-gray-800 text-gray-100"
+    : "bg-white text-gray-900";
 
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
-     <div className={`space-y-4 rounded-md p-3 ${cardBg}`}>
+      <div className={`space-y-4 rounded-md p-3 ${cardBg}`}>
         <div className="md:flex md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold ">
-              Students List
-            </h2>
+            <h2 className="text-base font-semibold ">Students List</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>
-              
-               <button onClick={() => navigate("/school/dashboard/studentlist")} className="hover:text-indigo-600">
-               / Student
+              <button
+                onClick={() => navigate("/school/dashboard/studentlist")}
+                className="hover:text-indigo-600"
+              >
+                / Student
               </button>
-             / Student List
+              / Student List
             </p>
           </div>
 
@@ -232,7 +239,6 @@ const dropdownBg = darkMode
           <div className="hidden md:flex gap-2">
             <button
               onClick={handleRefresh}
-            
               className={`flex items-center shadow-sm  px-3 py-2 text-xs w-24 rounded border ${borderClr} ${inputBg}`}
             >
               Refresh
@@ -253,10 +259,16 @@ const dropdownBg = darkMode
                       : "bg-white border-gray-200 text-gray-900"
                   }`}
                 >
-                  <button   onClick={() => exportPDF(filteredStudents)} className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <button
+                    onClick={() => exportPDF(filteredStudents)}
+                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
                     Export PDF
                   </button>
-                  <button   onClick={() => exportExcel(filteredStudents)} className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <button
+                    onClick={() => exportExcel(filteredStudents)}
+                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
                     Export Excel
                   </button>
                 </div>
@@ -268,7 +280,7 @@ const dropdownBg = darkMode
                 onClick={() => navigate("/school/dashboard/addstudent")}
                 className="flex items-center gap-1 rounded w-28 shadow-sm bg-blue-600 px-3 py-2 text-xs text-white"
               >
-               Student
+                Student
               </button>
             )}
           </div>
@@ -278,16 +290,15 @@ const dropdownBg = darkMode
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
-           
-             className={`w-full  flex items-center shadow-sm  px-3 py-2 text-xs w-24 rounded border ${borderClr} ${inputBg}`}
+            className={`w-full  flex items-center shadow-sm  px-3 h-8 text-sm w-24 rounded border ${borderClr} ${inputBg}`}
           >
-           Refresh
+            Refresh
           </button>
 
           <div className="relative w-full">
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-               className={`w-full  flex items-center justify-between shadow-sm  px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
+              className={`w-full  flex items-center justify-between shadow-sm  px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
             >
               Export <BiChevronDown className="text-sm" />
             </button>
@@ -299,10 +310,16 @@ const dropdownBg = darkMode
                     : "bg-white border-gray-200 text-gray-900"
                 }`}
               >
-                <button   onClick={() => exportPDF(filteredStudents)} className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button
+                  onClick={() => exportPDF(filteredStudents)}
+                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
                   Export PDF
                 </button>
-                <button   onClick={() => exportExcel(filteredStudents)} className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button
+                  onClick={() => exportExcel(filteredStudents)}
+                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
                   Export Excel
                 </button>
               </div>
@@ -326,8 +343,7 @@ const dropdownBg = darkMode
             <div className="relative" ref={dateDropdownRef}>
               <button
                 onClick={() => setDateOpen((prev) => !prev)}
-               
-                 className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
+                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
               >
                 {selectedDate} <BiChevronDown className="text-sm" />
               </button>
@@ -385,18 +401,60 @@ const dropdownBg = darkMode
             </div>
 
             {/* Filter Button */}
-            <button
-              onClick={() => setFilterOpen(true)}
-             className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
-            >
-             Filter <BiChevronDown className="text-sm" />
-            </button>
+            <div className="relative " ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen(true)}
+                 className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
+              >
+                Filter <BiChevronDown />
+              </button>
+
+              <FilterDropdown
+                title="Filter Students"
+                fields={[
+                  {
+                    key: "className",
+                    label: "Class",
+                    options: classOptions,
+                    placeholder: "All Classes",
+                  },
+                  {
+                    key: "group",
+                    label: "Group",
+                    options: groupOptions,
+                    placeholder: "All Groups",
+                  },
+                  {
+                    key: "section",
+                    label: "Section",
+                    options: sectionOptions,
+                    placeholder: "All Sections",
+                  },
+                  {
+                    key: "session",
+                    label: "Session",
+                    options: sessionOptions,
+                    placeholder: "All Sessions",
+                  },
+                ]}
+                selected={filters}
+                setSelected={setFilters}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={() => setCurrentPage(1)}
+              />
+            </div>
 
             {/* Sort Dropdown */}
             <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${darkMode?"bg-gray-700 border-gray-200" : "bg-white border-gray-200"}`}
+                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-200"
+                    : "bg-white border-gray-200"
+                }`}
               >
                 Sort By <BiChevronDown className="text-sm" />
               </button>
@@ -439,7 +497,6 @@ const dropdownBg = darkMode
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name..."
               className={`w-full md:w-64 ${borderClr} ${inputBg} rounded border  px-3 py-2 text-xs focus:outline-none`}
-              
             />
             <Pagination
               currentPage={currentPage}
@@ -451,8 +508,11 @@ const dropdownBg = darkMode
       </div>
 
       {/* ===== STUDENT TABLE ===== */}
-      <div className={`rounded ${darkMode?"bg-gray-900":"bg-white"} p-2 overflow-x-auto`}>
-        
+      <div
+        className={`rounded ${
+          darkMode ? "bg-gray-900" : "bg-white"
+        } p-2 overflow-x-auto`}
+      >
         <StudentTable
           data={currentStudents}
           setData={setStudents}
@@ -474,121 +534,6 @@ const dropdownBg = darkMode
             setEditingStudent(null);
           }}
         />
-      )}
-
-      {/* ===== FILTER MODAL ===== */}
-      {filterOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          onClick={() => setFilterOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            ref={filterRef}
-            className={`${
-              darkMode ? "bg-gray-700 text-gray-100" : "bg-white text-gray-800"
-            } w-8/12 md:w-96 p-6 max-h-[80vh] overflow-y-auto rounded shadow-sm border ${
-              darkMode ? "border-gray-600" : "border-gray-200"
-            } transition-all duration-300 md:fixed md:top-48 md:left-100`}
-          >
-            <h2
-              className={`text-lg md:text-xl mx-2 font-semibold mb-3 text-left ${
-                darkMode ? "text-gray-200" : "text-gray-700"
-              }`}
-            >
-              Filter Students
-            </h2>
-
-            <div className="flex flex-col gap-3 mx-2">
-              {["Class", "Group", "Section", "Session"].map((field) => {
-                const key = field.toLowerCase();
-                return (
-                  <div key={field} className="relative">
-                    <label
-                      className={`absolute -top-2 left-2 px-1 text-[10px] ${
-                        darkMode
-                          ? "bg-gray-700 text-blue-300"
-                          : "bg-white text-blue-500"
-                      }`}
-                    >
-                      {field}
-                    </label>
-                    <select
-                      value={tempFilters[key]}
-                      onChange={(e) =>
-                        setTempFilters({
-                          ...tempFilters,
-                          [key]:
-                            e.target.value === "Select" ? "" : e.target.value,
-                        })
-                      }
-                      className={`w-full px-2 py-1.5 text-xs rounded border bg-transparent ${
-                        darkMode
-                          ? "border-gray-400 text-gray-100"
-                          : "border-gray-300 text-gray-800"
-                      } focus:outline-none focus:ring-1 focus:ring-blue-400`}
-                    >
-                      <option>Select</option>
-                      {field === "Class" && (
-                        <>
-                          <option>I</option>
-                          <option>II</option>
-                        </>
-                      )}
-                      {field === "Group" && (
-                        <>
-                          <option>Science</option>
-                          <option>Arts</option>
-                        </>
-                      )}
-                      {field === "Section" && (
-                        <>
-                          <option>A</option>
-                          <option>B</option>
-                        </>
-                      )}
-                      {field === "Session" && (
-                        <>
-                          <option>2024-25</option>
-                          <option>2025-26</option>
-                        </>
-                      )}
-                    </select>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex flex-wrap gap-2 justify-end pt-2 mt-1 mx-2">
-              <button
-                onClick={() => {
-                  const reset = {
-                    className: "",
-                    group: "",
-                    section: "",
-                    session: "",
-                  };
-                  setTempFilters(reset);
-                  setFilters(reset);
-                  setFilterOpen(false);
-                }}
-                className="flex-1 sm:flex-none px-3 py-1 text-xs font-medium border rounded bg-gray-200 hover:bg-gray-300"
-              >
-                Reset
-              </button>
-              <button
-                onClick={() => {
-                  setFilters(tempFilters);
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                className="flex-1 sm:flex-none px-3 py-1 text-xs font-medium rounded bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

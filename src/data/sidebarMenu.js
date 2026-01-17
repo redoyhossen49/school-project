@@ -203,11 +203,11 @@ export const sidebarMenu = (role) => {
       title: "Examination",
       icon: BookOpen,
       children: [
-        { title: "Exam Name", path: "/exam/name" },
-        { title: "Exam Routine", path: "/exam/routine" },
-        { title: "Grade", path: "/exam/grade" },
-        { title: "Admit Card", path: "/exam/admit" },
-        { title: "Sit Number", path: "/exam/setnumber" },
+        { title: "Exam Name", path: "examlist" },
+        { title: "Exam Routine", path: "examroutine" },
+        { title: "Grade", path: "examgrade" },
+        { title: "Admit Card", path: "examadmit" },
+        { title: "Sit Number", path: "examsitnumber" },
 
         { title: "Schedule", path: "/exam/schedule" },
         { title: "Result Find", path: "/exam/result" },

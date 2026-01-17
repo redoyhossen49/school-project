@@ -50,7 +50,11 @@ export default function AddGuardianPage() {
   return (
     <div className="py-4 px-4 mx-6 md:mx-0 min-h-screen">
       {/* Header */}
-      <div className="mb-6">
+     <div
+        className={`mb-6  ${
+          darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
+        } p-6 rounded`}
+      >
         <h1 className="text-base font-bold">Add Guardian</h1>
         <p className="text-sm text-gray-500 mt-1">
           <Link to="/dashboard" className="hover:text-indigo-600">

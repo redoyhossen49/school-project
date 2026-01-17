@@ -1,57 +1,122 @@
+import { useState, useRef, useEffect } from "react";
+
 export default function Input({
   label,
-  type = "text",
+  type = "text", // "text" | "select"
   name,
   value,
   onChange,
+  options = [], // for select
   error,
   inputClassName = "",
 }) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Custom Select Option component
+  const SelectField = () => (
+    <div className="relative w-full" ref={wrapperRef}>
+      <div
+        className={`
+          w-full h-8 border px-2 text-sm flex items-center justify-between cursor-pointer
+          ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
+          ${inputClassName}
+        `}
+        onClick={() => setOpen(!open)}
+      >
+        <span className={`${value ? "text-gray-700" : "text-gray-400"}`}>
+          {value || label}
+        </span>
+        <svg
+          className="w-3 h-3 text-gray-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+
+      {/* Options dropdown */}
+      {open && (
+        <ul className="absolute z-50 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto shadow-md">
+          {options.map((opt, idx) => (
+            <li
+              key={idx}
+              className="px-2 py-1 text-sm hover:bg-indigo-100 cursor-pointer text-gray-700"
+              onClick={() => {
+                onChange({ target: { name, value: opt } });
+                setOpen(false);
+              }}
+            >
+              {opt}
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+    </div>
+  );
+
+  // Render
+  if (type === "select") return <SelectField />;
+
+  // Regular input
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
-        placeholder=" "
+        placeholder=" " // important for floating label
         className={`
-          peer w-full border px-3
-          ${inputClassName || "py-1"}   /* ✅ default fallback */
-          focus:outline-none
-          focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]
-          placeholder:text-transparent
-          ${
-            error
-              ? "border-red-500"
-              : "border-gray-300 focus:border-indigo-600"
-          }
+          peer w-full border h-8 px-2 text-sm
+          ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
+          focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.15)]
+          ${inputClassName}
         `}
       />
 
+      {/* Floating Label */}
       <label
-        className="
-          absolute left-4 top-2 text-gray-400
-          text-sm pointer-events-none
-          transition-all duration-300
-          peer-placeholder-shown:top-2
+        className={`
+          absolute left-2 top-1/2 -translate-y-1/2 text-sm text-gray-400
+          pointer-events-none transition-all duration-300
+
+          peer-placeholder-shown:top-1/2
+          peer-placeholder-shown:-translate-y-1/2
           peer-placeholder-shown:text-sm
-          md:peer-placeholder-shown:text-base
           peer-placeholder-shown:text-gray-400
-          peer-focus:-top-3
+
+          peer-focus:-top-1
           peer-focus:text-xs
           peer-focus:text-indigo-600
           peer-focus:bg-white
-          peer-not-placeholder-shown:-top-2
+          peer-focus:px-1
+
+          peer-not-placeholder-shown:-top-1
           peer-not-placeholder-shown:text-xs
           peer-not-placeholder-shown:text-gray-600
           peer-not-placeholder-shown:bg-white
           peer-not-placeholder-shown:px-1
-          peer-focus:px-1
-        "
+        `}
       >
         {label}
       </label>
+
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }

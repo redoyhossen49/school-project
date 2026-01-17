@@ -11,7 +11,7 @@ export default function Step3({ formData, handleChange }) {
       }`}
     >
       <p
-        className={`text-sm text-center ${
+        className={`text-sm text-center py-4 ${
           darkMode ? "text-gray-400" : "text-gray-500"
         }`}
       >
@@ -31,7 +31,7 @@ export default function Step3({ formData, handleChange }) {
           placeholder={field.label}
           value={formData[field.name]}
           onChange={handleChange}
-          inputClassName={`py-1 ${
+          inputClassName={` ${
             darkMode
               ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               : "bg-white border-gray-300 text-gray-700 placeholder-gray-400"
@@ -43,34 +43,36 @@ export default function Step3({ formData, handleChange }) {
       {/* Guardian Location Select */}
       <section className="space-y-4 mb-8">
         {[
-          { name: "guardianDivision", label: "Division", options: ["Dhaka", "Chattogram"] },
-          { name: "guardianDistrict", label: "District", options: ["Gazipur", "Comilla"] },
-          { name: "guardianUpazila", label: "Upazila", options: ["Savar", "Sonargaon"] },
+          {
+            name: "guardianDivision",
+            label: "Division",
+            options: ["Dhaka", "Chattogram"],
+          },
+          {
+            name: "guardianDistrict",
+            label: "District",
+            options: ["Gazipur", "Comilla"],
+          },
+          {
+            name: "guardianUpazila",
+            label: "Upazila",
+            options: ["Savar", "Sonargaon"],
+          },
         ].map(({ name, label, options }) => (
-          <select
+          <Input
             key={name}
+            type="select"
+            label={label}
             name={name}
             value={formData[name] || ""}
             onChange={handleChange}
-            className={`w-full text-sm md:text-base px-4 py-1 my-2 rounded border focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+            options={options}
+            inputClassName={
               darkMode
-                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                : "bg-white border-gray-300 text-gray-700 placeholder-gray-400"
-            }`}
-          >
-            <option value="" disabled>
-              {label}
-            </option>
-            {options.map((opt) => (
-              <option
-                key={opt}
-                value={opt}
-                className={darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"}
-              >
-                {opt}
-              </option>
-            ))}
-          </select>
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-700 border-gray-300"
+            }
+          />
         ))}
       </section>
     </div>

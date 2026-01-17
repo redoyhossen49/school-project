@@ -7,6 +7,7 @@ import { FiRefreshCw, FiFilter } from "react-icons/fi";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import ClassPaymentTable from "../components/academic/ClassPaymentTable.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function TeacherList() {
   const navigate = useNavigate();
@@ -22,13 +23,9 @@ export default function TeacherList() {
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
- 
+  const [designationOpen, setDesignationOpen] = useState(false);
 
- 
-const [designationOpen, setDesignationOpen] = useState(false);
-
-const [designationFilter, setDesignationFilter] = useState("");
-
+  const [designationFilter, setDesignationFilter] = useState("");
 
   // Dropdown states
   const [attendanceOpen, setAttendanceOpen] = useState(false);
@@ -89,9 +86,9 @@ const [designationFilter, setDesignationFilter] = useState("");
 
   const filteredTeachers = teachers
 
-  .filter((t) =>
-    designationFilter ? t.designation === designationFilter : true
-  )
+    .filter((t) =>
+      designationFilter ? t.designation === designationFilter : true
+    )
     // 1️⃣ Search by name
     .filter((t) => t.teacherName.toLowerCase().includes(search.toLowerCase()))
 
@@ -129,11 +126,9 @@ const [designationFilter, setDesignationFilter] = useState("");
       return 0;
     });
 
-     const designationOptions = Array.from(
+  const designationOptions = Array.from(
     new Set(teacherData.map((t) => t.designation))
   );
-
- 
 
   const totalTeachers = filteredTeachers.length;
   const totalPages = Math.ceil(totalTeachers / teachersPerPage);
@@ -235,6 +230,7 @@ const [designationFilter, setDesignationFilter] = useState("");
               setTeachers(teacherData); // reset teacher list
               setFilterValues({ designation: "" }); // reset applied filter
               setTempFilterValues({ designation: "" }); // reset modal temp
+              setDesignationFilter("");
               setAttendanceFilter(""); // reset attendance filter
               setSearch(""); // optional: reset search too
               setCurrentPage(1); // optional: go back to first page
@@ -288,7 +284,7 @@ const [designationFilter, setDesignationFilter] = useState("");
         </div>
 
         {/* Controls: Attendance Dropdown, Filter, Sort + Search */}
-        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-3 mt-3">
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-3 ">
           <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
             {/* Attendance Dropdown */}
             <div className="relative flex-1 md:flex-none" ref={attendanceRef}>
@@ -300,7 +296,8 @@ const [designationFilter, setDesignationFilter] = useState("");
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                {attendanceFilter || "Attendance"} <BiChevronDown className="" />
+                {attendanceFilter || "Attendance"}{" "}
+                <BiChevronDown className="" />
               </button>
 
               {attendanceOpen && (
@@ -341,14 +338,33 @@ const [designationFilter, setDesignationFilter] = useState("");
                 Filter <BiChevronDown />
               </button>
 
-              {filterOpen && (
+              <FilterDropdown
+                title="Filter Teacher"
+                fields={[
+                  {
+                    key: "designation", // state key
+                    label: "Designation", // optional, just for clarity
+                    options: designationOptions, // ["Math Teacher", "Science Teacher", ...]
+                      placeholder:"All Designations",
+                  },
+                ]}
+                selected={{ designation: designationFilter }} // pass as object
+                setSelected={(value) => setDesignationFilter(value.designation)} // update parent
+              
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(value) => console.log("Applied:", value.designation)}
+              />
+
+              {/* {filterOpen && (
                 <div
                   className={`absolute top-full z-50 mt-2 w-56 rounded border
     left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0
     max-h-60 overflow-y-auto shadow-md p-3 space-y-2
     ${darkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"}`}
                 >
-                  {/* Designation */}
+                 
                   <div className="relative">
                     <button
                       onClick={() => setDesignationOpen((prev) => !prev)}
@@ -386,7 +402,7 @@ const [designationFilter, setDesignationFilter] = useState("");
                       ))}
                   </div>
 
-                  {/* Apply */}
+                 
                   <button
                     onClick={() => setFilterOpen(false)}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 rounded"
@@ -394,7 +410,7 @@ const [designationFilter, setDesignationFilter] = useState("");
                     Apply
                   </button>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Sort */}

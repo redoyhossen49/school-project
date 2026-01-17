@@ -2,6 +2,7 @@ import { useState,useEffect} from "react";
 import Input from "./Input";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Button from "./Button";
 
 export default function SchoolForm() {
   const navigate = useNavigate();
@@ -143,23 +144,35 @@ const successData = {
       <form className="space-y-4" onSubmit={handleSubmit}>
         <Input label="School Name" name="schoolName" value={formData.schoolName} onChange={handleChange} />
 
-        <select className="input">
-          <option value="">Division</option>
-          <option>Dhaka</option>
-          <option>Chattogram</option>
-        </select>
+     <div className="space-y-3">
+  <Input
+    type="select"
+    label="Division"
+    name="division"
+    value={formData.division}
+    onChange={handleChange}
+    options={["Dhaka", "Chattogram"]}
+  />
 
-        <select className="input">
-          <option value="">District</option>
-          <option>Gazipur</option>
-          <option>Comilla</option>
-        </select>
+  <Input
+    type="select"
+    label="District"
+    name="district"
+    value={formData.district}
+    onChange={handleChange}
+    options={["Gazipur", "Comilla"]}
+  />
 
-        <select className="input">
-          <option value="">Upazila</option>
-          <option>Savar</option>
-          <option>Sonargaon</option>
-        </select>
+  <Input
+    type="select"
+    label="Upazila"
+    name="upazila"
+    value={formData.upazila}
+    onChange={handleChange}
+    options={["Savar", "Sonargaon"]}
+  />
+</div>
+
 
         <Input label="Address" name="address" value={formData.address} onChange={handleChange} />
 
@@ -194,9 +207,9 @@ const successData = {
         {/* Upload */}
         <div className="relative">
   {!formData.logo ? (
-    <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed  h-36 cursor-pointer text-gray-500 hover:border-indigo-600 transition-all duration-300">
-      <span className="text-2xl">📷</span>
-      <span className="text-sm font-medium">Upload School Logo</span>
+    <label className="flex flex-col items-center justify-center  border-2 border-dashed  h-24 cursor-pointer text-gray-500 hover:border-indigo-600 transition-all duration-300">
+      <span className="">📷</span>
+      <span className="text-xs font-medium">Upload School Logo</span>
       <span className="text-xs text-gray-400">
         PNG, JPG, JPEG, PDF • Max 2MB (Optional)
       </span>
@@ -210,7 +223,7 @@ const successData = {
       />
     </label>
   ) : (
-    <div className="relative border rounded-lg p-3 flex items-center gap-4 bg-gray-50">
+    <div className="relative h-24 border border-gray-300  p-1 flex items-center justify-center gap-4 bg-gray-50">
       {/* Image Preview */}
       {formData.logo.type.startsWith("image/") ? (
         <img
@@ -253,12 +266,12 @@ const successData = {
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         {success && <p className="text-green-600 text-sm text-center">{success}</p>}
 
-        <button
+        <Button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 font-semibold hover:bg-slate-800 transition"
+          className="w-full "
         >
           Register School
-        </button>
+        </Button>
       </form>
 
       <p className="text-center text-sm text-gray-600 mt-4">

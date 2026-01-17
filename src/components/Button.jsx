@@ -1,17 +1,30 @@
+import React from "react";
+
 export default function Button({
-  text,
+  children,
+  className = "",
   type = "button",
   onClick,
-  className = "",
+  ...props
 }) {
+  // Default styles
+  const baseClasses = `
+    bg-blue-600 text-white text-sm h-8
+    hover:bg-slate-800
+    hover:shadow-md hover:shadow-slate-800/50
+    transition-shadow duration-300
+    
+    flex items-center justify-center
+  `;
+
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`w-1/2 bg-blue-500 text-white text-sm md:text-base py-2  font-semibold
-                   hover:bg-slate-800 transition ${className}`}
+      className={`${baseClasses} ${className}`}
+      {...props}
     >
-      {text}
+      {children}
     </button>
   );
 }

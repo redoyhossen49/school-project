@@ -36,8 +36,10 @@ export default function TeacherTable({ data, setData, onEdit }) {
 
   return (
     <div
-      className={`rounded overflow-x-auto ${
-        darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-900"
+      className={`border rounded overflow-x-auto ${
+        darkMode
+          ? "bg-gray-900 text-gray-200 border-gray-700"
+          : "bg-white text-gray-900 border-gray-200"
       }`}
     >
       <table className="w-full min-w-max border-collapse text-xs">
@@ -53,15 +55,17 @@ export default function TeacherTable({ data, setData, onEdit }) {
             {headers.map((h, i) => (
               <th
                 key={h}
-                className={`px-3 py-2 text-left font-semibold whitespace-nowrap ${
-                  i !== headers.length - 1 ? `border-r ${borderCol}` : ""
+                className={`px-3 h-8 text-left font-semibold whitespace-nowrap ${
+                  i !== headers.length ? `border-r ${borderCol}` : ""
                 }`}
               >
                 {h}
               </th>
             ))}
             {showAction && (
-              <th className="px-3 py-2 text-left font-semibold">Action</th>
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
+                Action
+              </th>
             )}
           </tr>
         </thead>
@@ -70,10 +74,12 @@ export default function TeacherTable({ data, setData, onEdit }) {
         <tbody>
           {data.map((t) => (
             <tr key={t.id} className={`border-b ${borderCol} ${hoverRow}`}>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{t.idNumber}</td>
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+                {t.idNumber}
+              </td>
 
               {/* Name + Photo */}
-              <td className={`px-3 py-2 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
                 <div className="flex items-center gap-2">
                   {t.photo ? (
                     <img
@@ -88,12 +94,17 @@ export default function TeacherTable({ data, setData, onEdit }) {
                 </div>
               </td>
 
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{t.designation}</td>
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+                {t.designation}
+              </td>
 
-              {/* Clickable Phone */}
-              <td className={`px-3 py-2 border-r ${borderCol}`}>
+              {/* Phone */}
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
                 {t.phone ? (
-                  <a href={`tel:${t.phone}`} className="text-blue-500 hover:underline">
+                  <a
+                    href={`tel:${t.phone}`}
+                    className="text-blue-500 hover:underline"
+                  >
                     {t.phone}
                   </a>
                 ) : (
@@ -101,10 +112,13 @@ export default function TeacherTable({ data, setData, onEdit }) {
                 )}
               </td>
 
-              {/* Clickable Email */}
-              <td className={`px-3 py-2 border-r ${borderCol}`}>
+              {/* Email */}
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
                 {t.email ? (
-                  <a href={`mailto:${t.email}`} className="text-blue-500 hover:underline">
+                  <a
+                    href={`mailto:${t.email}`}
+                    className="text-blue-500 hover:underline"
+                  >
                     {t.email}
                   </a>
                 ) : (
@@ -112,26 +126,44 @@ export default function TeacherTable({ data, setData, onEdit }) {
                 )}
               </td>
 
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{t.password || "-"}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{t.absence || 0}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{t.present || 0}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{t.late || 0}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{t.leave || 0}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+                {t.password || "-"}
+              </td>
+
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+                {t.absence || 0}
+              </td>
+
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+                {t.present || 0}
+              </td>
+
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+                {t.late || 0}
+              </td>
+
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+                {t.leave || 0}
+              </td>
+
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
                 ৳{t.totalPayable || 0}
               </td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>
+
+              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
                 {t.payableDue === 0 ? (
                   <span className="text-green-600 font-semibold">Paid</span>
                 ) : (
-                  <span className="text-red-600 font-semibold">৳{t.payableDue}</span>
+                  <span className="text-red-600 font-semibold">
+                    ৳{t.payableDue}
+                  </span>
                 )}
               </td>
 
               {showAction && (
-                <td className="px-3 py-2">
+                <td className="px-3 h-8 whitespace-nowrap">
                   <StudentActions
-                    student={t} // passing teacher object
+                    student={t}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                   />

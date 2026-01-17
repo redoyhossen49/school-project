@@ -32,6 +32,12 @@ import SessionListPage from "./pages/SessionListPage";
 import SubjectListPage from "./pages/SubjectListPage";
 import SyllabusPage from "./pages/SyllabusPage";
 import ClassRoutinePage from "./pages/ClassRoutinePage";
+import Examlist from "./pages/Examlist";
+import ExamRoutineList from "./pages/ExamRoutineList";
+import GradeList from "./pages/GradeList";
+import AddmitCardPage from "./pages/AdmitCardPage";
+import SitNumberPage from "./pages/SitNumberPage";
+
 
 const router = createBrowserRouter([
   {
@@ -115,6 +121,13 @@ const router = createBrowserRouter([
               { path: "routine", element: <ClassRoutinePage/> },
         { path: "permissionlist", element: <ClassPermissionList /> },
         { path: "addclasspermission", element: <AddClassPermissionPage/> },
+
+          { path: "Examlist", element: <Examlist/> },
+           { path: "examroutine", element: <ExamRoutineList /> },
+             { path: "examgrade", element: <GradeList/> },
+             { path: "examadmit", element: <AddmitCardPage/> },
+             { path: "examsitnumber", element: <SitNumberPage/> },
+          
     ],
   },
   

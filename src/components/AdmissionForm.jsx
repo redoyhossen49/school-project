@@ -191,9 +191,9 @@ export default function AdmissionForm() {
       <h1 className="text-center  md:text-2xl text-bold  mb-6 flex items-center justify-center gap-2">
         <span className="text-slate-600">{stepTitles[step]}</span>
       </h1>
-      
-        <Stepper activeStep={step}></Stepper>
-      
+
+      <Stepper activeStep={step}></Stepper>
+
       {/* STEP CONTENT */}
       <div className="mt-6 transition-all duration-500">
         {step === 0 && (
@@ -220,31 +220,45 @@ export default function AdmissionForm() {
           <>
             <Link
               to="/"
-              className="w-1/2 bg-blue-500 border text-white text-sm md:text-base py-2   text-center  font-semibold
-                   hover:bg-slate-800 transition"
+              className="w-1/2 bg-blue-600 text-white text-sm h-8
+    hover:bg-slate-800
+    hover:shadow-md hover:shadow-slate-800/50
+    transition-shadow duration-300
+    
+    flex items-center justify-center"
             >
               Login
             </Link>
-
-            <Button onClick={next} text="Next" />
+            <Button onClick={next} className="w-1/2">
+              Next
+            </Button>
           </>
         )}
 
         {/* STEP 1 & 2 */}
         {(step === 1 || step === 2) && (
           <>
-            <Button onClick={back} text="Back" />
+          
+             <Button onClick={back} className="w-1/2">
+              Back
+            </Button>
 
-            <Button onClick={next} text="  Next" />
+             <Button onClick={next} className="w-1/2">
+              Next
+            </Button>
           </>
         )}
 
         {/* LAST STEP */}
         {step === 3 && (
           <>
-            <Button onClick={back} text="Back" />
+            <Button onClick={back} className="w-1/2">
+              Back
+            </Button>
 
-            <Button onClick={handleAdmission} text="Admission" />
+             <Button onClick={handleAdmission} className="w-1/2">
+              Admission
+            </Button>
           </>
         )}
       </div>

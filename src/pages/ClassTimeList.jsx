@@ -9,6 +9,7 @@ import { useTheme } from "../context/ThemeContext.jsx";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function ClassTimeList() {
   const navigate = useNavigate();
@@ -28,13 +29,19 @@ export default function ClassTimeList() {
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("asc");
   const [filterOpen, setFilterOpen] = useState(false);
+   const [filters, setFilters] = useState({
+      className: "",
+      group: "",
+      section: "",
+      session: "",
+    });
 
   const sectionDropdownRef = useRef(null);
   const exportRef = useRef(null);
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const sectionOptions = ["All", "Morning", "Day", "Evening"];
+  
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -56,12 +63,37 @@ export default function ClassTimeList() {
   }, []);
 
   // Filter + Sort + Search
-  const filteredClassTimes = classTimes
-    .filter((c) => c.className.toLowerCase().includes(search.toLowerCase()))
-    .filter((c) =>
-      selectedSection === "All" ? true : c.section === selectedSection
-    )
-    .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
+const filteredClassTimes = classTimes
+  // Search
+  .filter((c) =>
+    c.className.toLowerCase().includes(search.toLowerCase())
+  )
+
+  // Class filter
+  .filter((c) =>
+    filters.className ? c.className === filters.className : true
+  )
+
+  // Group filter
+  .filter((c) =>
+    filters.group ? c.group === filters.group : true
+  )
+
+  // Section filter
+  .filter((c) =>
+    filters.section ? c.section === filters.section : true
+  )
+
+  // Session filter
+  
+
+  // Old section dropdown (optional)
+  
+  // Sort
+  .sort((a, b) =>
+    sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl
+  );
+
 
   const totalClassTimes = filteredClassTimes.length;
   const totalPages = Math.ceil(totalClassTimes / classTimesPerPage);
@@ -106,6 +138,18 @@ export default function ClassTimeList() {
     });
     doc.save("ClassTimes.pdf");
   };
+
+   // Generate dynamic options from studentData
+    const getUniqueOptions = (data, key) => {
+      return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
+    };
+  
+    // Example usage in parent component
+    const classOptions = getUniqueOptions(classTimeData, "className"); // ["I", "II", "III", ...]
+    const groupOptions = getUniqueOptions(classTimeData, "group"); // ["N/A", "Science", ...]
+    const sectionOptions = getUniqueOptions(classTimeData, "section"); // ["A", "B", "C", ...]
+    const sessionOptions = getUniqueOptions(classTimeData, "session"); // ["2025-26", ...]
+  
 
   // Button base class
   const buttonClass = `flex items-center justify-between w-28 rounded px-3 py-2 text-xs shadow-sm hover:bg-gray-100 ${
@@ -298,72 +342,37 @@ export default function ClassTimeList() {
               >
                 Filter <BiChevronDown />
               </button>
-              {filterOpen && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center p-6"
-                  onClick={() => setFilterOpen(false)}
-                >
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className={`w-8/12 md:w-96 max-h-[80vh] overflow-y-auto p-6 rounded shadow-lg border ${
-                      darkMode
-                        ? "bg-gray-700 text-gray-100 border-gray-600"
-                        : "bg-white text-gray-800 border-gray-200"
-                    }`}
-                  >
-                    <h2 className="text-lg font-semibold mb-4">
-                      Filter Class Times
-                    </h2>
-                    {/* Example filter inputs */}
-                    <div className="flex flex-col gap-3">
-                      {["Class", "Section"].map((field) => (
-                        <div key={field} className="relative">
-                          <label
-                            className={`absolute -top-2 left-2 px-1 text-[10px] ${
-                              darkMode
-                                ? "bg-gray-700 text-blue-300"
-                                : "bg-white text-blue-500"
-                            }`}
-                          >
-                            {field}
-                          </label>
-                          <select
-                            className={`w-full px-2 py-1.5 text-xs rounded border ${
-                              darkMode
-                                ? "bg-gray-600 border-gray-500 text-gray-100"
-                                : "bg-white border-gray-300 text-gray-800"
-                            }`}
-                          >
-                            <option>Select</option>
-                            {[
-                              ...new Set(
-                                classTimes.map((c) =>
-                                  field.toLowerCase() === "class"
-                                    ? c.className
-                                    : c.section
-                                )
-                              ),
-                            ].map((val) => (
-                              <option key={val}>{val}</option>
-                            ))}
-                          </select>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex flex-wrap gap-2 justify-end mt-4">
-                      <button
-                        onClick={() => setFilterOpen(false)}
-                        className={`px-3 py-1 text-xs rounded border bg-gray-200 hover:bg-gray-300 ${darkMode? "bg-gray-600 border-gray-200":"bg-gray-200 border-gray-600"}`}
-                      >
-                        Reset
-                      </button>
-                      <button className="px-3 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white">
-                        Apply
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              
+                            <FilterDropdown
+                              title="Filter Students"
+                              fields={[
+                                {
+                                  key: "className",
+                                  label: "Class",
+                                  options: classOptions,
+                                  placeholder: "All Classes",
+                                },
+                                {
+                                  key: "group",
+                                  label: "Group",
+                                  options: groupOptions,
+                                  placeholder: "All Groups",
+                                },
+                                {
+                                  key: "section",
+                                  label: "Section",
+                                  options: sectionOptions,
+                                  placeholder: "All Sections",
+                                },
+                               
+                              ]}
+                              selected={filters}
+                              setSelected={setFilters}
+                              darkMode={darkMode}
+                              isOpen={filterOpen}
+                              onClose={() => setFilterOpen(false)}
+                              onApply={() => setCurrentPage(1)}
+                            />
             </div>
 
             {/* Sort */}

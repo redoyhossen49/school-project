@@ -5,17 +5,18 @@ import Modal from "./Modal";
 export default function FormModal({
   open,
   title,
-  fields = [],
+  fields,
   initialValues = {},
   onClose,
   onSubmit,
+  onChange, // 🔹 new prop to notify parent on field change
 }) {
   const { darkMode } = useTheme();
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(initialValues);
   const [dropdownOpen, setDropdownOpen] = useState({});
   const dropdownRef = useRef({});
 
-  // Open modal resets form
+  // Reset form when modal opens
   useEffect(() => {
     if (open) {
       setFormData(initialValues);
@@ -23,13 +24,20 @@ export default function FormModal({
     }
   }, [open, initialValues]);
 
+  // Handle field change
   const handleChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setDropdownOpen((prev) => ({ ...prev, [name]: false }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+
+      // Notify parent if onChange is provided
+      onChange?.(name, value, updated, setFormData);
+
+      return updated;
+    });
   };
 
+  // Save handler
   const handleSave = () => {
-    // validation
     for (let field of fields) {
       if (field.required && !formData[field.name]) {
         alert(`${field.label} is required`);
@@ -58,18 +66,19 @@ export default function FormModal({
 
   return (
     <Modal open={open} title={title} onClose={onClose} onSave={handleSave}>
-      <div className="space-y-3  max-h-80 overflow-y-auto">
+      <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
         {fields.map((field) => (
           <div key={field.name} className="relative">
             {field.type === "select" ? (
               <div
                 ref={(el) => (dropdownRef.current[field.name] = el)}
-                className={`w-full border rounded shadow-sm px-3 py-2 text-xs cursor-pointer ${
+                className={`w-full border rounded shadow-sm px-3 py-2 text-sm cursor-pointer relative ${
                   darkMode
                     ? "border-gray-400 bg-gray-700 text-gray-100"
                     : "border-gray-300 bg-white text-gray-800"
                 }`}
               >
+                {/* Selected Value */}
                 <div
                   onClick={() =>
                     setDropdownOpen((prev) => ({
@@ -77,36 +86,84 @@ export default function FormModal({
                       [field.name]: !prev[field.name],
                     }))
                   }
+                  className="flex justify-between items-center"
                 >
-                  {formData[field.name] || field.placeholder || "Select"}
+                  <span>
+                    {(() => {
+                      const opts = (field.options || []).map((o) =>
+                        typeof o === "string" ? { label: o, value: o } : o
+                      );
+                      const selected = opts.find(
+                        (opt) => opt.value === formData[field.name]
+                      );
+                      return selected
+                        ? selected.label
+                        : field.placeholder || "Select";
+                    })()}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      dropdownOpen[field.name] ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
                 </div>
+
+                {/* Dropdown Options */}
                 {dropdownOpen[field.name] && (
                   <ul
-                    className={`absolute left-0 top-8 right-0 mt-1 h-30 overflow-y-auto border rounded shadow-md z-50 ${
+                    className={`absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded border shadow-lg z-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 ${
                       darkMode
-                        ? "bg-gray-700 border-gray-400"
-                        : "bg-white border-gray-400"
+                        ? "bg-gray-700 border-gray-400 scrollbar-thumb-gray-600 scrollbar-track-gray-800"
+                        : "bg-white border-gray-300"
                     }`}
                   >
-                    {field.options?.map((opt) => (
-                      <li
-                        key={opt.value}
-                        onClick={() => handleChange(field.name, opt.value)}
-                        className="px-6 py-2 text-xs   cursor-pointer"
-                      >
-                        <p className="border border-gray-200 px-3 py-1 rounded">{opt.label}</p>
-                      </li>
-                    ))}
+                    {(field.options || []).map((opt) => {
+                      const option =
+                        typeof opt === "string" ? { label: opt, value: opt } : opt;
+                      const isSelected = formData[field.name] === option.value;
+                      return (
+                        <li
+                          key={option.value}
+                          onClick={() => {
+                            handleChange(field.name, option.value);
+                            setDropdownOpen((prev) => ({
+                              ...prev,
+                              [field.name]: false,
+                            }));
+                          }}
+                          className={`px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 ${
+                            isSelected
+                              ? "bg-blue-100 text-blue-700 font-medium"
+                              : darkMode
+                              ? "text-gray-100"
+                              : "text-gray-800"
+                          }`}
+                        >
+                          {option.label}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
             ) : (
               <input
                 type={field.type || "text"}
-                value={formData[field.name] || ""}
+                value={formData[field.name] ?? ""}
                 onChange={(e) => handleChange(field.name, e.target.value)}
                 placeholder={field.placeholder}
-                className={`w-full border shadow-sm px-3 py-2 text-xs rounded ${
+                readOnly={field.readOnly || false}
+                className={`w-full border shadow-sm px-3 py-2 text-sm rounded ${
                   darkMode
                     ? "border-gray-400 bg-gray-700 text-gray-100"
                     : "border-gray-300 bg-white text-gray-800"

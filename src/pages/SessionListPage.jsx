@@ -116,29 +116,37 @@ export default function SessionListPage() {
     .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
 
   const handleAddSession = (formData) => {
-    const sessionYear = `${new Date(
-      formData.sessionStart
-    ).getFullYear()}-${new Date(formData.sessionEnd).getFullYear()}`;
+  // 1️⃣ year বের করা
+  const startYear = new Date(formData.sessionStart).getFullYear();
+  const endYear = new Date(formData.sessionEnd).getFullYear();
 
-    const newSession = {
-      sl: sessions.length + 1,
-      class: formData.class,
-      group: formData.group || "",
-      section: formData.section || "",
-      sessionStart: formData.sessionStart,
-      sessionEnd: formData.sessionEnd,
-      sessionYear,
-      totalDays:
-        Math.ceil(
-          (new Date(formData.sessionEnd) - new Date(formData.sessionStart)) /
-            (1000 * 60 * 60 * 24)
-        ) || 0,
-    };
-
-    setSessions((prev) => [...prev, newSession]);
-    setAddSessionModalOpen(false);
-    setCurrentPage(1); // reset page
+  // 2️⃣ new session object
+  const newSession = {
+    sl: sessions.length + 1,
+    class: formData.class,
+    group: formData.group || "",
+    section: formData.section || "",
+    sessionStart: formData.sessionStart,
+    sessionEnd: formData.sessionEnd,
+    sessionYear: `${startYear}-${endYear}`,
+    totalDays:
+      Math.ceil(
+        (new Date(formData.sessionEnd) -
+          new Date(formData.sessionStart)) /
+          (1000 * 60 * 60 * 24)
+      ) || 0,
   };
+
+  // 3️⃣ state update → table auto update
+  setSessions((prev) => [...prev, newSession]);
+
+  // 4️⃣ modal close
+  setAddSessionModalOpen(false);
+
+  // 5️⃣ first page
+  setCurrentPage(1);
+};
+
 
   const perPage = 10;
   const totalPages = Math.ceil(filteredData.length / perPage);
@@ -146,67 +154,61 @@ export default function SessionListPage() {
     (currentPage - 1) * perPage,
     currentPage * perPage
   );
-  const addSessionFields = [
-    {
-      name: "class",
-      label: "Class",
-      type: "select",
-      options: Array.from(new Set(sessionData.map((s) => s.class))).map(
-        (c) => ({
-          label: c,
-          value: c,
-        })
-      ),
-      required: true,
-      placeholder: "Select Class",
-    },
-    {
-      name: "group",
-      label: "Group",
-      type: "select",
-      options: Array.from(new Set(sessionData.map((s) => s.group))).map(
-        (g) => ({
-          label: g,
-          value: g,
-        })
-      ),
-      required: false,
-      placeholder: "Select Group ",
-    },
-    {
-      name: "section",
-      label: "Section",
-      type: "select",
-      options: Array.from(new Set(sessionData.map((s) => s.section))).map(
-        (s) => ({
-          label: s,
-          value: s,
-        })
-      ),
-      required: false,
-      placeholder: "Select Section ",
-    },
-    {
-      name: "sessionStart",
-      label: "Session Start",
-      type: "date",
-      required: true,
-    },
-    {
-      name: "sessionEnd",
-      label: "Session End",
-      type: "date",
-      required: true,
-    },
-    {
-      name: "sessionYear",
-      label: "Session Year",
-      type: "text",
-      required: false,
-      placeholder: "Auto-calculated",
-      disabled: true,
-    },
-  ];
+ const addSessionFields = [
+  {
+    name: "class",
+    label: "Class",
+    type: "select",
+    placeholder:"Class",
+    options: classOptions.map((c) => ({
+      label: c,
+      value: c,
+    })),
+    required: true,
+  },
+  {
+    name: "group",
+    label: "Group",
+    type: "select",
+    placeholder:"Group",
+    options: groupOptions.map((g) => ({
+      label: g,
+      value: g,
+    })),
+  },
+  {
+    name: "section",
+    label: "Section",
+    type: "select",
+    placeholder:"Section",
+    options: sectionOptions.map((s) => ({
+      label: s,
+      value: s,
+    })),
+  },
+  {
+    name: "sessionStart",
+    label: "Session Start",
+    type: "date",
+    placeholder:"Session Start Time",
+    required: true,
+  },
+  {
+    name: "sessionEnd",
+    label: "Session End",
+    type: "date",
+    placeholder:"Session End Time",
+    required: true,
+  },
+  {
+    name: "showSession",
+    label: "Session",
+    type: "text",
+     disabled: false,
+    placeholder:"Show Session",
+  },
+];
+
 
   // -------------------- Export Functions --------------------
   const exportExcel = (data) => {
@@ -346,6 +348,7 @@ export default function SessionListPage() {
                 section: "",
                 sessionStart: "",
                 sessionEnd: "",
+                showSession:" ",
               }}
               onClose={() => setAddSessionModalOpen(false)}
               onSubmit={handleAddSession}
@@ -426,157 +429,178 @@ export default function SessionListPage() {
               </button>
               {filterOpen && (
                 <div
-                  className={`absolute  z-50 mt-1 w-52 rounded border p-3 space-y-2 left-1/2 -translate-x-1/2
-    md:left-0 md:translate-x-0 max-h-40 overflow-y-autoshadow-sm ${
-      darkMode ? "bg-gray-700 border-gray-500" : "bg-white border-gray-200"
-    }`}
+                  className={`absolute z-50 mt-1 w-52
+    left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0
+    h-44 overflow-y-auto p-3 space-y-2 rounded border shadow-md
+    ${darkMode ? "bg-gray-700 border-gray-500" : "bg-white border-gray-200"}`}
                 >
                   {/* Class */}
                   <div className="relative">
                     <button
-                      onClick={() => setClassOpen(!classOpen)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center shadow-sm ${
-                        darkMode
-                          ? "bg-gray-700 border-gray-500"
-                          : "bg-white border-gray-200"
-                      }`}
+                      onClick={() => {
+                        setClassOpen(!classOpen);
+                        setGroupOpen(false);
+                        setSectionOpen(false);
+                        setSessionOpen(false);
+                      }}
+                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
+        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
                     >
                       {classFilter || "All Classes"} <BiChevronDown />
                     </button>
-                    {classOpen &&
-                      classOptions.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => {
-                            setClassFilter(c);
-                            setClassOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            classFilter === c
-                              ? darkMode
-                                ? "bg-blue-600 text-white font-medium"
-                                : "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {c}
-                        </button>
-                      ))}
+
+                    {classOpen && (
+                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
+                        {classOptions.map((c) => (
+                          <button
+                            key={c}
+                            onClick={() => {
+                              setClassFilter(c);
+                              setClassOpen(false);
+                            }}
+                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
+              ${
+                classFilter === c
+                  ? "bg-blue-100 text-blue-700 font-medium"
+                  : darkMode
+                  ? "text-gray-200"
+                  : "text-gray-700"
+              }`}
+                          >
+                            {c}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Group */}
                   <div className="relative">
                     <button
-                      onClick={() => setGroupOpen(!groupOpen)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center shadow-sm ${
-                        darkMode
-                          ? "bg-gray-700 border-gray-500"
-                          : "bg-white border-gray-200"
-                      }`}
+                      onClick={() => {
+                        setGroupOpen(!groupOpen);
+                        setClassOpen(false);
+                        setSectionOpen(false);
+                        setSessionOpen(false);
+                      }}
+                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
+        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
                     >
                       {groupFilter || "All Groups"} <BiChevronDown />
                     </button>
-                    {groupOpen &&
-                      groupOptions.map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => {
-                            setGroupFilter(g);
-                            setGroupOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            groupFilter === g
-                              ? darkMode
-                                ? "bg-blue-600 text-white font-medium"
-                                : "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
+
+                    {groupOpen && (
+                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
+                        {groupOptions.map((g) => (
+                          <button
+                            key={g}
+                            onClick={() => {
+                              setGroupFilter(g);
+                              setGroupOpen(false);
+                            }}
+                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
+              ${
+                groupFilter === g
+                  ? "bg-blue-100 text-blue-700 font-medium"
+                  : darkMode
+                  ? "text-gray-200"
+                  : "text-gray-700"
+              }`}
+                          >
+                            {g}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Section */}
                   <div className="relative">
                     <button
-                      onClick={() => setSectionOpen(!sectionOpen)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center shadow-sm ${
-                        darkMode
-                          ? "bg-gray-700 border-gray-500"
-                          : "bg-white border-gray-200"
-                      }`}
+                      onClick={() => {
+                        setSectionOpen(!sectionOpen);
+                        setClassOpen(false);
+                        setGroupOpen(false);
+                        setSessionOpen(false);
+                      }}
+                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
+        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
                     >
                       {sectionFilter || "All Sections"} <BiChevronDown />
                     </button>
-                    {sectionOpen &&
-                      sectionOptions.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => {
-                            setSectionFilter(s);
-                            setSectionOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            sectionFilter === s
-                              ? darkMode
-                                ? "bg-blue-600 text-white font-medium"
-                                : "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
+
+                    {sectionOpen && (
+                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
+                        {sectionOptions.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              setSectionFilter(s);
+                              setSectionOpen(false);
+                            }}
+                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
+              ${
+                sectionFilter === s
+                  ? "bg-blue-100 text-blue-700 font-medium"
+                  : darkMode
+                  ? "text-gray-200"
+                  : "text-gray-700"
+              }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Session Year */}
+                  {/* Session */}
                   <div className="relative">
                     <button
-                      onClick={() => setSessionOpen(!sessionOpen)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center shadow-sm ${
-                        darkMode
-                          ? "bg-gray-700 border-gray-500"
-                          : "bg-white border-gray-200"
-                      }`}
+                      onClick={() => {
+                        setSessionOpen(!sessionOpen);
+                        setClassOpen(false);
+                        setGroupOpen(false);
+                        setSectionOpen(false);
+                      }}
+                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
+        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
                     >
                       {sessionFilter || "All Sessions"} <BiChevronDown />
                     </button>
-                    {sessionOpen &&
-                      sessionOptions.map((y) => (
-                        <button
-                          key={y}
-                          onClick={() => {
-                            setSessionFilter(y);
-                            setSessionOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            sessionFilter === y
-                              ? darkMode
-                                ? "bg-blue-600 text-white font-medium"
-                                : "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {y}
-                        </button>
-                      ))}
+
+                    {sessionOpen && (
+                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
+                        {sessionOptions.map((y) => (
+                          <button
+                            key={y}
+                            onClick={() => {
+                              setSessionFilter(y);
+                              setSessionOpen(false);
+                            }}
+                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
+              ${
+                sessionFilter === y
+                  ? "bg-blue-100 text-blue-700 font-medium"
+                  : darkMode
+                  ? "text-gray-200"
+                  : "text-gray-700"
+              }`}
+                          >
+                            {y}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
+                  {/* Apply */}
                   <button
                     onClick={() => {
                       setFilterOpen(false);
                       setCurrentPage(1);
                     }}
-                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-1.5 rounded"
                   >
                     Apply
                   </button>

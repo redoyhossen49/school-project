@@ -11,7 +11,7 @@ export default function Step2({ formData, handleChange }) {
       }`}
     >
       <p
-        className={`text-sm text-center ${
+        className={`text-sm text-center py-4 ${
           darkMode ? "text-gray-400" : "text-gray-500"
         }`}
       >

@@ -1,5 +1,5 @@
 import { useTheme } from "../../context/ThemeContext";
-import StudentActions from "../student/StudentActions"; // Reuse the same actions component
+import StudentActions from "../student/StudentActions"; // Reuse actions component
 
 export default function SubjectTable({ data, setData, onEdit }) {
   const { darkMode } = useTheme();
@@ -34,7 +34,19 @@ export default function SubjectTable({ data, setData, onEdit }) {
           }`}
         >
           <tr>
-            {["Sl", "Class", "Group", "Section", "Subject Name"].map((h) => (
+            {[
+              "Sl",
+              "Class",
+              "Group",
+              "Section",
+              "Subject Name",
+              "Type",
+              "Theory Full",
+              "Theory Pass",
+              "Theory Fail",
+              "Practical Full",
+              "Practical Pass",
+            ].map((h) => (
               <th
                 key={h}
                 className={`px-3 py-2 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
@@ -52,12 +64,39 @@ export default function SubjectTable({ data, setData, onEdit }) {
 
         <tbody>
           {data.map((s) => (
-            <tr key={`${s.class}-${s.group}-${s.section}-${s.subjectName}`} className={`border-b ${borderCol} ${hoverRow}`}>
+            <tr
+              key={`${s.class}-${s.group}-${s.section}-${s.subjectName}`}
+              className={`border-b ${borderCol} ${hoverRow}`}
+            >
               <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{s.sl}</td>
               <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{s.class}</td>
               <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{s.group}</td>
               <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{s.section}</td>
               <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{s.subjectName}</td>
+              <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>
+                {s.subjectType === "theory"
+                  ? "Theory"
+                  : s.subjectType === "practical"
+                  ? "Practical"
+                  : "Theory + Practical"}
+              </td>
+              {/* Theory Marks */}
+              <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>
+                {s.theoryFullMark ?? "-"}
+              </td>
+              <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>
+                {s.theoryPassMark ?? "-"}
+              </td>
+              <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>
+                {s.theoryFailMark ?? "-"}
+              </td>
+              {/* Practical Marks */}
+              <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>
+                {s.practicalFullMark ?? "-"}
+              </td>
+              <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>
+                {s.practicalPassMark ?? "-"}
+              </td>
 
               {showAction && (
                 <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>

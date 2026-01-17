@@ -130,39 +130,101 @@ export default function SubjectListPage() {
     currentPage * perPage
   );
 
-  const modalFields = [
-    {
-      name: "class",
-      label: "Class",
-      type: "select",
-      options: classOptions.map((c) => ({ label: c, value: c })),
-      required: true,
-    },
-    {
-      name: "group",
-      label: "Group",
-      type: "select",
-      options: groupOptions(classFilter).map((g) => ({ label: g, value: g })),
-      required: false,
-    },
-    {
-      name: "section",
-      label: "Section",
-      type: "select",
-      options: sectionOptions(classFilter, groupFilter).map((s) => ({
-        label: s,
-        value: s,
-      })),
-      required: false,
-    },
-    {
-      name: "subjectName",
-      label: "Subject Name",
-      type: "text",
-      placeholder: "Enter subject name",
-      required: true,
-    },
-  ];
+ const modalFields = [
+  {
+    name: "class",
+    label: "Class",
+    type: "select",
+    placeholder: "Select Class",
+    options: classOptions.map((c) => ({ label: c, value: c })),
+    required: true,
+  },
+  {
+    name: "group",
+    label: "Group",
+    type: "select",
+    placeholder: "Select Group",
+    options: groupOptions(classFilter).map((g) => ({ label: g, value: g })),
+    required: false,
+  },
+  {
+    name: "section",
+    label: "Section",
+    type: "select",
+    placeholder: "Select Section",
+    options: sectionOptions(classFilter, groupFilter).map((s) => ({
+      label: s,
+      value: s,
+    })),
+    required: false,
+  },
+  {
+    name: "subjectName",
+    label: "Subject Name",
+    type: "text",
+    placeholder: "Enter Subject Name",
+    required: true,
+  },
+  {
+    name: "subjectType",
+    label: "Subject Type",
+    type: "select",
+    placeholder: "Select Type",
+    options: [
+      { label: "Theory", value: "theory" },
+      { label: "Practical", value: "practical" },
+      { label: "Theory + Practical", value: "both" },
+    ],
+    required: true,
+  },
+  // Theory Marks
+  {
+    name: "theoryFullMark",
+    label: "Theory Full Mark",
+    type: "number",
+    placeholder: "Enter Full Mark (Theory)",
+    required: true,
+  },
+  {
+    name: "theoryPassMark",
+    label: "Theory Pass Mark",
+    type: "number",
+    placeholder: "Enter Pass Mark (Theory)",
+    required: true,
+  },
+  {
+    name: "theoryFailMark",
+    label: "Theory Fail Mark",
+    type: "number",
+    placeholder: "Enter Fail Mark (Theory)",
+    required: true,
+  },
+  // Practical Marks — optional, show only if type has practical
+  {
+    name: "practicalFullMark",
+    label: "Practical Full Mark",
+    type: "number",
+    placeholder: "Enter Full Mark (Practical)",
+    required: false,
+    dependsOn: "subjectType", // custom logic in FormModal to show if type === 'practical' or 'both'
+  },
+  {
+    name: "practicalPassMark",
+    label: "Practical Pass Mark",
+    type: "number",
+    placeholder: "Enter Pass Mark (Practical)",
+    required: false,
+    dependsOn: "subjectType",
+  },
+  {
+    name: "practicalFailMark",
+    label: "Practical Fail Mark",
+    type: "number",
+    placeholder: "Enter Fail Mark (Practical)",
+    required: false,
+    dependsOn: "subjectType",
+  },
+];
 
   const handleAddSubject = (data) => {
     const newSubject = {
