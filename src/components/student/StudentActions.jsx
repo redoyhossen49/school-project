@@ -37,7 +37,7 @@ export default function StudentActions({ student, onEdit, onDelete }) {
     <div className="relative h-6 flex items-center" ref={ref}>
       <button
         onClick={toggleDropdown}
-        className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-gray-100"
+        className="h-6 w-6 p-0 flex items-center justify-center  hover:bg-gray-100"
       >
         <FiMoreHorizontal className="w-4 h-4 text-gray-600" />
       </button>
@@ -45,7 +45,7 @@ export default function StudentActions({ student, onEdit, onDelete }) {
       {open && (
         <div
           className={`absolute -right-4 w-24 border shadow-sm z-50 ${
-            positionTop ? "top-8" : "bottom-8"
+            positionTop ? "top-7" : "bottom-7"
           } ${
             darkMode
               ? "bg-gray-500 text-gray-100 border-gray-600"
@@ -56,7 +56,7 @@ export default function StudentActions({ student, onEdit, onDelete }) {
             onClick={() => onEdit(student)}
             className="w-full flex items-center gap-2 px-3 py-1 text-xs hover:bg-gray-100"
           >
-            <FiEdit className="w-4 h-4 text-blue-600" />
+            <FiEdit className="w-3 h-3 text-blue-600" />
             Edit
           </button>
 
@@ -68,7 +68,7 @@ export default function StudentActions({ student, onEdit, onDelete }) {
             }}
             className="w-full flex items-center gap-2 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
           >
-            <FiTrash2 className="w-4 h-4" />
+            <FiTrash2 className="w-3 h-3" />
             Delete
           </button>
         </div>

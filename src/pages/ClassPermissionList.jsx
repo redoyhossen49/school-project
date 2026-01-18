@@ -151,7 +151,7 @@ doc.save("ClassPermissions.pdf");
 
 
   // Button base class for exact StudentList style
-  const buttonClass = `flex items-center  w-28  border px-3 h-8 text-xs shadow-sm ${
+  const buttonClass = `flex items-center  w-28  border px-3 h-8 text-xs  ${
     darkMode
       ? "border-gray-600 bg-gray-700 text-gray-100 hover:bg-gray-600"
       : "border-gray-200 bg-white text-gray-800 hover:bg-gray-100"
@@ -160,7 +160,7 @@ doc.save("ClassPermissions.pdf");
   return (
     <div
       className={`${
-        darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
+        darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-700"
       } p-3 min-h-screen space-y-4`}
     >
       {/* ========== HEADER ========== */}
@@ -180,7 +180,7 @@ doc.save("ClassPermissions.pdf");
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>{" "}
-              / Class Permission List
+              / Class Permission 
             </p>
           </div>
 
@@ -203,7 +203,7 @@ doc.save("ClassPermissions.pdf");
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-28  border shadow-sm`}
+                  } absolute top-full left-0 mt-1 w-28  border `}
                 >
                   <button className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
                     Export PDF
@@ -218,7 +218,7 @@ doc.save("ClassPermissions.pdf");
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addclasspermission")}
-                className="flex items-center justify-center  w-28  px-3 h-8 text-xs shadow-sm bg-blue-600 text-white hover:bg-blue-700"
+                className="flex items-center justify-center  w-28  px-3 h-8 text-xs  bg-blue-600 text-white hover:bg-blue-700"
               >
                 Permission
               </button>
@@ -244,7 +244,7 @@ doc.save("ClassPermissions.pdf");
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
-                } absolute top-full left-0 mt-1 z-50 w-full  border shadow-sm`}
+                } absolute top-full left-0 mt-1 z-50 w-full  border `}
               >
                 <button onClick={handleExportPDF} className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
                   PDF
@@ -258,7 +258,7 @@ doc.save("ClassPermissions.pdf");
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addclasspermission")}
-              className="flex items-center justify-center gap-1 w-full  px-3 h-8 text-xs shadow-sm bg-blue-600 text-white hover:bg-blue-700"
+              className="flex items-center justify-center gap-1 w-full  px-3 h-8 text-xs bg-blue-600 text-white hover:bg-blue-700"
             >
               Permission
             </button>
@@ -272,7 +272,7 @@ doc.save("ClassPermissions.pdf");
             <div className="relative flex-1 md:flex-none" ref={sectionRef}>
               <button
                 onClick={() => setSectionOpen((p) => !p)}
-                className={`w-full md:w-28 flex items-center justify-between  border px-3 h-8 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center justify-between  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
@@ -286,7 +286,7 @@ doc.save("ClassPermissions.pdf");
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute mt-2 w-full text-xs z-40  border shadow-sm`}
+                  } absolute mt-2 w-full text-xs z-40  border `}
                 >
                   {sectionOptions.map((opt) => (
                     <div
@@ -309,10 +309,14 @@ doc.save("ClassPermissions.pdf");
               )}
             </div>
 
-            <div className="relative" ref={filterRef}>
+            <div className="relative flex-1" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((p) => !p)}
-                className={buttonClass}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                    : "bg-white border-gray-300 hover:bg-gray-100"
+                }`}
               >
                 Filter
               </button>
@@ -356,7 +360,7 @@ doc.save("ClassPermissions.pdf");
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((p) => !p)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
@@ -370,7 +374,7 @@ doc.save("ClassPermissions.pdf");
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-full z-40  border shadow-sm`}
+                  } absolute top-full left-0 mt-1 w-full z-40  border `}
                 >
                   <button
                     onClick={() => {
@@ -406,7 +410,7 @@ doc.save("ClassPermissions.pdf");
                 darkMode
                   ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400"
                   : "bg-white border-gray-200 text-gray-900 placeholder-gray-500"
-              } w-full md:w-64 px-3 h-8 border text-xs shadow-sm focus:outline-none`}
+              } w-full md:w-64 px-3 h-8 border text-xs  focus:outline-none`}
             />
             <Pagination
               currentPage={currentPage}

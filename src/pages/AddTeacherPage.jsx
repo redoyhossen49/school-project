@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import Input from "../components/Input"; // your custom Input component
+import { TfiGallery } from "react-icons/tfi";
+import { AiOutlineSignature } from "react-icons/ai";
 
 export default function AddTeacherPage() {
   const { darkMode } = useTheme();
@@ -109,7 +111,7 @@ const removeImage = (type) => {
       {/* Form */}
       <form
         onSubmit={handleSave}
-        className={`p-6  shadow-md space-y-6 overflow-y-auto ${
+        className={`px-6 py-4   space-y-4 overflow-y-auto ${
           darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
         }`}
       >
@@ -117,7 +119,7 @@ const removeImage = (type) => {
         {/* Grid layout for text inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Input
-            label="Teacher Name"
+            label="Teacher name"
             name="teacherName"
             value={formData.teacherName}
             onChange={handleChange}
@@ -133,7 +135,7 @@ const removeImage = (type) => {
           />
 
           <Input
-            label="ID Number"
+            label="ID number"
             name="idNumber"
             value={formData.idNumber}
             onChange={handleChange}
@@ -143,7 +145,7 @@ const removeImage = (type) => {
           />
 
           <Input
-            label="Mobile Number"
+            label="Mobile number"
             name="mobileNumber"
             value={formData.mobileNumber}
             onChange={handleChange}
@@ -151,7 +153,7 @@ const removeImage = (type) => {
           />
 
           <Input
-            label="E-mail Address"
+            label="E-mail address"
             name="email"
             type="email"
             value={formData.email}
@@ -169,7 +171,7 @@ const removeImage = (type) => {
           />
 
           <Input
-            label="Date of Birth"
+            label="Date of birth"
             name="dateOfBirth"
             type="date"
             value={formData.dateOfBirth}
@@ -178,7 +180,7 @@ const removeImage = (type) => {
           />
 
           <Input
-            label="Join Date"
+            label="Join date"
             name="joinDate"
             type="date"
             value={formData.joinDate}
@@ -196,10 +198,10 @@ const removeImage = (type) => {
 
             {!photoPreview ? (
               <div
-                className="border border-dashed border-gray-300 h-16 flex flex-col items-center justify-center
+                className="border border-dashed border-gray-300 h-18 flex flex-col items-center justify-center
         text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
               >
-                <span className="text-sm">📷 Upload Photo</span>
+                <span className="text-xs flex items-center gap-2"><TfiGallery /> Upload Photo</span>
 
                 <input
                   type="file"
@@ -233,10 +235,10 @@ const removeImage = (type) => {
 
             {!signaturePreview ? (
               <div
-                className="border border-dashed border-gray-300 h-16 flex flex-col items-center justify-center
+                className="border border-dashed border-gray-300 h-18  flex flex-col items-center justify-center
         text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
               >
-                <span className="text-sm">✍️ Upload Signature</span>
+                <span className="text-xs flex items-center gap-2">  <AiOutlineSignature className="w-4 h-4"/>Upload Signature</span>
 
                 <input
                   type="file"

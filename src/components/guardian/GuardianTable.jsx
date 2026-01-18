@@ -2,7 +2,7 @@ import { useTheme } from "../../context/ThemeContext";
 import GuardianActions from "./GuardianActions";
 
 const headers = [
-  "Guardian Name",
+  "Guardian name",
   "Relation",
   "Division",
   "District",
@@ -37,7 +37,7 @@ export default function GuardianTable({ data, setData, onEdit }) {
 
   return (
     <div
-      className={`border rounded overflow-x-auto ${
+      className={`border overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
@@ -53,16 +53,18 @@ export default function GuardianTable({ data, setData, onEdit }) {
           }`}
         >
           <tr>
-            {headers.map((h, i) => (
+            {headers.map((h) => (
               <th
                 key={h}
-                className={`px-3 py-2 text-left font-semibold whitespace-nowrap border-r ${borderCol}`}
+                className={`px-3 h-8 text-left font-semibold whitespace-nowrap border-r ${borderCol}`}
               >
                 {h}
               </th>
             ))}
             {showAction && (
-              <th className="px-3 py-2 text-left font-semibold">Action</th>
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
+                Action
+              </th>
             )}
           </tr>
         </thead>
@@ -73,7 +75,7 @@ export default function GuardianTable({ data, setData, onEdit }) {
             <tr>
               <td
                 colSpan={showAction ? headers.length + 1 : headers.length}
-                className="h-7 text-center text-gray-400"
+                className="h-8 text-center text-gray-400 whitespace-nowrap"
               >
                 No guardians found
               </td>
@@ -82,15 +84,15 @@ export default function GuardianTable({ data, setData, onEdit }) {
 
           {data.map((s) => {
             const g = s.guardian;
-            if (!g) return null; // skip if guardian is null
+            if (!g) return null;
 
             return (
               <tr key={s.id} className={`border-b ${borderCol} ${hoverRow}`}>
-                {/* ===== Guardian Name ===== */}
-                <td className={`px-3 py-2 border-r ${borderCol}`}>
+                {/* Guardian Name */}
+                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
                   <div className="flex items-center gap-2 overflow-hidden">
                     <img
-                      src={g.photo || "/default-avatar.png"} // optional photo
+                      src={g.photo || "/default-avatar.png"}
                       alt={g.name}
                       className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                     />
@@ -98,21 +100,34 @@ export default function GuardianTable({ data, setData, onEdit }) {
                   </div>
                 </td>
 
-                <td className={`px-3 py-2 border-r ${borderCol}`}>{g.relation}</td>
-                <td className={`px-3 py-2 border-r ${borderCol}`}>{g.division}</td>
-                <td className={`px-3 py-2 border-r ${borderCol}`}>{g.district}</td>
-                <td className={`px-3 py-2 border-r ${borderCol}`}>{g.upazila}</td>
-                <td className={`px-3 py-2 border-r ${borderCol}`}>{g.village}</td>
+                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                  {g.relation}
+                </td>
+                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                  {g.division}
+                </td>
+                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                  {g.district}
+                </td>
+                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                  {g.upazila}
+                </td>
+                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                  {g.village}
+                </td>
 
-                {/* ===== Phone clickable ===== */}
-                <td className={`px-3 py-2 border-r ${borderCol}`}>
-                  <a href={`tel:${g.phone}`} className="text-blue-500 hover:underline">
+                {/* Phone */}
+                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                  <a
+                    href={`tel:${g.phone}`}
+                    className="text-blue-500 hover:underline"
+                  >
                     {g.phone}
                   </a>
                 </td>
 
                 {showAction && (
-                  <td className="px-3 py-2">
+                  <td className="px-3 h-8 whitespace-nowrap">
                     <GuardianActions
                       guardian={g}
                       studentId={s.id}

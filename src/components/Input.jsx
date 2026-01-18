@@ -50,7 +50,7 @@ export default function Input({
 
       {/* Options dropdown */}
       {open && (
-        <ul className="absolute z-50 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto shadow-md">
+        <ul className="absolute z-50 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto ">
           {options.map((opt, idx) => (
             <li
               key={idx}
@@ -82,9 +82,9 @@ export default function Input({
         onChange={onChange}
         placeholder=" " // important for floating label
         className={`
-          peer w-full border h-8 px-2 text-sm
+          peer w-full border h-8 px-2 text-xs
           ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
-          focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.15)]
+          focus:outline-none 
           ${inputClassName}
         `}
       />
@@ -97,10 +97,10 @@ export default function Input({
 
           peer-placeholder-shown:top-1/2
           peer-placeholder-shown:-translate-y-1/2
-          peer-placeholder-shown:text-sm
+          peer-placeholder-shown:text-xs
           peer-placeholder-shown:text-gray-400
 
-          peer-focus:-top-1
+          peer-focus:-top-0.5
           peer-focus:text-xs
           peer-focus:text-indigo-600
           peer-focus:bg-white

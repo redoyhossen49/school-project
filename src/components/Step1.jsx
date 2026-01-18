@@ -106,7 +106,7 @@ export default function Step1({ formData, handleChange }) {
       <div className="space-y-4 mb-6">
         <Input
           type="select"
-          label="Select School"
+          label=" School"
           name="school"
           value={formData.school || ""}
           onChange={handleChange}
@@ -115,7 +115,7 @@ export default function Step1({ formData, handleChange }) {
 
         <Input
           type="select"
-          label="Select Class"
+          label=" Class"
           name="class"
           value={formData.class || ""}
           onChange={handleChange}
@@ -124,7 +124,7 @@ export default function Step1({ formData, handleChange }) {
 
         <Input
           type="select"
-          label="Select Group"
+          label=" Group"
           name="group"
           value={formData.group || ""}
           onChange={handleChange}
@@ -133,7 +133,7 @@ export default function Step1({ formData, handleChange }) {
 
         <Input
           type="select"
-          label="Select Session"
+          label=" Session"
           name="session"
           value={formData.session || ""}
           onChange={handleChange}
@@ -142,7 +142,7 @@ export default function Step1({ formData, handleChange }) {
 
         <Input
           type="text"
-          label="Admission Fee"
+          label="Admission fee"
           name="admissionFee"
           value={formData.admissionFee || ""}
           inputClassName={darkMode ? "bg-gray-600" : "bg-gray-100"}
@@ -152,7 +152,7 @@ export default function Step1({ formData, handleChange }) {
 
         <Input
           type="date"
-          label="Admission Date"
+          label="Admission date"
           name="admissionDate"
           value={formData.admissionDate || ""}
           onChange={handleChange}

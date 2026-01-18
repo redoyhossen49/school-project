@@ -231,7 +231,6 @@ export default function StudentsList() {
               >
                 / Student List
               </button>
-              
             </p>
           </div>
 
@@ -239,7 +238,7 @@ export default function StudentsList() {
           <div className="hidden md:flex gap-2">
             <button
               onClick={handleRefresh}
-              className={`flex items-center shadow-sm  px-3 py-2 text-xs w-24 rounded border ${borderClr} ${inputBg}`}
+              className={`flex items-center   px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -247,13 +246,13 @@ export default function StudentsList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between shadow-sm  px-3 py-2 text-xs w-24 rounded border ${borderClr} ${inputBg}`}
+                className={`flex items-center justify-between  px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border rounded shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -278,7 +277,7 @@ export default function StudentsList() {
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addstudent")}
-                className="flex items-center gap-1 rounded w-28 shadow-sm bg-blue-600 px-3 py-2 text-xs text-white"
+                className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
               >
                 Student
               </button>
@@ -290,7 +289,7 @@ export default function StudentsList() {
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
-            className={`w-full  flex items-center shadow-sm  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
+            className={`w-full  flex items-center  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
           >
             Refresh
           </button>
@@ -298,13 +297,13 @@ export default function StudentsList() {
           <div className="relative w-full " ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full  flex items-center justify-between shadow-sm  px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+              className={`w-full  flex items-center   px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
             >
-              Export 
+              Export
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border  shadow-sm ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border   ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -329,7 +328,7 @@ export default function StudentsList() {
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addstudent")}
-              className="w-full flex items-center  shadow-sm bg-blue-600 px-3 h-8 text-xs text-white"
+              className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Student
             </button>
@@ -341,20 +340,24 @@ export default function StudentsList() {
           <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
             {/* Date Dropdown */}
             <div className="relative" ref={dateDropdownRef}>
+              {/* Main Button */}
               <button
                 onClick={() => setDateOpen((prev) => !prev)}
-                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs  border ${borderClr} ${inputBg}`}
+                className={`w-full flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
               >
-                {selectedDate}
+                {selectedDate || "Select Date"}
               </button>
+
+              {/* Main Dropdown */}
               {dateOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-36 shadow-lg z-30 overflow-hidden ${
+                  className={`absolute left-0 mt-2 py-2 w-full max-h-[60vh] overflow-y-auto space-y-2  z-40 ${
                     darkMode
-                      ? "bg-gray-600 text-gray-100 border border-gray-700"
-                      : "bg-white text-gray-900 border border-gray-200"
-                  } flex flex-col`}
+                      ? "bg-gray-700 text-gray-100 border border-gray-600"
+                      : "bg-white text-gray-900 border border-gray-300"
+                  }`}
                 >
+                  {/* Date Options */}
                   {dateOptions.map((opt) => (
                     <div
                       key={opt.value}
@@ -363,39 +366,47 @@ export default function StudentsList() {
                         setDateOpen(false);
                         setShowSession(false);
                       }}
-                      className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
+                      className="w-full cursor-pointer px-3 h-6 text-xs flex items-center justify-between   hover:bg-gray-100 dark:hover:bg-gray-600 transition"
                     >
                       <span>{opt.label}</span>
-                      
                     </div>
                   ))}
+
+                  {/* Session Button */}
                   <div
                     onClick={() => setShowSession(!showSession)}
-                    className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
+                    className="w-full cursor-pointer px-3  text-xs flex items-center justify-between hover:bg-gray-100  transition"
                   >
                     <span>Session</span>
-                    <BiChevronRight
-                      size={14}
-                      className={`${
-                        showSession ? "rotate-90" : ""
-                      } transition-transform`}
-                    />
                   </div>
-                  {showSession &&
-                    sessionKeys.map((s) => (
+
+                  {/* Sub-options Overlay (CENTERED) */}
+                  {showSession && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
                       <div
-                        key={s}
-                        onClick={() => {
-                          setSelectedDate(s);
-                          setDateOpen(false);
-                          setShowSession(false);
-                        }}
-                        className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
+                        className={`w-10/12   overflow-y-auto pointer-events-auto ${
+                          darkMode
+                            ? "bg-gray-700 text-gray-100 border border-gray-600"
+                            : "bg-white text-gray-900 border border-gray-300"
+                        }`}
+                        onClick={(e) => e.stopPropagation()} // sub-options click handle
                       >
-                        <span>{s}</span>
-                        
+                        {sessionKeys.map((s) => (
+                          <div
+                            key={s}
+                            onClick={() => {
+                              setSelectedDate(s);
+                              setDateOpen(false);
+                              setShowSession(false);
+                            }}
+                            className="w-full cursor-pointer px-2 py-1  text-xs flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                          >
+                            <span>{s}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -403,10 +414,10 @@ export default function StudentsList() {
             {/* Filter Button */}
             <div className="relative " ref={filterRef}>
               <button
-                 onClick={() => setFilterOpen((prev) => !prev)}
-                 className={`w-full  flex items-center  shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
               >
-                Filter 
+                Filter
               </button>
 
               <FilterDropdown
@@ -450,17 +461,17 @@ export default function StudentsList() {
             <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs   border ${
+                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs   border ${
                   darkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-200"
                 }`}
               >
-                Sort By 
+                Sort By
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border  ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -496,7 +507,7 @@ export default function StudentsList() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name..."
-              className={`w-full md:w-64 ${borderClr} ${inputBg}  border  px-3 h-8 shadow-sm text-xs focus:outline-none`}
+              className={`w-full md:w-64 ${borderClr} ${inputBg}  border  px-3 h-8  text-xs focus:outline-none`}
             />
             <Pagination
               currentPage={currentPage}

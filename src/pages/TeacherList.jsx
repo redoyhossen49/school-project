@@ -173,7 +173,7 @@ const handleDropdownClick = (type) => {
                 setSearch(""); // optional: reset search too
                 setCurrentPage(1); // optional: go back to first page
               }}
-              className={`w-28 flex items-center  gap-1 border  shadow-sm ${
+              className={`w-28 flex items-center   border   ${
                 darkMode
                   ? "bg-gray-700 border-gray-500"
                   : "bg-white border-gray-200"
@@ -185,7 +185,7 @@ const handleDropdownClick = (type) => {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => handleDropdownClick("export")}
-                className={`w-28 flex items-center justify-between   border  shadow-sm ${
+                className={`w-28 flex items-center   border  ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
                     : "bg-white border-gray-200"
@@ -195,7 +195,7 @@ const handleDropdownClick = (type) => {
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-28 z-40 border   ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -238,7 +238,7 @@ const handleDropdownClick = (type) => {
               darkMode
                 ? "bg-gray-700 border-gray-500"
                 : "bg-white border-gray-200"
-            } shadow-sm  px-3 h-8 text-xs`}
+            }   px-3 h-8 text-xs`}
           >
             Refresh
           </button>
@@ -250,13 +250,13 @@ const handleDropdownClick = (type) => {
                 darkMode
                   ? "bg-gray-700 border-gray-500"
                   : "bg-white border-gray-200"
-              } shadow-sm  px-3 h-8 text-xs`}
+              }  px-3 h-8 text-xs`}
             >
               Export 
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border shadow-sm ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border  ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -289,7 +289,7 @@ const handleDropdownClick = (type) => {
             <div className="relative flex-1 md:flex-none" ref={attendanceRef}>
               <button
                 onClick={() => handleDropdownClick("attendance")}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
@@ -301,7 +301,7 @@ const handleDropdownClick = (type) => {
 
               {attendanceOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-full shadow-lg z-40 overflow-hidden flex flex-col ${
+                  className={`absolute left-0 mt-2 w-full  z-40 overflow-hidden flex flex-col ${
                     darkMode
                       ? "bg-gray-800 text-gray-100 border border-gray-700"
                       : "bg-white text-gray-900 border border-gray-200"
@@ -314,7 +314,7 @@ const handleDropdownClick = (type) => {
                         setAttendanceFilter(opt);
                         setAttendanceOpen(false);
                       }}
-                      className="w-full cursor-pointer px-3 h-8 text-xs flex items-center justify-between hover:bg-gray-100 transition"
+                      className="w-full cursor-pointer px-3 h-8 text-xs flex items-center hover:bg-gray-100 transition"
                     >
                       <span>{opt}</span>
                       
@@ -329,7 +329,7 @@ const handleDropdownClick = (type) => {
               <button
                  ref={filterButtonRef}
                   onClick={() => setFilterOpen(prev => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
@@ -419,7 +419,7 @@ const handleDropdownClick = (type) => {
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => handleDropdownClick("sort")}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
@@ -429,7 +429,7 @@ const handleDropdownClick = (type) => {
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute left-0 mt-2  md:w-36 shadow-sm z-40 w-full border ${
+                  className={`absolute left-0 mt-2  md:w-36 z-40 w-full border ${
                     darkMode
                       ? "bg-gray-800 text-gray-100 border-gray-700"
                       : "bg-white text-gray-900 border-gray-200"
@@ -465,7 +465,7 @@ const handleDropdownClick = (type) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name..."
-              className={`w-full px-3 h-8 text-xs  border shadow-sm ${
+              className={`w-full px-3 h-8 text-xs  border  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"

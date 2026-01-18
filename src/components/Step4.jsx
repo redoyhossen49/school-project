@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
 import Input from "./Input";
+import { TfiGallery } from "react-icons/tfi";
 
 export default function Step4({ formData, handleChange }) {
   const { darkMode } = useTheme();
@@ -34,15 +35,15 @@ export default function Step4({ formData, handleChange }) {
 
   return (
     <div className={`space-y-4 animate-fadeIn ${darkMode ? "text-gray-200" : "text-gray-700"}`}>
-      <p className={`text-sm text-center ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+      <p className={`text-xs text-center ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
         Please provide the student information.
       </p>
 
       {/* Student Info Inputs */}
       {[
-        { label: "Student Name", name: "studentname" },
-        { label: "Father Name", name: "father" },
-        { label: "Mother Name", name: "mother" },
+        { label: "Student name", name: "studentname" },
+        { label: "Father name", name: "father" },
+        { label: "Mother name", name: "mother" },
       ].map((field) => (
         <Input
           key={field.name}
@@ -86,8 +87,8 @@ export default function Step4({ formData, handleChange }) {
 
       {/* Account Info */}
       {[
-        { label: "ID Number", name: "idNumber" },
-        { label: "Mobile Number", name: "mobileNumber" },
+        { label: "ID number", name: "idNumber" },
+        { label: "Mobile number", name: "mobileNumber" },
       ].map((field) => (
         <Input
           key={field.name}
@@ -131,11 +132,11 @@ export default function Step4({ formData, handleChange }) {
       <div className="my-4">
         {!preview ? (
           <div
-            className={`border border-dashed border-gray-300 h-16 flex flex-col items-center justify-center relative cursor-pointer hover:border-indigo-400 transition ${
+            className={`border border-dashed border-gray-300 h-18 flex flex-col items-center justify-center relative cursor-pointer hover:border-indigo-400 transition ${
               darkMode ? "text-gray-400 border-gray-600" : "text-gray-400 border-gray-300"
             }`}
           >
-            <span className="text-sm">📷 Upload Photo</span>
+            <span className="flex items-center gap-2 text-sm"><TfiGallery /> Upload Photo</span>
             <input
               type="file"
               accept="image/*"
