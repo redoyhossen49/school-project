@@ -11,7 +11,7 @@ export default function Step2({ formData, handleChange }) {
       }`}
     >
       <p
-        className={`text-sm text-center py-4 ${
+        className={`text-xs text-center py-4 ${
           darkMode ? "text-gray-400" : "text-gray-500"
         }`}
       >
@@ -19,12 +19,12 @@ export default function Step2({ formData, handleChange }) {
       </p>
 
       {[
-        { label: "Previous School", name: "previousSchool" },
-        { label: "Class Name", name: "className" },
-        { label: "Group Name", name: "groupName" },
+        { label: "Previous school", name: "previousSchool" },
+        { label: "Class name", name: "className" },
+        { label: "Group name", name: "groupName" },
         { label: "Section", name: "sectionName" },
-        { label: "Session Year", name: "sessionYear" },
-        { label: "Last Result", name: "lastResult" },
+        { label: "Session year", name: "sessionYear" },
+        { label: "Last result", name: "lastResult" },
       ].map((field) => (
         <Input
           key={field.name}

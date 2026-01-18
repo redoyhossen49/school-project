@@ -152,7 +152,7 @@ const filteredClassTimes = classTimes
   
 
   // Button base class
-  const buttonClass = `flex items-center  w-28  px-3 h-8 text-xs shadow-sm hover:bg-gray-100 ${
+  const buttonClass = `flex items-center  w-28  px-3 h-8 text-xs hover:bg-gray-100 ${
     darkMode
       ? "border bg-gray-700 border-gray-500 text-gray-100"
       : "border bg-white border-gray-200 text-gray-900"
@@ -173,7 +173,7 @@ const filteredClassTimes = classTimes
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>{" "}
-               / Class Time List
+               / Class Time 
             </p>
           </div>
 
@@ -197,7 +197,7 @@ const filteredClassTimes = classTimes
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 z-50 top-full mt-1 w-28  border shadow-sm ${
+                  className={`absolute left-0 z-50 top-full mt-1 w-28  border  ${
                     darkMode
                       ? "border-gray-500 bg-gray-700"
                       : "border-gray-200 bg-white"
@@ -222,7 +222,7 @@ const filteredClassTimes = classTimes
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addclasstime")}
-                className="flex items-center   w-28  bg-blue-600 px-3 py-2 text-xs text-white shadow-sm hover:bg-blue-700"
+                className="flex items-center   w-28  bg-blue-600 px-3 py-2 text-xs text-whitehover:bg-blue-700"
               >
                 Class Time
               </button>
@@ -237,7 +237,7 @@ const filteredClassTimes = classTimes
               setClassTimes(classTimeData);
               setSearch("");
             }}
-            className={`flex items-center  w-full  border px-3 h-8 text-xs shadow-sm ${
+            className={`flex items-center  w-full  border px-3 h-8 text-xs  ${
               darkMode
                 ? "border-gray-500 bg-gray-700 text-gray-100"
                 : "border-gray-200 bg-white text-gray-900"
@@ -249,7 +249,7 @@ const filteredClassTimes = classTimes
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setExportOpen(!exportOpen)}
-              className={`flex items-center w-full  border px-3 h-8 text-xs shadow-sm ${
+              className={`flex items-center w-full  border px-3 h-8 text-xs  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100"
                   : "border-gray-200 bg-white text-gray-900"
@@ -259,7 +259,7 @@ const filteredClassTimes = classTimes
             </button>
             {exportOpen && (
               <div
-                className={`absolute left-0 z-50 top-full mt-1 w-full  border shadow-sm ${
+                className={`absolute left-0 z-50 top-full mt-1 w-full  border  ${
                   darkMode
                     ? "border-gray-500 bg-gray-700"
                     : "border-gray-200 bg-white"
@@ -284,7 +284,7 @@ const filteredClassTimes = classTimes
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addclasstime")}
-              className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white shadow-sm"
+              className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white "
             >
                Class Time
             </button>
@@ -298,7 +298,7 @@ const filteredClassTimes = classTimes
             <div className="relative" ref={sectionDropdownRef}>
               <button
                 onClick={() => setSectionOpen(!sectionOpen)}
-                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs shadow-sm ${
+                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-900"
@@ -308,7 +308,7 @@ const filteredClassTimes = classTimes
               </button>
               {sectionOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-28 shadow-lg z-30 flex flex-col ${
+                  className={`absolute left-0 mt-2 w-full  z-30 flex flex-col ${
                     darkMode
                       ? "bg-gray-600 text-gray-100 border border-gray-700"
                       : "bg-white text-gray-900 border border-gray-200"
@@ -321,7 +321,7 @@ const filteredClassTimes = classTimes
                         setSelectedSection(opt);
                         setSectionOpen(false);
                       }}
-                      className="w-full cursor-pointer px-3 h-8 text-sm hover:bg-gray-100 flex  items-center"
+                      className="w-full cursor-pointer px-3 h-8 text-xs hover:bg-gray-100 flex  items-center"
                     >
                       {opt} 
                     </div>
@@ -334,7 +334,7 @@ const filteredClassTimes = classTimes
             <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs shadow-sm ${
+                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-900"
@@ -379,7 +379,7 @@ const filteredClassTimes = classTimes
             <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
-                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs shadow-sm ${
+                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-900"
@@ -389,7 +389,7 @@ const filteredClassTimes = classTimes
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-28 border shadow-sm ${
+                  className={`absolute left-0 mt-2 w-28 border ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -425,7 +425,7 @@ const filteredClassTimes = classTimes
               placeholder="Search by class..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`h-8 px-3  w-full text-xs  border shadow-sm ${
+              className={`h-8 px-3  w-full text-xs  border  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"

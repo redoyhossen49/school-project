@@ -1,178 +1,164 @@
 import { useState, useEffect, useRef } from "react";
-import { useTheme } from "../context/ThemeContext";
-import Modal from "./Modal";
 
 export default function FormModal({
   open,
-  title,
-  fields,
+  title = "Form",
+  fields = [], // [{ key, placeholder, options, type }]
   initialValues = {},
   onClose,
   onSubmit,
-  onChange, // 🔹 new prop to notify parent on field change
+  darkMode = false,
 }) {
-  const { darkMode } = useTheme();
   const [formData, setFormData] = useState(initialValues);
-  const [dropdownOpen, setDropdownOpen] = useState({});
-  const dropdownRef = useRef({});
+  const [activeField, setActiveField] = useState(null);
+  const containerRef = useRef(null);
 
-  // Reset form when modal opens
+  /* Reset form when opened */
   useEffect(() => {
     if (open) {
       setFormData(initialValues);
-      setDropdownOpen({});
+      setActiveField(null);
     }
   }, [open, initialValues]);
 
-  // Handle field change
-  const handleChange = (name, value) => {
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
-
-      // Notify parent if onChange is provided
-      onChange?.(name, value, updated, setFormData);
-
-      return updated;
-    });
-  };
-
-  // Save handler
-  const handleSave = () => {
-    for (let field of fields) {
-      if (field.required && !formData[field.name]) {
-        alert(`${field.label} is required`);
-        return;
-      }
-    }
-    onSubmit(formData);
-    onClose();
-  };
-
-  // Close dropdown if click outside
+  /* Outside click to close dropdown */
   useEffect(() => {
     const handleClickOutside = (e) => {
-      fields.forEach((f) => {
-        if (
-          dropdownRef.current[f.name] &&
-          !dropdownRef.current[f.name].contains(e.target)
-        ) {
-          setDropdownOpen((prev) => ({ ...prev, [f.name]: false }));
-        }
-      });
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setActiveField(null);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [fields]);
+  }, []);
+
+  const handleFieldChange = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+    setActiveField(null);
+  };
+
+  if (!open) return null;
 
   return (
-    <Modal open={open} title={title} onClose={onClose} onSave={handleSave}>
-      <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
-        {fields.map((field) => (
-          <div key={field.name} className="relative">
-            {field.type === "select" ? (
-              <div
-                ref={(el) => (dropdownRef.current[field.name] = el)}
-                className={`w-full border rounded shadow-sm px-3 py-2 text-sm cursor-pointer relative ${
-                  darkMode
-                    ? "border-gray-400 bg-gray-700 text-gray-100"
-                    : "border-gray-300 bg-white text-gray-800"
-                }`}
-              >
-                {/* Selected Value */}
-                <div
-                  onClick={() =>
-                    setDropdownOpen((prev) => ({
-                      ...prev,
-                      [field.name]: !prev[field.name],
-                    }))
-                  }
-                  className="flex justify-between items-center"
-                >
-                  <span>
-                    {(() => {
-                      const opts = (field.options || []).map((o) =>
-                        typeof o === "string" ? { label: o, value: o } : o
-                      );
-                      const selected = opts.find(
-                        (opt) => opt.value === formData[field.name]
-                      );
-                      return selected
-                        ? selected.label
-                        : field.placeholder || "Select";
-                    })()}
-                  </span>
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      dropdownOpen[field.name] ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    ></path>
-                  </svg>
-                </div>
+    <div className="fixed inset-0 z-40 flex items-center justify-center px-4">
+      {/* Overlay */}
+      <div className="absolute inset-0 " onClick={onClose}></div>
 
-                {/* Dropdown Options */}
-                {dropdownOpen[field.name] && (
-                  <ul
-                    className={`absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded border shadow-lg z-50 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-400 scrollbar-thumb-gray-600 scrollbar-track-gray-800"
-                        : "bg-white border-gray-300"
-                    }`}
-                  >
-                    {(field.options || []).map((opt) => {
-                      const option =
-                        typeof opt === "string" ? { label: opt, value: opt } : opt;
-                      const isSelected = formData[field.name] === option.value;
-                      return (
-                        <li
-                          key={option.value}
-                          onClick={() => {
-                            handleChange(field.name, option.value);
-                            setDropdownOpen((prev) => ({
-                              ...prev,
-                              [field.name]: false,
-                            }));
-                          }}
-                          className={`px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 ${
-                            isSelected
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-100"
-                              : "text-gray-800"
-                          }`}
-                        >
-                          {option.label}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            ) : (
-              <input
-                type={field.type || "text"}
-                value={formData[field.name] ?? ""}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                placeholder={field.placeholder}
-                readOnly={field.readOnly || false}
-                className={`w-full border shadow-sm px-3 py-2 text-sm rounded ${
-                  darkMode
-                    ? "border-gray-400 bg-gray-700 text-gray-100"
-                    : "border-gray-300 bg-white text-gray-800"
-                }`}
-              />
-            )}
+      {/* Main container */}
+      <div
+        ref={containerRef}
+        className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+      w-64 max-w-md p-6 max-h-[70vh] overflow-y-auto 
+      ${
+        darkMode
+          ? "bg-gray-800 text-gray-100 border border-gray-600"
+          : "bg-white text-gray-900 border border-gray-200"
+      }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Title */}
+        <h3 className="text-sm font-semibold mb-4 text-center">{title}</h3>
+
+        {/* Fields */}
+        <div className="space-y-4">
+          {fields.map((field) => (
+            <div key={field.key} className="relative">
+              {field.type === "select" ? (
+                <button
+                  onClick={() =>
+                    setActiveField(activeField === field.key ? null : field.key)
+                  }
+                  className={`w-full px-3 h-8 text-sm text-left border flex justify-between items-center ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-gray-100"
+                      : "bg-white border-gray-300 text-gray-900"
+                  }`}
+                >
+                  {formData[field.key] || field.placeholder}
+                  <span className="w-3 h-3">▼</span>
+                </button>
+              ) : (
+                <input
+                  type={field.type || "text"}
+                  value={formData[field.key] || ""}
+                  placeholder={field.placeholder}
+                  onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                  className={`w-full px-3 h-8 border text-xs ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-gray-100"
+                      : "bg-white border-gray-300 text-gray-900"
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 mt-6">
+          <button
+            onClick={() => {
+              setFormData({}); // Form reset
+              setActiveField(null); // Dropdown close
+              onClose(); // Modal close
+            }}
+            className={`w-1/2 h-8 text-xs border ${
+              darkMode
+                ? "bg-gray-700 border-gray-600"
+                : "bg-white border-gray-300"
+            }`}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSubmit(formData)}
+            className="w-1/2 h-8 text-xs  bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+
+        {/* Centered Options Overlay */}
+        {activeField && fields.find((f) => f.key === activeField)?.options && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div
+              className="absolute inset-0 "
+              onClick={() => setActiveField(null)}
+            ></div>
+            <div
+              className={`relative w-full max-w-sm max-h-[70vh] overflow-y-auto bg-white border border-gray-300  p-4`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ul className="space-y-2">
+                {[
+                  {
+                    label: fields.find((f) => f.key === activeField)
+                      ?.placeholder,
+                    value: "",
+                  },
+                  ...fields
+                    .find((f) => f.key === activeField)
+                    ?.options.map((o) => ({ label: o, value: o })),
+                ].map((opt) => (
+                  <li key={opt.value}>
+                    <label className="flex items-center px-3 h-8cursor-pointer hover:bg-blue-50 ">
+                      <input
+                        type="radio"
+                        checked={formData[activeField] === opt.value}
+                        onChange={() =>
+                          handleFieldChange(activeField, opt.value)
+                        }
+                        className="hidden"
+                      />
+                      {opt.label}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        ))}
+        )}
       </div>
-    </Modal>
+    </div>
   );
 }

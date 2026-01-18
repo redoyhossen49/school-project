@@ -11,7 +11,7 @@ export default function Step3({ formData, handleChange }) {
       }`}
     >
       <p
-        className={`text-sm text-center py-4 ${
+        className={`text-xs text-center py-4 ${
           darkMode ? "text-gray-400" : "text-gray-500"
         }`}
       >
@@ -20,9 +20,9 @@ export default function Step3({ formData, handleChange }) {
 
       {/* Guardian Inputs */}
       {[
-        { label: "Guardian Name", name: "guardianname" },
+        { label: "Guardian name", name: "guardianname" },
         { label: "Relation", name: "relation" },
-        { label: "Mobile Number", name: "mobile" },
+        { label: "Mobile number", name: "mobile" },
       ].map((field) => (
         <Input
           key={field.name}

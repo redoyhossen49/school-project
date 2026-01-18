@@ -39,28 +39,37 @@ export default function AddPromoteRequestPage() {
   };
 
   return (
-    <div className="py-4 px-4 mx-6 md:mx-0 min-h-screen">
+    <div className="py-4 px-2 md:mx-0 min-h-screen">
       {/* ===== Header ===== */}
-      <div className="mb-4 bg-white p-6 rounded">
-        <h1 className="text-base font-bold">Add Promote Request</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          <Link to="/school/dashboard" className="hover:text-indigo-600">
-            Dashboard
-          </Link>
-          <span className="mx-1">/</span>
-          <Link to="/students" className="hover:text-indigo-600">
-            Students
-          </Link>
-          <span className="mx-1">/</span>
-          <span className="text-gray-400">Add Promote Request</span>
-        </p>
-      </div>
+      <div
+              className={`mb-6  ${
+                darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
+              } p-6 `}
+            >
+              <h1 className="text-base font-semibold">Add Promote Request</h1>
+              <p className={`text-xs  mt-1 ${darkMode?"text-gray-200":"text-gray-400"}`}>
+                <Link
+                  to="/school/dashboard"
+                  className="hover:text-indigo-600 transition"
+                >
+                  Dashboard
+                </Link>
+                <span className="mx-1">/</span>
+                <Link
+                  to="/school/dashboard/promoterequest"
+                  className="hover:text-indigo-600 transition"
+                >
+                  Promote request
+                </Link>
+                 <span className="mx-1">/</span>Add promote
+              </p>
+            </div>
 
       {/* ===== Form ===== */}
       <form
         onSubmit={handleSave}
-        className={`p-6 rounded shadow-md space-y-6 overflow-y-auto ${
-          darkMode ? "bg-gray-700 text-white" : "bg-white"
+        className={`px-6 py-4   space-y-4 overflow-y-auto ${
+          darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
         }`}
       >
         <h2 className="text-center font-semibold text-lg mb-4">
@@ -70,70 +79,70 @@ export default function AddPromoteRequestPage() {
         {/* ===== From Class Grid ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Input
-            label="From Class"
+            label="From class"
             name="fromClass"
             value={formData.fromClass}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
-            label="From Group (Optional)"
+            label="From group "
             name="fromGroup"
             value={formData.fromGroup}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
-            label="From Section (Optional)"
+            label="From section "
             name="fromSection"
             value={formData.fromSection}
             onChange={handleChange}
-            inputClassName="py-1"
+            
           />
 
           <Input
-            label="From Session"
+            label="From session"
             name="fromSession"
             value={formData.fromSession}
             onChange={handleChange}
-            inputClassName="py-1"
+            
           />
         </div>
 
         {/* ===== To Class Grid ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
           <Input
-            label="To Class"
+            label="To class"
             name="toClass"
             value={formData.toClass}
             onChange={handleChange}
-            inputClassName="py-1"
+            
           />
 
           <Input
-            label="To Group (Optional)"
+            label="To Group "
             name="toGroup"
             value={formData.toGroup}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
-            label="To Section (Optional)"
+            label="To section "
             name="toSection"
             value={formData.toSection}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
-            label="To Session"
+            label="To session"
             name="toSession"
             value={formData.toSession}
             onChange={handleChange}
-            inputClassName="py-1"
+         
           />
         </div>
 
@@ -147,7 +156,7 @@ export default function AddPromoteRequestPage() {
             onChange={handleChange}
             className="h-4 w-4"
           />
-          <label htmlFor="payment" className="text-sm">
+          <label htmlFor="payment" className="text-xs">
             Payment Required for Promote Request
           </label>
         </div>
@@ -157,14 +166,14 @@ export default function AddPromoteRequestPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-1 border w-full md:w-auto rounded hover:bg-gray-100 transition"
+            className="px-6 h-8 border border-gray-300 w-full md:w-auto shdaow-sm hover:bg-gray-100 transition"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-6 py-1 w-full md:w-auto bg-green-600 text-white rounded hover:bg-green-700 transition"
+             className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shdaow-sm hover:bg-green-700 transition"
           >
             Submit
           </button>

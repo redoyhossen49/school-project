@@ -13,12 +13,6 @@ import FormModal from "../components/FormModal.jsx";
 import PromoteFormModal from "../components/PromoteFormModal.jsx";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
-// Dummy filter options
-const classOptions = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5"];
-const groupOptions = ["Group A", "Group B", "Group C"];
-const sectionOptions = ["Section 1", "Section 2", "Section 3"];
-const sessionOptions = ["Session 2023", "Session 2024", "Session 2025"];
-
 export default function PromoteRequestList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
@@ -107,8 +101,9 @@ export default function PromoteRequestList() {
   const filteredRequests = requests
     .filter((r) => r.studentName.toLowerCase().includes(search.toLowerCase()))
     .filter((r) =>
-      selectedSection === "All" ? true : r.fromGroup === selectedSection
+      selectedSection === "All" ? true : r.fromSection === selectedSection
     )
+
     .filter((r) => (appliedClass ? r.fromClass === appliedClass : true))
     .filter((r) => (appliedGroup ? r.fromGroup === appliedGroup : true))
     .filter((r) => (appliedSection ? r.fromSection === appliedSection : true))
@@ -233,7 +228,7 @@ export default function PromoteRequestList() {
     doc.save("PromoteRequests.pdf");
   };
 
-  const buttonClass = `flex items-center justify-between w-28 rounded px-3 py-2 text-xs shadow-sm ${
+  const buttonClass = `flex items-center  w-28  px-3 h-8 text-xs ${
     darkMode
       ? "border bg-gray-700 border-gray-500 text-gray-100"
       : "border bg-white border-gray-200 text-gray-800"
@@ -243,14 +238,14 @@ export default function PromoteRequestList() {
     <div className="p-3 space-y-4 min-h-screen">
       {/* Header */}
       <div
-        className={`rounded-md p-3 space-y-3 ${
+        className={` p-3 space-y-3 ${
           darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-700"
         }`}
       >
         <div className="md:flex md:items-center md:justify-between gap-3">
           <div className="md:mb-3">
-            <h1 className="text-base font-bold">Promote Request List</h1>
-            <nav className="text-sm w-full truncate">
+            <h1 className="text-base font-semibold">Promote Request </h1>
+            <nav className="text-xs w-full truncate">
               <Link
                 to="/school/dashboard"
                 className="hover:text-indigo-600 transition"
@@ -278,7 +273,7 @@ export default function PromoteRequestList() {
                   section: "",
                   session: "",
                 });
-                setSortOrder("asc")
+                setSortOrder("asc");
                 setSelectedSection("All"); // section dropdown reset
                 setCurrentPage(1); // page reset
               }}
@@ -291,11 +286,11 @@ export default function PromoteRequestList() {
                 onClick={() => setExportOpen(!exportOpen)}
                 className={buttonClass}
               >
-                Export <BiChevronDown />
+                Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-28 rounded border shadow-sm ${
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border ${
                     darkMode
                       ? "bg-gray-700 border-gray-500"
                       : "bg-white border-gray-200"
@@ -303,13 +298,13 @@ export default function PromoteRequestList() {
                 >
                   <button
                     onClick={() => exportPDF(filteredRequests)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-2 h-6 text-left text-sm hover:bg-gray-100"
                   >
                     Export PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredRequests)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-2 h-61 text-left text-sm hover:bg-gray-100"
                   >
                     Export Excel
                   </button>
@@ -320,7 +315,7 @@ export default function PromoteRequestList() {
             {canEdit && (
               <button
                 onClick={() => setPromoteModalOpen(true)}
-                className="flex items-center w-28 rounded bg-blue-600 px-3 py-2 text-xs text-white shadow-sm hover:bg-blue-700"
+                className="flex items-center w-28 bg-blue-600 px-3 h-8 text-xs text-white  hover:bg-blue-700"
               >
                 Promote
               </button>
@@ -345,11 +340,11 @@ export default function PromoteRequestList() {
                 section: "",
                 session: "",
               });
-              setSortOrder("asc")
+              setSortOrder("asc");
               setSelectedSection("All"); // section dropdown reset
               setCurrentPage(1); // page reset
             }}
-            className={`flex items-center  w-full rounded border px-2 py-2 text-xs shadow-sm ${
+            className={`flex items-center  w-full  border px-3 h-8 text-xs  ${
               darkMode
                 ? "border-gray-500 bg-gray-700 text-gray-100"
                 : "border-gray-200 bg-white text-gray-900"
@@ -361,17 +356,17 @@ export default function PromoteRequestList() {
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setExportOpen(!exportOpen)}
-              className={`flex items-center justify-between w-full rounded border px-2 py-2 text-xs shadow-sm ${
+              className={`flex items-center w-full border px-3 h-8 text-xs ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100"
                   : "border-gray-200 bg-white text-gray-900"
               }`}
             >
-              Export <BiChevronDown />
+              Export
             </button>
             {exportOpen && (
               <div
-                className={`absolute left-0 z-50 top-full mt-1 w-full rounded border shadow-sm ${
+                className={`absolute left-0 z-50 top-full mt-1 w-full border  ${
                   darkMode
                     ? "border-gray-500 bg-gray-700"
                     : "border-gray-200 bg-white"
@@ -379,13 +374,13 @@ export default function PromoteRequestList() {
               >
                 <button
                   onClick={() => exportPDF(filteredRequests)}
-                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                 >
                   Export PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredRequests)}
-                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                 >
                   Export Excel
                 </button>
@@ -395,45 +390,13 @@ export default function PromoteRequestList() {
 
           {canEdit && (
             <button
-              onClick={() => setPromoteModalOpen(true)}
-              className="flex items-center  w-full rounded bg-blue-600 px-2 py-2 text-xs text-white shadow-sm"
+             onClick={() => navigate("/school/dashboard/addpromoterequest")}
+              className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white "
             >
               Promote
             </button>
           )}
-          <PromoteFormModal
-            open={promoteModalOpen}
-            title="Promote Students"
-            fields={promoteFormFields}
-            initialValues={{}}
-            onClose={() => setPromoteModalOpen(false)}
-            onSubmit={(data) => {
-              console.log("Promote Request Data:", data);
-
-              // Update table state with new request
-              setRequests((prev) => [
-                ...prev,
-                {
-                  id: prev.length + 1, // unique id
-                  sl: prev.length + 1,
-                  studentName: data.studentName || `Student ${prev.length + 1}`, // optional
-                  fromClass: data.fromClass,
-                  fromGroup: data.fromGroup,
-                  fromSection: data.fromSection,
-                  fromSession: data.fromSession,
-                  toClass: data.toClass,
-                  toGroup: data.toGroup,
-                  toSection: data.toSection,
-                  toSession: data.toSession,
-                  paymentRequired: data.paymentRequired,
-                  status: "Pending",
-                  date: new Date().toLocaleDateString(),
-                },
-              ]);
-
-              setPromoteModalOpen(false);
-            }}
-          />
+         
         </div>
 
         {/* Controls */}
@@ -445,12 +408,12 @@ export default function PromoteRequestList() {
                 onClick={() => setSectionOpen((prev) => !prev)}
                 className={buttonClass + " w-full md:w-28 justify-between"}
               >
-                {selectedSection || "All Sections"} <BiChevronDown />
+                {selectedSection || "All Sections"}
               </button>
 
               {sectionOpen && (
                 <div
-                  className={`absolute mt-2 w-36 z-40 rounded border shadow-sm max-h-48 overflow-y-auto ${
+                  className={`absolute mt-2 w-full z-40  border  max-h-48 overflow-y-auto ${
                     darkMode
                       ? "bg-gray-700 border-gray-500 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -463,15 +426,9 @@ export default function PromoteRequestList() {
                         setSelectedSection(s); // table filter state
                         setSectionOpen(false);
                       }}
-                      className={`px-3 h-8 flex items-center justify-between text-sm cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600 ${
-                        selectedSection === s
-                          ? darkMode
-                            ? "bg-gray-600"
-                            : "bg-blue-100"
-                          : ""
-                      }`}
+                      className={`px-3 h-8 flex items-center  text-xs cursor-pointer hover:bg-blue-50 `}
                     >
-                      {s} <BiChevronRight size={12} />
+                      {s}
                     </div>
                   ))}
                 </div>
@@ -485,7 +442,7 @@ export default function PromoteRequestList() {
                 onClick={() => setFilterOpen((prev) => !prev)}
                 className={buttonClass + " w-full md:w-28 justify-between"}
               >
-                Filter <BiChevronDown />
+                Filter
               </button>
 
               <FilterDropdown
@@ -514,11 +471,11 @@ export default function PromoteRequestList() {
                 onClick={() => setSortOpen(!sortOpen)}
                 className={buttonClass + " w-full md:w-28 justify-between"}
               >
-                Sort By <BiChevronDown />
+                Sort By
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute mt-2 w-24 z-40 rounded border shadow-sm ${
+                  className={`absolute mt-2 w-full z-40  border  ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -529,18 +486,18 @@ export default function PromoteRequestList() {
                       setSortOrder("asc");
                       setSortOpen(false);
                     }}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-3 h-6 text-left text-sm hover:bg-gray-100"
                   >
-                    First ↑
+                    First
                   </button>
                   <button
                     onClick={() => {
                       setSortOrder("desc");
                       setSortOpen(false);
                     }}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-3 h-6 text-left text-sm hover:bg-gray-100"
                   >
-                    Last ↓
+                    Last
                   </button>
                 </div>
               )}
@@ -548,13 +505,13 @@ export default function PromoteRequestList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 mt-2 md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search student..."
-              className={`h-8 px-3 w-full text-xs rounded border shadow-sm ${
+              className={`h-8 px-3 w-full text-xs  border  ${
                 darkMode
                   ? "bg-gray-700 border-gray-500 text-gray-100 placeholder:text-gray-400"
                   : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
@@ -570,7 +527,7 @@ export default function PromoteRequestList() {
       </div>
 
       {/* Table */}
-      <div className={`p-2 rounded ${darkMode ? "bg-gray-900" : "bg-white"}`}>
+      <div className={`p-2  ${darkMode ? "bg-gray-900" : "bg-white"}`}>
         <PromoteRequestTable data={currentData} setData={setRequests} />
       </div>
 

@@ -4,9 +4,9 @@ import { classPermissionData } from "../../data/classPermissionData"; // আপ�
 
 const headers = [
   { label: "Sl", key: "sl" },
-  { label: "Name", key: "name" },
-  { label: "Teacher Name", key: "teacherName" },
-  { label: "Id Number", key: "idNumber" },
+  
+  { label: "Teacher name", key: "teacherName" },
+  { label: "Id number", key: "idNumber" },
   { label: "Class", key: "class" },
   { label: "Group", key: "group" },
   { label: "Section", key: "section" },

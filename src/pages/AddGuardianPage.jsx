@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import Input from "../components/Input"; // your custom Input component
+import { TfiGallery } from "react-icons/tfi";
 
 export default function AddGuardianPage() {
   const { darkMode } = useTheme();
@@ -48,21 +49,25 @@ export default function AddGuardianPage() {
   };
 
   return (
-    <div className="py-4 px-4 mx-6 md:mx-0 min-h-screen">
+    <div
+      className={`py-3 px-2  min-h-screen ${
+        darkMode ? "bg-gray-800" : "bg-gray-50"
+      }`}
+    >
       {/* Header */}
-     <div
-        className={`mb-6  ${
-          darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
-        } p-6 rounded`}
+      <div
+        className={`mb-3 p-6  ${
+          darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
+        }`}
       >
-        <h1 className="text-base font-bold">Add Guardian</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-base font-semibold">Add Guardian</h1>
+        <p className="text-xs text-gray-500 mt-1">
           <Link to="/dashboard" className="hover:text-indigo-600">
             Dashboard
           </Link>
           <span className="mx-1">/</span>
-          <Link to="/guardians" className="hover:text-indigo-600">
-            Guardians
+          <Link  to="/school/dashboard/guardianlist" className="hover:text-indigo-600">
+            Guardian
           </Link>
           <span className="mx-1">/</span>
           <span className="text-gray-400">Add Guardian</span>
@@ -72,11 +77,11 @@ export default function AddGuardianPage() {
       {/* Form */}
       <form
         onSubmit={handleSave}
-        className={`p-6 rounded shadow-md space-y-6 overflow-y-auto ${
-          darkMode ? "bg-gray-700 text-white" : "bg-white"
+        className={`p-6  space-y-4 overflow-y-auto ${
+          darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
         }`}
       >
-        <h2 className="">Guardian Information</h2>
+        <h2 className="font-semibold text-center">Guardian Information</h2>
 
         {/* Grid layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -141,16 +146,14 @@ export default function AddGuardianPage() {
         {/* Upload Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium mb-1">
-              Upload Photo
-            </label>
-
             {!photoPreview ? (
               <div
-                className="border-2 border-dashed h-28 flex flex-col items-center justify-center
-        text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
+                className="border border-dashed border-gray-300 h-18 flex flex-col items-center justify-center
+                  text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
               >
-                <span className="text-sm">📷 Upload Photo</span>
+                <span className="text-xs flex items-center gap-2">
+                  <TfiGallery /> Upload Photo
+                </span>
 
                 <input
                   type="file"
@@ -160,7 +163,7 @@ export default function AddGuardianPage() {
                 />
               </div>
             ) : (
-              <div className="relative h-28 w-full border rounded-lg overflow-hidden">
+              <div className="relative h-12 w-full border rounded-lg overflow-hidden">
                 <img
                   src={photoPreview}
                   alt="Photo Preview"
@@ -170,28 +173,28 @@ export default function AddGuardianPage() {
                 <button
                   onClick={() => removeImage("photo")}
                   className="absolute top-2 right-2 bg-black/60 text-white rounded-full
-          w-7 h-7 flex items-center justify-center hover:bg-red-600 transition"
+                    w-7 h-7 flex items-center justify-center hover:bg-red-600 transition"
                 >
                   ✕
                 </button>
               </div>
             )}
           </div>
-          </div>
+        </div>
 
         {/* Action Buttons */}
         <div className="flex w-full gap-4 md:justify-end mt-4">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-2 border w-full md:w-auto rounded hover:bg-gray-100 transition"
+             className="px-6 h-8 border border-gray-300 w-full md:w-auto  hover:bg-gray-100 transition"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-6 py-2 w-full md:w-auto bg-green-600 text-white rounded hover:bg-green-700 transition"
+            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white  hover:bg-green-700 transition"
           >
             Save
           </button>

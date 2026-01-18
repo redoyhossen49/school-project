@@ -21,13 +21,14 @@ import { IoExtensionPuzzleOutline } from "react-icons/io5";
 import {
   MdOutlineDashboard,
   MdOutlineFormatListNumberedRtl,
+  MdOutlineInventory2,
   MdOutlineShoppingBag,
 } from "react-icons/md";
 
 import { BsCalendarDay } from "react-icons/bs";
 
 import { VscCalendar } from "react-icons/vsc";
-import { RiMoneyDollarCircleLine } from "react-icons/ri";
+import { RiAccountPinBoxLine, RiMoneyDollarCircleLine } from "react-icons/ri";
 
 import { GiBookAura } from "react-icons/gi";
 
@@ -74,19 +75,19 @@ export const sidebarMenu = (role) => {
       icon: Home,
 
       children: [
-        { title: "view", path: "/landing/see" },
+        { title: "View", path: "/landing/see" },
         { title: "Edit Page", path: "/landing/edit" },
         { title: "Add Page", path: "/landing/add" },
       ],
     },
     {
-      title: "Member Ship",
+      title: "Subscription",
       icon: LuUserRoundPlus,
       children: [
-        { title: "Create Plan", path: "/membership/plan" },
-        { title: "Active Plan", path: "/membership/active" },
+        { title: "Create ", path: "/membership/plan" },
+        { title: "Active ", path: "/membership/active" },
         {
-          title: "Unactive Plan",
+          title: "Unactive ",
           path: "/membership/unactive",
         },
       ],
@@ -103,19 +104,18 @@ export const sidebarMenu = (role) => {
       title: "Transaction",
       icon: GrTransaction,
       children: [
-        { title: "Cash In History", path: "/transaction/cashin" },
-        { title: "Cash Out History", path: "/transaction/cashout" },
-        { title: "Profit history", path: "/transaction/profit" },
-        { title: "Cash Out Request", path: "/transaction/request" },
+        { title: "Cash In ", path: "/transaction/cashin" },
+        { title: "Cash Out ", path: "/transaction/cashout" },
+    
       ],
     },
     {
       title: "Financial & Profit",
       icon: TbReportMoney,
       children: [
-        { title: "Our Profit", path: "/financial/profit" },
-        { title: "Our Balance", path: "/financial/balance" },
-        { title: "Member Balance", path: "/financial/memberbalance" },
+        { title: "Collection", path: "/financial/profit" },
+        { title: "Due", path: "/financial/balance" },
+        
       ],
     },
 
@@ -207,7 +207,7 @@ export const sidebarMenu = (role) => {
         { title: "Exam Routine", path: "examroutine" },
         { title: "Grade", path: "examgrade" },
         { title: "Admit Card", path: "examadmit" },
-        { title: "Sit Number", path: "examsitnumber" },
+        { title: "Seat Number", path: "examsitnumber" },
 
         { title: "Schedule", path: "/exam/schedule" },
         { title: "Result Find", path: "/exam/result" },
@@ -219,10 +219,11 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: CreditCard,
       children: [
-        { title: "Fees Group", path: "fee/feegrouplist" },
-        { title: "Fees Type", path: "fee/feetypelist" },
-        { title: "Discount", path: "fee/discount" },
-        { title: "Collection", path: "fee/collection" },
+        { title: "Fees Group", path: "/fee/group" },
+        { title: "Fees Type", path: "/fee/type" },
+        { title: "Discount", path: "/fee/discount" },
+        { title: "Fees List", path: "/fee/list" },
+        { title: "Collection", path: "/fee/collection" },
       ],
     },
 
@@ -276,8 +277,8 @@ export const sidebarMenu = (role) => {
     },
 
     {
-      title: "Financial & Account",
-      icon: Wallet, // Main section icon
+      title: "Inventory",
+      icon:MdOutlineInventory2, // Main section icon
       children: [
         { title: "Income", path: "/financial/income" },
         { title: "Expense", path: "/financial/expense" },
@@ -299,6 +300,24 @@ export const sidebarMenu = (role) => {
         },
       ],
     },
+     {
+      title: "A/C Opening",
+      icon: RiAccountPinBoxLine,
+      children: [
+        {
+          title: "Opening Status History",
+          path: "/notice",
+        },
+        {
+          title: " Status ",
+          path: "/notice",
+        },
+        {
+          title: " History",
+          path: "/notice",
+        },
+      ],
+    },
 
     {
       title: "Report",
@@ -309,11 +328,7 @@ export const sidebarMenu = (role) => {
           title: "Monthly",
           path: "/report/monthly",
         },
-        {
-          title: "Cash In",
-          path: "/report/cash-in",
-        },
-        { title: "Cash Out", path: "/report/cash-out" },
+        
         {
           title: "Order Process",
           path: "/report/order-process",
@@ -418,7 +433,7 @@ export const sidebarMenu = (role) => {
         { title: "Exam Routine", path: "/exam/routine" },
         { title: "Grade", path: "/exam/grade" },
         { title: "Admit Card", path: "/exam/admit" },
-        { title: "Sit Number", path: "/exam/sitnumber" },
+        { title: "Seat Number", path: "/exam/sitnumber" },
         { title: "Mark Submit", path: "/exam/marksubmit" },
         { title: "Result Find", path: "/exam/result" },
         { title: "Certificate", path: "/exam/certificate" },

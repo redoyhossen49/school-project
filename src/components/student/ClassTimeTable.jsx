@@ -7,9 +7,9 @@ const headers = [
   { label: "Class", key: "className" },
   { label: "Group", key: "group" },
   { label: "Section", key: "section" },
-  { label: "Start Time", key: "startTime" },
-  { label: "Last Time", key: "lastTime" },
-  { label: "End Time", key: "endTime" },
+  { label: "Start time", key: "startTime" },
+  { label: "Last time", key: "lastTime" },
+  { label: "End time", key: "endTime" },
   { label: "Subject", key: "subject" },
 ];
 

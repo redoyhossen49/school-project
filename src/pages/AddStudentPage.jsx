@@ -83,13 +83,13 @@ const baseBtn =
   return (
     <div className="py-2 px-2  md:px-0 min-h-screen flex flex-col items-center space-y-4">
       {/* Header */}
-     <div className={`w-full text-center md:text-left  ${
+     <div className={`w-full   ${
           darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
-        } px-6 py-4 space-y-3`}>
+        } px-6 py-4 space-y-4`}>
           <div>
   <h1
-    className={`text-base md:text-lg font-bold ${
-      darkMode ? "text-gray-100" : "text-gray-800"
+    className={`text-base md:text-lg font-semibold ${
+      darkMode ? "text-gray-100" : "text-gray-700"
     }`}
   >
     Add Student
@@ -113,7 +113,7 @@ const baseBtn =
 
 
       {/* Stepper */}
-      <div className="w-full max-w-xl px-2  ">
+      <div className="w-full max-w-xl   ">
         <Stepper
           activeStep={activeStep}
           onStepClick={(step) => setActiveStep(step)}

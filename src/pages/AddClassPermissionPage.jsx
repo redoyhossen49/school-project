@@ -36,8 +36,8 @@ export default function AddClassPermissionPage() {
   return (
     <div className="py-4 px-2 md:mx-0 min-h-screen">
       {/* ===== Header ===== */}
-      <div className={`mb-4 ${darkMode?"bg-gray-700 text-gray-200":"bg-white text-gray-800"} p-6 `}>
-        <h1 className="text-base font-bold">Add Class Permission</h1>
+      <div className={`mb-4 ${darkMode?"bg-gray-700 text-gray-200":"bg-white text-gray-700"} p-6 `}>
+        <h1 className="text-base font-semibold">Add Class Permission</h1>
         <p className={`text-xs  mt-1 ${darkMode?"text-gray-200":"text-gray-400"}`}>
           <Link to="/school/dashboard" className="hover:text-indigo-600">
             Dashboard
@@ -57,13 +57,13 @@ export default function AddClassPermissionPage() {
           darkMode ? "bg-gray-700 text-white" : "bg-white"
         }`}
       >
-        <h2 className="text-center font-bold ">Class Permission Information</h2>
+        <h2 className="text-center font-semibold ">Class Permission Information</h2>
 
         {/* ===== Grid ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Name */}
           <Input
-            label="Student Name"
+            label="Student name"
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -72,7 +72,7 @@ export default function AddClassPermissionPage() {
 
           {/* Teacher Name */}
           <Input
-            label="Teacher Name"
+            label="Teacher name"
             name="teacherName"
             value={formData.teacherName}
             onChange={handleChange}
@@ -81,7 +81,7 @@ export default function AddClassPermissionPage() {
 
           {/* ID Number */}
           <Input
-            label="ID Number"
+            label="ID number"
             name="idNumber"
             value={formData.idNumber}
             onChange={handleChange}
@@ -90,7 +90,7 @@ export default function AddClassPermissionPage() {
 
           {/* Class */}
           <Input
-            label="Select Class"
+            label="Select class"
             name="className"
             value={formData.className}
             onChange={handleChange}
@@ -99,7 +99,7 @@ export default function AddClassPermissionPage() {
 
           {/* Group */}
           <Input
-            label="Select Group (Optional)"
+            label="Select group "
             name="group"
             value={formData.group}
             onChange={handleChange}
@@ -108,7 +108,7 @@ export default function AddClassPermissionPage() {
 
           {/* Section */}
           <Input
-            label="Select Section (Optional)"
+            label="Select section "
             name="section"
             value={formData.section}
             onChange={handleChange}

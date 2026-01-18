@@ -6,19 +6,19 @@ const headers = [
   "Student ID",
   "Roll No",
   "Name",
-  "Father Name",
-  "Mother Name",
+  "Father name",
+  "Mother name",
   "Class",
   "Group",
   "Section",
   "Session",
   "Phone",
   "Password",
-  "Fees Due",
+  "Fees due",
   "Gender",
   "Status",
-  "Join Date",
-  "DOB",
+  "Join date",
+  "Date of birth",
 ];
 
 export default function StudentTable({ data, setData, onEdit }) {
@@ -27,6 +27,17 @@ export default function StudentTable({ data, setData, onEdit }) {
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
   const userRole = localStorage.getItem("role"); // "school"
   const showAction = userRole === "school";
+
+  // utils function
+const formatDateShort = (dateStr) => {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  const day = date.getDate().toString().padStart(2, "0"); // 2 digit day
+  const month = date.toLocaleString("default", { month: "short" }); // Jan, Feb...
+  const year = date.getFullYear().toString().slice(-2); // last 2 digits
+  return `${day} ${month} ${year}`;
+};
+
 
   const handleEdit = (student) => onEdit(student);
 
@@ -73,17 +84,17 @@ export default function StudentTable({ data, setData, onEdit }) {
         <tbody>
           {data.map((s) => (
             <tr key={s.id} className={`border-b ${borderCol} ${hoverRow}`}>
-              <td className={`px-3 h-8 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}>
                 {s.admissionNo}
               </td>
-              <td className={`px-3 h-8 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}>
                 {s.studentId}
               </td>
-              <td className={`px-3 h-8 border-r ${borderCol}`}>{s.rollNo}</td>
+              <td className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}>{s.rollNo}</td>
 
               {/* Name + Photo */}
               <td
-                className={`px-3 h-8 border-r ${borderCol} max-w-[200px] truncate`}
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap truncate`}
               >
                 <div className="flex items-center gap-2">
                   <img
@@ -95,10 +106,10 @@ export default function StudentTable({ data, setData, onEdit }) {
                 </div>
               </td>
 
-              <td className={`px-3 h-8 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 border-r  whitespace-nowrap ${borderCol}`}>
                 {s.fatherName}
               </td>
-              <td className={`px-3 h-8 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}>
                 {s.motherName}
               </td>
               <td
@@ -122,7 +133,7 @@ export default function StudentTable({ data, setData, onEdit }) {
                 {s.session}
               </td>
 
-              <td className={`px-3 h-8 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}>
                 <a
                   href={`tel:${s.phone}`}
                   className="text-blue-500 hover:underline"
@@ -130,9 +141,9 @@ export default function StudentTable({ data, setData, onEdit }) {
                   {s.phone}
                 </a>
               </td>
-              <td className={`px-3 h-8 border-r ${borderCol}`}>{s.password}</td>
+              <td className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}>{s.password}</td>
 
-              <td className={`px-3 h-8 border-r ${borderCol}`}>
+              <td className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}>
                 {s.feesDue === 0 ? (
                   <span className="text-green-600 font-semibold">Paid</span>
                 ) : (
@@ -170,12 +181,12 @@ export default function StudentTable({ data, setData, onEdit }) {
               <td
                 className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
               >
-                {s.joinDate}
+                {formatDateShort(s.joinDate)}
               </td>
               <td
                 className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
               >
-                {s.dob}
+                {formatDateShort(s.joinDate)}
               </td>
 
               {showAction && (

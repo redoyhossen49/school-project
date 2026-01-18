@@ -1,7 +1,12 @@
 import { useTheme } from "../../context/ThemeContext";
 import StudentActions from "../student/StudentActions";
 
-export default function ReusableTable({ columns, data, showActionKey = false, extraProps = {} }) {
+export default function ReusableTable({
+  columns,
+  data,
+  showActionKey = false,
+  extraProps = {},
+}) {
   const { darkMode } = useTheme();
   const borderCol = darkMode ? "border-gray-700" : "border-gray-200";
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
@@ -29,13 +34,13 @@ export default function ReusableTable({ columns, data, showActionKey = false, ex
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`px-3 py-2 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
+                className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
               >
                 {col.label}
               </th>
             ))}
             {showAction && (
-              <th className="px-3 py-2 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
                 Action
               </th>
             )}
@@ -45,24 +50,32 @@ export default function ReusableTable({ columns, data, showActionKey = false, ex
         <tbody>
           {data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length + (showAction ? 1 : 0)} className="text-center py-4">
+              <td
+                colSpan={columns.length + (showAction ? 1 : 0)}
+                className="text-center h-10"
+              >
                 No Data Found
               </td>
             </tr>
           ) : (
             data.map((row, index) => (
-              <tr key={row.sl || index} className={`border-b ${borderCol} ${hoverRow}`}>
+              <tr
+                key={row.sl || index}
+                className={`border-b ${borderCol} ${hoverRow} h-8`}
+              >
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap align-middle`}
                   >
                     {row[col.key]}
                   </td>
                 ))}
 
                 {showAction && (
-                  <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap flex gap-1`}>
+                  <td
+                    className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap flex items-center gap-1`}
+                  >
                     <StudentActions {...extraProps} rowData={row} />
                   </td>
                 )}

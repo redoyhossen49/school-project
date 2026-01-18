@@ -251,14 +251,14 @@ export default function GroupListPage() {
     <div className="p-3 space-y-4">
       {/* HEADER */}
       <div
-        className={`rounded shadow-sm p-3 space-y-3 ${
-          darkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800"
+        className={` p-3 space-y-3 ${
+          darkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-700"
         }`}
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Group List</h2>
-            <p className="text-xs text-blue-400">
+            <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-700">
                 Dashboard
               </Link>
@@ -270,7 +270,7 @@ export default function GroupListPage() {
             {/* Refresh */}
             <button
               onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center gap-1 rounded border px-2 py-2 text-xs shadow-sm ${
+              className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700"
                   : "border-gray-200 bg-white"
@@ -283,17 +283,17 @@ export default function GroupListPage() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between gap-1 rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`w-full flex items-center  border px-3 h-8 text-xs ${
                   darkMode
                     ? "border-gray-500 bg-gray-700"
                     : "border-gray-200 bg-white"
                 }`}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28  border  ${
                     darkMode
                       ? "border-gray-500 bg-gray-700"
                       : "border-gray-200 bg-white"
@@ -301,15 +301,15 @@ export default function GroupListPage() {
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                     PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3h-6 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                     Excel
                   </button>
                 </div>
               )}
@@ -319,7 +319,7 @@ export default function GroupListPage() {
             {canEdit && (
               <button
                 onClick={() => setIsAddGroupModalOpen(true)}
-                className="w-full md:w-28 flex items-center rounded bg-blue-600 text-white px-2 py-2 text-xs"
+                className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Add Group
               </button>
@@ -336,29 +336,26 @@ export default function GroupListPage() {
         </div>
 
         {/* FILTER / SORT / MONTH */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-2">
           {/* Left: Month / Group / Sort */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
             {/* Month */}
             <div ref={monthRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setMonthOpen((prev) => !prev)}
-                className={`w-full flex items-center justify-between gap-2 rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`w-full flex items-center border px-3 h-8 text-xs ${
                   darkMode
                     ? "border-gray-500 bg-gray-700"
                     : "border-gray-200 bg-white"
                 }`}
               >
                 {selectedMonth}{" "}
-                <BiChevronDown
-                  className={`${
-                    monthOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+              
+               
               </button>
               {monthOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-md max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
                 >
                   {months.map((m) => (
                     <button
@@ -368,7 +365,7 @@ export default function GroupListPage() {
                         setCurrentPage(1);
                         setMonthOpen(false);
                       }}
-                      className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
                         selectedMonth === m
                           ? "bg-blue-100 text-blue-700 font-medium"
                           : darkMode
@@ -392,7 +389,7 @@ export default function GroupListPage() {
                   setGroupFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className={`appearance-none w-full border outline-0 shadow-sm rounded pl-2 py-2 pr-8  text-xs ${
+                className={`appearance-none w-full border outline-0  px-3 h-8  text-xs ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-800"
@@ -405,11 +402,8 @@ export default function GroupListPage() {
                 ))}
               </select>
               {/* Custom down icon */}
-              <BiChevronDown
-                className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-sm ${
-                  darkMode ? "text-gray-100" : "text-gray-800"
-                }`}
-              />
+             
+              
             </div>
 
             {/* Sort */}
@@ -418,7 +412,7 @@ export default function GroupListPage() {
                 onClick={() =>
                   setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                 }
-                className={`w-full flex items-center justify-center gap-1 rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`w-full flex items-center  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-800"
@@ -480,7 +474,7 @@ export default function GroupListPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search group..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs focus:outline-none shadow-sm ${
+              className={`w-full md:w-64  border px-3 h-8 text-xs focus:outline-none ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100"
                   : "border-gray-200 bg-white text-gray-800"
@@ -497,7 +491,7 @@ export default function GroupListPage() {
 
       {/* TABLE */}
       <div
-        className={`rounded p-2 overflow-x-auto ${
+        className={` p-2 overflow-x-auto ${
           darkMode ? "bg-gray-900" : "bg-white"
         }`}
       >

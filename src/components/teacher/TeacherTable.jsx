@@ -12,8 +12,8 @@ const headers = [
   "Present",
   "Late",
   "Leave",
-  "Total Payable",
-  "Payable Due",
+  "Total payable",
+  "Payable due",
 ];
 
 export default function TeacherTable({ data, setData, onEdit }) {

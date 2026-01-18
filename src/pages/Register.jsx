@@ -6,9 +6,9 @@ export default function Register({ submitted }) {
   const showTabs = true;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-2">
       {/* Card */}
-      <div className="relative w-full max-w-md bg-white shadow-lg rounded-lg px-8 pt-12 pb-4 my-16 animate-fade-in-up transition-all duration-300 hover:scale-[1.01]">
+      <div className="relative w-full max-w-md bg-white shadow-lg rounded-lg px-6 pt-12 pb-4 my-16 animate-fade-in-up transition-all duration-300 hover:scale-[1.01]">
         
         {/* LoginLogo Centered */}
         <div className="flex justify-center mb-6">

@@ -3,6 +3,7 @@ import Input from "./Input";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Button from "./Button";
+import { TfiGallery } from "react-icons/tfi";
 
 export default function SchoolForm() {
   const navigate = useNavigate();
@@ -142,7 +143,7 @@ const successData = {
   return (
     <>
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <Input label="School Name" name="schoolName" value={formData.schoolName} onChange={handleChange} />
+        <Input label="School name" name="schoolName" value={formData.schoolName} onChange={handleChange} />
 
      <div className="space-y-3">
   <Input
@@ -177,12 +178,12 @@ const successData = {
         <Input label="Address" name="address" value={formData.address} onChange={handleChange} />
 
         <div className="grid grid-cols-2 gap-3">
-          <Input label="ID Number" name="id" value={formData.id} onChange={handleChange} />
-          <Input label="EIIN Number" name="eiin" value={formData.eiin} onChange={handleChange} />
+          <Input label="ID number" name="id" value={formData.id} onChange={handleChange} />
+          <Input label="EIIN number" name="eiin" value={formData.eiin} onChange={handleChange} />
         </div>
 
-        <Input label="Mobile Number" name="mobile" value={formData.mobile} onChange={handleChange} />
-        <Input label="Email Address" name="email" value={formData.email} onChange={handleChange} />
+        <Input label="Mobile number" name="mobile" value={formData.mobile} onChange={handleChange} />
+        <Input label="Email address" name="email" value={formData.email} onChange={handleChange} />
           <div className="relative">
         <Input  type={showPassword ? "text" : "password"} label="Password" name="password" value={formData.password} onChange={handleChange} />
          <span
@@ -207,11 +208,11 @@ const successData = {
         {/* Upload */}
         <div className="relative">
   {!formData.logo ? (
-    <label className="flex flex-col items-center justify-center  border-2 border-dashed  h-24 cursor-pointer text-gray-500 hover:border-indigo-600 transition-all duration-300">
-      <span className="">📷</span>
-      <span className="text-xs font-medium">Upload School Logo</span>
+    <label className="flex flex-col items-center justify-center  border-2 border-dashed  h-18 cursor-pointer text-gray-500 hover:border-indigo-600 transition-all duration-300">
+      
+      <span className="text-xs flex items-center gap-2 font-medium"> <TfiGallery /> Upload School Logo</span>
       <span className="text-xs text-gray-400">
-        PNG, JPG, JPEG, PDF • Max 2MB (Optional)
+        PNG, JPG, PDF 
       </span>
 
       <input
@@ -223,16 +224,16 @@ const successData = {
       />
     </label>
   ) : (
-    <div className="relative h-24 border border-gray-300  p-1 flex items-center justify-center gap-4 bg-gray-50">
+    <div className="relative h-18 border border-gray-300  p-1 flex items-center justify-center gap-4 bg-gray-50">
       {/* Image Preview */}
       {formData.logo.type.startsWith("image/") ? (
         <img
           src={URL.createObjectURL(formData.logo)}
           alt="Preview"
-          className="w-20 h-20 object-cover rounded-md shadow"
+          className="w-12 h-12 object-cover "
         />
       ) : (
-        <div className="w-20 h-20 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-md font-semibold">
+        <div className="w-20 h-20 flex items-center justify-center bg-indigo-100 text-indigo-600  font-semibold">
           PDF
         </div>
       )}
