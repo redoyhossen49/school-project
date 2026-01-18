@@ -219,10 +219,10 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: CreditCard,
       children: [
-        { title: "Fees Group", path: "/fee/group" },
-        { title: "Fees Type", path: "/fee/type" },
+        { title: "Fees Group", path: "feegrouplist" },
+        { title: "Fees Type", path: "feetypelist" },
         { title: "Discount", path: "/fee/discount" },
-        { title: "Fees List", path: "/fee/list" },
+        { title: "Fees List", path: "feelist" },
         { title: "Collection", path: "/fee/collection" },
       ],
     },
@@ -559,7 +559,6 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: Wallet,
       children: [
-        { title: "Fees List", path: "/fee/list" },
         { title: "Pay Fee", path: "/fee/pay" },
         { title: "Pay Slip", path: "/fee/payslip" },
       ],

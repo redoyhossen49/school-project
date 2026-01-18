@@ -35,7 +35,7 @@ export default function FilterDropdown({
   return (
     <div
       ref={containerRef}
-      className="absolute z-40 mt-2 left-1/2 -translate-x-1/2 w-64 md:w-72 max-h-[60vh] overflow-y-auto"
+      className="absolute z-40 mt-2 left-0 w-64 md:w-72 max-h-[60vh] overflow-y-auto"
     >
       <div
         className={`border  shadow-lg p-6
@@ -63,14 +63,26 @@ export default function FilterDropdown({
               {/* Options Overlay */}
               {activeField === field.key && (
                 <div
-                  className={`absolute left-1/2 -top-20 -translate-x-1/2 z-50 mt-1 w-64 max-h-48 py-6 overflow-y-auto border text-xs shadow-lg
+                  className={`absolute left-0 top-full mt-1 z-50 w-full max-h-48 py-2 overflow-y-auto border text-xs shadow-lg rounded
                     ${darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-200"}`}
                 >
                   <ul className="">
                     {/* All / Placeholder */}
                     <li>
                       <label
-                        className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600"
+                        onClick={() => {
+                          setTempValues((prev) => ({ ...prev, [field.key]: "" }));
+                          setActiveField(null); // close overlay immediately
+                        }}
+                        className={`flex items-center px-3 h-8 cursor-pointer transition-colors ${
+                          !tempValues[field.key]
+                            ? darkMode
+                              ? "bg-blue-800 text-white"
+                              : "bg-blue-100 text-blue-700 font-medium"
+                            : darkMode
+                            ? "hover:bg-gray-600 text-gray-300"
+                            : "hover:bg-blue-50 text-gray-700"
+                        }`}
                       >
                         <input
                           type="radio"
@@ -81,7 +93,7 @@ export default function FilterDropdown({
                             setTempValues((prev) => ({ ...prev, [field.key]: "" }));
                             setActiveField(null); // close overlay immediately
                           }}
-                          className="mr-2"
+                          className="mr-2 hidden"
                         />
                         {field.placeholder}
                       </label>
@@ -91,7 +103,19 @@ export default function FilterDropdown({
                     {field.options.map((opt) => (
                       <li key={opt}>
                         <label
-                          className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600"
+                          onClick={() => {
+                            setTempValues((prev) => ({ ...prev, [field.key]: opt }));
+                            setActiveField(null); // close overlay immediately
+                          }}
+                          className={`flex items-center px-3 h-8 cursor-pointer transition-colors ${
+                            tempValues[field.key] === opt
+                              ? darkMode
+                                ? "bg-blue-800 text-white"
+                                : "bg-blue-100 text-blue-700 font-medium"
+                              : darkMode
+                              ? "hover:bg-gray-600 text-gray-300"
+                              : "hover:bg-blue-50 text-gray-700"
+                          }`}
                         >
                           <input
                             type="radio"
@@ -102,7 +126,7 @@ export default function FilterDropdown({
                               setTempValues((prev) => ({ ...prev, [field.key]: opt }));
                               setActiveField(null); // close overlay immediately
                             }}
-                            className="mr-2"
+                            className="mr-2 hidden"
                           />
                           {opt}
                         </label>
