@@ -47,38 +47,98 @@ export default function FilterDropdown({
   return (
     <div
       ref={containerRef}
-       className="absolute z-40 mt-2 left-1/2 -translate-x-1/2 w-64 md:w-72 max-h-[80vh] min-h-[60vh] overflow-y-auto"
+      className="absolute z-40 mt-2 left-1/2 -translate-x-1/2 w-64 md:w-72 max-h-[60vh] overflow-y-auto"
     >
       {/* ===== MAIN DROPDOWN ===== */}
       <div
         className={`border shadow-lg p-5 relative 
-          ${darkMode
-            ? "bg-gray-800 text-gray-100 border-gray-600"
-            : "bg-white text-gray-900 border-gray-200"}`}
+          ${
+            darkMode
+              ? "bg-gray-800 text-gray-100 border-gray-600"
+              : "bg-white text-gray-900 border-gray-200"
+          }`}
       >
         {/* Title */}
-        <h3 className="text-sm text-center font-semibold mb-4">
-          {title}
-        </h3>
+        <h3 className="text-sm text-center font-semibold mb-4">{title}</h3>
 
         {/* Fields */}
         <div className="space-y-3">
           {fields.map((field) => (
-            <button
-              key={field.key}
-              onClick={() =>
-                setActiveField(
-                  activeField === field.key ? null : field.key
-                )
-              }
-              className={`w-full h-8 px-3 text-xs text-left border flex justify-between items-center
-                ${darkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"}`}
-            >
-              {tempValues[field.key] || field.placeholder}
-              <span className="w-3 h-3">▼</span>
-            </button>
+            <div key={field.key} className="relative">
+              {/* Select Button */}
+              <button
+                onClick={() =>
+                  setActiveField(activeField === field.key ? null : field.key)
+                }
+                className={`w-full px-3 h-8 text-left text-xs border  flex justify-between items-center
+                  ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-gray-100"
+                      : "bg-white border-gray-300 text-gray-900"
+                  }`}
+              >
+                {tempValues[field.key] || field.placeholder}
+                <span className="ml-2">&#9662;</span>
+              </button>
+
+              {/* Options Overlay */}
+              {activeField === field.key && (
+                <div
+                  className={`absolute left-1/2 -top-20 -translate-x-1/2 z-50 mt-1 w-64 max-h-48 py-6 overflow-y-auto border text-xs shadow-lg
+                    ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-200"
+                    }`}
+                >
+                  <ul className="">
+                    {/* All / Placeholder */}
+                    <li>
+                      <label className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600">
+                        <input
+                          type="radio"
+                          name={field.key}
+                          value=""
+                          checked={!tempValues[field.key]}
+                          onChange={() => {
+                            setTempValues((prev) => ({
+                              ...prev,
+                              [field.key]: "",
+                            }));
+                            setActiveField(null); // close overlay immediately
+                          }}
+                          className="mr-2"
+                        />
+                        {field.placeholder}
+                      </label>
+                    </li>
+
+                    {/* Options */}
+                    {field.options.map((opt) => (
+                      <li key={opt}>
+                        <label className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600">
+                          <input
+                            type="radio"
+                            name={field.key}
+                            value={opt}
+                            checked={tempValues[field.key] === opt}
+                            onChange={() => {
+                              setTempValues((prev) => ({
+                                ...prev,
+                                [field.key]: opt,
+                              }));
+                              setActiveField(null); // close overlay immediately
+                            }}
+                            className="mr-2"
+                          />
+                          {opt}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
@@ -87,9 +147,11 @@ export default function FilterDropdown({
           <button
             onClick={() => setTempValues({})}
             className={`w-1/2 h-8 text-xs border
-              ${darkMode
-                ? "bg-gray-700 border-gray-600"
-                : "bg-white border-gray-300"}`}
+              ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
+              }`}
           >
             Reset
           </button>
@@ -112,9 +174,11 @@ export default function FilterDropdown({
           <div className="absolute inset-0 mt-2 z-50 flex items-center justify-center ">
             <div
               className={`w-8/12 max-h-30 text-xs overflow-y-auto border py-3
-                ${darkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"}`}
+                ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
             >
               <ul>
                 {/* All / placeholder */}

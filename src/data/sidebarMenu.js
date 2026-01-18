@@ -222,7 +222,7 @@ export const sidebarMenu = (role) => {
         { title: "Fees Group", path: "/fee/group" },
         { title: "Fees Type", path: "/fee/type" },
         { title: "Discount", path: "/fee/discount" },
-        
+        { title: "Fees List", path: "/fee/list" },
         { title: "Collection", path: "/fee/collection" },
       ],
     },
@@ -233,9 +233,9 @@ export const sidebarMenu = (role) => {
       children: [
         {
           title: "Employee",
-          path: "/hrm/employee",
+          path: "hrm/employee",
         },
-        { title: "Payroll", path: "/hrm/payroll" },
+        { title: "Payroll", path: "hrm/payroll" },
       ],
     },
 
@@ -573,7 +573,6 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: Wallet,
       children: [
-        { title: "Fees List", path: "/fee/list" },
         { title: "Pay Fee", path: "/fee/pay" },
         { title: "Pay Slip", path: "/fee/payslip" },
       ],
