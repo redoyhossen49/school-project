@@ -36,6 +36,14 @@ import FeeGroupList from "../pages/FeeGroupList";
 import AddFeeGroupPage from "../pages/AddFeeGroupPage";
 import FeeTypeList from "../pages/FeeTypeList";
 import AddFeeTypePage from "../pages/AddFeeTypePage";
+import DiscountList from "../pages/DiscountList";
+import AddDiscountPage from "../pages/AddDiscountPage";
+import CollectionList from "../pages/CollectionList";
+import AddCollectionPage from "../pages/AddCollectionPage";
+import EmployeeList from "../pages/EmployeeList";
+import AddEmployeePage from "../pages/AddEmployeePage";
+import PayrollList from "../pages/PayrollList";
+import AddPayrollPage from "../pages/AddPayrollPage";
 
 export const router = createBrowserRouter([
   {
@@ -131,10 +139,28 @@ export const router = createBrowserRouter([
       { path: "examsitnumber", element: <SitNumberPage /> },
 
       // fee management routes
-      { path: "feegrouplist", element: <FeeGroupList /> },
-      { path: "addfeegroup", element: <AddFeeGroupPage /> },
-      { path: "feetypelist", element: <FeeTypeList /> },
-      { path: "addfeetype", element: <AddFeeTypePage /> },
+      { path: "fee/feegrouplist", element: <FeeGroupList /> },
+      { path: "fee/addfeegroup", element: <AddFeeGroupPage /> },
+      { path: "fee/feetypelist", element: <FeeTypeList /> },
+      { path: "fee/addfeetype", element: <AddFeeTypePage /> },
+
+
+      // discount routes
+      { path: "fee/discount", element: <DiscountList /> },
+      { path: "fee/adddiscount", element: <AddDiscountPage /> },
+
+      // collection routes
+      { path: "fee/collection", element: <CollectionList /> },
+      { path: "fee/addcollection", element: <AddCollectionPage /> },
+
+      // employee routes
+      { path: "hrm/employee", element: <EmployeeList /> },
+      { path: "hrm/addemployee", element: <AddEmployeePage /> },
+
+      // payroll routes
+      { path: "hrm/payroll", element: <PayrollList /> },
+      { path: "hrm/addpayroll", element: <AddPayrollPage /> },
+      
 
     ],
   },

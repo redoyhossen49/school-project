@@ -9,7 +9,7 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
-import FormModal from "../components/FormModal.jsx";
+import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
 
 export default function FeeTypeList() {
   const navigate = useNavigate();
@@ -36,16 +36,6 @@ export default function FeeTypeList() {
     session: "",
   });
   const [editingFee, setEditingFee] = useState(null);
-  const [showFeeForm, setShowFeeForm] = useState(false);
-  const [feeFormData, setFeeFormData] = useState({
-    group_name: "",
-    class: "",
-    group: "",
-    section: "",
-    session: "",
-    fees_type: "",
-    fees_amount: "",
-  });
 
   const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
@@ -186,11 +176,6 @@ export default function FeeTypeList() {
   const groupNameOptions = getUniqueOptions(feeTypeData, "group_name");
   const feesTypeOptions = getUniqueOptions(feeTypeData, "fees_type");
   
-  // Handle fee form field change
-  const handleFeeFormChange = (name, value, updated, setFormData) => {
-    // Handle field changes if needed
-  };
-
   // Handle fee form submit (edit only - add is now handled by separate page)
   const handleFeeFormSubmit = (formData) => {
     if (editingFee) {
@@ -209,33 +194,7 @@ export default function FeeTypeList() {
       setEditingFee(null);
       alert("Fee type updated successfully ✅");
     }
-    setShowFeeForm(false);
-    setFeeFormData({
-      group_name: "",
-      class: "",
-      group: "",
-      section: "",
-      session: "",
-      fees_type: "",
-      fees_amount: "",
-    });
   };
-
-  // Handle edit - open form with fee data
-  useEffect(() => {
-    if (editingFee) {
-      setFeeFormData({
-        group_name: editingFee.group_name || "",
-        class: editingFee.class || "",
-        group: editingFee.group || "",
-        section: editingFee.section || "",
-        session: editingFee.session || "",
-        fees_type: editingFee.fees_type || "",
-        fees_amount: editingFee.fees_amount || "",
-      });
-      setShowFeeForm(true);
-    }
-  }, [editingFee]);
 
   const feeFormFields = [
     {
@@ -311,19 +270,20 @@ export default function FeeTypeList() {
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
-      <div className={`space-y-4  p-3 ${cardBg}`}>
-        <div className="md:flex md:items-center md:justify-between">
+      <div className={`space-y-4 p-3 ${cardBg}`}>
+        <div className="md:flex md:items-center md:justify-between space-y-3 md:space-y-0">
           <div>
-            <h2 className="text-base font-semibold ">Fee Type List</h2>
-            <p className="text-xs text-gray-400">
-              <Link to="/teacher/dashboard" className="hover:text-indigo-600">
+            <h2 className="text-base font-semibold">Fee Type List</h2>
+            <p className="text-xs text-gray-400 flex flex-wrap items-center gap-x-1">
+              <Link to={`/${canEdit ? "school" : ""}/dashboard`} className="hover:text-indigo-600">
                 Dashboard
               </Link>
+              <span>/</span>
               <button
-                onClick={() => navigate(`/${canEdit ? "school" : ""}/dashboard/feetypelist`)}
+                onClick={() => navigate(`/${canEdit ? "school" : ""}/dashboard/fee/feetypelist`)}
                 className="hover:text-indigo-600 cursor-pointer"
               >
-                / Fee Type List
+                Fee Type List
               </button>
             </p>
           </div>
@@ -340,13 +300,13 @@ export default function FeeTypeList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between shadow-sm  px-3 py-2 text-xs w-24 rounded border ${borderClr} ${inputBg}`}
+                className={`flex items-center justify-between shadow-sm  px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
               >
                 Export <BiChevronDown />
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border rounded shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -373,9 +333,9 @@ export default function FeeTypeList() {
                 onClick={() => {
                   const userRole = localStorage.getItem("role");
                   const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                  navigate(`${basePath}/addfeetype`);
+                  navigate(`${basePath}/fee/addfeetype`);
                 }}
-                className="flex items-center gap-1 rounded w-28 shadow-sm bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
+                className="flex items-center gap-1  w-28 shadow-sm bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
               >
                 Add Fee Type
               </button>
@@ -384,24 +344,24 @@ export default function FeeTypeList() {
         </div>
 
         {/* Mobile Buttons */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
-            className={`w-full  flex items-center shadow-sm  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
+            className={`w-full flex items-center justify-center shadow-sm px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
           >
             Refresh
           </button>
 
-          <div className="relative w-full " ref={exportRef}>
+          <div className="relative w-full" ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full  flex items-center justify-between shadow-sm  px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+              className={`w-full flex items-center justify-center shadow-sm px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
             >
               Export
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border  shadow-sm ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border shadow-sm ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -409,13 +369,13 @@ export default function FeeTypeList() {
               >
                 <button
                   onClick={() => exportPDF(filteredFees)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredFees)}
-                  className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export Excel
                 </button>
@@ -430,7 +390,9 @@ export default function FeeTypeList() {
                 const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
                 navigate(`${basePath}/addfeetype`);
               }}
-              className="w-full flex items-center justify-center shadow-sm bg-blue-600 px-3 h-8 text-xs text-white"
+              className={`w-full flex items-center justify-center shadow-sm bg-blue-600 px-3 h-8 text-xs text-white hover:bg-blue-700 ${
+                canEdit ? "col-span-2 sm:col-span-1" : ""
+              }`}
             >
               Add Fee Type
             </button>
@@ -438,13 +400,13 @@ export default function FeeTypeList() {
         </div>
 
         {/* Filters + Search */}
-        <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="grid grid-cols-4 gap-2 md:flex md:w-auto items-center">
+        <div className="space-y-3 md:flex md:items-center md:justify-between md:gap-4 md:space-y-0">
+          <div className="grid grid-cols-2 gap-2 md:flex md:w-auto items-center">
             {/* Filter Button */}
-            <div className="relative " ref={filterRef}>
+            <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full  flex items-center  shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+                className={`w-full flex items-center justify-center shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
               >
                 Filter
               </button>
@@ -491,7 +453,7 @@ export default function FeeTypeList() {
             <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs   border ${
+                className={`w-full flex items-center justify-center shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs border ${
                   darkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-200"
@@ -531,13 +493,13 @@ export default function FeeTypeList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:mt-0 w-full md:w-auto">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by group name, class, fees type..."
-              className={`w-full md:w-64 ${borderClr} ${inputBg}  border  px-3 h-8 shadow-sm text-xs focus:outline-none`}
+              className={`w-full md:w-64 ${borderClr} ${inputBg} border px-3 h-8 shadow-sm text-xs focus:outline-none`}
             />
             <Pagination
               currentPage={currentPage}
@@ -550,7 +512,7 @@ export default function FeeTypeList() {
 
       {/* ===== FEE TYPE TABLE ===== */}
       <div
-        className={` ${
+        className={`${
           darkMode ? "bg-gray-900" : "bg-white"
         } p-2 overflow-x-auto`}
       >
@@ -561,27 +523,14 @@ export default function FeeTypeList() {
         />
       </div>
 
-      {/* Fee Form Modal */}
-      <FormModal
-        open={showFeeForm}
-        title={editingFee ? "Edit Fee Type" : "Add Fee Type"}
-        fields={feeFormFields}
-        initialValues={feeFormData}
-        onClose={() => {
-          setShowFeeForm(false);
-          setEditingFee(null);
-          setFeeFormData({
-            group_name: "",
-            class: "",
-            group: "",
-            section: "",
-            session: "",
-            fees_type: "",
-            fees_amount: "",
-          });
-        }}
+      {/* Fee Edit Modal */}
+      <ReusableEditModal
+        open={editingFee !== null}
+        title="Edit Fee Type"
+        item={editingFee}
+        onClose={() => setEditingFee(null)}
         onSubmit={handleFeeFormSubmit}
-        onChange={handleFeeFormChange}
+        fields={feeFormFields}
       />
     </div>
   );

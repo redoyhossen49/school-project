@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { feepayment } from "../data/feepayment.js";
-import FeeGroupTable from "../components/fee/FeeGroupTable.jsx";
+import { discountData } from "../data/discountData.js";
+import DiscountTable from "../components/discount/DiscountTable.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { FiRefreshCw, FiFilter } from "react-icons/fi";
-import { BiChevronDown, BiChevronRight } from "react-icons/bi";
+import { BiChevronDown } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
@@ -12,25 +11,21 @@ import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
 
-export default function FeeGroupList() {
+export default function DiscountList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [fees, setFees] = useState(feepayment);
+  const [discounts, setDiscounts] = useState(discountData);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const feesPerPage = 20;
+  const discountsPerPage = 20;
 
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
-  const [selectedDate, setSelectedDate] = useState("Monthly");
-  const [dateOpen, setDateOpen] = useState(false);
-  const [showSession, setShowSession] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
-  const [view, setView] = useState("table");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     className: "",
@@ -38,31 +33,15 @@ export default function FeeGroupList() {
     section: "",
     session: "",
   });
-  const [editingFee, setEditingFee] = useState(null);
+  const [editingDiscount, setEditingDiscount] = useState(null);
 
-  const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const dateOptions = [
-    { label: "Today", value: "today" },
-    { label: "Last 7 Days", value: "weekly" },
-    { label: "Monthly", value: "monthly" },
-  ];
-
-  const sessionKeys = ["Session 1", "Session 2", "Session 3"];
-
   // ===== Close dropdowns on outside click =====
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        dateDropdownRef.current &&
-        !dateDropdownRef.current.contains(e.target)
-      ) {
-        setDateOpen(false);
-        setShowSession(false);
-      }
       if (exportRef.current && !exportRef.current.contains(e.target))
         setExportOpen(false);
       if (sortRef.current && !sortRef.current.contains(e.target))
@@ -75,50 +54,56 @@ export default function FeeGroupList() {
   }, []);
 
   // ===== Filter + Sort Logic =====
-  const filteredFees = fees
-    .filter((f) => 
-      f.group_name?.toLowerCase().includes(search.toLowerCase()) ||
-      f.class?.toLowerCase().includes(search.toLowerCase()) ||
-      f.group?.toLowerCase().includes(search.toLowerCase())
+  const filteredDiscounts = discounts
+    .filter((d) => 
+      d.group_name?.toLowerCase().includes(search.toLowerCase()) ||
+      d.class?.toLowerCase().includes(search.toLowerCase()) ||
+      d.group?.toLowerCase().includes(search.toLowerCase()) ||
+      d.fees_type?.toLowerCase().includes(search.toLowerCase()) ||
+      d.student_name?.toLowerCase().includes(search.toLowerCase())
     )
-    .filter((f) => {
+    .filter((d) => {
       // Cumulative filtering: only apply if value is selected
-      if (filters.className && f.class !== filters.className) return false;
-      if (filters.group && f.group !== filters.group) return false;
-      if (filters.section && f.section !== filters.section) return false;
-      if (filters.session && f.session !== filters.session) return false;
+      if (filters.className && d.class !== filters.className) return false;
+      if (filters.group && d.group !== filters.group) return false;
+      if (filters.section && d.section !== filters.section) return false;
+      if (filters.session && d.session !== filters.session) return false;
       return true;
     })
     .sort((a, b) => {
       return sortOrder === "oldest" ? a.sl - b.sl : b.sl - a.sl;
     });
 
-  const totalFees = filteredFees.length;
-  const totalPages = Math.ceil(totalFees / feesPerPage);
-  const currentFees = filteredFees.slice(
-    (currentPage - 1) * feesPerPage,
-    currentPage * feesPerPage
+  const totalDiscounts = filteredDiscounts.length;
+  const totalPages = Math.ceil(totalDiscounts / discountsPerPage);
+  const currentDiscounts = filteredDiscounts.slice(
+    (currentPage - 1) * discountsPerPage,
+    currentPage * discountsPerPage
   );
 
   // ===== EXPORT EXCEL =====
   const exportExcel = (data) => {
     if (!data.length) return;
 
-    const sheetData = data.map((f, i) => ({
+    const sheetData = data.map((d, i) => ({
       Sl: i + 1,
-      "Group Name": f.group_name,
-      Class: f.class,
-      Group: f.group,
-      Section: f.section,
-      Session: f.session,
-      "Total Payable": f.total_payable,
-      "Payable Due": f.payable_due,
+      "Group Name": d.group_name,
+      Class: d.class,
+      Group: d.group,
+      Section: d.section,
+      Session: d.session,
+      "Student Name": d.student_name,
+      "Fees Type": d.fees_type,
+      Regular: d.regular,
+      "Discount Amount": d.discount_amount,
+      "Start Date": d.start_date,
+      "End Date": d.end_date,
     }));
 
     const ws = utils.json_to_sheet(sheetData);
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Fees");
-    writeFile(wb, "Fees_List.xlsx");
+    utils.book_append_sheet(wb, ws, "Discounts");
+    writeFile(wb, "Discount_List.xlsx");
   };
 
   // ===== EXPORT PDF =====
@@ -134,108 +119,132 @@ export default function FeeGroupList() {
       "Group",
       "Section",
       "Session",
-      "Total Payable",
-      "Payable Due",
+      "Student Name",
+      "Fees Type",
+      "Regular",
+      "Discount Amount",
+      "Start Date",
+      "End Date",
     ];
 
-    const rows = data.map((f, i) => [
+    const rows = data.map((d, i) => [
       i + 1,
-      f.group_name,
-      f.class,
-      f.group,
-      f.section,
-      f.session,
-      f.total_payable,
-      f.payable_due,
+      d.group_name,
+      d.class,
+      d.group,
+      d.section,
+      d.session,
+      d.student_name,
+      d.fees_type,
+      d.regular,
+      d.discount_amount,
+      d.start_date,
+      d.end_date,
     ]);
 
     autoTable(doc, {
       head: [columns],
       body: rows,
       startY: 20,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 7 },
       headStyles: { fillColor: [37, 99, 235] },
     });
 
-    doc.save("Fees_List.pdf");
+    doc.save("Discount_List.pdf");
   };
 
   const handleRefresh = () => {
-    setFees(feepayment);
+    setDiscounts(discountData);
     setSearch("");
     setFilters({ className: "", group: "", section: "", session: "" });
     setSortOrder("newest");
-    setSelectedDate("Monthly");
     setCurrentPage(1);
   };
 
-  // Generate dynamic options from feeData
+  // Generate dynamic options from discountData
   const getUniqueOptions = (data, key) => {
     return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
   };
 
-  const classOptions = getUniqueOptions(feepayment, "class");
-  const groupOptions = getUniqueOptions(feepayment, "group");
-  const sectionOptions = getUniqueOptions(feepayment, "section");
-  const sessionOptions = getUniqueOptions(feepayment, "session");
-  const groupNameOptions = getUniqueOptions(feepayment, "group_name");
-  
-  // Handle fee form submit (edit only - add is now handled by separate page)
-  const handleFeeFormSubmit = (formData) => {
-    if (editingFee) {
-      // Edit existing fee - keep existing total_payable and payable_due
-      const updatedFee = {
-        ...editingFee,
-        group_name: formData.group_name,
-        class: formData.class,
-        group: formData.group,
-        section: formData.section,
-        session: formData.session,
-      };
-      setFees(fees.map((f) => (f.sl === editingFee.sl ? updatedFee : f)));
-      setEditingFee(null);
-      alert("Fee updated successfully ✅");
-    }
-  };
+  const classOptions = getUniqueOptions(discountData, "class");
+  const groupOptions = getUniqueOptions(discountData, "group");
+  const sectionOptions = getUniqueOptions(discountData, "section");
+  const sessionOptions = getUniqueOptions(discountData, "session");
+  const feesTypeOptions = getUniqueOptions(discountData, "fees_type");
+  const studentNameOptions = getUniqueOptions(discountData, "student_name");
 
-  const feeFormFields = [
+  // Discount form fields for ReusableEditModal
+  const discountFields = [
     {
       name: "group_name",
-      label: "Type Group Name",
+      label: "Group Name",
       type: "text",
-      placeholder: "Type Group Name",
       required: true,
     },
     {
       name: "class",
-      label: "Select Class",
+      label: "Class",
       type: "select",
-      placeholder: "Select Class",
       options: classOptions,
       required: true,
     },
     {
       name: "group",
-      label: "Select Group",
+      label: "Group",
       type: "select",
-      placeholder: "Select Group",
       options: groupOptions,
       required: true,
     },
     {
       name: "section",
-      label: "Select Section",
+      label: "Section",
       type: "select",
-      placeholder: "Select Section",
       options: sectionOptions,
       required: true,
     },
     {
       name: "session",
-      label: "Select Session",
+      label: "Session",
       type: "select",
-      placeholder: "Select Session",
       options: sessionOptions,
+      required: true,
+    },
+    {
+      name: "student_name",
+      label: "Student Name",
+      type: "select",
+      options: studentNameOptions,
+      required: true,
+    },
+    {
+      name: "fees_type",
+      label: "Fees Type",
+      type: "select",
+      options: feesTypeOptions,
+      required: true,
+    },
+    {
+      name: "regular",
+      label: "Regular Amount",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "discount_amount",
+      label: "Discount Amount",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "start_date",
+      label: "Start Date",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "end_date",
+      label: "End Date",
+      type: "date",
       required: true,
     },
   ];
@@ -250,36 +259,34 @@ export default function FeeGroupList() {
     ? "bg-gray-700 text-white"
     : "bg-white text-gray-800";
 
-  const dropdownBg = darkMode
-    ? "bg-gray-800 text-gray-100"
-    : "bg-white text-gray-900";
-
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
       <div className={`space-y-4 p-3 ${cardBg}`}>
         <div className="md:flex md:items-center md:justify-between space-y-3 md:space-y-0">
           <div>
-            <h2 className="text-base font-semibold">Fee Group</h2>
+            <h2 className="text-base font-semibold">Discount List</h2>
             <p className="text-xs text-gray-400 flex flex-wrap items-center gap-x-1">
               <Link to={`/${canEdit ? "school" : ""}/dashboard`} className="hover:text-indigo-600">
                 Dashboard
               </Link>
               <span>/</span>
               <button
-                onClick={() => navigate(`/${canEdit ? "school" : ""}/dashboard/fee/feegrouplist`)}
+                onClick={() => navigate(`/${canEdit ? "school" : ""}/dashboard/discountlist`)}
                 className="hover:text-indigo-600 cursor-pointer"
               >
-                Fee Group
+                Discount List
               </button>
             </p>
           </div>
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2">
+           
+
             <button
               onClick={handleRefresh}
-              className={`flex items-center shadow-sm  px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+              className={`flex items-center shadow-sm px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -287,7 +294,7 @@ export default function FeeGroupList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between shadow-sm  px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+                className={`flex items-center justify-between shadow-sm px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
               >
                 Export <BiChevronDown />
               </button>
@@ -300,13 +307,13 @@ export default function FeeGroupList() {
                   }`}
                 >
                   <button
-                    onClick={() => exportPDF(filteredFees)}
+                    onClick={() => exportPDF(filteredDiscounts)}
                     className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Export PDF
                   </button>
                   <button
-                    onClick={() => exportExcel(filteredFees)}
+                    onClick={() => exportExcel(filteredDiscounts)}
                     className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Export Excel
@@ -314,24 +321,23 @@ export default function FeeGroupList() {
                 </div>
               )}
             </div>
-
             {canEdit && (
               <button
                 onClick={() => {
                   const userRole = localStorage.getItem("role");
                   const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                  navigate(`${basePath}/fee/addfeegroup`);
+                  navigate(`${basePath}/fee/adddiscount`);
                 }}
-                className="flex items-center gap-1  w-28 shadow-sm bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
+                className="flex items-center justify-center shadow-sm  bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
               >
-                Add Group Fee
+                Add Discount
               </button>
             )}
           </div>
         </div>
 
         {/* Mobile Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:hidden">
+        <div className="grid grid-cols-2 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
             className={`w-full flex items-center justify-center shadow-sm px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
@@ -355,13 +361,13 @@ export default function FeeGroupList() {
                 }`}
               >
                 <button
-                  onClick={() => exportPDF(filteredFees)}
+                  onClick={() => exportPDF(filteredDiscounts)}
                   className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export PDF
                 </button>
                 <button
-                  onClick={() => exportExcel(filteredFees)}
+                  onClick={() => exportExcel(filteredDiscounts)}
                   className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export Excel
@@ -375,13 +381,13 @@ export default function FeeGroupList() {
               onClick={() => {
                 const userRole = localStorage.getItem("role");
                 const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                navigate(`${basePath}/addfeegroup`);
+                navigate(`${basePath}/fee/adddiscount`);
               }}
               className={`w-full flex items-center justify-center shadow-sm bg-blue-600 px-3 h-8 text-xs text-white hover:bg-blue-700 ${
                 canEdit ? "col-span-2 sm:col-span-1" : ""
               }`}
             >
-              Add Fee
+              Add Discount
             </button>
           )}
         </div>
@@ -399,7 +405,7 @@ export default function FeeGroupList() {
               </button>
 
               <FilterDropdown
-                title="Filter Fees"
+                title="Filter Discounts"
                 fields={[
                   {
                     key: "className",
@@ -411,19 +417,19 @@ export default function FeeGroupList() {
                     key: "group",
                     label: "Group",
                     options: groupOptions,
-                    placeholder: "Select group",
+                    placeholder: "Select Group",
                   },
                   {
                     key: "section",
                     label: "Section",
                     options: sectionOptions,
-                    placeholder: "Select section",
+                    placeholder: "Select Section",
                   },
                   {
                     key: "session",
                     label: "Session",
                     options: sessionOptions,
-                    placeholder: "Select session",
+                    placeholder: "Select Session",
                   },
                 ]}
                 selected={filters}
@@ -432,6 +438,7 @@ export default function FeeGroupList() {
                 isOpen={filterOpen}
                 onClose={() => setFilterOpen(false)}
                 onApply={() => setCurrentPage(1)}
+                buttonRef={filterRef}
               />
             </div>
 
@@ -449,7 +456,7 @@ export default function FeeGroupList() {
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -465,7 +472,7 @@ export default function FeeGroupList() {
                     First
                   </button>
                   <button
-                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100 "
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                     onClick={() => {
                       setSortOrder("oldest");
                       setSortOpen(false);
@@ -484,7 +491,7 @@ export default function FeeGroupList() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by group name, class..."
+              placeholder="Search by group name, class, student name, fees type..."
               className={`w-full md:w-64 ${borderClr} ${inputBg} border px-3 h-8 shadow-sm text-xs focus:outline-none`}
             />
             <Pagination
@@ -496,27 +503,47 @@ export default function FeeGroupList() {
         </div>
       </div>
 
-      {/* ===== FEE TABLE ===== */}
+      {/* ===== DISCOUNT TABLE ===== */}
       <div
-        className={` ${
+        className={`${
           darkMode ? "bg-gray-900" : "bg-white"
         } p-2 overflow-x-auto`}
       >
-        <FeeGroupTable
-          data={currentFees}
-          setData={setFees}
-          onEdit={(fee) => setEditingFee(fee)}
+        <DiscountTable
+          data={currentDiscounts}
+          setData={setDiscounts}
+          onEdit={(discount) => setEditingDiscount(discount)}
         />
       </div>
 
-      {/* Fee Edit Modal */}
+      {/* Edit Discount Modal */}
       <ReusableEditModal
-        open={editingFee !== null}
-        title="Edit Fee Group"
-        item={editingFee}
-        onClose={() => setEditingFee(null)}
-        onSubmit={handleFeeFormSubmit}
-        fields={feeFormFields}
+        open={editingDiscount !== null}
+        title="Edit Discount"
+        item={editingDiscount}
+        onClose={() => setEditingDiscount(null)}
+        onSubmit={(formData) => {
+          if (editingDiscount) {
+            const updatedDiscount = {
+              ...editingDiscount,
+              group_name: formData.group_name,
+              class: formData.class,
+              group: formData.group,
+              section: formData.section,
+              session: formData.session,
+              student_name: formData.student_name,
+              fees_type: formData.fees_type,
+              regular: parseFloat(formData.regular) || 0,
+              discount_amount: parseFloat(formData.discount_amount) || 0,
+              start_date: formData.start_date,
+              end_date: formData.end_date,
+            };
+            setDiscounts(discounts.map((d) => (d.sl === editingDiscount.sl ? updatedDiscount : d)));
+            setEditingDiscount(null);
+            alert("Discount updated successfully ✅");
+          }
+        }}
+        fields={discountFields}
       />
     </div>
   );

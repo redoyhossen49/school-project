@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { FiMoreHorizontal, FiEdit, FiTrash2 } from "react-icons/fi";
 import { useTheme } from "../../context/ThemeContext";
 
-export default function FeeActions({ fee, onEdit, onDelete }) {
+export default function DiscountActions({ discount, onEdit, onDelete }) {
   const { darkMode } = useTheme();
   const [open, setOpen] = useState(false);
   const [positionTop, setPositionTop] = useState(true); // true -> dropdown below, false -> dropdown above
@@ -80,7 +80,7 @@ export default function FeeActions({ fee, onEdit, onDelete }) {
           <button
             onClick={() => {
               setOpen(false); // Close dropdown
-              onEdit(fee);
+              onEdit(discount);
             }}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
               darkMode
@@ -95,8 +95,8 @@ export default function FeeActions({ fee, onEdit, onDelete }) {
           <button
             onClick={() => {
               setOpen(false); // Close dropdown
-              if (confirm("Are you sure you want to delete this fee?")) {
-                onDelete(fee.sl); // Use fee.sl for deletion
+              if (confirm("Are you sure you want to delete this discount?")) {
+                onDelete(discount.sl); // Use discount.sl for deletion
               }
             }}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${

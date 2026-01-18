@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { feepayment } from "../data/feepayment.js";
-import FeeGroupTable from "../components/fee/FeeGroupTable.jsx";
+import { employeeData } from "../data/employeeData.js";
+import EmployeeTable from "../components/employee/EmployeeTable.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { FiRefreshCw, FiFilter } from "react-icons/fi";
-import { BiChevronDown, BiChevronRight } from "react-icons/bi";
+import { BiChevronDown } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
@@ -12,57 +11,62 @@ import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
 
-export default function FeeGroupList() {
+export default function EmployeeList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [fees, setFees] = useState(feepayment);
+  const [employees, setEmployees] = useState(employeeData);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const feesPerPage = 20;
+  const employeesPerPage = 20;
 
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
-  const [selectedDate, setSelectedDate] = useState("Monthly");
-  const [dateOpen, setDateOpen] = useState(false);
-  const [showSession, setShowSession] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
-  const [view, setView] = useState("table");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
-    className: "",
-    group: "",
-    section: "",
-    session: "",
+    employee_name: "",
+    month: "",
+    year: "",
   });
-  const [editingFee, setEditingFee] = useState(null);
+  const [editingEmployee, setEditingEmployee] = useState(null);
 
-  const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const dateOptions = [
-    { label: "Today", value: "today" },
-    { label: "Last 7 Days", value: "weekly" },
-    { label: "Monthly", value: "monthly" },
-  ];
+  // Generate unique options for filters
+  const getUniqueOptions = (data, key) => {
+    return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
+  };
 
-  const sessionKeys = ["Session 1", "Session 2", "Session 3"];
+  // Generate employee name options
+  const employeeNameOptions = getUniqueOptions(employeeData, "employee_name");
+
+  // Generate month options (1-12)
+  const monthOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+
+  // Generate year options from payroll_date
+  const yearOptions = Array.from(
+    new Set(
+      employeeData
+        .map((item) => {
+          if (item.payroll_date) {
+            const year = new Date(item.payroll_date).getFullYear();
+            return year.toString();
+          }
+          return null;
+        })
+        .filter(Boolean)
+    )
+  ).sort((a, b) => parseInt(b) - parseInt(a)); // Sort descending (newest first)
 
   // ===== Close dropdowns on outside click =====
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        dateDropdownRef.current &&
-        !dateDropdownRef.current.contains(e.target)
-      ) {
-        setDateOpen(false);
-        setShowSession(false);
-      }
       if (exportRef.current && !exportRef.current.contains(e.target))
         setExportOpen(false);
       if (sortRef.current && !sortRef.current.contains(e.target))
@@ -75,50 +79,66 @@ export default function FeeGroupList() {
   }, []);
 
   // ===== Filter + Sort Logic =====
-  const filteredFees = fees
-    .filter((f) => 
-      f.group_name?.toLowerCase().includes(search.toLowerCase()) ||
-      f.class?.toLowerCase().includes(search.toLowerCase()) ||
-      f.group?.toLowerCase().includes(search.toLowerCase())
+  const filteredEmployees = employees
+    .filter((e) => 
+      e.employee_name?.toLowerCase().includes(search.toLowerCase()) ||
+      e.mobile_number?.toLowerCase().includes(search.toLowerCase()) ||
+      e.employee_type?.toLowerCase().includes(search.toLowerCase()) ||
+      e.bank_name?.toLowerCase().includes(search.toLowerCase())
     )
-    .filter((f) => {
-      // Cumulative filtering: only apply if value is selected
-      if (filters.className && f.class !== filters.className) return false;
-      if (filters.group && f.group !== filters.group) return false;
-      if (filters.section && f.section !== filters.section) return false;
-      if (filters.session && f.session !== filters.session) return false;
+    .filter((e) => {
+      // Filter by employee name
+      if (filters.employee_name && e.employee_name !== filters.employee_name) return false;
+      
+      // Filter by month and year from payroll_date
+      if (filters.month || filters.year) {
+        if (!e.payroll_date) return false;
+        const payrollDate = new Date(e.payroll_date);
+        const payrollMonth = (payrollDate.getMonth() + 1).toString(); // getMonth() returns 0-11
+        const payrollYear = payrollDate.getFullYear().toString();
+        
+        if (filters.month && payrollMonth !== filters.month) return false;
+        if (filters.year && payrollYear !== filters.year) return false;
+      }
+      
       return true;
     })
     .sort((a, b) => {
       return sortOrder === "oldest" ? a.sl - b.sl : b.sl - a.sl;
     });
 
-  const totalFees = filteredFees.length;
-  const totalPages = Math.ceil(totalFees / feesPerPage);
-  const currentFees = filteredFees.slice(
-    (currentPage - 1) * feesPerPage,
-    currentPage * feesPerPage
+  const totalEmployees = filteredEmployees.length;
+  const totalPages = Math.ceil(totalEmployees / employeesPerPage);
+  const currentEmployees = filteredEmployees.slice(
+    (currentPage - 1) * employeesPerPage,
+    currentPage * employeesPerPage
   );
 
   // ===== EXPORT EXCEL =====
   const exportExcel = (data) => {
     if (!data.length) return;
 
-    const sheetData = data.map((f, i) => ({
+    const sheetData = data.map((e, i) => ({
       Sl: i + 1,
-      "Group Name": f.group_name,
-      Class: f.class,
-      Group: f.group,
-      Section: f.section,
-      Session: f.session,
-      "Total Payable": f.total_payable,
-      "Payable Due": f.payable_due,
+      "Employee name": e.employee_name,
+      "Mobile number": e.mobile_number,
+      "Employee Type": e.employee_type === "teacher" ? "Teacher" : `Others (${e.employee_type_other || ""})`,
+      "Leave remaining": e.leave_remaining,
+      "Salary Amount": e.salary_amount,
+      "Payroll date": e.payroll_date,
+      "Total Payable": e.total_payable,
+      "Payable due": e.payable_due,
+      "Bank name": e.bank_name,
+      "Branch": e.branch,
+      "Routing number": e.routing_number,
+      "A/C holder name": e.ac_holder_name,
+      "A/C number": e.ac_number,
     }));
 
     const ws = utils.json_to_sheet(sheetData);
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Fees");
-    writeFile(wb, "Fees_List.xlsx");
+    utils.book_append_sheet(wb, ws, "Employees");
+    writeFile(wb, "Employee_List.xlsx");
   };
 
   // ===== EXPORT PDF =====
@@ -129,114 +149,155 @@ export default function FeeGroupList() {
 
     const columns = [
       "Sl",
-      "Group Name",
-      "Class",
-      "Group",
-      "Section",
-      "Session",
+      "Employee name",
+      "Mobile",
+      "Type",
+      "Leave",
+      "Salary",
+      "Payroll date",
       "Total Payable",
-      "Payable Due",
+      "Payable due",
+      "Bank",
+      "Branch",
+      "Routing",
+      "A/C Holder",
+      "A/C Number",
     ];
 
-    const rows = data.map((f, i) => [
+    const rows = data.map((e, i) => [
       i + 1,
-      f.group_name,
-      f.class,
-      f.group,
-      f.section,
-      f.session,
-      f.total_payable,
-      f.payable_due,
+      e.employee_name,
+      e.mobile_number,
+      e.employee_type === "teacher" ? "Teacher" : `Others (${e.employee_type_other || ""})`,
+      e.leave_remaining,
+      e.salary_amount,
+      e.payroll_date,
+      e.total_payable,
+      e.payable_due,
+      e.bank_name,
+      e.branch,
+      e.routing_number,
+      e.ac_holder_name,
+      e.ac_number,
     ]);
 
     autoTable(doc, {
       head: [columns],
       body: rows,
       startY: 20,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 7 },
       headStyles: { fillColor: [37, 99, 235] },
     });
 
-    doc.save("Fees_List.pdf");
+    doc.save("Employee_List.pdf");
   };
 
+  // ===== Refresh =====
   const handleRefresh = () => {
-    setFees(feepayment);
+    setEmployees([...employeeData]);
     setSearch("");
-    setFilters({ className: "", group: "", section: "", session: "" });
-    setSortOrder("newest");
-    setSelectedDate("Monthly");
+    setFilters({ employee_name: "", month: "", year: "" });
     setCurrentPage(1);
   };
 
-  // Generate dynamic options from feeData
-  const getUniqueOptions = (data, key) => {
-    return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
-  };
-
-  const classOptions = getUniqueOptions(feepayment, "class");
-  const groupOptions = getUniqueOptions(feepayment, "group");
-  const sectionOptions = getUniqueOptions(feepayment, "section");
-  const sessionOptions = getUniqueOptions(feepayment, "session");
-  const groupNameOptions = getUniqueOptions(feepayment, "group_name");
-  
-  // Handle fee form submit (edit only - add is now handled by separate page)
-  const handleFeeFormSubmit = (formData) => {
-    if (editingFee) {
-      // Edit existing fee - keep existing total_payable and payable_due
-      const updatedFee = {
-        ...editingFee,
-        group_name: formData.group_name,
-        class: formData.class,
-        group: formData.group,
-        section: formData.section,
-        session: formData.session,
-      };
-      setFees(fees.map((f) => (f.sl === editingFee.sl ? updatedFee : f)));
-      setEditingFee(null);
-      alert("Fee updated successfully ✅");
+  // ===== Edit Employee =====
+  const handleEmployeeFormSubmit = (formData) => {
+    const sl = editingEmployee?.sl;
+    if (sl) {
+      setEmployees((prev) =>
+        prev.map((e) => (e.sl === sl ? { ...e, ...formData } : e))
+      );
+      setEditingEmployee(null);
+      alert("Employee updated successfully ✅");
     }
   };
 
-  const feeFormFields = [
+  // Employee form fields for ReusableEditModal
+  const employeeFields = [
     {
-      name: "group_name",
-      label: "Type Group Name",
+      name: "employee_name",
+      label: "Employee name",
       type: "text",
-      placeholder: "Type Group Name",
       required: true,
     },
     {
-      name: "class",
-      label: "Select Class",
-      type: "select",
-      placeholder: "Select Class",
-      options: classOptions,
+      name: "mobile_number",
+      label: "Mobile number",
+      type: "text",
       required: true,
     },
     {
-      name: "group",
-      label: "Select Group",
+      name: "employee_type",
+      label: "Employee Type",
       type: "select",
-      placeholder: "Select Group",
-      options: groupOptions,
+      options: ["teacher", "others"],
       required: true,
     },
     {
-      name: "section",
-      label: "Select Section",
-      type: "select",
-      placeholder: "Select Section",
-      options: sectionOptions,
+      name: "employee_type_other",
+      label: "Employee Type (Others - specify)",
+      type: "text",
+      required: false,
+    },
+    {
+      name: "leave_remaining",
+      label: "Leave remaining",
+      type: "number",
       required: true,
     },
     {
-      name: "session",
-      label: "Select Session",
-      type: "select",
-      placeholder: "Select Session",
-      options: sessionOptions,
+      name: "salary_amount",
+      label: "Salary Amount",
+      type: "number",
       required: true,
+    },
+    {
+      name: "payroll_date",
+      label: "Payroll date",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "total_payable",
+      label: "Total Payable",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "payable_due",
+      label: "Payable due",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "bank_name",
+      label: "Bank name",
+      type: "text",
+      required: false,
+    },
+    {
+      name: "branch",
+      label: "Branch",
+      type: "text",
+      required: false,
+    },
+    {
+      name: "routing_number",
+      label: "Routing number",
+      type: "text",
+      required: false,
+    },
+    {
+      name: "ac_holder_name",
+      label: "A/C holder name",
+      type: "text",
+      required: false,
+    },
+    {
+      name: "ac_number",
+      label: "A/C number",
+      type: "text",
+      required: false,
     },
   ];
 
@@ -250,27 +311,27 @@ export default function FeeGroupList() {
     ? "bg-gray-700 text-white"
     : "bg-white text-gray-800";
 
-  const dropdownBg = darkMode
-    ? "bg-gray-800 text-gray-100"
-    : "bg-white text-gray-900";
-
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
       <div className={`space-y-4 p-3 ${cardBg}`}>
         <div className="md:flex md:items-center md:justify-between space-y-3 md:space-y-0">
           <div>
-            <h2 className="text-base font-semibold">Fee Group</h2>
+            <h2 className="text-base font-semibold">Employee List</h2>
             <p className="text-xs text-gray-400 flex flex-wrap items-center gap-x-1">
               <Link to={`/${canEdit ? "school" : ""}/dashboard`} className="hover:text-indigo-600">
                 Dashboard
               </Link>
               <span>/</span>
               <button
-                onClick={() => navigate(`/${canEdit ? "school" : ""}/dashboard/fee/feegrouplist`)}
+                onClick={() =>
+                  navigate(
+                    `/${canEdit ? "school" : ""}/dashboard/hrm/employee`
+                  )
+                }
                 className="hover:text-indigo-600 cursor-pointer"
               >
-                Fee Group
+                Employee List
               </button>
             </p>
           </div>
@@ -279,7 +340,7 @@ export default function FeeGroupList() {
           <div className="hidden md:flex gap-2">
             <button
               onClick={handleRefresh}
-              className={`flex items-center shadow-sm  px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+              className={`flex items-center shadow-sm px-3 py-2 text-xs w-24 rounded border ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -287,26 +348,26 @@ export default function FeeGroupList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between shadow-sm  px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+                className={`flex items-center justify-between shadow-sm px-3 py-2 text-xs w-24 border ${borderClr} ${inputBg}`}
               >
                 Export <BiChevronDown />
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-28 z-40 border shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
                   }`}
                 >
                   <button
-                    onClick={() => exportPDF(filteredFees)}
+                    onClick={() => exportPDF(filteredEmployees)}
                     className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Export PDF
                   </button>
                   <button
-                    onClick={() => exportExcel(filteredFees)}
+                    onClick={() => exportExcel(filteredEmployees)}
                     className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Export Excel
@@ -320,18 +381,18 @@ export default function FeeGroupList() {
                 onClick={() => {
                   const userRole = localStorage.getItem("role");
                   const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                  navigate(`${basePath}/fee/addfeegroup`);
+                  navigate(`${basePath}/hrm/addemployee`);
                 }}
-                className="flex items-center gap-1  w-28 shadow-sm bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
+                className="flex items-center justify-center shadow-sm bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
               >
-                Add Group Fee
+                Add Employee
               </button>
             )}
           </div>
         </div>
 
         {/* Mobile Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:hidden">
+        <div className="grid grid-cols-2 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
             className={`w-full flex items-center justify-center shadow-sm px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
@@ -355,13 +416,13 @@ export default function FeeGroupList() {
                 }`}
               >
                 <button
-                  onClick={() => exportPDF(filteredFees)}
+                  onClick={() => exportPDF(filteredEmployees)}
                   className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export PDF
                 </button>
                 <button
-                  onClick={() => exportExcel(filteredFees)}
+                  onClick={() => exportExcel(filteredEmployees)}
                   className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export Excel
@@ -375,13 +436,13 @@ export default function FeeGroupList() {
               onClick={() => {
                 const userRole = localStorage.getItem("role");
                 const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                navigate(`${basePath}/addfeegroup`);
+                navigate(`${basePath}/employee/add`);
               }}
               className={`w-full flex items-center justify-center shadow-sm bg-blue-600 px-3 h-8 text-xs text-white hover:bg-blue-700 ${
                 canEdit ? "col-span-2 sm:col-span-1" : ""
               }`}
             >
-              Add Fee
+              Add Employee
             </button>
           )}
         </div>
@@ -399,31 +460,25 @@ export default function FeeGroupList() {
               </button>
 
               <FilterDropdown
-                title="Filter Fees"
+                title="Filter Employees"
                 fields={[
                   {
-                    key: "className",
-                    label: "Class",
-                    options: classOptions,
-                    placeholder: "Select Class",
+                    key: "employee_name",
+                    label: "Select employee",
+                    options: employeeNameOptions,
+                    placeholder: "Select employee",
                   },
                   {
-                    key: "group",
-                    label: "Group",
-                    options: groupOptions,
-                    placeholder: "Select group",
+                    key: "month",
+                    label: "Select month",
+                    options: monthOptions,
+                    placeholder: "Select month",
                   },
                   {
-                    key: "section",
-                    label: "Section",
-                    options: sectionOptions,
-                    placeholder: "Select section",
-                  },
-                  {
-                    key: "session",
-                    label: "Session",
-                    options: sessionOptions,
-                    placeholder: "Select session",
+                    key: "year",
+                    label: "Select year",
+                    options: yearOptions,
+                    placeholder: "Select year",
                   },
                 ]}
                 selected={filters}
@@ -432,6 +487,7 @@ export default function FeeGroupList() {
                 isOpen={filterOpen}
                 onClose={() => setFilterOpen(false)}
                 onApply={() => setCurrentPage(1)}
+                buttonRef={filterRef}
               />
             </div>
 
@@ -449,7 +505,7 @@ export default function FeeGroupList() {
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -465,7 +521,7 @@ export default function FeeGroupList() {
                     First
                   </button>
                   <button
-                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100 "
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                     onClick={() => {
                       setSortOrder("oldest");
                       setSortOpen(false);
@@ -479,12 +535,12 @@ export default function FeeGroupList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:mt-0 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:mt-0 w-full md:w-auto">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by group name, class..."
+              placeholder="Search by name, mobile, type, bank..."
               className={`w-full md:w-64 ${borderClr} ${inputBg} border px-3 h-8 shadow-sm text-xs focus:outline-none`}
             />
             <Pagination
@@ -496,27 +552,31 @@ export default function FeeGroupList() {
         </div>
       </div>
 
-      {/* ===== FEE TABLE ===== */}
+      {/* ===== EMPLOYEE TABLE ===== */}
       <div
-        className={` ${
+        className={`${
           darkMode ? "bg-gray-900" : "bg-white"
         } p-2 overflow-x-auto`}
       >
-        <FeeGroupTable
-          data={currentFees}
-          setData={setFees}
-          onEdit={(fee) => setEditingFee(fee)}
+        <EmployeeTable
+          data={currentEmployees}
+          setData={setEmployees}
+          onEdit={(employee) => setEditingEmployee(employee)}
         />
       </div>
 
-      {/* Fee Edit Modal */}
+      {/* Employee Edit Modal */}
       <ReusableEditModal
-        open={editingFee !== null}
-        title="Edit Fee Group"
-        item={editingFee}
-        onClose={() => setEditingFee(null)}
-        onSubmit={handleFeeFormSubmit}
-        fields={feeFormFields}
+        open={editingEmployee !== null}
+        title="Edit Employee"
+        item={editingEmployee}
+        onClose={() => setEditingEmployee(null)}
+        onSubmit={handleEmployeeFormSubmit}
+        fields={employeeFields}
+        getInitialValues={(item) => ({
+          ...item,
+          payroll_date: item.payroll_date || new Date().toISOString().split("T")[0],
+        })}
       />
     </div>
   );

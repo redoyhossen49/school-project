@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { feepayment } from "../data/feepayment.js";
-import FeeGroupTable from "../components/fee/FeeGroupTable.jsx";
+import { payrollData } from "../data/payrollData.js";
+import PayrollTable from "../components/payroll/PayrollTable.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { FiRefreshCw, FiFilter } from "react-icons/fi";
-import { BiChevronDown, BiChevronRight } from "react-icons/bi";
+import { BiChevronDown } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
@@ -12,57 +11,52 @@ import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
 
-export default function FeeGroupList() {
+export default function PayrollList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [fees, setFees] = useState(feepayment);
+  const [payrolls, setPayrolls] = useState(payrollData);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const feesPerPage = 20;
+  const payrollsPerPage = 20;
 
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
-  const [selectedDate, setSelectedDate] = useState("Monthly");
-  const [dateOpen, setDateOpen] = useState(false);
-  const [showSession, setShowSession] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
-  const [view, setView] = useState("table");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
-    className: "",
-    group: "",
-    section: "",
-    session: "",
+    employee: "",
+    month: "",
+    year: "",
   });
-  const [editingFee, setEditingFee] = useState(null);
+  const [editingPayroll, setEditingPayroll] = useState(null);
 
-  const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const dateOptions = [
-    { label: "Today", value: "today" },
-    { label: "Last 7 Days", value: "weekly" },
-    { label: "Monthly", value: "monthly" },
-  ];
+  // Generate unique options for filters
+  const getUniqueOptions = (data, key) => {
+    return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
+  };
 
-  const sessionKeys = ["Session 1", "Session 2", "Session 3"];
+  // Generate employee name options
+  const employeeOptions = getUniqueOptions(payrollData, "employee");
+
+  // Generate month options (1-12)
+  const monthOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+
+  // Generate year options
+  const yearOptions = Array.from(
+    new Set(payrollData.map((item) => item.pay_year).filter(Boolean))
+  ).sort((a, b) => parseInt(b) - parseInt(a)); // Sort descending (newest first)
 
   // ===== Close dropdowns on outside click =====
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        dateDropdownRef.current &&
-        !dateDropdownRef.current.contains(e.target)
-      ) {
-        setDateOpen(false);
-        setShowSession(false);
-      }
       if (exportRef.current && !exportRef.current.contains(e.target))
         setExportOpen(false);
       if (sortRef.current && !sortRef.current.contains(e.target))
@@ -75,50 +69,55 @@ export default function FeeGroupList() {
   }, []);
 
   // ===== Filter + Sort Logic =====
-  const filteredFees = fees
-    .filter((f) => 
-      f.group_name?.toLowerCase().includes(search.toLowerCase()) ||
-      f.class?.toLowerCase().includes(search.toLowerCase()) ||
-      f.group?.toLowerCase().includes(search.toLowerCase())
+  const filteredPayrolls = payrolls
+    .filter((p) => 
+      p.employee?.toLowerCase().includes(search.toLowerCase()) ||
+      p.employee_type?.toLowerCase().includes(search.toLowerCase()) ||
+      p.pay_type?.toLowerCase().includes(search.toLowerCase())
     )
-    .filter((f) => {
-      // Cumulative filtering: only apply if value is selected
-      if (filters.className && f.class !== filters.className) return false;
-      if (filters.group && f.group !== filters.group) return false;
-      if (filters.section && f.section !== filters.section) return false;
-      if (filters.session && f.session !== filters.session) return false;
+    .filter((p) => {
+      // Filter by employee name
+      if (filters.employee && p.employee !== filters.employee) return false;
+      
+      // Filter by month and year
+      if (filters.month && p.pay_month !== filters.month) return false;
+      if (filters.year && p.pay_year !== filters.year) return false;
+      
       return true;
     })
     .sort((a, b) => {
       return sortOrder === "oldest" ? a.sl - b.sl : b.sl - a.sl;
     });
 
-  const totalFees = filteredFees.length;
-  const totalPages = Math.ceil(totalFees / feesPerPage);
-  const currentFees = filteredFees.slice(
-    (currentPage - 1) * feesPerPage,
-    currentPage * feesPerPage
+  const totalPayrolls = filteredPayrolls.length;
+  const totalPages = Math.ceil(totalPayrolls / payrollsPerPage);
+  const currentPayrolls = filteredPayrolls.slice(
+    (currentPage - 1) * payrollsPerPage,
+    currentPage * payrollsPerPage
   );
 
   // ===== EXPORT EXCEL =====
   const exportExcel = (data) => {
     if (!data.length) return;
 
-    const sheetData = data.map((f, i) => ({
+    const sheetData = data.map((p, i) => ({
       Sl: i + 1,
-      "Group Name": f.group_name,
-      Class: f.class,
-      Group: f.group,
-      Section: f.section,
-      Session: f.session,
-      "Total Payable": f.total_payable,
-      "Payable Due": f.payable_due,
+      Employee: p.employee,
+      "Employee type": p.employee_type,
+      "Total salary": p.total_salary,
+      "Total due": p.total_due,
+      "Advance status": p.advance_status,
+      "Pay type": p.pay_type,
+      "Payroll amount": p.payroll_amount,
+      "Pay Month": p.pay_month,
+      "Pay year": p.pay_year,
+      "Pay date": p.pay_date,
     }));
 
     const ws = utils.json_to_sheet(sheetData);
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Fees");
-    writeFile(wb, "Fees_List.xlsx");
+    utils.book_append_sheet(wb, ws, "Payrolls");
+    writeFile(wb, "Payroll_List.xlsx");
   };
 
   // ===== EXPORT PDF =====
@@ -129,113 +128,125 @@ export default function FeeGroupList() {
 
     const columns = [
       "Sl",
-      "Group Name",
-      "Class",
-      "Group",
-      "Section",
-      "Session",
-      "Total Payable",
-      "Payable Due",
+      "Employee",
+      "Employee type",
+      "Total salary",
+      "Total due",
+      "Advance status",
+      "Pay type",
+      "Payroll amount",
+      "Pay Month",
+      "Pay year",
+      "Pay date",
     ];
 
-    const rows = data.map((f, i) => [
+    const rows = data.map((p, i) => [
       i + 1,
-      f.group_name,
-      f.class,
-      f.group,
-      f.section,
-      f.session,
-      f.total_payable,
-      f.payable_due,
+      p.employee,
+      p.employee_type,
+      p.total_salary,
+      p.total_due,
+      p.advance_status,
+      p.pay_type,
+      p.payroll_amount,
+      p.pay_month,
+      p.pay_year,
+      p.pay_date,
     ]);
 
     autoTable(doc, {
       head: [columns],
       body: rows,
       startY: 20,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 7 },
       headStyles: { fillColor: [37, 99, 235] },
     });
 
-    doc.save("Fees_List.pdf");
+    doc.save("Payroll_List.pdf");
   };
 
+  // ===== Refresh =====
   const handleRefresh = () => {
-    setFees(feepayment);
+    setPayrolls([...payrollData]);
     setSearch("");
-    setFilters({ className: "", group: "", section: "", session: "" });
-    setSortOrder("newest");
-    setSelectedDate("Monthly");
+    setFilters({ employee: "", month: "", year: "" });
     setCurrentPage(1);
   };
 
-  // Generate dynamic options from feeData
-  const getUniqueOptions = (data, key) => {
-    return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
-  };
-
-  const classOptions = getUniqueOptions(feepayment, "class");
-  const groupOptions = getUniqueOptions(feepayment, "group");
-  const sectionOptions = getUniqueOptions(feepayment, "section");
-  const sessionOptions = getUniqueOptions(feepayment, "session");
-  const groupNameOptions = getUniqueOptions(feepayment, "group_name");
-  
-  // Handle fee form submit (edit only - add is now handled by separate page)
-  const handleFeeFormSubmit = (formData) => {
-    if (editingFee) {
-      // Edit existing fee - keep existing total_payable and payable_due
-      const updatedFee = {
-        ...editingFee,
-        group_name: formData.group_name,
-        class: formData.class,
-        group: formData.group,
-        section: formData.section,
-        session: formData.session,
-      };
-      setFees(fees.map((f) => (f.sl === editingFee.sl ? updatedFee : f)));
-      setEditingFee(null);
-      alert("Fee updated successfully ✅");
+  // ===== Edit Payroll =====
+  const handlePayrollFormSubmit = (formData) => {
+    const sl = editingPayroll?.sl;
+    if (sl) {
+      setPayrolls((prev) =>
+        prev.map((p) => (p.sl === sl ? { ...p, ...formData } : p))
+      );
+      setEditingPayroll(null);
+      alert("Payroll updated successfully ✅");
     }
   };
 
-  const feeFormFields = [
+  // Payroll form fields for ReusableEditModal
+  const payrollFields = [
     {
-      name: "group_name",
-      label: "Type Group Name",
+      name: "employee",
+      label: "Employee",
       type: "text",
-      placeholder: "Type Group Name",
       required: true,
     },
     {
-      name: "class",
-      label: "Select Class",
-      type: "select",
-      placeholder: "Select Class",
-      options: classOptions,
+      name: "employee_type",
+      label: "Employee type",
+      type: "text",
       required: true,
     },
     {
-      name: "group",
-      label: "Select Group",
-      type: "select",
-      placeholder: "Select Group",
-      options: groupOptions,
+      name: "total_salary",
+      label: "Total salary",
+      type: "number",
       required: true,
     },
     {
-      name: "section",
-      label: "Select Section",
-      type: "select",
-      placeholder: "Select Section",
-      options: sectionOptions,
+      name: "total_due",
+      label: "Total due",
+      type: "number",
       required: true,
     },
     {
-      name: "session",
-      label: "Select Session",
+      name: "advance_status",
+      label: "Advance status",
       type: "select",
-      placeholder: "Select Session",
-      options: sessionOptions,
+      options: ["Yes", "No"],
+      required: true,
+    },
+    {
+      name: "pay_type",
+      label: "Pay type",
+      type: "select",
+      options: ["Full", "Partial"],
+      required: true,
+    },
+    {
+      name: "payroll_amount",
+      label: "Payroll amount",
+      type: "number",
+      required: true,
+    },
+    {
+      name: "pay_month",
+      label: "Pay Month",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "pay_year",
+      label: "Pay year",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "pay_date",
+      label: "Pay date",
+      type: "date",
       required: true,
     },
   ];
@@ -250,27 +261,27 @@ export default function FeeGroupList() {
     ? "bg-gray-700 text-white"
     : "bg-white text-gray-800";
 
-  const dropdownBg = darkMode
-    ? "bg-gray-800 text-gray-100"
-    : "bg-white text-gray-900";
-
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
       <div className={`space-y-4 p-3 ${cardBg}`}>
         <div className="md:flex md:items-center md:justify-between space-y-3 md:space-y-0">
           <div>
-            <h2 className="text-base font-semibold">Fee Group</h2>
+            <h2 className="text-base font-semibold">Payroll List</h2>
             <p className="text-xs text-gray-400 flex flex-wrap items-center gap-x-1">
               <Link to={`/${canEdit ? "school" : ""}/dashboard`} className="hover:text-indigo-600">
                 Dashboard
               </Link>
               <span>/</span>
               <button
-                onClick={() => navigate(`/${canEdit ? "school" : ""}/dashboard/fee/feegrouplist`)}
+                onClick={() =>
+                  navigate(
+                    `/${canEdit ? "school" : ""}/dashboard/hrm/payroll`
+                  )
+                }
                 className="hover:text-indigo-600 cursor-pointer"
               >
-                Fee Group
+                Payroll List
               </button>
             </p>
           </div>
@@ -279,7 +290,7 @@ export default function FeeGroupList() {
           <div className="hidden md:flex gap-2">
             <button
               onClick={handleRefresh}
-              className={`flex items-center shadow-sm  px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+              className={`flex items-center shadow-sm px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -287,26 +298,26 @@ export default function FeeGroupList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between shadow-sm  px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+                className={`flex items-center justify-between shadow-sm px-3 py-2 text-xs w-24 border ${borderClr} ${inputBg}`}
               >
                 Export <BiChevronDown />
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-28 z-40 border shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
                   }`}
                 >
                   <button
-                    onClick={() => exportPDF(filteredFees)}
+                    onClick={() => exportPDF(filteredPayrolls)}
                     className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Export PDF
                   </button>
                   <button
-                    onClick={() => exportExcel(filteredFees)}
+                    onClick={() => exportExcel(filteredPayrolls)}
                     className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Export Excel
@@ -320,18 +331,18 @@ export default function FeeGroupList() {
                 onClick={() => {
                   const userRole = localStorage.getItem("role");
                   const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                  navigate(`${basePath}/fee/addfeegroup`);
+                  navigate(`${basePath}/hrm/addpayroll`);
                 }}
-                className="flex items-center gap-1  w-28 shadow-sm bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
+                className="flex items-center justify-center shadow-sm bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700 "
               >
-                Add Group Fee
+                Add Payroll
               </button>
             )}
           </div>
         </div>
 
         {/* Mobile Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:hidden">
+        <div className="grid grid-cols-2 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
             className={`w-full flex items-center justify-center shadow-sm px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
@@ -355,13 +366,13 @@ export default function FeeGroupList() {
                 }`}
               >
                 <button
-                  onClick={() => exportPDF(filteredFees)}
+                  onClick={() => exportPDF(filteredPayrolls)}
                   className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export PDF
                 </button>
                 <button
-                  onClick={() => exportExcel(filteredFees)}
+                  onClick={() => exportExcel(filteredPayrolls)}
                   className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Export Excel
@@ -375,13 +386,13 @@ export default function FeeGroupList() {
               onClick={() => {
                 const userRole = localStorage.getItem("role");
                 const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                navigate(`${basePath}/addfeegroup`);
+                navigate(`${basePath}/hrm/addpayroll`);
               }}
               className={`w-full flex items-center justify-center shadow-sm bg-blue-600 px-3 h-8 text-xs text-white hover:bg-blue-700 ${
                 canEdit ? "col-span-2 sm:col-span-1" : ""
               }`}
             >
-              Add Fee
+              Add Payroll
             </button>
           )}
         </div>
@@ -399,31 +410,25 @@ export default function FeeGroupList() {
               </button>
 
               <FilterDropdown
-                title="Filter Fees"
+                title="Filter Payrolls"
                 fields={[
                   {
-                    key: "className",
-                    label: "Class",
-                    options: classOptions,
-                    placeholder: "Select Class",
+                    key: "employee",
+                    label: "Select employee",
+                    options: employeeOptions,
+                    placeholder: "Select employee",
                   },
                   {
-                    key: "group",
-                    label: "Group",
-                    options: groupOptions,
-                    placeholder: "Select group",
+                    key: "month",
+                    label: "Select month",
+                    options: monthOptions,
+                    placeholder: "Select month",
                   },
                   {
-                    key: "section",
-                    label: "Section",
-                    options: sectionOptions,
-                    placeholder: "Select section",
-                  },
-                  {
-                    key: "session",
-                    label: "Session",
-                    options: sessionOptions,
-                    placeholder: "Select session",
+                    key: "year",
+                    label: "Select year",
+                    options: yearOptions,
+                    placeholder: "Select year",
                   },
                 ]}
                 selected={filters}
@@ -432,6 +437,7 @@ export default function FeeGroupList() {
                 isOpen={filterOpen}
                 onClose={() => setFilterOpen(false)}
                 onApply={() => setCurrentPage(1)}
+                buttonRef={filterRef}
               />
             </div>
 
@@ -449,7 +455,7 @@ export default function FeeGroupList() {
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -465,7 +471,7 @@ export default function FeeGroupList() {
                     First
                   </button>
                   <button
-                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100 "
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                     onClick={() => {
                       setSortOrder("oldest");
                       setSortOpen(false);
@@ -479,12 +485,12 @@ export default function FeeGroupList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:mt-0 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:mt-0 w-full md:w-auto">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by group name, class..."
+              placeholder="Search by employee, type, pay type..."
               className={`w-full md:w-64 ${borderClr} ${inputBg} border px-3 h-8 shadow-sm text-xs focus:outline-none`}
             />
             <Pagination
@@ -496,27 +502,31 @@ export default function FeeGroupList() {
         </div>
       </div>
 
-      {/* ===== FEE TABLE ===== */}
+      {/* ===== PAYROLL TABLE ===== */}
       <div
-        className={` ${
+        className={`${
           darkMode ? "bg-gray-900" : "bg-white"
         } p-2 overflow-x-auto`}
       >
-        <FeeGroupTable
-          data={currentFees}
-          setData={setFees}
-          onEdit={(fee) => setEditingFee(fee)}
+        <PayrollTable
+          data={currentPayrolls}
+          setData={setPayrolls}
+          onEdit={(payroll) => setEditingPayroll(payroll)}
         />
       </div>
 
-      {/* Fee Edit Modal */}
+      {/* Payroll Edit Modal */}
       <ReusableEditModal
-        open={editingFee !== null}
-        title="Edit Fee Group"
-        item={editingFee}
-        onClose={() => setEditingFee(null)}
-        onSubmit={handleFeeFormSubmit}
-        fields={feeFormFields}
+        open={editingPayroll !== null}
+        title="Edit Payroll"
+        item={editingPayroll}
+        onClose={() => setEditingPayroll(null)}
+        onSubmit={handlePayrollFormSubmit}
+        fields={payrollFields}
+        getInitialValues={(item) => ({
+          ...item,
+          pay_date: item.pay_date || new Date().toISOString().split("T")[0],
+        })}
       />
     </div>
   );

@@ -2,7 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { FiMoreHorizontal, FiEdit, FiTrash2 } from "react-icons/fi";
 import { useTheme } from "../../context/ThemeContext";
 
-export default function FeeActions({ fee, onEdit, onDelete }) {
+export default function ReusableActions({ 
+  item, 
+  onEdit, 
+  onDelete, 
+  deleteMessage = "Are you sure you want to delete this item?",
+  getId = (item) => item?.sl || item?.id 
+}) {
   const { darkMode } = useTheme();
   const [open, setOpen] = useState(false);
   const [positionTop, setPositionTop] = useState(true); // true -> dropdown below, false -> dropdown above
@@ -54,6 +60,19 @@ export default function FeeActions({ fee, onEdit, onDelete }) {
     setOpen(!open);
   };
 
+  const handleEdit = () => {
+    setOpen(false);
+    onEdit(item);
+  };
+
+  const handleDelete = () => {
+    setOpen(false);
+    if (confirm(deleteMessage)) {
+      const id = getId(item);
+      onDelete(id);
+    }
+  };
+
   return (
     <div className="relative h-6 flex items-center" ref={ref}>
       <button
@@ -78,10 +97,7 @@ export default function FeeActions({ fee, onEdit, onDelete }) {
           }`}
         >
           <button
-            onClick={() => {
-              setOpen(false); // Close dropdown
-              onEdit(fee);
-            }}
+            onClick={handleEdit}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
               darkMode
                 ? "hover:bg-gray-600 text-gray-100"
@@ -93,12 +109,7 @@ export default function FeeActions({ fee, onEdit, onDelete }) {
           </button>
 
           <button
-            onClick={() => {
-              setOpen(false); // Close dropdown
-              if (confirm("Are you sure you want to delete this fee?")) {
-                onDelete(fee.sl); // Use fee.sl for deletion
-              }
-            }}
+            onClick={handleDelete}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
               darkMode
                 ? "text-red-400 hover:bg-red-900/30"
