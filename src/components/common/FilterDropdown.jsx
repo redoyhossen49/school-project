@@ -82,62 +82,7 @@ export default function FilterDropdown({
               </button>
 
               {/* Options Overlay */}
-              {activeField === field.key && (
-                <div
-                  className={`absolute left-1/2 -top-20 -translate-x-1/2 z-50 mt-1 w-64 max-h-48 py-6 overflow-y-auto border text-xs shadow-lg
-                    ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-200"
-                    }`}
-                >
-                  <ul className="">
-                    {/* All / Placeholder */}
-                    <li>
-                      <label className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600">
-                        <input
-                          type="radio"
-                          name={field.key}
-                          value=""
-                          checked={!tempValues[field.key]}
-                          onChange={() => {
-                            setTempValues((prev) => ({
-                              ...prev,
-                              [field.key]: "",
-                            }));
-                            setActiveField(null); // close overlay immediately
-                          }}
-                          className="mr-2"
-                        />
-                        {field.placeholder}
-                      </label>
-                    </li>
-
-                    {/* Options */}
-                    {field.options.map((opt) => (
-                      <li key={opt}>
-                        <label className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600">
-                          <input
-                            type="radio"
-                            name={field.key}
-                            value={opt}
-                            checked={tempValues[field.key] === opt}
-                            onChange={() => {
-                              setTempValues((prev) => ({
-                                ...prev,
-                                [field.key]: opt,
-                              }));
-                              setActiveField(null); // close overlay immediately
-                            }}
-                            className="mr-2"
-                          />
-                          {opt}
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+             
             </div>
           ))}
         </div>
@@ -171,9 +116,9 @@ export default function FilterDropdown({
 
         {/* ===== CENTER OPTION MODAL ===== */}
         {activeField && (
-          <div className="absolute inset-0 mt-2 z-50 flex items-center justify-center ">
+          <div className="absolute inset-0  z-50 flex items-center justify-center ">
             <div
-              className={`w-8/12 max-h-30 text-xs overflow-y-auto border py-3
+              className={`w-11/12 max-h-30 text-xs overflow-y-auto border py-3
                 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600"
