@@ -47,7 +47,7 @@ export default function FilterDropdown({
   return (
     <div
       ref={containerRef}
-      className="absolute z-40 mt-2 left-1/2 -translate-x-1/2 w-64 md:w-72 max-h-[60vh] overflow-y-auto"
+      className="absolute z-40 mt-2 left-0 w-64 md:w-72 max-h-[60vh] overflow-y-auto"
     >
       {/* ===== MAIN DROPDOWN ===== */}
       <div

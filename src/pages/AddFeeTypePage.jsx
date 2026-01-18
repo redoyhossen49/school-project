@@ -172,14 +172,14 @@ export default function AddFeeTypePage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 h-8 border border-gray-300 w-full md:w-auto shadow-sm hover:bg-gray-100 transition"
+            className="px-6 h-8 border border-gray-300 w-full md:w-auto hover:bg-gray-100 transition"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shadow-sm hover:bg-green-700 transition"
+            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white hover:bg-green-700 transition"
           >
             Save
           </button>

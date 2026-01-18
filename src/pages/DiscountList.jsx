@@ -3,7 +3,6 @@ import { discountData } from "../data/discountData.js";
 import DiscountTable from "../components/discount/DiscountTable.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { BiChevronDown } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
@@ -262,31 +261,28 @@ export default function DiscountList() {
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
-      <div className={`space-y-4 p-3 ${cardBg}`}>
-        <div className="md:flex md:items-center md:justify-between space-y-3 md:space-y-0">
+      <div className={`space-y-4  p-3 ${cardBg}`}>
+        <div className="md:flex md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold">Discount List</h2>
-            <p className="text-xs text-gray-400 flex flex-wrap items-center gap-x-1">
-              <Link to={`/${canEdit ? "school" : ""}/dashboard`} className="hover:text-indigo-600">
+            <h2 className="text-base font-semibold ">Discount List</h2>
+            <p className="text-xs text-gray-400">
+              <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>
-              <span>/</span>
               <button
-                onClick={() => navigate(`/${canEdit ? "school" : ""}/dashboard/discountlist`)}
-                className="hover:text-indigo-600 cursor-pointer"
+                onClick={() => navigate("/school/dashboard/discountlist")}
+                className="hover:text-indigo-600"
               >
-                Discount List
+                / Discount List
               </button>
             </p>
           </div>
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2">
-           
-
             <button
               onClick={handleRefresh}
-              className={`flex items-center shadow-sm px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+              className={`flex items-center   px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -294,13 +290,13 @@ export default function DiscountList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between shadow-sm px-3 py-2 text-xs w-24  border ${borderClr} ${inputBg}`}
+                className={`flex items-center justify-between  px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -321,40 +317,37 @@ export default function DiscountList() {
                 </div>
               )}
             </div>
+
             {canEdit && (
               <button
-                onClick={() => {
-                  const userRole = localStorage.getItem("role");
-                  const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                  navigate(`${basePath}/fee/adddiscount`);
-                }}
-                className="flex items-center justify-center shadow-sm  bg-blue-600 px-3 py-2 text-xs text-white hover:bg-blue-700"
+                onClick={() => navigate("/school/dashboard/fee/adddiscount")}
+                className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
               >
-                Add Discount
+                Discount
               </button>
             )}
           </div>
         </div>
 
         {/* Mobile Buttons */}
-        <div className="grid grid-cols-2 gap-2 md:hidden">
+        <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
-            className={`w-full flex items-center justify-center shadow-sm px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
+            className={`w-full  flex items-center  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
           >
             Refresh
           </button>
 
-          <div className="relative w-full" ref={exportRef}>
+          <div className="relative w-full " ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full flex items-center justify-center shadow-sm px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
+              className={`w-full  flex items-center   px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
             >
               Export
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border shadow-sm ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border   ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -362,13 +355,13 @@ export default function DiscountList() {
               >
                 <button
                   onClick={() => exportPDF(filteredDiscounts)}
-                  className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100 "
                 >
                   Export PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredDiscounts)}
-                  className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100 "
                 >
                   Export Excel
                 </button>
@@ -378,28 +371,22 @@ export default function DiscountList() {
 
           {canEdit && (
             <button
-              onClick={() => {
-                const userRole = localStorage.getItem("role");
-                const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                navigate(`${basePath}/fee/adddiscount`);
-              }}
-              className={`w-full flex items-center justify-center shadow-sm bg-blue-600 px-3 h-8 text-xs text-white hover:bg-blue-700 ${
-                canEdit ? "col-span-2 sm:col-span-1" : ""
-              }`}
+              onClick={() => navigate("/school/dashboard/fee/adddiscount")}
+              className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
             >
-              Add Discount
+              Discount
             </button>
           )}
         </div>
 
         {/* Filters + Search */}
-        <div className="space-y-3 md:flex md:items-center md:justify-between md:gap-4 md:space-y-0">
+        <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
           <div className="grid grid-cols-2 gap-2 md:flex md:w-auto items-center">
             {/* Filter Button */}
             <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full flex items-center justify-center shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
+                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
               >
                 Filter
               </button>
@@ -446,7 +433,7 @@ export default function DiscountList() {
             <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full flex items-center justify-center shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs border ${
+                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs border ${
                   darkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-200"
@@ -456,7 +443,7 @@ export default function DiscountList() {
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border  ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -486,13 +473,13 @@ export default function DiscountList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:mt-0 w-full md:w-auto">
+          <div className="flex items-center gap-2 md:w-auto">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by group name, class, student name, fees type..."
-              className={`w-full md:w-64 ${borderClr} ${inputBg} border px-3 h-8 shadow-sm text-xs focus:outline-none`}
+              className={`w-full md:w-64 ${borderClr} ${inputBg}  border  px-3 h-8  text-xs focus:outline-none`}
             />
             <Pagination
               currentPage={currentPage}

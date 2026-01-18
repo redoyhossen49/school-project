@@ -219,11 +219,9 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: CreditCard,
       children: [
-        { title: "Fees Group", path: "/fee/group" },
-        { title: "Fees Type", path: "/fee/type" },
-        { title: "Discount", path: "/fee/discount" },
-        { title: "Fees List", path: "/fee/list" },
-        { title: "Collection", path: "/fee/collection" },
+        { title: "Fees Type", path: "fee/type" },
+        { title: "Discount", path: "fee/discount" },
+        { title: "Collection", path: "fee/collection" },
       ],
     },
 
@@ -305,7 +303,7 @@ export const sidebarMenu = (role) => {
       icon: RiAccountPinBoxLine,
       children: [
         {
-          title: "Opening Status History",
+          title: "Opening",
           path: "/notice",
         },
         {

@@ -141,7 +141,7 @@ export const router = createBrowserRouter([
       // fee management routes
       { path: "fee/feegrouplist", element: <FeeGroupList /> },
       { path: "fee/addfeegroup", element: <AddFeeGroupPage /> },
-      { path: "fee/feetypelist", element: <FeeTypeList /> },
+      { path: "fee/type", element: <FeeTypeList /> },
       { path: "fee/addfeetype", element: <AddFeeTypePage /> },
 
 

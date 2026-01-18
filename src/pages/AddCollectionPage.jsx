@@ -4,6 +4,8 @@ import { useTheme } from "../context/ThemeContext";
 import Input from "../components/Input";
 import { collectionData } from "../data/collectionData";
 import { feeTypeData } from "../data/feeTypeData";
+import { studentData } from "../data/studentData";
+import { discountData } from "../data/discountData";
 
 export default function AddCollectionPage() {
   const { darkMode } = useTheme();
@@ -13,11 +15,6 @@ export default function AddCollectionPage() {
   const getUniqueOptions = (data, key) => {
     return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
   };
-
-  const classOptions = getUniqueOptions(collectionData, "class");
-  const groupOptions = getUniqueOptions(collectionData, "group");
-  const sectionOptions = getUniqueOptions(collectionData, "section");
-  const sessionOptions = getUniqueOptions(collectionData, "session");
   
   // Get unique fees types from feeTypeData
   const feesTypeOptions = getUniqueOptions(feeTypeData, "fees_type");
@@ -49,6 +46,7 @@ export default function AddCollectionPage() {
     section: "",
     session: "",
     fees_type: [], // Array for multi-select checkboxes
+    fees_amounts: {}, // Object to store fees_type and their amounts { "Tuition": 5000, "Exam": 1000 }
     total_payable: 0, // Calculated field
     payable_due: 0, // Calculated field
     pay_type: "",
@@ -58,40 +56,182 @@ export default function AddCollectionPage() {
     pay_date: today, // Auto-select today's date
   });
 
-  // Calculate fees amounts based on selected fees types
+  // Auto-populate Class, Group, Section, Session when Student ID is entered
+  // Also check for existing collection data for this student
   useEffect(() => {
-    if (formData.fees_type.length > 0 && formData.class && formData.group && formData.section && formData.session) {
-      // Filter feeTypeData based on selected class, group, section, session
-      const matchingFees = feeTypeData.filter(
-        (fee) =>
-          fee.class === formData.class &&
-          fee.group === formData.group &&
-          fee.section === formData.section &&
-          fee.session === formData.session &&
-          formData.fees_type.includes(fee.fees_type)
+    if (formData.student_id) {
+      // Find the student by studentId (from studentData)
+      const student = studentData.find(
+        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
       );
 
-      // Calculate total payable from matching fees
-      const totalPayable = matchingFees.reduce((sum, fee) => sum + (fee.fees_amount || 0), 0);
-      
+      if (student) {
+        // Update form fields with student data
+        setFormData((prev) => ({
+          ...prev,
+          class: student.className || "",
+          group: student.group || "",
+          section: student.section || "",
+          session: student.session || "",
+        }));
+
+        // Check if there's existing collection data for this student (using student_id from collectionData)
+        // Relation: studentData.studentId === collectionData.student_id
+        const existingCollections = collectionData.filter(
+          (collection) => collection.student_id?.toUpperCase() === formData.student_id.toUpperCase()
+        );
+
+        // If there are existing collections, you can use them to pre-populate or show history
+        // For now, we just ensure the relation is established
+        if (existingCollections.length > 0) {
+          // Collections exist for this student - relation is established
+          console.log(`Found ${existingCollections.length} collection(s) for student ${formData.student_id}`);
+        }
+      } else {
+        // Clear fields if student not found
+        setFormData((prev) => ({
+          ...prev,
+          class: "",
+          group: "",
+          section: "",
+          session: "",
+        }));
+      }
+    } else {
+      // Clear fields if student_id is empty
       setFormData((prev) => ({
         ...prev,
-        total_payable: totalPayable,
+        class: "",
+        group: "",
+        section: "",
+        session: "",
       }));
+    }
+  }, [formData.student_id]);
+
+  // Calculate fees amounts based on selected fees types using collectionData or feeTypeData
+  useEffect(() => {
+    if (formData.fees_type.length > 0 && formData.class && formData.group && formData.section && formData.session) {
+      // First, check if there's existing collection data for this student and fees types
+      // Relation: studentData.studentId === collectionData.student_id (case-insensitive)
+      const matchingCollections = collectionData.filter(
+        (collection) =>
+          collection.student_id?.toUpperCase() === formData.student_id.toUpperCase() &&
+          collection.class === formData.class &&
+          collection.group === formData.group &&
+          collection.section === formData.section &&
+          collection.session === formData.session
+      );
+
+      // Check if any collection has matching fees_type
+      const feesTypeString = formData.fees_type.join(", ");
+      let totalPayable = 0;
+      let payableDue = 0;
+      let feesAmountsObj = {}; // Declare outside if-else for proper scope
+
+      // If we have matching collection data, use it
+      const matchedCollection = matchingCollections.find(
+        (collection) => collection.fees_type === feesTypeString || formData.fees_type.includes(collection.fees_type)
+      );
+
+      if (matchedCollection) {
+        // Use existing collection data
+        totalPayable = matchedCollection.total_payable || 0;
+        payableDue = matchedCollection.payable_due || 0;
+      } else {
+        // Calculate from feeTypeData
+        const matchingFees = feeTypeData.filter(
+          (fee) =>
+            fee.class === formData.class &&
+            fee.group === formData.group &&
+            fee.section === formData.section &&
+            fee.session === formData.session &&
+            formData.fees_type.includes(fee.fees_type)
+        );
+
+        // Store fees amounts and calculate total payable from matching fees with discount applied
+        feesAmountsObj = {};
+        
+        totalPayable = matchingFees.reduce((sum, fee) => {
+          let feeAmount = fee.fees_amount || 0;
+          
+          // Store the original fee amount for this fees_type
+          feesAmountsObj[fee.fees_type] = feeAmount;
+          
+          // Check if there's a discount for this student and fees_type
+          if (formData.student_id) {
+            // Find student name from studentData
+            const student = studentData.find(
+              (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+            );
+            
+            if (student) {
+              // Find matching discount for this fees_type
+              const matchingDiscount = discountData.find(
+                (discount) =>
+                  discount.student_name === student.name &&
+                  discount.class === formData.class &&
+                  discount.group === formData.group &&
+                  discount.section === formData.section &&
+                  discount.session === formData.session &&
+                  discount.fees_type === fee.fees_type
+              );
+              
+              if (matchingDiscount) {
+                // Check if discount is valid for current date
+                const today = new Date().toISOString().split("T")[0];
+                const startDate = matchingDiscount.start_date;
+                const endDate = matchingDiscount.end_date;
+                
+                if (today >= startDate && today <= endDate) {
+                  // Apply discount: regular amount - discount amount
+                  feeAmount = Math.max(0, (matchingDiscount.regular || feeAmount) - (matchingDiscount.discount_amount || 0));
+                  // Update stored amount with discounted amount
+                  feesAmountsObj[fee.fees_type] = feeAmount;
+                }
+              }
+            }
+          }
+          
+          return sum + feeAmount;
+        }, 0);
+        
+        payableDue = totalPayable; // Initially payable_due equals total_payable
+      }
+
+      // Set formData with fees_amounts, total_payable, and payable_due
+      setFormData((prev) => {
+        const updated = {
+          ...prev,
+          total_payable: totalPayable,
+          payable_due: payableDue,
+        };
+        
+        // Only update fees_amounts if we calculated them (when not using existing collection data)
+        if (!matchedCollection && totalPayable > 0 && Object.keys(feesAmountsObj).length > 0) {
+          updated.fees_amounts = feesAmountsObj;
+        }
+        
+        return updated;
+      });
     } else {
       setFormData((prev) => ({
         ...prev,
+        fees_amounts: {},
         total_payable: 0,
+        payable_due: 0,
       }));
     }
-  }, [formData.fees_type, formData.class, formData.group, formData.section, formData.session]);
+  }, [formData.fees_type, formData.student_id, formData.class, formData.group, formData.section, formData.session]);
 
-  // Calculate payable_due, total, and total_due based on type_amount
+  // Calculate payable_due, total, and total_due based on type_amount and total_payable
+  // This will update immediately when fees_type is selected (via total_payable change)
   useEffect(() => {
     const typeAmount = parseFloat(formData.type_amount) || 0;
     const totalPayable = formData.total_payable || 0;
     
     // Payable due = Total payable - Type amount
+    // Initially, if no amount is entered, payable_due equals total_payable
     const payableDue = Math.max(0, totalPayable - typeAmount);
     
     // Total = Total payable (same as total_payable)
@@ -263,45 +403,49 @@ export default function AddCollectionPage() {
             type="text"
           />
 
-          {/* Show Class */}
-          <Input
-            label="Show Class"
-            name="class"
-            value={formData.class}
-            onChange={handleChange}
-            type="select"
-            options={classOptions}
-          />
+          {/* Show Class - Read-only */}
+          <div className="relative w-full">
+            <label className="block text-sm font-medium mb-1">Show Class</label>
+            <input
+              type="text"
+              value={formData.class}
+              readOnly
+              className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+            />
+          </div>
 
-          {/* Show Group */}
-          <Input
-            label="Show Group"
-            name="group"
-            value={formData.group}
-            onChange={handleChange}
-            type="select"
-            options={groupOptions}
-          />
+          {/* Show Group - Read-only */}
+          <div className="relative w-full">
+            <label className="block text-sm font-medium mb-1">Show Group</label>
+            <input
+              type="text"
+              value={formData.group}
+              readOnly
+              className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+            />
+          </div>
 
-          {/* Show Section */}
-          <Input
-            label="Show Section"
-            name="section"
-            value={formData.section}
-            onChange={handleChange}
-            type="select"
-            options={sectionOptions}
-          />
+          {/* Show Section - Read-only */}
+          <div className="relative w-full">
+            <label className="block text-sm font-medium mb-1">Show Section</label>
+            <input
+              type="text"
+              value={formData.section}
+              readOnly
+              className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+            />
+          </div>
 
-          {/* Show Session */}
-          <Input
-            label="Show Session"
-            name="session"
-            value={formData.session}
-            onChange={handleChange}
-            type="select"
-            options={sessionOptions}
-          />
+          {/* Show Session - Read-only */}
+          <div className="relative w-full">
+            <label className="block text-sm font-medium mb-1">Show Session</label>
+            <input
+              type="text"
+              value={formData.session}
+              readOnly
+              className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+            />
+          </div>
 
           {/* Select Fees Type - Dropdown with Checkboxes */}
           <div className="relative w-full" ref={feesTypeDropdownRef}>
