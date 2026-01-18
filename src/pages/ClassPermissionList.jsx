@@ -1,15 +1,26 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { classPermissionData } from "../data/classPermissionData";
 import ClassPermissionTable from "../components/teacher/ClassPermissionTable.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { useNavigate, Link } from "react-router-dom";
-import { FiRefreshCw, FiFilter } from "react-icons/fi";
+
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 export default function ClassPermissionList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
+
+  const [filterValues, setFilterValues] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
 
   const [permissions, setPermissions] = useState(classPermissionData);
   const [search, setSearch] = useState("");
@@ -19,7 +30,6 @@ export default function ClassPermissionList() {
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
-  const [selectedSection, setSelectedSection] = useState("All"); // <-- corrected initial value
   const [sectionOpen, setSectionOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -31,50 +41,117 @@ export default function ClassPermissionList() {
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const sectionOptions = ["All", "Morning", "Day", "Evening"];
+  const normalize = (v) => (v ? v.toString().trim().toLowerCase() : "");
+
+  const getUniqueOptions = (data, key) =>
+    Array.from(new Set(data.map((item) => item[key]).filter(Boolean)));
+
+  const classOptions = getUniqueOptions(classPermissionData, "class");
+  const groupOptions = getUniqueOptions(classPermissionData, "group");
+  const sectionOptions = getUniqueOptions(classPermissionData, "section");
 
   // ===== Close dropdowns on outside click =====
   useEffect(() => {
-    const handler = (e) => {
-      if (sectionRef.current && !sectionRef.current.contains(e.target))
-        setSectionOpen(false);
-      if (exportRef.current && !exportRef.current.contains(e.target))
-        setExportOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
-      if (filterRef.current && !filterRef.current.contains(e.target))
-        setFilterOpen(false);
+    const handleClickOutside = (e) => {
+      if (sectionRef.current?.contains(e.target)) return;
+      if (filterRef.current?.contains(e.target)) return;
+      if (sortRef.current?.contains(e.target)) return;
+
+      setSectionOpen(false);
+      setFilterOpen(false);
+      setSortOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ===== Filter + Sort + Search =====
-  const filteredPermissions = classPermissionData
-    .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-    .filter((p) =>
-      selectedSection === "All" ? true : p.section === selectedSection
-    )
-    .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
+  // ===== FILTER + SEARCH + SORT =====
+  const filteredPermissions = useMemo(() => {
+    return permissions
+      .filter((p) => {
+        const q = normalize(search);
+        if (!q) return true;
+        return (
+          normalize(p.name).includes(q) ||
+          normalize(p.teacherName).includes(q) ||
+          normalize(p.idNumber).includes(q)
+        );
+      })
+      .filter((p) =>
+        !filterValues.class
+          ? true
+          : normalize(p.class) === normalize(filterValues.class)
+      )
+      .filter((p) =>
+        !filterValues.group
+          ? true
+          : normalize(p.group) === normalize(filterValues.group)
+      )
+      .filter((p) =>
+        !filterValues.section
+          ? true
+          : normalize(p.section) === normalize(filterValues.section)
+      )
+      .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
+  }, [permissions, search, filterValues, sortOrder]);
 
+  // ===== PAGINATION =====
   const totalPages = Math.ceil(filteredPermissions.length / permissionsPerPage);
   const currentPermissions = filteredPermissions.slice(
     (currentPage - 1) * permissionsPerPage,
     currentPage * permissionsPerPage
   );
 
-  // ===== Refresh Handler =====
+  // ===== HANDLERS =====
   const handleRefresh = () => {
-    setPermissions(classPermissionData); // Reset to full data
-    setSearch(""); // Clear search
-    setCurrentPage(1); // Reset page
-    setSelectedSection("All"); // Reset section
-    setSortOrder("asc"); // Reset sort
-    setFilterOpen(false); // Close filter modal
+    setPermissions(classPermissionData);
+    setSearch("");
+    setSortOrder("asc");
+    setCurrentPage(1);
+    setFilterValues({ class: "", group: "", section: "" });
   };
 
+
+  // EXPORT EXCEL
+  const handleExportExcel = () => {
+    const wsData = filteredPermissions.map(({ sl, name, teacherName, idNumber, class: cls, group, section, subject }) => ({
+      SL: sl,
+      Name: name,
+      Teacher: teacherName,
+      ID: idNumber,
+      Class: cls,
+      Group: group,
+      Section: section,
+      Subject: subject,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ClassPermissions");
+    XLSX.writeFile(wb, "ClassPermissions.xlsx");
+  };
+
+  // EXPORT PDF
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+
+autoTable(doc, {
+  head: [["SL", "Name", "Teacher", "ID", "Class", "Group", "Section", "Subject"]],
+  body: filteredPermissions.map(({ sl, name, teacherName, idNumber, class: cls, group, section, subject }) => [
+    sl, name, teacherName, idNumber, cls, group, section, subject
+  ]),
+  startY: 20,
+  styles: { fontSize: 8 },
+  headStyles: { fillColor: [22, 160, 133] },
+});
+
+doc.save("ClassPermissions.pdf");
+  }
+
+
   // Button base class for exact StudentList style
-  const buttonClass = `flex items-center justify-between w-28 rounded border px-3 py-2 text-xs shadow-sm ${
+  const buttonClass = `flex items-center  w-28  border px-3 h-8 text-xs shadow-sm ${
     darkMode
       ? "border-gray-600 bg-gray-700 text-gray-100 hover:bg-gray-600"
       : "border-gray-200 bg-white text-gray-800 hover:bg-gray-100"
@@ -90,11 +167,11 @@ export default function ClassPermissionList() {
       <div
         className={`${
           darkMode ? "bg-gray-800" : "bg-white"
-        } rounded-md p-3 space-y-4`}
+        } p-3 space-y-4`}
       >
-        <div className="md:flex md:items-center md:justify-between gap-3">
+        <div className="md:flex md:items-center md:justify-between gap-2">
           <div>
-            <h2 className="text-base font-semibold">{`Class Permission List`}</h2>
+            <h2 className="text-base font-semibold">Class Permission</h2>
             <p
               className={`${
                 darkMode ? "text-gray-400" : "text-gray-500"
@@ -115,10 +192,10 @@ export default function ClassPermissionList() {
 
             <div className="relative w-28" ref={exportRef}>
               <button
-                onClick={() => setExportOpen((prev) => !prev)}
+              onClick={() => setExportOpen((p) => !p)} 
                 className={buttonClass}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
@@ -126,12 +203,12 @@ export default function ClassPermissionList() {
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-28 rounded border shadow-sm`}
+                  } absolute top-full left-0 mt-1 w-28  border shadow-sm`}
                 >
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-blue-50">
+                  <button className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
                     Export PDF
                   </button>
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-blue-50">
+                  <button className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
                     Export Excel
                   </button>
                 </div>
@@ -141,7 +218,7 @@ export default function ClassPermissionList() {
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addclasspermission")}
-                className="flex items-center justify-center gap-1 w-28 rounded px-3 py-2 text-xs shadow-sm bg-blue-600 text-white hover:bg-blue-700"
+                className="flex items-center justify-center  w-28  px-3 h-8 text-xs shadow-sm bg-blue-600 text-white hover:bg-blue-700"
               >
                 Permission
               </button>
@@ -154,16 +231,34 @@ export default function ClassPermissionList() {
           <button onClick={handleRefresh} className={buttonClass + " w-full"}>
             Refresh
           </button>
-          <button
-            onClick={() => setExportOpen((prev) => !prev)}
-            className={buttonClass + " w-full"}
-          >
-            Export <BiChevronDown />
-          </button>
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setExportOpen((p) => !p)} 
+              className={buttonClass + " w-full"}
+            >
+              Export
+            </button>
+            {exportOpen && (
+              <div
+                className={`${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-gray-100"
+                    : "bg-white border-gray-200 text-gray-900"
+                } absolute top-full left-0 mt-1 z-50 w-full  border shadow-sm`}
+              >
+                <button onClick={handleExportPDF} className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
+                  PDF
+                </button>
+                <button onClick={handleExportExcel} className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
+                  Excel
+                </button>
+              </div>
+            )}
+          </div>
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addclasspermission")}
-              className="flex items-center justify-center gap-1 w-full rounded px-3 py-2 text-xs shadow-sm bg-blue-600 text-white hover:bg-blue-700"
+              className="flex items-center justify-center gap-1 w-full  px-3 h-8 text-xs shadow-sm bg-blue-600 text-white hover:bg-blue-700"
             >
               Permission
             </button>
@@ -171,19 +266,19 @@ export default function ClassPermissionList() {
         </div>
 
         {/* ========== CONTROLS: Section, Sort, Filter, Search + Pagination ========== */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-3 md:gap-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
           <div className="flex gap-2 md:gap-2 w-full md:w-auto">
             {/* Section Dropdown */}
             <div className="relative flex-1 md:flex-none" ref={sectionRef}>
               <button
-                onClick={() => setSectionOpen((prev) => !prev)}
-                 className={`w-full md:w-28 flex items-center justify-between rounded border px-2 py-2 text-xs shadow-sm ${
+                onClick={() => setSectionOpen((p) => !p)}
+                className={`w-full md:w-28 flex items-center justify-between  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                {selectedSection} <BiChevronDown />
+                {filterValues.section || "Section"}
               </button>
               {sectionOpen && (
                 <div
@@ -191,46 +286,83 @@ export default function ClassPermissionList() {
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute mt-2 w-40 z-40 rounded border shadow-sm`}
+                  } absolute mt-2 w-full text-xs z-40  border shadow-sm`}
                 >
                   {sectionOptions.map((opt) => (
                     <div
                       key={opt}
                       onClick={() => {
-                        setSelectedSection(opt);
+                        const selected = opt?.toString().trim().toLowerCase(); // normalize
+                        setFilterValues((prev) => ({
+                          ...prev,
+                          section: selected,
+                        }));
                         setSectionOpen(false);
+                        setCurrentPage(1);
                       }}
-                      className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex justify-between"
+                      className="px-3 h-8 text-xs flex items-center cursor-pointer hover:bg-blue-50 justify-between"
                     >
-                      {opt} <BiChevronRight size={12} className="ml-2" />
+                      {opt} 
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-           <div className="relative flex-1 md:flex-none">
-             {/* Filter Button */}
-            <button onClick={() => setFilterOpen(true)}  className={`w-full md:w-28 flex items-center justify-between rounded border px-3 py-2 text-xs shadow-sm ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
-                    : "bg-white border-gray-300 hover:bg-gray-100"
-                }`}>
-              Filter <BiChevronDown size={12}  />
-            </button>
-           </div>
+            <div className="relative" ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen((p) => !p)}
+                className={buttonClass}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter class permission"
+                fields={[
+                  {
+                    key: "class",
+                    label: "Class",
+                    options: classOptions,
+                    placeholder: "All Classes",
+                  },
+                  {
+                    key: "group",
+                    label: "Group",
+                    options: groupOptions,
+                    placeholder: "All Groups",
+                  },
+                  {
+                    key: "section",
+                    label: "Section",
+                    options: sectionOptions,
+                    placeholder: "All Sections",
+                  },
+                ]}
+                selected={filterValues}
+                setSelected={setFilterValues}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setFilterValues(values);
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+              />
+            </div>
 
             {/* Sort Dropdown */}
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
-                onClick={() => setSortOpen((prev) => !prev)}
-                 className={`w-full md:w-28 flex items-center justify-between rounded border px-3 py-2 text-xs shadow-sm ${
+                onClick={() => setSortOpen((p) => !p)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Sort By <BiChevronDown  />
+                Sort By
               </button>
               {sortOpen && (
                 <div
@@ -238,25 +370,25 @@ export default function ClassPermissionList() {
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-28 z-40 rounded border shadow-sm`}
+                  } absolute top-full left-0 mt-1 w-full z-40  border shadow-sm`}
                 >
                   <button
                     onClick={() => {
-                      setSortOrder("asc");
+                      setSortOrder("desc");
                       setSortOpen(false);
                     }}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-blue-50"
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
                   >
-                    SL ↑
+                    First
                   </button>
                   <button
                     onClick={() => {
                       setSortOrder("desc");
                       setSortOpen(false);
                     }}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-blue-50"
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
                   >
-                    SL ↓
+                    Last
                   </button>
                 </div>
               )}
@@ -273,8 +405,8 @@ export default function ClassPermissionList() {
               className={`${
                 darkMode
                   ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400"
-                  : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-              } w-full md:w-64 rounded px-3 py-2 text-xs shadow-sm focus:outline-none`}
+                  : "bg-white border-gray-200 text-gray-900 placeholder-gray-500"
+              } w-full md:w-64 px-3 h-8 border text-xs shadow-sm focus:outline-none`}
             />
             <Pagination
               currentPage={currentPage}
@@ -289,7 +421,7 @@ export default function ClassPermissionList() {
       <div
         className={`${
           darkMode ? "bg-gray-800" : "bg-white"
-        } rounded-md p-2 overflow-x-auto`}
+        }  p-2 overflow-x-auto`}
       >
         <ClassPermissionTable
           data={currentPermissions}
@@ -297,80 +429,6 @@ export default function ClassPermissionList() {
           darkMode={darkMode}
         />
       </div>
-
-      {/* ========== FILTER MODAL ========== */}
-      {filterOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          onClick={() => setFilterOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className={`${
-              darkMode
-                ? "bg-gray-700 text-gray-100 border-gray-600"
-                : "bg-white text-gray-800 border-gray-200"
-            } w-8/12 md:w-96 p-6 max-h-[80vh] overflow-y-auto rounded shadow-sm transition-all duration-300`}
-          >
-            <h2 className="text-lg md:text-xl font-semibold mb-3">
-              Filter Permissions
-            </h2>
-            <div className="flex flex-col gap-3">
-              {["Class", "Section", "Session"].map((field) => (
-                <div key={field} className="relative">
-                  <label
-                    className={`absolute -top-2 left-2 px-1 text-[10px] ${
-                      darkMode
-                        ? "bg-gray-700 text-blue-300"
-                        : "bg-white text-blue-500"
-                    }`}
-                  >
-                    {field}
-                  </label>
-                  <select
-                    className={`${
-                      darkMode
-                        ? "bg-gray-800 border-gray-600 text-gray-100"
-                        : "bg-white border-gray-300 text-gray-900"
-                    } w-full px-2 py-1.5 text-xs rounded focus:outline-none focus:ring-1 focus:ring-blue-400`}
-                  >
-                    <option>Select</option>
-                    {field === "Class" && (
-                      <>
-                        <option>One</option>
-                        <option>Two</option>
-                      </>
-                    )}
-                    {field === "Section" && (
-                      <>
-                        <option>A</option>
-                        <option>B</option>
-                      </>
-                    )}
-                    {field === "Session" && (
-                      <>
-                        <option>2024-25</option>
-                        <option>2025-26</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-2 justify-end pt-2 mt-1">
-              <button
-                onClick={() => setFilterOpen(false)}
-                className={`flex-1 sm:flex-none px-3 py-1 text-xs font-medium border rounded ${darkMode?"bg-gray-700 border-gray-500":"border-gray-200 bg-white"} hover:bg-gray-300`}
-              >
-                Reset
-              </button>
-              <button className="flex-1 sm:flex-none px-3 py-1 text-xs font-medium rounded bg-blue-600 hover:bg-blue-700 text-white">
-                Apply
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

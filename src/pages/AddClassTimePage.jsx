@@ -33,9 +33,9 @@ export default function AddClassTimePage() {
   };
 
   return (
-    <div className={`py-4 px-4 mx-6 md:mx-0 min-h-screen ${darkMode ? "bg-gray-800" : "bg-gray-50"}`}>
+    <div className={`py-2 px-2  min-h-screen ${darkMode ? "bg-gray-800" : "bg-gray-50"}`}>
       {/* ===== Header ===== */}
-      <div className={`mb-4 p-6 rounded ${darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"}`}>
+      <div className={`mb-4 p-6 shdow-sm ${darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"}`}>
         <h1 className="text-base font-bold">Add Class Time</h1>
         <p className={`text-sm mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
           <Link to="/school/dashboard" className="hover:text-indigo-600">Dashboard</Link>
@@ -48,7 +48,7 @@ export default function AddClassTimePage() {
       {/* ===== Form ===== */}
       <form
         onSubmit={handleSave}
-        className={`p-6 rounded shadow-md space-y-6 overflow-y-auto transition-colors duration-300 ${
+        className={`p-6  shadow-sm space-y-6 overflow-y-auto transition-colors duration-300 ${
           darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"
         }`}
       >

@@ -80,15 +80,15 @@ const removeImage = (type) => {
   };
 
   return (
-    <div className="py-4 px-4 mx-6 md:mx-0  min-h-screen">
+    <div className="py-4 px-2  md:mx-0  min-h-screen">
       {/* Header */}
       <div
         className={`mb-6  ${
           darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
-        } p-6 rounded`}
+        } p-6 `}
       >
         <h1 className="text-base font-bold">Add Teacher</h1>
-        <p className="text-xs text-indigo-600 mt-1">
+        <p className={`text-xs  mt-1 ${darkMode?"text-gray-200":"text-gray-400"}`}>
           <Link
             to="/school/dashboard"
             className="hover:text-indigo-600 transition"
@@ -102,13 +102,14 @@ const removeImage = (type) => {
           >
             Teacher list
           </Link>
+           <span className="mx-1">/</span>Add teacher
         </p>
       </div>
 
       {/* Form */}
       <form
         onSubmit={handleSave}
-        className={`p-6 rounded shadow-md space-y-6 overflow-y-auto ${
+        className={`p-6  shadow-md space-y-6 overflow-y-auto ${
           darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
         }`}
       >
@@ -120,7 +121,7 @@ const removeImage = (type) => {
             name="teacherName"
             value={formData.teacherName}
             onChange={handleChange}
-            inputClassName="py-1"
+            
           />
 
           <Input
@@ -128,7 +129,7 @@ const removeImage = (type) => {
             name="designation"
             value={formData.designation}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
@@ -138,7 +139,7 @@ const removeImage = (type) => {
             onChange={handleChange}
             type="text"
             disabled
-            inputClassName="py-1"
+            
           />
 
           <Input
@@ -146,7 +147,7 @@ const removeImage = (type) => {
             name="mobileNumber"
             value={formData.mobileNumber}
             onChange={handleChange}
-            inputClassName="py-1"
+            
           />
 
           <Input
@@ -155,7 +156,7 @@ const removeImage = (type) => {
             type="email"
             value={formData.email}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
@@ -164,7 +165,7 @@ const removeImage = (type) => {
             type="password"
             value={formData.password}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
@@ -173,7 +174,7 @@ const removeImage = (type) => {
             type="date"
             value={formData.dateOfBirth}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
 
           <Input
@@ -182,7 +183,7 @@ const removeImage = (type) => {
             type="date"
             value={formData.joinDate}
             onChange={handleChange}
-            inputClassName="py-1"
+           
           />
         </div>
 
@@ -191,13 +192,11 @@ const removeImage = (type) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
           {/* Photo Upload */}
           <div>
-            <label className="block text-xs font-medium mb-1">
-              Upload Photo
-            </label>
+           
 
             {!photoPreview ? (
               <div
-                className="border-2 border-dashed h-28 flex flex-col items-center justify-center
+                className="border border-dashed border-gray-300 h-16 flex flex-col items-center justify-center
         text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
               >
                 <span className="text-sm">📷 Upload Photo</span>
@@ -210,7 +209,7 @@ const removeImage = (type) => {
                 />
               </div>
             ) : (
-              <div className="relative h-28 w-full border rounded-lg overflow-hidden">
+              <div className="relative h-12 w-full border rounded-lg overflow-hidden">
                 <img
                   src={photoPreview}
                   alt="Photo Preview"
@@ -230,13 +229,11 @@ const removeImage = (type) => {
 
           {/* Signature Upload */}
           <div>
-            <label className="block text-xs font-medium mb-1">
-              Upload Signature
-            </label>
+           
 
             {!signaturePreview ? (
               <div
-                className="border-2 border-dashed h-28 flex flex-col items-center justify-center
+                className="border border-dashed border-gray-300 h-16 flex flex-col items-center justify-center
         text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
               >
                 <span className="text-sm">✍️ Upload Signature</span>
@@ -249,7 +246,7 @@ const removeImage = (type) => {
                 />
               </div>
             ) : (
-              <div className="relative h-28 w-full border rounded-lg overflow-hidden">
+              <div className="relative h-12 w-full border rounded-lg overflow-hidden">
                 <img
                   src={signaturePreview}
                   alt="Signature Preview"
@@ -273,14 +270,14 @@ const removeImage = (type) => {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-1 border w-full md:w-auto rounded hover:bg-gray-100 transition"
+            className="px-6 h-8 border border-gray-300 w-full md:w-auto shdaow-sm hover:bg-gray-100 transition"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-6 py-1 w-full md:w-auto bg-green-600 text-white rounded hover:bg-green-700 transition"
+            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shdaow-sm hover:bg-green-700 transition"
           >
             Save
           </button>

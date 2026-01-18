@@ -152,7 +152,7 @@ const filteredClassTimes = classTimes
   
 
   // Button base class
-  const buttonClass = `flex items-center justify-between w-28 rounded px-3 py-2 text-xs shadow-sm hover:bg-gray-100 ${
+  const buttonClass = `flex items-center  w-28  px-3 h-8 text-xs shadow-sm hover:bg-gray-100 ${
     darkMode
       ? "border bg-gray-700 border-gray-500 text-gray-100"
       : "border bg-white border-gray-200 text-gray-900"
@@ -162,7 +162,7 @@ const filteredClassTimes = classTimes
     <div className="p-3 space-y-4 min-h-screen">
       {/* Header */}
       <div
-        className={`rounded-md p-3 space-y-3 ${
+        className={` p-3 space-y-3 ${
           darkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-700"
         }`}
       >
@@ -173,7 +173,7 @@ const filteredClassTimes = classTimes
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>{" "}
-              / Class Time / Class Time List
+               / Class Time List
             </p>
           </div>
 
@@ -193,11 +193,11 @@ const filteredClassTimes = classTimes
                 onClick={() => setExportOpen(!exportOpen)}
                 className={buttonClass}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 z-50 top-full mt-1 w-28 rounded border shadow-sm ${
+                  className={`absolute left-0 z-50 top-full mt-1 w-28  border shadow-sm ${
                     darkMode
                       ? "border-gray-500 bg-gray-700"
                       : "border-gray-200 bg-white"
@@ -205,15 +205,15 @@ const filteredClassTimes = classTimes
                 >
                   <button
                     onClick={() => exportPDF(filteredClassTimes)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100"
                   >
-                    Export PDF
+                     PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredClassTimes)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100"
                   >
-                    Export Excel
+                     Excel
                   </button>
                 </div>
               )}
@@ -222,7 +222,7 @@ const filteredClassTimes = classTimes
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addclasstime")}
-                className="flex items-center  gap-1 w-28 rounded bg-blue-600 px-3 py-2 text-xs text-white shadow-sm hover:bg-blue-700"
+                className="flex items-center   w-28  bg-blue-600 px-3 py-2 text-xs text-white shadow-sm hover:bg-blue-700"
               >
                 Class Time
               </button>
@@ -237,7 +237,7 @@ const filteredClassTimes = classTimes
               setClassTimes(classTimeData);
               setSearch("");
             }}
-            className={`flex items-center  w-full rounded border px-2 py-2 text-xs shadow-sm ${
+            className={`flex items-center  w-full  border px-3 h-8 text-xs shadow-sm ${
               darkMode
                 ? "border-gray-500 bg-gray-700 text-gray-100"
                 : "border-gray-200 bg-white text-gray-900"
@@ -249,17 +249,17 @@ const filteredClassTimes = classTimes
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setExportOpen(!exportOpen)}
-              className={`flex items-center justify-between w-full rounded border px-2 py-2 text-xs shadow-sm ${
+              className={`flex items-center w-full  border px-3 h-8 text-xs shadow-sm ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100"
                   : "border-gray-200 bg-white text-gray-900"
               }`}
             >
-              Export <BiChevronDown />
+              Export 
             </button>
             {exportOpen && (
               <div
-                className={`absolute left-0 z-50 top-full mt-1 w-full rounded border shadow-sm ${
+                className={`absolute left-0 z-50 top-full mt-1 w-full  border shadow-sm ${
                   darkMode
                     ? "border-gray-500 bg-gray-700"
                     : "border-gray-200 bg-white"
@@ -267,15 +267,15 @@ const filteredClassTimes = classTimes
               >
                 <button
                   onClick={() => exportPDF(filteredClassTimes)}
-                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 text-left text-xs hover:bg-gray-100"
                 >
-                  Export PDF
+                   PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredClassTimes)}
-                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 text-left text-xs hover:bg-gray-100"
                 >
-                  Export Excel
+                  Excel
                 </button>
               </div>
             )}
@@ -284,7 +284,7 @@ const filteredClassTimes = classTimes
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addclasstime")}
-              className="flex items-center  w-full rounded bg-blue-600 px-2 py-2 text-xs text-white shadow-sm"
+              className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white shadow-sm"
             >
                Class Time
             </button>
@@ -298,13 +298,13 @@ const filteredClassTimes = classTimes
             <div className="relative" ref={sectionDropdownRef}>
               <button
                 onClick={() => setSectionOpen(!sectionOpen)}
-                className={`flex items-center justify-between w-full md:w-28 rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-900"
                 }`}
               >
-                {selectedSection} <BiChevronDown />
+                {selectedSection} 
               </button>
               {sectionOpen && (
                 <div
@@ -321,9 +321,9 @@ const filteredClassTimes = classTimes
                         setSelectedSection(opt);
                         setSectionOpen(false);
                       }}
-                      className="w-full cursor-pointer px-3 py-1 text-sm hover:bg-gray-100 flex justify-between items-center"
+                      className="w-full cursor-pointer px-3 h-8 text-sm hover:bg-gray-100 flex  items-center"
                     >
-                      {opt} <BiChevronRight size={12} />
+                      {opt} 
                     </div>
                   ))}
                 </div>
@@ -334,13 +334,13 @@ const filteredClassTimes = classTimes
             <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className={`flex items-center justify-between w-full md:w-28 rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-900"
                 }`}
               >
-                Filter <BiChevronDown />
+                Filter 
               </button>
               
                             <FilterDropdown
@@ -379,17 +379,17 @@ const filteredClassTimes = classTimes
             <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
-                className={`flex items-center justify-between w-full md:w-28 rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-900"
                 }`}
               >
-                Sort By <BiChevronDown />
+                Sort By 
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-28 rounded border shadow-sm ${
+                  className={`absolute left-0 mt-2 w-28 border shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -400,18 +400,18 @@ const filteredClassTimes = classTimes
                       setSortOrder("asc");
                       setSortOpen(false);
                     }}
-                    className="w-full px-3 py-1 text-left hover:bg-gray-100"
+                    className="w-full px-3 h-8 text-left hover:bg-gray-100"
                   >
-                    First ↑
+                    First 
                   </button>
                   <button
                     onClick={() => {
                       setSortOrder("desc");
                       setSortOpen(false);
                     }}
-                    className="w-full px-3 py-1 text-left hover:bg-gray-100"
+                    className="w-full px-3 h-8 text-left hover:bg-gray-100"
                   >
-                    Last ↓
+                    Last 
                   </button>
                 </div>
               )}
@@ -419,13 +419,13 @@ const filteredClassTimes = classTimes
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 mt-2 md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
             <input
               type="text"
               placeholder="Search by class..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`h-8 px-2 md:px-3 w-full text-xs rounded border shadow-sm ${
+              className={`h-8 px-3  w-full text-xs  border shadow-sm ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
@@ -441,7 +441,7 @@ const filteredClassTimes = classTimes
       </div>
 
       {/* Table */}
-      <div className={`p-2 ${darkMode ? "bg-gray-900" : "bg-white"} rounded`}>
+      <div className={`p-2 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
         <ClassTimeTable data={currentClassTimes} setData={setClassTimes} />
       </div>
     </div>

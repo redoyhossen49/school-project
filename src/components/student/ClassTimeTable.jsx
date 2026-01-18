@@ -34,7 +34,7 @@ export default function ClassTimeTable({ data = classTimeData, setData, onEdit }
 
   return (
     <div
-      className={`border rounded overflow-x-auto ${
+      className={`border overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
@@ -53,13 +53,13 @@ export default function ClassTimeTable({ data = classTimeData, setData, onEdit }
             {headers.map((h) => (
               <th
                 key={h.key}
-                className={`px-3 py-2 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
+                className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
               >
                 {h.label}
               </th>
             ))}
             {showAction && (
-              <th className="px-3 py-2 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
                 Action
               </th>
             )}
@@ -72,7 +72,7 @@ export default function ClassTimeTable({ data = classTimeData, setData, onEdit }
             <tr>
               <td
                 colSpan={showAction ? headers.length + 1 : headers.length}
-                className="h-7 text-center text-gray-400"
+                className="h-8 text-center text-gray-400"
               >
                 No class times found
               </td>
@@ -84,14 +84,14 @@ export default function ClassTimeTable({ data = classTimeData, setData, onEdit }
               {headers.map((h) => (
                 <td
                   key={h.key}
-                  className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                 >
                   {row[h.key]}
                 </td>
               ))}
 
               {showAction && (
-                <td className="px-3 py-2 whitespace-nowrap">
+                <td className="px-3 h-8 whitespace-nowrap">
                   <StudentActions
                     row={row}
                     onEdit={handleEdit}

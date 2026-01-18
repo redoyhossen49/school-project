@@ -207,7 +207,7 @@ export default function StudentsList() {
   const borderClr = darkMode ? "border-gray-600" : "border-gray-200";
 
   const inputBg = darkMode
-    ? "bg-gray-700 text-gray-100"
+    ? "bg-gray-700 text-white"
     : "bg-white text-gray-800";
 
   const dropdownBg = darkMode
@@ -217,7 +217,7 @@ export default function StudentsList() {
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
-      <div className={`space-y-4 rounded-md p-3 ${cardBg}`}>
+      <div className={`space-y-4  p-3 ${cardBg}`}>
         <div className="md:flex md:items-center md:justify-between">
           <div>
             <h2 className="text-base font-semibold ">Students List</h2>
@@ -229,9 +229,9 @@ export default function StudentsList() {
                 onClick={() => navigate("/school/dashboard/studentlist")}
                 className="hover:text-indigo-600"
               >
-                / Student
+                / Student List
               </button>
-              / Student List
+              
             </p>
           </div>
 
@@ -290,21 +290,21 @@ export default function StudentsList() {
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
-            className={`w-full  flex items-center shadow-sm  px-3 h-8 text-sm w-24 rounded border ${borderClr} ${inputBg}`}
+            className={`w-full  flex items-center shadow-sm  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
           >
             Refresh
           </button>
 
-          <div className="relative w-full">
+          <div className="relative w-full " ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full  flex items-center justify-between shadow-sm  px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
+              className={`w-full  flex items-center justify-between shadow-sm  px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
             >
-              Export <BiChevronDown className="text-sm" />
+              Export 
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border rounded shadow-sm ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border  shadow-sm ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -312,13 +312,13 @@ export default function StudentsList() {
               >
                 <button
                   onClick={() => exportPDF(filteredStudents)}
-                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100 "
                 >
                   Export PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredStudents)}
-                  className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100 "
                 >
                   Export Excel
                 </button>
@@ -329,9 +329,9 @@ export default function StudentsList() {
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addstudent")}
-              className="w-full flex items-center gap-1 rounded shadow-sm bg-blue-600 px-2 py-2 text-xs text-white"
+              className="w-full flex items-center  shadow-sm bg-blue-600 px-3 h-8 text-xs text-white"
             >
-              Add Student
+              Student
             </button>
           )}
         </div>
@@ -343,9 +343,9 @@ export default function StudentsList() {
             <div className="relative" ref={dateDropdownRef}>
               <button
                 onClick={() => setDateOpen((prev) => !prev)}
-                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
+                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs  border ${borderClr} ${inputBg}`}
               >
-                {selectedDate} <BiChevronDown className="text-sm" />
+                {selectedDate}
               </button>
               {dateOpen && (
                 <div
@@ -366,7 +366,7 @@ export default function StudentsList() {
                       className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
                     >
                       <span>{opt.label}</span>
-                      <BiChevronRight size={12} />
+                      
                     </div>
                   ))}
                   <div
@@ -393,7 +393,7 @@ export default function StudentsList() {
                         className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
                       >
                         <span>{s}</span>
-                        <BiChevronRight size={14} />
+                        
                       </div>
                     ))}
                 </div>
@@ -403,10 +403,10 @@ export default function StudentsList() {
             {/* Filter Button */}
             <div className="relative " ref={filterRef}>
               <button
-                onClick={() => setFilterOpen(true)}
-                 className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${borderClr} ${inputBg}`}
+                 onClick={() => setFilterOpen((prev) => !prev)}
+                 className={`w-full  flex items-center  shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
               >
-                Filter <BiChevronDown />
+                Filter 
               </button>
 
               <FilterDropdown
@@ -450,24 +450,24 @@ export default function StudentsList() {
             <div className="relative" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 py-2 text-xs  rounded border ${
+                className={`w-full  flex items-center justify-between shadow-sm md:px-3 md:w-24 px-3 h-8 text-xs   border ${
                   darkMode
-                    ? "bg-gray-700 border-gray-200"
+                    ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-200"
                 }`}
               >
-                Sort By <BiChevronDown className="text-sm" />
+                Sort By 
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border rounded shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border  shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
                   }`}
                 >
                   <button
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 h-6 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                     onClick={() => {
                       setSortOrder("newest");
                       setSortOpen(false);
@@ -476,7 +476,7 @@ export default function StudentsList() {
                     First
                   </button>
                   <button
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100 "
                     onClick={() => {
                       setSortOrder("oldest");
                       setSortOpen(false);
@@ -496,7 +496,7 @@ export default function StudentsList() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name..."
-              className={`w-full md:w-64 ${borderClr} ${inputBg} rounded border  px-3 py-2 text-xs focus:outline-none`}
+              className={`w-full md:w-64 ${borderClr} ${inputBg}  border  px-3 h-8 shadow-sm text-xs focus:outline-none`}
             />
             <Pagination
               currentPage={currentPage}
@@ -509,7 +509,7 @@ export default function StudentsList() {
 
       {/* ===== STUDENT TABLE ===== */}
       <div
-        className={`rounded ${
+        className={` ${
           darkMode ? "bg-gray-900" : "bg-white"
         } p-2 overflow-x-auto`}
       >

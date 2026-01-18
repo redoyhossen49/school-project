@@ -39,7 +39,7 @@ export default function StudentTable({ data, setData, onEdit }) {
 
   return (
     <div
-      className={`border rounded overflow-x-auto ${
+      className={`border overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
@@ -57,13 +57,13 @@ export default function StudentTable({ data, setData, onEdit }) {
             {headers.map((h) => (
               <th
                 key={h}
-                className={`px-3 py-2 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
+                className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
               >
                 {h}
               </th>
             ))}
             {showAction && (
-              <th className="px-3 py-2 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
                 Action
               </th>
             )}
@@ -72,14 +72,19 @@ export default function StudentTable({ data, setData, onEdit }) {
 
         <tbody>
           {data.map((s) => (
-            <tr key={s.id} className={`border-b ${borderCol}  ${hoverRow}`}>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{s.admissionNo}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{s.studentId}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{s.rollNo}</td>
+            <tr key={s.id} className={`border-b ${borderCol} ${hoverRow}`}>
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
+                {s.admissionNo}
+              </td>
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
+                {s.studentId}
+              </td>
+              <td className={`px-3 h-8 border-r ${borderCol}`}>{s.rollNo}</td>
 
               {/* Name + Photo */}
-            
-                 <td className={`px-3 py-2 border-r ${borderCol} max-w-[200px] truncate`}>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} max-w-[200px] truncate`}
+              >
                 <div className="flex items-center gap-2">
                   <img
                     src={s.photo}
@@ -90,32 +95,63 @@ export default function StudentTable({ data, setData, onEdit }) {
                 </div>
               </td>
 
-              <td className={`px-3 py-2  border-r ${borderCol}`}>{s.fatherName}</td>
-              <td className={`px-3 py-2 border-r ${borderCol}`}>{s.motherName}</td>
-              <td className={`px-3 py-2 whitespace-nowrap border-r ${borderCol}`}>{s.className}</td>
-              <td className={`px-3 py-2 whitespace-nowrap border-r ${borderCol}`}>{s.group}</td>
-              <td className={`px-3 py-2 whitespace-nowrap border-r ${borderCol}`}>{s.section}</td>
-              <td className={`px-3 py-2 whitespace-nowrap border-r ${borderCol}`}>{s.session}</td>
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
+                {s.fatherName}
+              </td>
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
+                {s.motherName}
+              </td>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
+                {s.className}
+              </td>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
+                {s.group}
+              </td>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
+                {s.section}
+              </td>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
+                {s.session}
+              </td>
 
-              <td className={`px-3 py-2  border-r ${borderCol}`}>
-                <a href={`tel:${s.phone}`} className="text-blue-500 hover:underline">
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
+                <a
+                  href={`tel:${s.phone}`}
+                  className="text-blue-500 hover:underline"
+                >
                   {s.phone}
                 </a>
               </td>
-              <td className={`px-3 py-2  border-r ${borderCol}`}>{s.password}</td>
+              <td className={`px-3 h-8 border-r ${borderCol}`}>{s.password}</td>
 
-              <td className={`px-3 py-2  border-r ${borderCol}`}>
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
                 {s.feesDue === 0 ? (
                   <span className="text-green-600 font-semibold">Paid</span>
                 ) : (
-                  <span className="text-red-600 font-semibold">৳{s.feesDue}</span>
+                  <span className="text-red-600 font-semibold">
+                    ৳{s.feesDue}
+                  </span>
                 )}
               </td>
 
-              <td className={`px-3 py-2  border-r ${borderCol} whitespace-nowrap`}>{s.gender}</td>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
+                {s.gender}
+              </td>
 
               {/* Status */}
-              <td className={`px-3 py-2  border-r ${borderCol} whitespace-nowrap`}>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
                 <span
                   className={`inline-flex items-center h-4 px-2 text-[10px] font-semibold ${
                     s.status === "Active"
@@ -131,11 +167,19 @@ export default function StudentTable({ data, setData, onEdit }) {
                 </span>
               </td>
 
-              <td className={`px-3 py-2  border-r ${borderCol} whitespace-nowrap`}>{s.joinDate}</td>
-              <td className={`px-3 py-2  border-r ${borderCol} whitespace-nowrap`}>{s.dob}</td>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
+                {s.joinDate}
+              </td>
+              <td
+                className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+              >
+                {s.dob}
+              </td>
 
               {showAction && (
-                <td className="px-3 py-2">
+                <td className="px-3 h-8">
                   <StudentActions
                     student={s}
                     onEdit={handleEdit}

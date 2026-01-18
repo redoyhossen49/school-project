@@ -131,7 +131,7 @@ export default function Step4({ formData, handleChange }) {
       <div className="my-4">
         {!preview ? (
           <div
-            className={`border-2 border-dashed h-24 flex flex-col items-center justify-center relative cursor-pointer hover:border-indigo-400 transition ${
+            className={`border border-dashed border-gray-300 h-16 flex flex-col items-center justify-center relative cursor-pointer hover:border-indigo-400 transition ${
               darkMode ? "text-gray-400 border-gray-600" : "text-gray-400 border-gray-300"
             }`}
           >
@@ -145,7 +145,7 @@ export default function Step4({ formData, handleChange }) {
             />
           </div>
         ) : (
-          <div className="relative h-24 w-full flex justify-center items-center border rounded-lg overflow-hidden">
+          <div className="relative h-12 w-full flex justify-center items-center border rounded-lg overflow-hidden">
             <img src={preview} alt="Preview"  className="w-20 h-20 object-cover rounded-md shadow" />
             <button
               onClick={removeImage}

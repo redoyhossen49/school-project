@@ -52,37 +52,36 @@ export default function TeacherList() {
   const filterRef = useRef(null);
   const sortRef = useRef(null);
   const exportRef = useRef(null);
+  const filterButtonRef = useRef(); // filter button er ref
+
 
   const attendanceOptions = ["Presence", "Absence", "Late", "Leave"];
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (attendanceRef.current && !attendanceRef.current.contains(e.target))
-        setAttendanceOpen(false);
-      if (filterRef.current && !filterRef.current.contains(e.target))
-        setFilterOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
-      if (exportRef.current && !exportRef.current.contains(e.target))
-        setExportOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const handleClickOutside = (e) => {
+    if (attendanceRef.current && !attendanceRef.current.contains(e.target))
+      setAttendanceOpen(false);
+    if (filterRef.current && !filterRef.current.contains(e.target))
+      setFilterOpen(false);
+    if (sortRef.current && !sortRef.current.contains(e.target))
+      setSortOpen(false);
+    if (exportRef.current && !exportRef.current.contains(e.target))
+      setExportOpen(false);
+  };
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
+
 
   // Open only one dropdown at a time
-  const handleDropdownClick = (type) => {
-    setAttendanceOpen(false);
-    setFilterOpen(false);
-    setSortOpen(false);
-    setExportOpen(false);
+const handleDropdownClick = (type) => {
+  setAttendanceOpen((prev) => (type === "attendance" ? !prev : false));
+  setFilterOpen((prev) => (type === "filter" ? !prev : false));
+  setSortOpen((prev) => (type === "sort" ? !prev : false));
+  setExportOpen((prev) => (type === "export" ? !prev : false));
+};
 
-    if (type === "attendance") setAttendanceOpen(true);
-    if (type === "filter") setFilterOpen(true);
-    if (type === "sort") setSortOpen(true);
-    if (type === "export") setExportOpen(true);
-  };
 
   const filteredTeachers = teachers
 
@@ -147,7 +146,7 @@ export default function TeacherList() {
     >
       {/* Header */}
       <div
-        className={`space-y-4 rounded-md p-3 ${
+        className={`space-y-4  p-3 ${
           darkMode ? "bg-gray-900" : "bg-white"
         }`}
       >
@@ -174,11 +173,11 @@ export default function TeacherList() {
                 setSearch(""); // optional: reset search too
                 setCurrentPage(1); // optional: go back to first page
               }}
-              className={`w-28 flex items-center  gap-1 rounded border  shadow-sm ${
+              className={`w-28 flex items-center  gap-1 border  shadow-sm ${
                 darkMode
                   ? "bg-gray-700 border-gray-500"
                   : "bg-white border-gray-200"
-              } px-3 py-2 text-xs`}
+              } px-3 h-8 text-xs`}
             >
               Refresh
             </button>
@@ -186,26 +185,26 @@ export default function TeacherList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => handleDropdownClick("export")}
-                className={`w-28 flex items-center justify-between   rounded border  shadow-sm ${
+                className={`w-28 flex items-center justify-between   border  shadow-sm ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
                     : "bg-white border-gray-200"
-                } px-3 py-2 text-xs`}
+                } px-3 h-8 text-xs`}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border rounded shadow-sm ${
+                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  shadow-sm ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
                   }`}
                 >
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                  <button className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100">
                     Export PDF
                   </button>
-                  <button className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100">
+                  <button className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100">
                     Export Excel
                   </button>
                 </div>
@@ -215,7 +214,7 @@ export default function TeacherList() {
             {canEdit && (
               <button
                 onClick={() => navigate("/school/dashboard/addteacher")}
-                className="w-28 flex items-center gap-1 rounded bg-blue-600 px-3 py-2 text-xs text-white"
+                className="w-28 flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
               >
                 Add Teacher
               </button>
@@ -235,11 +234,11 @@ export default function TeacherList() {
               setSearch(""); // optional: reset search too
               setCurrentPage(1); // optional: go back to first page
             }}
-            className={`w-full flex items-center gap-2 rounded border ${
+            className={`w-full flex items-center gap-2  border ${
               darkMode
                 ? "bg-gray-700 border-gray-500"
                 : "bg-white border-gray-200"
-            } shadow-sm  px-3 py-2 text-xs`}
+            } shadow-sm  px-3 h-8 text-xs`}
           >
             Refresh
           </button>
@@ -247,27 +246,27 @@ export default function TeacherList() {
           <div className="relative w-full" ref={exportRef}>
             <button
               onClick={() => handleDropdownClick("export")}
-              className={`w-full flex items-center justify-between gap-2 rounded border ${
+              className={`w-full flex items-center   border ${
                 darkMode
                   ? "bg-gray-700 border-gray-500"
                   : "bg-white border-gray-200"
-              } shadow-sm  px-3 py-2 text-xs`}
+              } shadow-sm  px-3 h-8 text-xs`}
             >
-              Export <BiChevronDown />
+              Export 
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border rounded shadow-sm ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border shadow-sm ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
                 }`}
               >
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
-                  Export PDF
+                <button className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100">
+                   PDF
                 </button>
-                <button className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100">
-                  Export Excel
+                <button className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100">
+                 Excel
                 </button>
               </div>
             )}
@@ -276,7 +275,7 @@ export default function TeacherList() {
           {canEdit && (
             <button
               onClick={() => navigate("/school/dashboard/addteacher")}
-              className="w-full flex items-center gap-1 rounded bg-blue-600 px-3 py-2 text-xs text-white"
+              className="w-full flex items-center   bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Teacher
             </button>
@@ -284,25 +283,25 @@ export default function TeacherList() {
         </div>
 
         {/* Controls: Attendance Dropdown, Filter, Sort + Search */}
-        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-3 ">
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2 ">
           <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
             {/* Attendance Dropdown */}
             <div className="relative flex-1 md:flex-none" ref={attendanceRef}>
               <button
                 onClick={() => handleDropdownClick("attendance")}
-                className={`w-full md:w-28 flex items-center justify-between rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
                 {attendanceFilter || "Attendance"}{" "}
-                <BiChevronDown className="" />
+               
               </button>
 
               {attendanceOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-36 shadow-lg z-40 overflow-hidden flex flex-col ${
+                  className={`absolute left-0 mt-2 w-full shadow-lg z-40 overflow-hidden flex flex-col ${
                     darkMode
                       ? "bg-gray-800 text-gray-100 border border-gray-700"
                       : "bg-white text-gray-900 border border-gray-200"
@@ -315,10 +314,10 @@ export default function TeacherList() {
                         setAttendanceFilter(opt);
                         setAttendanceOpen(false);
                       }}
-                      className="w-full cursor-pointer px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-100 transition"
+                      className="w-full cursor-pointer px-3 h-8 text-xs flex items-center justify-between hover:bg-gray-100 transition"
                     >
                       <span>{opt}</span>
-                      <BiChevronRight size={12} />
+                      
                     </div>
                   ))}
                 </div>
@@ -328,14 +327,15 @@ export default function TeacherList() {
             {/* Filter */}
             <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
-                onClick={() => handleDropdownClick("filter")}
-                className={`w-full md:w-28 flex items-center justify-between rounded border px-3 py-2 text-xs shadow-sm ${
+                 ref={filterButtonRef}
+                  onClick={() => setFilterOpen(prev => !prev)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Filter <BiChevronDown />
+                Filter  
               </button>
 
               <FilterDropdown
@@ -353,9 +353,11 @@ export default function TeacherList() {
               
                 darkMode={darkMode}
                 isOpen={filterOpen}
+                  buttonRef={filterButtonRef} 
                 onClose={() => setFilterOpen(false)}
                 onApply={(value) => console.log("Applied:", value.designation)}
               />
+               </div>
 
               {/* {filterOpen && (
                 <div
@@ -411,23 +413,23 @@ export default function TeacherList() {
                   </button>
                 </div>
               )} */}
-            </div>
+           
 
             {/* Sort */}
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => handleDropdownClick("sort")}
-                className={`w-full md:w-28 flex items-center justify-between rounded border px-3 py-2 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs shadow-sm ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Sort By <BiChevronDown />
+                Sort By 
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute left-0 mt-2 w-25 md:w-36 shadow-sm z-40 rounded border ${
+                  className={`absolute left-0 mt-2  md:w-36 shadow-sm z-40 w-full border ${
                     darkMode
                       ? "bg-gray-800 text-gray-100 border-gray-700"
                       : "bg-white text-gray-900 border-gray-200"
@@ -438,7 +440,7 @@ export default function TeacherList() {
                       setSortOpen(false);
                       setSortOrder("newest");
                     }}
-                    className="w-full px-3 py-1 text-xs text-left hover:bg-gray-100"
+                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
                   >
                     First
                   </button>
@@ -447,7 +449,7 @@ export default function TeacherList() {
                       setSortOpen(false);
                       setSortOrder("oldest");
                     }}
-                    className="w-full px-3 py-1 text-xs text-left hover:bg-gray-100"
+                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
                   >
                     Last
                   </button>
@@ -463,7 +465,7 @@ export default function TeacherList() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name..."
-              className={`w-full px-3 py-2 text-xs rounded border shadow-sm ${
+              className={`w-full px-3 h-8 text-xs  border shadow-sm ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
@@ -480,7 +482,7 @@ export default function TeacherList() {
 
       {/* Table */}
       <div
-        className={`rounded-md p-2 ${darkMode ? "bg-gray-900" : "bg-white"}`}
+        className={` p-2 ${darkMode ? "bg-gray-900" : "bg-white"}`}
       >
         <TeacherTable
           data={filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher)}

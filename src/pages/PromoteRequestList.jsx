@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
 import PromoteFormModal from "../components/PromoteFormModal.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 // Dummy filter options
 const classOptions = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5"];
@@ -21,6 +22,12 @@ const sessionOptions = ["Session 2023", "Session 2024", "Session 2025"];
 export default function PromoteRequestList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
+  const [selectedFilters, setSelectedFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+    session: "",
+  });
 
   const [requests, setRequests] = useState(promoteRequestData);
   const [search, setSearch] = useState("");
@@ -57,9 +64,28 @@ export default function PromoteRequestList() {
   const [appliedSession, setAppliedSession] = useState("");
 
   // Section + sort
-  const sectionFilterOptions = ["All", "Science", "Commerce", "Arts"];
+
   const [selectedSection, setSelectedSection] = useState("All");
   const [sortOrder, setSortOrder] = useState("asc");
+
+  // Get unique values from data
+  const getUniqueValues = (data, key) => {
+    return [...new Set(data.map((item) => item[key]))].sort();
+  };
+
+  // Dynamic options
+  const classOptions = getUniqueValues(promoteRequestData, "fromClass");
+  const groupOptions = getUniqueValues(promoteRequestData, "fromGroup");
+  const sectionOptions = getUniqueValues(promoteRequestData, "fromSection");
+  const sessionOptions = getUniqueValues(promoteRequestData, "fromSession");
+
+  // FilterDropdown fields
+  const filterFields = [
+    { key: "class", placeholder: "All Classes", options: classOptions },
+    { key: "group", placeholder: "All Groups", options: groupOptions },
+    { key: "section", placeholder: "All Sections", options: sectionOptions },
+    { key: "session", placeholder: "All Sessions", options: sessionOptions },
+  ];
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -83,11 +109,14 @@ export default function PromoteRequestList() {
     .filter((r) =>
       selectedSection === "All" ? true : r.fromGroup === selectedSection
     )
-    .filter((r) => (appliedClass ? r.class === appliedClass : true))
-    .filter((r) => (appliedGroup ? r.group === appliedGroup : true))
-    .filter((r) => (appliedSection ? r.section === appliedSection : true))
-    .filter((r) => (appliedSession ? r.session === appliedSession : true))
-    .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
+    .filter((r) => (appliedClass ? r.fromClass === appliedClass : true))
+    .filter((r) => (appliedGroup ? r.fromGroup === appliedGroup : true))
+    .filter((r) => (appliedSection ? r.fromSection === appliedSection : true))
+    .filter((r) => (appliedSession ? r.fromSession === appliedSession : true))
+    .sort((a, b) => {
+      if (sortOrder === "asc") return a.sl - b.sl;
+      else return b.sl - a.sl;
+    });
 
   const totalPages = Math.ceil(filteredRequests.length / requestsPerPage);
   const currentData = filteredRequests.slice(
@@ -236,8 +265,22 @@ export default function PromoteRequestList() {
           <div className="hidden md:flex gap-2 w-full md:w-auto">
             <button
               onClick={() => {
-                setRequests(promoteRequestData);
-                setSearch("");
+                setRequests(promoteRequestData); // মূল data reload
+                setSearch(""); // search clear
+                setAppliedClass(""); // applied filters clear
+                setAppliedGroup("");
+                setAppliedSection("");
+                setAppliedSession("");
+                setSelectedFilters({
+                  // filter dropdown reset
+                  class: "",
+                  group: "",
+                  section: "",
+                  session: "",
+                });
+                setSortOrder("asc")
+                setSelectedSection("All"); // section dropdown reset
+                setCurrentPage(1); // page reset
               }}
               className={buttonClass}
             >
@@ -289,8 +332,22 @@ export default function PromoteRequestList() {
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={() => {
-              setRequests(promoteRequestData);
-              setSearch("");
+              setRequests(promoteRequestData); // মূল data reload
+              setSearch(""); // search clear
+              setAppliedClass(""); // applied filters clear
+              setAppliedGroup("");
+              setAppliedSection("");
+              setAppliedSession("");
+              setSelectedFilters({
+                // filter dropdown reset
+                class: "",
+                group: "",
+                section: "",
+                session: "",
+              });
+              setSortOrder("asc")
+              setSelectedSection("All"); // section dropdown reset
+              setCurrentPage(1); // page reset
             }}
             className={`flex items-center  w-full rounded border px-2 py-2 text-xs shadow-sm ${
               darkMode
@@ -385,27 +442,34 @@ export default function PromoteRequestList() {
             {/* Section */}
             <div className="relative" ref={sectionRef}>
               <button
-                onClick={() => setSectionOpen(!sectionOpen)}
+                onClick={() => setSectionOpen((prev) => !prev)}
                 className={buttonClass + " w-full md:w-28 justify-between"}
               >
-                {selectedSection} <BiChevronDown />
+                {selectedSection || "All Sections"} <BiChevronDown />
               </button>
+
               {sectionOpen && (
                 <div
-                  className={`absolute mt-2 w-36 z-40 rounded border shadow-sm ${
+                  className={`absolute mt-2 w-36 z-40 rounded border shadow-sm max-h-48 overflow-y-auto ${
                     darkMode
                       ? "bg-gray-700 border-gray-500 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
                   }`}
                 >
-                  {sectionFilterOptions.map((s) => (
+                  {["All", ...sectionOptions].map((s) => (
                     <div
                       key={s}
                       onClick={() => {
-                        setSelectedSection(s);
+                        setSelectedSection(s); // table filter state
                         setSectionOpen(false);
                       }}
-                      className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 flex justify-between"
+                      className={`px-3 h-8 flex items-center justify-between text-sm cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600 ${
+                        selectedSection === s
+                          ? darkMode
+                            ? "bg-gray-600"
+                            : "bg-blue-100"
+                          : ""
+                      }`}
                     >
                       {s} <BiChevronRight size={12} />
                     </div>
@@ -421,127 +485,27 @@ export default function PromoteRequestList() {
                 onClick={() => setFilterOpen((prev) => !prev)}
                 className={buttonClass + " w-full md:w-28 justify-between"}
               >
-              Filter <BiChevronDown />
+                Filter <BiChevronDown />
               </button>
 
-              {filterOpen && (
-                <div
-                  className={`absolute top-full z-50 mt-1 w-52 rounded border left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 max-h-40 overflow-y-auto shadow-md p-3 space-y-2 ${
-                    darkMode
-                      ? "border-gray-600 bg-gray-700"
-                      : "border-gray-200 bg-white"
-                  }`}
-                >
-                  {/* Class */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setClassOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${
-                        darkMode
-                          ? "border-gray-500 bg-gray-700 text-gray-100"
-                          : "border-gray-200 bg-white text-gray-800"
-                      }`}
-                    >
-                      {classFilter || "All Classes"} <BiChevronDown />
-                    </button>
-                    {classOpen &&
-                      classOptions.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => {
-                            setClassFilter(c);
-                            setClassOpen(false);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            classFilter === c
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                  </div>
-
-                  {/* Group */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setGroupOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${
-                        darkMode
-                          ? "border-gray-500 bg-gray-700 text-gray-100"
-                          : "border-gray-200 bg-white text-gray-800"
-                      }`}
-                    >
-                      {groupFilter || "All Groups"} <BiChevronDown />
-                    </button>
-                    {groupOpen &&
-                      groupOptions.map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => {
-                            setGroupFilter(g);
-                            setGroupOpen(false);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            groupFilter === g
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                  </div>
-
-                  {/* Section */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setSectionOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${
-                        darkMode
-                          ? "border-gray-500 bg-gray-700 text-gray-100"
-                          : "border-gray-200 bg-white text-gray-800"
-                      }`}
-                    >
-                      {sectionFilter || "All Sections"} <BiChevronDown />
-                    </button>
-                    {sectionOpen &&
-                      sectionOptions.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => {
-                            setSectionFilter(s);
-                            setSectionOpen(false);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            sectionFilter === s
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                  </div>
-
-                  <button
-                    onClick={() => setFilterOpen(false)}
-                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
-                  >
-                    Apply
-                  </button>
-                </div>
-              )}
+              <FilterDropdown
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                darkMode={darkMode}
+                fields={filterFields}
+                selected={selectedFilters}
+                setSelected={setSelectedFilters}
+                onApply={(values) => {
+                  // IMPORTANT: Use the correct keys from your data
+                  setAppliedClass(values.class); // values.class corresponds to fromClass
+                  setAppliedGroup(values.group); // values.group -> fromGroup
+                  setAppliedSection(values.section); // values.section -> fromSection
+                  setAppliedSession(values.session); // values.session -> fromSession
+                  setCurrentPage(1);
+                }}
+                buttonRef={filterRef}
+                title="Filter Options"
+              />
             </div>
 
             {/* Sort */}
@@ -609,6 +573,133 @@ export default function PromoteRequestList() {
       <div className={`p-2 rounded ${darkMode ? "bg-gray-900" : "bg-white"}`}>
         <PromoteRequestTable data={currentData} setData={setRequests} />
       </div>
+
+      {/*
+
+      // Dummy filter options
+const classOptions = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5"];
+const groupOptions = ["Group A", "Group B", "Group C"];
+const sectionOptions = ["Section 1", "Section 2", "Section 3"];
+const sessionOptions = ["Session 2023", "Session 2024", "Session 2025"];
+
+       {filterOpen && (
+                <div
+                  className={`absolute top-full z-50 mt-1 w-52 rounded border left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 max-h-40 overflow-y-auto shadow-md p-3 space-y-2 ${
+                    darkMode
+                      ? "border-gray-600 bg-gray-700"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+                  
+                  <div className="relative">
+                    <button
+                      onClick={() => setClassOpen((prev) => !prev)}
+                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${
+                        darkMode
+                          ? "border-gray-500 bg-gray-700 text-gray-100"
+                          : "border-gray-200 bg-white text-gray-800"
+                      }`}
+                    >
+                      {classFilter || "All Classes"} <BiChevronDown />
+                    </button>
+                    {classOpen &&
+                      classOptions.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => {
+                            setClassFilter(c);
+                            setClassOpen(false);
+                            setCurrentPage(1);
+                          }}
+                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                            classFilter === c
+                              ? "bg-blue-100 text-blue-700 font-medium"
+                              : darkMode
+                              ? "text-gray-200"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                  </div>
+
+                
+                  <div className="relative">
+                    <button
+                      onClick={() => setGroupOpen((prev) => !prev)}
+                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${
+                        darkMode
+                          ? "border-gray-500 bg-gray-700 text-gray-100"
+                          : "border-gray-200 bg-white text-gray-800"
+                      }`}
+                    >
+                      {groupFilter || "All Groups"} <BiChevronDown />
+                    </button>
+                    {groupOpen &&
+                      groupOptions.map((g) => (
+                        <button
+                          key={g}
+                          onClick={() => {
+                            setGroupFilter(g);
+                            setGroupOpen(false);
+                            setCurrentPage(1);
+                          }}
+                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                            groupFilter === g
+                              ? "bg-blue-100 text-blue-700 font-medium"
+                              : darkMode
+                              ? "text-gray-200"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                  </div>
+
+                 
+                  <div className="relative">
+                    <button
+                      onClick={() => setSectionOpen((prev) => !prev)}
+                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${
+                        darkMode
+                          ? "border-gray-500 bg-gray-700 text-gray-100"
+                          : "border-gray-200 bg-white text-gray-800"
+                      }`}
+                    >
+                      {sectionFilter || "All Sections"} <BiChevronDown />
+                    </button>
+                    {sectionOpen &&
+                      sectionOptions.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => {
+                            setSectionFilter(s);
+                            setSectionOpen(false);
+                            setCurrentPage(1);
+                          }}
+                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                            sectionFilter === s
+                              ? "bg-blue-100 text-blue-700 font-medium"
+                              : darkMode
+                              ? "text-gray-200"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                  </div>
+
+                  <button
+                    onClick={() => setFilterOpen(false)}
+                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )} */}
     </div>
   );
 }

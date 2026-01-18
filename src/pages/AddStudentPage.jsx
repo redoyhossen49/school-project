@@ -78,12 +78,15 @@ const cardBg = darkMode
 const breadcrumbText = darkMode ? "text-gray-300" : "text-gray-500";
 
 const baseBtn =
-  "px-3 md:px-4 py-1 md:py-2 w-full md:w-1/2 text-sm rounded transition";
+  "px-3 md:px-4 py-1 md:py-2 w-full md:w-1/2 text-sm  transition";
 
   return (
-    <div className="py-4 px-6 mx-4 md:px-0 min-h-screen flex flex-col items-center space-y-4">
+    <div className="py-2 px-2  md:px-0 min-h-screen flex flex-col items-center space-y-4">
       {/* Header */}
-     <div className="w-full max-w-sm text-center md:text-left">
+     <div className={`w-full text-center md:text-left  ${
+          darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
+        } px-6 py-4 space-y-3`}>
+          <div>
   <h1
     className={`text-base md:text-lg font-bold ${
       darkMode ? "text-gray-100" : "text-gray-800"
@@ -104,22 +107,23 @@ const baseBtn =
       Student
     </button>
     <span className="mx-1">/</span>
-    <span className="opacity-70">Add Student</span>
+    <span className="">Add Student</span>
   </p>
 </div>
 
 
       {/* Stepper */}
-      <div className="w-full max-w-2xl my-2">
+      <div className="w-full max-w-xl px-2  ">
         <Stepper
           activeStep={activeStep}
           onStepClick={(step) => setActiveStep(step)}
           className="!h-6 md:!h-8" // smaller stepper
         />
       </div>
+      </div>
 
       {/* Step Content */}
-    <div className={`w-full max-w-2xl p-5 shadow-sm rounded ${cardBg}`}>
+    <div className={`w-full max-w-2xl p-5 shadow-sm  ${cardBg}`}>
 
         {activeStep === 0 && (
           <Step1
@@ -155,7 +159,7 @@ const baseBtn =
           <button
             onClick={prevStep}
             disabled={activeStep === 0}
-            className={`px-3 md:px-4 py-1 md:py-2 w-full md:w-1/2 text-sm rounded border border-gray-300 ${
+            className={`px-3 md:px-4 h-8 w-full md:w-1/2 text-sm  border border-gray-300 ${
               activeStep === 0
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-gray-100"
@@ -167,14 +171,14 @@ const baseBtn =
           {activeStep < steps.length - 1 ? (
             <button
               onClick={nextStep}
-              className="px-3 md:px-4 py-1 md:py-2 w-full md:w-1/2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-sm bg-indigo-600 text-white  hover:bg-indigo-700"
             >
               Next
             </button>
           ) : (
             <button
               onClick={handleSubmit}
-              className="px-3 md:px-4 py-1 md:py-2 w-full md:w-1/2 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-sm bg-green-600 text-white hover:bg-green-700"
             >
               Submit
             </button>

@@ -36,7 +36,7 @@ export default function TeacherTable({ data, setData, onEdit }) {
 
   return (
     <div
-      className={`border rounded overflow-x-auto ${
+      className={`border  overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
