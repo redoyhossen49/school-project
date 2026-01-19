@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import StudentActions from "./StudentActions"; // same action component
+
+import ReusableEditModal from "../common/ReusableEditModal";
 import { promoteRequestData } from "../../data/promoteRequestData";
+import ReusableActions from "../common/ReusableActions";
 
 const headers = [
   { label: "Sl", key: "sl" },
@@ -19,11 +22,7 @@ const headers = [
   { label: "Status", key: "status" },
 ];
 
-export default function PromoteRequestTable({
-  data = promoteRequestData,
-  setData,
-  onEdit,
-}) {
+export default function PromoteRequestTable({ data = promoteRequestData, setData }) {
   const { darkMode } = useTheme();
   const userRole = localStorage.getItem("role"); // "school"
   const showAction = userRole === "school";
@@ -31,13 +30,20 @@ export default function PromoteRequestTable({
   const borderCol = darkMode ? "border-gray-700" : "border-gray-200";
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
 
-  const handleEdit = (row) => {
-    if (onEdit) onEdit(row);
+  // -------------------- Edit Modal --------------------
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleEditSubmit = (updatedData) => {
+    setData((prev) =>
+      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...updatedData } : r))
+    );
+    setEditModalOpen(false);
   };
 
-  const handleDelete = (sl) => {
+  const handleDelete = (row) => {
     if (confirm("Are you sure you want to delete this promote request?")) {
-      setData((prev) => prev.filter((r) => r.sl !== sl));
+      setData((prev) => prev.filter((r) => r.sl !== row.sl));
       alert("Promote request deleted successfully ✅");
     }
   };
@@ -106,9 +112,12 @@ export default function PromoteRequestTable({
 
               {showAction && (
                 <td className="px-3 py-2 whitespace-nowrap">
-                  <StudentActions
+                  <ReusableActions
                     row={row}
-                    onEdit={handleEdit}
+                    onEdit={(r) => {
+                      setSelectedRow(r);
+                      setEditModalOpen(true);
+                    }}
                     onDelete={handleDelete}
                   />
                 </td>
@@ -117,6 +126,32 @@ export default function PromoteRequestTable({
           ))}
         </tbody>
       </table>
+
+      {/* ===== Edit Modal ===== */}
+      {selectedRow && (
+        <ReusableEditModal
+          open={editModalOpen}
+          title="Edit Promote Request"
+          item={selectedRow}
+          onClose={() => setEditModalOpen(false)}
+          onSubmit={handleEditSubmit}
+          fields={[
+            { name: "studentName", label: "Student Name", type: "text", required: true },
+            { name: "fatherName", label: "Father's Name", type: "text" },
+            { name: "idNumber", label: "ID Number", type: "text" },
+            { name: "fromClass", label: "From Class", type: "text" },
+            { name: "fromGroup", label: "From Group", type: "text" },
+            { name: "fromSection", label: "From Section", type: "text" },
+            { name: "fromSession", label: "From Session", type: "text" },
+            { name: "toClass", label: "To Class", type: "text" },
+            { name: "toGroup", label: "To Group", type: "text" },
+            { name: "toSection", label: "To Section", type: "text" },
+            { name: "toSession", label: "To Session", type: "text" },
+            { name: "payment", label: "Payment", type: "number" },
+            { name: "status", label: "Status", type: "text" },
+          ]}
+        />
+      )}
     </div>
   );
 }

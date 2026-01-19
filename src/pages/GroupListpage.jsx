@@ -10,6 +10,7 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function GroupListPage() {
   const navigate = useNavigate();
@@ -29,10 +30,12 @@ export default function GroupListPage() {
   const [data, setData] = useState(classGroupData);
 
   const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const monthRef = useRef(null);
   const exportRef = useRef(null);
   const sortRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const months = [
     "All",
@@ -108,7 +111,7 @@ export default function GroupListPage() {
             };
           }
           return cls;
-        })
+        }),
       );
     } else {
       setData((prevData) => [
@@ -145,7 +148,7 @@ export default function GroupListPage() {
   const filteredData = data
     .map((item) => {
       let groups = item.groups.filter((g) =>
-        search ? g.name.toLowerCase().includes(search.toLowerCase()) : true
+        search ? g.name.toLowerCase().includes(search.toLowerCase()) : true,
       );
 
       if (groupFilter && groupFilter !== "All Groups") {
@@ -177,7 +180,7 @@ export default function GroupListPage() {
   const totalPages = Math.ceil(filteredData.length / perPage);
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
 
   // Export Excel
@@ -191,8 +194,8 @@ export default function GroupListPage() {
           Month: m.month,
           Subjects: g.subjects,
           TotalStudents: g.totalStudents,
-        }))
-      )
+        })),
+      ),
     );
     const ws = utils.json_to_sheet(wsData);
     const wb = utils.book_new();
@@ -221,8 +224,8 @@ export default function GroupListPage() {
           m.month,
           g.subjects,
           g.totalStudents,
-        ])
-      )
+        ]),
+      ),
     );
     autoTable(doc, {
       head: [tableColumn],
@@ -289,7 +292,7 @@ export default function GroupListPage() {
                     : "border-gray-200 bg-white"
                 }`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -301,15 +304,15 @@ export default function GroupListPage() {
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                     PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3h-6 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3  py-1 text-left text-xs hover:bg-blue-50"
                   >
-                     Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -350,8 +353,6 @@ export default function GroupListPage() {
                 }`}
               >
                 {selectedMonth}{" "}
-              
-               
               </button>
               {monthOpen && (
                 <div
@@ -369,8 +370,8 @@ export default function GroupListPage() {
                         selectedMonth === m
                           ? "bg-blue-100 text-blue-700 font-medium"
                           : darkMode
-                          ? "text-gray-200"
-                          : "text-gray-700"
+                            ? "text-gray-200"
+                            : "text-gray-700"
                       }`}
                     >
                       {m}
@@ -382,89 +383,85 @@ export default function GroupListPage() {
 
             {/* Group Filter */}
             {/* Group Filter with custom icon */}
-            <div className="relative w-full md:w-28">
-              <select
-                value={groupFilter}
-                onChange={(e) => {
-                  setGroupFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className={`appearance-none w-full border outline-0  px-3 h-8  text-xs ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-800"
-                }`}
+            <div className="relative  flex-1 w-full md:w-28" ref={buttonRef}>
+              <button
+                ref={buttonRef}
+                onClick={() => setIsOpen((p) => !p)}
+                className={`px-3 h-8 text-xs border flex items-center justify-between w-full
+          ${
+            darkMode
+              ? "bg-gray-700 border-gray-600 text-gray-100"
+              : "bg-white border-gray-300 text-gray-700"
+          }`}
               >
-                {groupOptions.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-              {/* Custom down icon */}
-             
-              
+                Filter
+              </button>
+
+              {/* FilterDropdown */}
+              <FilterDropdown
+                title="Filter Sections"
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                selected={groupFilter}
+                setSelected={setGroupFilter}
+                darkMode={darkMode}
+                buttonRef={buttonRef}
+                onApply={(filters) => console.log("Applied Filters:", filters)}
+                fields={[
+                  {
+                    key: "class",
+                    placeholder: "Select Class",
+                    options: ["Class 1", "Class 2", "Class 3"],
+                  },
+                  {
+                    key: "group",
+                    placeholder: "Select Group",
+                    options: ["Science", "Commerce", "Arts"],
+                  },
+                ]}
+              />
             </div>
 
             {/* Sort */}
-            <div ref={sortRef} className="relative w-full md:w-28">
+            <div className="relative flex-1 " ref={sortRef}>
               <button
-                onClick={() =>
-                  setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-                }
-                className={`w-full flex items-center  border px-3 h-8 text-xs  ${
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-800"
                 }`}
               >
-                Sort {sortOrder === "asc" ? "↑" : "↓"}
-              </button>
-              {/*  <button
-                onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700"
-                    : "border-gray-200 bg-white"
-                }`}
-              >
-                Sort By{" "}
-                <BiChevronDown
-                  className={`${
-                    sortOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+                Sort By
               </button>
               {sortOpen && (
-                <div className="absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-md bg-white dark:bg-gray-700">
+                <div
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
+                >
                   <button
                     onClick={() => {
                       setSortOrder("asc");
                       setSortOpen(false);
                     }}
-                    className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 ${
-                      sortOrder === "asc"
-                        ? "bg-blue-100 text-blue-700 font-medium"
-                        : "text-gray-700"
-                    }`}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >
-                    First ↑
+                    First
                   </button>
                   <button
                     onClick={() => {
                       setSortOrder("desc");
                       setSortOpen(false);
                     }}
-                    className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 ${
-                      sortOrder === "desc"
-                        ? "bg-blue-100 text-blue-700 font-medium"
-                        : "text-gray-700"
-                    }`}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >
-                    Last ↓
+                    Last
                   </button>
                 </div>
-              )} */}
+              )}
             </div>
           </div>
 
@@ -491,7 +488,7 @@ export default function GroupListPage() {
 
       {/* TABLE */}
       <div
-        className={` p-2 overflow-x-auto ${
+        className={` p-3 overflow-x-auto ${
           darkMode ? "bg-gray-900" : "bg-white"
         }`}
       >

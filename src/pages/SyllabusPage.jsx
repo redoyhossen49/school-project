@@ -10,6 +10,7 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function SyllabusPage() {
   const { darkMode } = useTheme();
@@ -29,7 +30,7 @@ export default function SyllabusPage() {
         fullMarks: sub.fullMarks,
         passMarks: sub.passMarks,
         chapters: sub.chapters,
-      }))
+      })),
     );
   }, []);
 
@@ -38,6 +39,14 @@ export default function SyllabusPage() {
   const [classFilter, setClassFilter] = useState("");
   const [groupFilter, setGroupFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
+  const [sessionFilter, setSessionFilter] = useState("");
+  const [subjectFilter, setSubjectFilter] = useState("");
+
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
   const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 10;
@@ -47,9 +56,12 @@ export default function SyllabusPage() {
   const [classOpen, setClassOpen] = useState(false);
   const [groupOpen, setGroupOpen] = useState(false);
   const [sectionOpen, setSectionOpen] = useState(false);
+  const [sessionOpen, setSessionOpen] = useState(false);
   const filterRef = useRef(null);
   const exportRef = useRef(null);
+  const sortRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -75,17 +87,139 @@ export default function SyllabusPage() {
       tableData
         .filter((s) => !classFilter || s.class === classFilter)
         .map((s) => s.group)
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
   const sectionOptions = Array.from(
     new Set(
       tableData
         .filter((s) => !classFilter || s.class === classFilter)
         .filter((s) => !groupFilter || s.group === groupFilter)
-        .map((s) => s.section)
-    )
+        .map((s) => s.section),
+    ),
   );
+  // -------------------- Session Options --------------------
+  const sessionOptions = Array.from(
+    new Set(
+      tableData
+        .filter(
+          (s) =>
+            (!classFilter || s.class === classFilter) &&
+            (!groupFilter || s.group === groupFilter) &&
+            (!sectionFilter || s.section === sectionFilter),
+        )
+        .map((s) => s.session)
+        .filter(Boolean),
+    ),
+  );
+
+  // -------------------- Subject Options --------------------
+  const subjectOptions = Array.from(
+    new Set(
+      tableData
+        .filter(
+          (s) =>
+            (!classFilter || s.class === classFilter) &&
+            (!groupFilter || s.group === groupFilter) &&
+            (!sectionFilter || s.section === sectionFilter) &&
+            (!sessionFilter || s.session === sessionFilter),
+        )
+        .map((s) => s.subjectName)
+        .filter(Boolean),
+    ),
+  );
+
+  const examOptions = Array.from(
+    new Set(
+      tableData
+        .filter((s) => !classFilter || s.class === classFilter)
+        .filter((s) => !groupFilter || s.group === groupFilter)
+        .filter((s) => !sectionFilter || s.section === sectionFilter)
+        .flatMap((s) => s.exams || ["Mid Term", "Final"]),
+    ),
+  );
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select Class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select Group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      placeholder: "Select Section",
+      options: sectionOptions,
+    },
+  ];
+
+  const syllabusFields = [
+    {
+      key: "class",
+      label: "Class",
+      type: "select",
+      placeholder: "Select Class",
+      required: true,
+      options: classOptions,
+    },
+    {
+      key: "group",
+      label: "Group",
+      type: "select",
+      placeholder: "Select Group",
+      required: true,
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      label: "Section",
+      type: "select",
+      placeholder: "Select Section",
+      required: false,
+      options: sectionOptions,
+    },
+    {
+      key: "session",
+      label: "Session",
+      type: "select",
+      placeholder: "Select Session",
+      required: true,
+      options: sessionOptions,
+    },
+    {
+      key: "subject",
+      label: "Subject",
+      type: "select",
+      placeholder: "Select Subject",
+      required: true,
+      options: subjectOptions,
+    },
+    {
+      key: "exam",
+      label: "Exam",
+      type: "select",
+      placeholder: "Select Exam",
+      required: true,
+      options: examOptions,
+    },
+    {
+      key: "pageStart",
+      label: "Page Start No",
+      type: "number",
+      placeholder: "Start Page",
+      required: true,
+    },
+    {
+      key: "pageEnd",
+      label: "Page End No",
+      type: "number",
+      placeholder: "End Page",
+      required: true,
+    },
+  ];
 
   // -------------------- Filter + Search + Sort --------------------
   const filteredData = tableData
@@ -96,86 +230,14 @@ export default function SyllabusPage() {
     .sort((a, b) =>
       sortOrder === "asc"
         ? a.subjectName.localeCompare(b.subjectName)
-        : b.subjectName.localeCompare(a.subjectName)
+        : b.subjectName.localeCompare(a.subjectName),
     );
 
   const totalPages = Math.ceil(filteredData.length / perPage);
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
-
-  const syllabusFields = [
-    {
-      name: "class",
-      label: "Class",
-      type: "select",
-      options: classOptions.map((c) => ({ label: c, value: c })),
-      required: true,
-      placeholder: "Select Class",
-    },
-    {
-      name: "group",
-      label: "Group",
-      type: "select",
-      options: groupOptions.map((g) => ({ label: g, value: g })),
-      required: true,
-      placeholder: "Select Group",
-    },
-    {
-      name: "section",
-      label: "Section",
-      type: "select",
-      options: sectionOptions.map((s) => ({ label: s, value: s })),
-      required: false,
-      placeholder: "Select Section",
-    },
-    {
-      name: "session",
-      label: "Session",
-      type: "select",
-      options: Array.from(new Set(tableData.map((s) => s.session))).map(
-        (s) => ({ label: s, value: s })
-      ),
-      required: true,
-      placeholder: "Select Session",
-    },
-    {
-      name: "subject",
-      label: "Subject",
-      type: "select",
-      options: Array.from(new Set(tableData.map((s) => s.subjectName))).map(
-        (s) => ({ label: s, value: s })
-      ),
-      required: true,
-      placeholder: "Select Subject",
-    },
-    {
-      name: "exam",
-      label: "Exam",
-      type: "select",
-      options: [
-        { label: "Mid Term", value: "Mid Term" },
-        { label: "Final", value: "Final" },
-      ],
-      required: true,
-      placeholder: "Select Exam",
-    },
-    {
-      name: "pageStart",
-      label: "Page Start No",
-      type: "number",
-      required: true,
-      placeholder: "Start Page",
-    },
-    {
-      name: "pageEnd",
-      label: "Page End No",
-      type: "number",
-      required: true,
-      placeholder: "End Page",
-    },
-  ];
 
   // -------------------- Export Functions --------------------
   const exportExcel = (data) => {
@@ -253,13 +315,14 @@ export default function SyllabusPage() {
     setClassFilter("");
     setGroupFilter("");
     setSectionFilter("");
+    setSessionFilter("");
     setSortOrder("asc");
     setCurrentPage(1);
   };
   const cardBg = darkMode
     ? "bg-gray-900 text-gray-100"
     : "bg-white text-gray-800";
-  const borderClr = darkMode ? "border-gray-500" : "border-gray-200";
+  const borderClr = darkMode ? "border-gray-500" : "border-gray-300";
   const inputBg = darkMode
     ? "bg-gray-700 text-gray-100"
     : "bg-white text-gray-800";
@@ -271,15 +334,15 @@ export default function SyllabusPage() {
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={`rounded-md p-3 space-y-3 ${cardBg}`}>
+      <div className={`p-3 space-y-4 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Syllabus List</h2>
+            <h2 className="text-base font-semibold">Syllabus list</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-600">
                 Dashboard
               </Link>{" "}
-              / Syllabus
+              / Syllabus list
             </p>
           </div>
 
@@ -287,7 +350,7 @@ export default function SyllabusPage() {
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
             <button
               onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center   rounded border  px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+              className={`w-full md:w-28 flex items-center   border  px-3 h-8 text-xs ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -295,26 +358,26 @@ export default function SyllabusPage() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex rounded border  items-center justify-between shadow-sm px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full flex border  items-center justify-between px-3 h-8  text-xs ${borderClr} ${inputBg}`}
               >
-                Export <BiChevronDown />
+                Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border  shadow-sm  ${borderClr} ${dropdownBg}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28  border   ${borderClr} ${dropdownBg}
   `}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -323,7 +386,7 @@ export default function SyllabusPage() {
             {canEdit && (
               <button
                 onClick={() => setAddModalOpen(true)}
-                className="w-full md:w-28 flex items-center  rounded bg-blue-600 text-white px-2 py-2 text-xs"
+                className="w-full md:w-28 flex items-center   bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Syllabus
               </button>
@@ -345,159 +408,118 @@ export default function SyllabusPage() {
         </div>
 
         {/* Filters + Sort Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mt-2 ">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0  ">
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <button
-                onClick={handleRefresh}
-                className={`w-full md:w-28 flex items-center  rounded border shadow-sm px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+                onClick={() => setSessionOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center justify-between border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
-                All
+                {sessionFilter || "All Sessions"}
               </button>
+
+              {sessionOpen && (
+                <div
+                  className={`absolute left-0 top-full z-50 mt-1 w-full border max-h-56 overflow-y-auto ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-500"
+                      : "bg-white border-gray-300"
+                  }`}
+                >
+                  {sessionOptions.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => {
+                        setSessionFilter(s);
+                        setCurrentPage(1); // page reset
+                        setSessionOpen(false);
+                      }}
+                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 ${
+                        sessionFilter === s
+                          ? darkMode
+                            ? "bg-blue-600 text-white font-medium"
+                            : "bg-blue-100 text-blue-700 font-medium"
+                          : darkMode
+                            ? "text-gray-200"
+                            : "text-gray-700"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Filter */}
             <div ref={filterRef} className="relative w-full">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between  rounded border shadow-sm px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
-                Filter <BiChevronDown />
+                Filter
               </button>
 
-              {filterOpen && (
-                <div
-                  className={`absolute z-50 mt-1 space-y-2 w-52 rounded shadow-md p-3
-      left-1/2 -translate-x-1/2
-    md:left-0 md:translate-x-0 max-h-40 overflow-y-auto
-    ${borderClr} ${dropdownBg}
-  `}
-                >
-                  {/* Class */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setClassOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded gap-1  flex justify-between
-                         ${borderClr}  items-center `}
-                    >
-                      {classFilter || "All Classes"} <BiChevronDown />
-                    </button>
-                    {classOpen &&
-                      classOptions.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => {
-                            setClassFilter(c);
-                            setClassOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs
-  hover:bg-blue-50 hover:text-blue-600
-  ${
-    classFilter === c
-      ? darkMode
-        ? "bg-blue-600 text-white font-medium"
-        : "bg-blue-100 text-blue-700 font-medium"
-      : darkMode
-      ? "text-gray-200"
-      : "text-gray-700"
-  }
-`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                  </div>
+              <FilterDropdown
+                title="Filter syllabus"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
 
-                  {/* Group */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setGroupOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded  flex justify-between items-center ${borderClr}`}
-                    >
-                      {groupFilter || "All Groups"} <BiChevronDown />
-                    </button>
-                    {groupOpen &&
-                      groupOptions.map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => {
-                            setGroupFilter(g);
-                            setGroupOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs
-  hover:bg-blue-50 hover:text-blue-600
-  ${
-    classFilter === g
-      ? darkMode
-        ? "bg-blue-600 text-white font-medium"
-        : "bg-blue-100 text-blue-700 font-medium"
-      : darkMode
-      ? "text-gray-200"
-      : "text-gray-700"
-  }
-`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                  </div>
-
-                  {/* Section */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setSectionOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${borderClr}`}
-                    >
-                      {sectionFilter || "All Sections"} <BiChevronDown />
-                    </button>
-                    {sectionOpen &&
-                      sectionOptions.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => {
-                            setSectionFilter(s);
-                            setSectionOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs
-  hover:bg-blue-50 hover:text-blue-600
-  ${
-    classFilter === s
-      ? darkMode
-        ? "bg-blue-600 text-white font-medium"
-        : "bg-blue-100 text-blue-700 font-medium"
-      : darkMode
-      ? "text-gray-200"
-      : "text-gray-700"
-  }
-`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                  </div>
-
-                  <button
-                    onClick={() => setFilterOpen(false)}
-                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
-                  >
-                    Apply
-                  </button>
-                </div>
-              )}
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
             </div>
 
             {/* Sort */}
-            <div className="">
+            <div className="relative flex-1 " ref={sortRef}>
               <button
-                onClick={() =>
-                  setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-                }
-                className={`w-full md:w-28 flex items-center rounded border  px-2 py-2 text-xs shadow-sm ${
-                  darkMode ? "border-gray-500  bg-gray-700" : "border-gray-200"
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-300 bg-white text-gray-800"
                 }`}
               >
-                Sort By {sortOrder === "asc" ? "↑" : "↓"}
+                Sort By
               </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -507,8 +529,8 @@ export default function SyllabusPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search subject..."
-              className={`w-full md:w-64 rounded border  px-3 py-2 text-xs focus:outline-none shadow-sm ${
-                darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200"
+              className={`w-full md:w-64  border  px-3 h-8 text-xs focus:outline-none ${
+                darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
               }`}
             />
 
@@ -523,7 +545,7 @@ export default function SyllabusPage() {
 
       {/* SYLLABUS TABLE */}
       <div
-        className={` rounded p-2 overflow-x-auto ${
+        className={`  p-3 overflow-x-auto ${
           darkMode ? "bg-gray-900" : "bg-white"
         }`}
       >

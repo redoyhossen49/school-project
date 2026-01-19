@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
 import ReusableTable from "../components/common/ReusableTable.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function Examlist() {
   const navigate = useNavigate();
@@ -18,6 +19,11 @@ export default function Examlist() {
   const canEdit = localStorage.getItem("role") === "school";
 
   // -------------------- State --------------------
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
   const [classData, setClassData] = useState(examData);
   const [addClassOpen, setAddClassOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,14 +31,19 @@ export default function Examlist() {
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [classFilter, setClassFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
+  const [sortOpen, setSortOpen] = useState(false);
+
 
   // -------------------- Dropdowns --------------------
   const [monthOpen, setMonthOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  
+  const [open, setOpen] = useState(false);
 
   const [groupFilter, setGroupFilter] = useState("");
   const [sessionFilter, setSessionFilter] = useState("");
+  const [sectionFilter, setSectionFilter] = useState("");
   const [examFilter, setExamFilter] = useState("");
   // Add these states at the top
   const [classOpen, setClassOpen] = useState(false);
@@ -42,15 +53,17 @@ export default function Examlist() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [statusOpen, setStatusOpen] = useState(false);
 
-// Dynamically generate status options from examData
-const statusOptions = ["All", ...Array.from(new Set(examData.map(item => item.status)))];
-
+  // Dynamically generate status options from examData
+  const statusOptions = [
+    "All",
+    ...Array.from(new Set(examData.map((item) => item.status))),
+  ];
 
   const monthRef = useRef(null);
   const exportRef = useRef(null);
   const filterRef = useRef(null);
   const statusRef = useRef(null);
-
+ const sortRef = useRef(null);
   const months = [
     "All",
     "January",
@@ -67,32 +80,60 @@ const statusOptions = ["All", ...Array.from(new Set(examData.map(item => item.st
     "December",
   ];
 
- const classOptions = Array.from(new Set(examData.map((c) => c.Class)));
+  const classOptions = Array.from(new Set(examData.map((c) => c.Class)));
 
-const groupOptions = Array.from(
-  new Set(
-    examData
-      .filter((item) => (classFilter ? item.Class === classFilter : true))
-      .map((item) => item.Group)
-  )
-);
+  const groupOptions = Array.from(
+    new Set(
+      examData
+        .filter((item) => (classFilter ? item.Class === classFilter : true))
+        .map((item) => item.Group),
+    ),
+  );
 
-const sessionOptions = Array.from(
-  new Set(
-    examData
-      .filter((item) => (classFilter ? item.Class === classFilter : true))
-      .map((item) => item.Session)
-  )
-);
+  const sessionOptions = Array.from(
+    new Set(
+      examData
+        .filter((item) => (classFilter ? item.Class === classFilter : true))
+        .map((item) => item.Session),
+    ),
+  );
+  const sectionOptions = Array.from(
+    new Set(
+      examData
+        .filter((item) => (classFilter ? item.Class === classFilter : true))
+        .map((item) => item.Section),
+    ),
+  );
 
-const examOptions = Array.from(
-  new Set(
-    examData
-      .filter((item) => (classFilter ? item.Class === classFilter : true))
-      .map((item) => item["Exam Name"])
-  )
-);
-
+  const examOptions = Array.from(
+    new Set(
+      examData
+        .filter((item) => (classFilter ? item.Class === classFilter : true))
+        .map((item) => item["Exam Name"]),
+    ),
+  );
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      placeholder: "Select section",
+      options: sectionOptions,
+    },
+    {
+      key: "session",
+      placeholder: "Select session",
+      options: sessionOptions,
+    },
+  ];
 
   // -------------------- Outside Click --------------------
   useEffect(() => {
@@ -109,42 +150,52 @@ const examOptions = Array.from(
   }, []);
 
   // -------------------- Refresh --------------------
- 
+
   // -------------------- Columns --------------------
-const columns = [
-  { key: "SL", label: "SL" },
-  { key: "Class", label: "Class" },
-  { key: "Group", label: "Group" },
-  { key: "Section", label: "Section" },
-  { key: "Session", label: "Session" },
-  { key: "Exam Name", label: "Exam Name" },
-  { key: "Total Exam", label: "Total Exam" },
-  { key: "Upcoming Exam Fee", label: "Upcoming Exam Fee" },
-  { key: "Exam Fee Due", label: "Exam Fee Due" },
-  { key: "Action", label: "Action" },
-];
+  const columns = [
+    { key: "SL", label: "SL" },
+    { key: "Class", label: "Class" },
+    { key: "Group", label: "Group" },
+    { key: "Section", label: "Section" },
+    { key: "Session", label: "Session" },
+    { key: "Exam Name", label: "Exam Name" },
+    { key: "Total Exam", label: "Total Exam" },
+    { key: "Upcoming Exam Fee", label: "Upcoming Exam Fee" },
+    { key: "Exam Fee Due", label: "Exam Fee Due" },
+  ];
 
   // -------------------- Filter + Sort + Search --------------------
- const filteredData = useMemo(() => {
-  let data = examData
-    .filter(item => (classFilter ? item.Class === classFilter : true))
-    .filter(item => (groupFilter ? item.Group === groupFilter : true))
-    .filter(item => (sessionFilter ? item.Session === sessionFilter : true))
-    .filter(item => (examFilter ? item["Exam Name"] === examFilter : true))
-    .filter(item => (statusFilter && statusFilter !== "All" ? item.Status === statusFilter : true))
-    .filter(item => search 
-      ? item["Exam Name"].toLowerCase().includes(search.toLowerCase()) 
-      : true
-    );
+  const filteredData = useMemo(() => {
+    let data = examData
+      .filter((item) => (classFilter ? item.Class === classFilter : true))
+      .filter((item) => (groupFilter ? item.Group === groupFilter : true))
+      .filter((item) => (sectionFilter ? item.Section === sectionFilter : true))
+      .filter((item) => (sessionFilter ? item.Session === sessionFilter : true))
+      .filter((item) => (examFilter ? item["Exam Name"] === examFilter : true))
+      .filter((item) =>
+        statusFilter && statusFilter !== "All"
+          ? item.Status === statusFilter
+          : true,
+      )
+      .filter((item) =>
+        search
+          ? item["Exam Name"].toLowerCase().includes(search.toLowerCase())
+          : true,
+      );
 
-  // Sort by SL
-  data.sort((a, b) => sortOrder === "newest" ? b.SL - a.SL : a.SL - b.SL);
+    // Sort by SL
+    data.sort((a, b) => (sortOrder === "newest" ? b.SL - a.SL : a.SL - b.SL));
 
-  return data;
-}, [classFilter, groupFilter, sessionFilter, examFilter, statusFilter, search, sortOrder]);
-
-
-
+    return data;
+  }, [
+    classFilter,
+    groupFilter,
+    sessionFilter,
+    examFilter,
+    statusFilter,
+    search,
+    sortOrder,
+  ]);
 
   // -------------------- Pagination --------------------
   const perPage = 20;
@@ -158,126 +209,121 @@ const columns = [
 
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
 
- const exportExcel = (data) => {
-  if (!data.length) return;
+  const exportExcel = (data) => {
+    if (!data.length) return;
 
-  const wsData = data.map(item => ({
-    SL: item.SL,
-    Class: item.Class,
-    Group: item.Group,
-    Section: item.Section,
-    Session: item.Session,
-    "Exam Name": item["Exam Name"],
-    "Total Exam": item["Total Exam"],
-    "Upcoming Exam Fee": item["Upcoming Exam Fee"],
-    "Exam Fee Due": item["Exam Fee Due"],
-    Action: item.Action,
-  }));
+    const wsData = data.map((item) => ({
+      SL: item.SL,
+      Class: item.Class,
+      Group: item.Group,
+      Section: item.Section,
+      Session: item.Session,
+      "Exam Name": item["Exam Name"],
+      "Total Exam": item["Total Exam"],
+      "Upcoming Exam Fee": item["Upcoming Exam Fee"],
+      "Exam Fee Due": item["Exam Fee Due"],
+      Action: item.Action,
+    }));
 
-  const ws = utils.json_to_sheet(wsData);
-  const wb = utils.book_new();
-  utils.book_append_sheet(wb, ws, "Exam List");
-  writeFile(wb, "ExamList.xlsx");
-};
-const exportPDF = (data) => {
-  if (!data.length) {
-    alert("No data to export");
-    return;
-  }
+    const ws = utils.json_to_sheet(wsData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Exam List");
+    writeFile(wb, "ExamList.xlsx");
+  };
+  const exportPDF = (data) => {
+    if (!data.length) {
+      alert("No data to export");
+      return;
+    }
 
-  const doc = new jsPDF("landscape", "pt", "a4");
+    const doc = new jsPDF("landscape", "pt", "a4");
 
-  const tableColumn = [
-    "SL","Class","Group","Section","Session","Exam Name",
-    "Total Exam","Upcoming Exam Fee","Exam Fee Due","Action"
-  ];
+    const tableColumn = [
+      "SL",
+      "Class",
+      "Group",
+      "Section",
+      "Session",
+      "Exam Name",
+      "Total Exam",
+      "Upcoming Exam Fee",
+      "Exam Fee Due",
+      "Action",
+    ];
 
-  const tableRows = data.map(item => [
-    item.SL,
-    item.Class,
-    item.Group,
-    item.Section,
-    item.Session,
-    item["Exam Name"],
-    item["Total Exam"],
-    item["Upcoming Exam Fee"],
-    item["Exam Fee Due"],
-    item.Action
-  ]);
+    const tableRows = data.map((item) => [
+      item.SL,
+      item.Class,
+      item.Group,
+      item.Section,
+      item.Session,
+      item["Exam Name"],
+      item["Total Exam"],
+      item["Upcoming Exam Fee"],
+      item["Exam Fee Due"],
+      item.Action,
+    ]);
 
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 20,
-    theme: "striped",
-    styles: { fontSize: 8 },
-  });
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 8 },
+    });
 
-  doc.save("ExamList.pdf");
-};
-
-
-  const addExamFields = [
+    doc.save("ExamList.pdf");
+  };
+const addExamFields = [
   {
-    name: "class",
-    label: "Select Class",
+    key: "class",
     type: "select",
-    options: Array.from(new Set(examData.map((e) => e.Class))),
     placeholder: "Select Class",
-    required: true,
+    options: classOptions,
   },
   {
-    name: "group",
-    label: "Select Group",
+    key: "group",
     type: "select",
-    options: [], // will be set dynamically based on selected class
     placeholder: "Select Group",
-    required: true,
+    options: groupOptions, // class অনুযায়ী পরে set করবে
   },
   {
-    name: "section",
-    label: "Select Section",
+    key: "section",
     type: "select",
-    options: [], // will be set dynamically based on class & group
     placeholder: "Select Section",
-    required: true,
+    options: sectionOptions, // class + group অনুযায়ী পরে set করবে
   },
   {
-    name: "session",
-    label: "Select Session",
+    key: "session",
     type: "select",
-    options: Array.from(new Set(examData.map((e) => e.Session))),
     placeholder: "Select Session",
-    required: true,
+    options: sessionOptions,
   },
   {
-    name: "examName",
-    label: "Type Exam Name",
+    key: "examName",
     type: "text",
     placeholder: "Enter Exam Name",
-    required: true,
   },
 ];
 
+
   const handleRefresh = () => {
-  setClassFilter("");   
-  setGroupFilter("");  
-  setSessionFilter(""); 
-  setExamFilter("");    
-  setStatusFilter("All");
-  setSearch("");       
-  setSortOrder("newest");
-  setCurrentPage(1);
-};
-
-
+    setClassFilter("");
+    setGroupFilter("");
+    setSessionFilter("");
+    setExamFilter("");
+    setStatusFilter("All");
+    setSearch("");
+    setSortOrder("newest");
+    setCurrentPage(1);
+  };
 
   const handleAddClass = (data) => {
     const exists = classData.some(
-      (c) => c.class.toLowerCase() === data.className.toLowerCase()
+      (c) => c.class.toLowerCase() === data.className.toLowerCase(),
     );
     if (exists) {
       alert("Class already exists");
@@ -298,7 +344,7 @@ const exportPDF = (data) => {
   const cardBg = darkMode
     ? "bg-gray-900 text-gray-100"
     : "bg-white text-gray-800";
-  const borderClr = darkMode ? "border-gray-500" : "border-gray-200";
+  const borderClr = darkMode ? "border-gray-500" : "border-gray-300";
   const inputBg = darkMode
     ? "bg-gray-700 text-gray-100"
     : "bg-white text-gray-800";
@@ -309,15 +355,15 @@ const exportPDF = (data) => {
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={`rounded-md p-3 space-y-3 ${cardBg}`}>
+      <div className={` p-3 space-y-3 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Class List</h2>
+            <h2 className="text-base font-semibold">Exam list</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-600">
                 Dashboard
               </Link>
-              / Class List
+              / Exam list
             </p>
           </div>
 
@@ -325,7 +371,7 @@ const exportPDF = (data) => {
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
             <button
               onClick={handleRefresh}
-              className={`w-full flex items-center gap-1 rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+              className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -333,25 +379,25 @@ const exportPDF = (data) => {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
-                Export <BiChevronDown />
+                Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border  ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -360,16 +406,16 @@ const exportPDF = (data) => {
             {canEdit && (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center gap-1 rounded bg-blue-600 text-white px-2 py-2 text-xs"
+                className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
-                Add Class
+                Add exam
               </button>
             )}
 
             <FormModal
               open={addClassOpen}
-              title="Add Class"
-              fields={ addExamFields}
+              title="Add exam"
+              fields={addExamFields}
               initialValues={{ className: "" }}
               onClose={() => setAddClassOpen(false)}
               onSubmit={handleAddClass}
@@ -378,254 +424,116 @@ const exportPDF = (data) => {
         </div>
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-3 md:gap-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
           <div className="flex gap-2 md:gap-2 w-full md:w-auto">
-              
             {/* Month Dropdown */}
-           <div ref={statusRef} className="relative flex-1">
-  <button
-    onClick={() => setStatusOpen(prev => !prev)}
-    className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
-  >
-    {examFilter || " Exam"} 
-    <BiChevronDown className={`${statusOpen ? "rotate-180" : ""} transition-transform`} />
-  </button>
+            <div ref={statusRef} className="relative flex-1">
+              <button
+                onClick={() => setStatusOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+              >
+                {examFilter || " Exam"}
+                
+              </button>
 
-  {statusOpen && (
-    <div
-      className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-md max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
-    >
-      {examOptions.map((exam) => (
-        <button
-          key={exam}
-          onClick={() => {
-            setExamFilter(exam);
-            setCurrentPage(1);
-            setStatusOpen(false); // still closes dropdown
-          }}
-          className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-            examFilter === exam ? "bg-blue-100 text-blue-700 font-medium" : darkMode ? "text-gray-200" : "text-gray-700"
-          }`}
-        >
-          {exam}
-        </button>
-      ))}
-    </div>
-  )}
-</div>
-
-
+              {statusOpen && (
+                <div
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border shadow-md max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
+                >
+                  {examOptions.map((exam) => (
+                    <button
+                      key={exam}
+                      onClick={() => {
+                        setExamFilter(exam);
+                        setCurrentPage(1);
+                        setStatusOpen(false); // still closes dropdown
+                      }}
+                      className={`block w-full px-3 py-1 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                        examFilter === exam
+                          ? "bg-blue-100 text-blue-700 font-medium"
+                          : darkMode
+                            ? "text-gray-200"
+                            : "text-gray-700"
+                      }`}
+                    >
+                      {exam}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Filter Dropdown */}
             {/* Filter Dropdown */}
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
-                Filter{" "}
-                <BiChevronDown
-                  className={`${
-                    filterOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+                Filter
               </button>
 
-              {filterOpen && (
-                <div
-                  className={`absolute top-full z-50 mt-1 w-52 rounded border left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 max-h-64 overflow-y-auto shadow-md py-4 px-6 space-y-2 ${borderClr} ${dropdownBg}`}
-                >
-                  <div className="flex flex-col gap-2">
-                    {/* Class Filter */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setClassOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          classFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {classFilter || "Select Class"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            classOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {classOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {classOptions.map((c) => (
-                            <button
-                              key={c}
-                              onClick={() => {
-                                setClassFilter(c);
-                                setGroupFilter(""); // reset dependent filters
-                                setSessionFilter("");
-                                setExamFilter("");
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                classFilter === c
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {c}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              <FilterDropdown
+                title="Filter exam"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
 
-                    {/* Group Filter */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setGroupOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          groupFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {groupFilter || "Select Group"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            groupOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {groupOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {groupOptions.map((g) => (
-                            <button
-                              key={g}
-                              onClick={() => setGroupFilter(g)}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                groupFilter === g
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {g}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Session Filter */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setSessionOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          sessionFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {sessionFilter || "Select Session"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            sessionOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {sessionOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {sessionOptions.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setSessionFilter(s)}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                sessionFilter === s
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Exam Filter */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setExamOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          examFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {examFilter || "Select Exam"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            examOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {examOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {examOptions.map((e) => (
-                            <button
-                              key={e}
-                              onClick={() => setExamFilter(e)}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                examFilter === e
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {e}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Apply Filter */}
-                    <button
-                      onClick={() => {
-                        setCurrentPage(1); // Reset pagination
-                        setFilterOpen(false);
-                      }}
-                      className="w-full bg-blue-600 text-white text-xs py-1 rounded mt-2"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              )}
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
             </div>
 
             {/* Sort Button */}
-            <div className="flex-1">
+           <div className="relative flex-1 " ref={sortRef}>
               <button
-                onClick={() =>
-                  setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
-                }
-                className={`w-full md:w-28 flex items-center gap-1 rounded border px-2 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
               >
-                Sort {sortOrder === "newest" ? "↑" : "↓"}
+                Sort By
               </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -638,7 +546,7 @@ const exportPDF = (data) => {
                 setCurrentPage(1);
               }}
               placeholder="Search class..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs focus:outline-none ${borderClr} ${inputBg}`}
+              className={`w-full md:w-64 border px-3 h-8 text-xs focus:outline-none ${borderClr} ${inputBg}`}
             />
             <Pagination
               currentPage={currentPage}
@@ -650,7 +558,7 @@ const exportPDF = (data) => {
       </div>
 
       {/* TABLE */}
-      <div className={`rounded p-2 overflow-x-auto ${cardBg}`}>
+      <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ReusableTable
           columns={columns}
           data={currentData.map((item, idx) => ({

@@ -209,7 +209,7 @@ export const sidebarMenu = (role) => {
         { title: "Admit Card", path: "examadmit" },
         { title: "Seat Number", path: "examsitnumber" },
 
-        { title: "Schedule", path: "/exam/schedule" },
+        { title: "Schedule", path: "examschedule" },
         { title: "Result Find", path: "/exam/result" },
         { title: "Certificate", path: "/exam/certificate" },
       ],
@@ -305,7 +305,7 @@ export const sidebarMenu = (role) => {
       icon: RiAccountPinBoxLine,
       children: [
         {
-          title: "Opening Status History",
+          title: "Opening ",
           path: "/notice",
         },
         {

@@ -10,6 +10,7 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function SectionListPage() {
   const navigate = useNavigate();
@@ -24,27 +25,32 @@ export default function SectionListPage() {
   const [groupFilter, setGroupFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [filterValues, setFilterValues] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
 
   // -------------------- Dropdowns --------------------
   const [monthOpen, setMonthOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
   const [classOpen, setClassOpen] = useState(false);
   const [groupOpen, setGroupOpen] = useState(false);
   const [sectionOpen, setSectionOpen] = useState(false);
   const [data, setData] = useState(classGroupData);
   const [addSectionModalOpen, setAddSectionModalOpen] = useState(false);
-const [newSectionDefaults, setNewSectionDefaults] = useState({
-  class: "",
-  group: "",
-  section: "",
-});
-
-
+  const [newSectionDefaults, setNewSectionDefaults] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
 
   const monthRef = useRef(null);
   const exportRef = useRef(null);
   const filterRef = useRef(null);
+  const sortRef = useRef(null);
 
   const months = [
     "All",
@@ -65,11 +71,28 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
   // -------------------- Dynamic Options --------------------
   const classOptions = Array.from(new Set(classGroupData.map((c) => c.class)));
   const groupOptions = Array.from(
-    new Set(classGroupData.flatMap((c) => c.groups.map((g) => g.name)))
+    new Set(classGroupData.flatMap((c) => c.groups.map((g) => g.name))),
   );
   const sectionOptions = Array.from(
-    new Set(classGroupData.flatMap((c) => c.groups.map((g) => g.section)))
+    new Set(classGroupData.flatMap((c) => c.groups.map((g) => g.section))),
   );
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select Class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select Group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      placeholder: "Select Section",
+      options: sectionOptions,
+    },
+  ];
 
   // -------------------- Outside Click --------------------
   useEffect(() => {
@@ -97,75 +120,73 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
   };
 
   // -------------------- Filter + Sort + Search --------------------
- const filteredData = useMemo(() => {
-  return data
-    .filter((item) => (classFilter ? item.class === classFilter : true))
-    .map((item) => {
-      const groups = item.groups
-        .map((g) => {
-          if (groupFilter && g.name !== groupFilter) return null;
-          if (sectionFilter && g.section !== sectionFilter) return null;
-          let monthly = g.monthly;
-          if (selectedMonth !== "All")
-            monthly = g.monthly.filter((m) => m.month === selectedMonth);
-          return { ...g, monthly };
-        })
-        .filter((g) => g && g.monthly.length > 0);
-      return { ...item, groups };
-    })
-    .filter((item) => item.groups.length > 0)
-    .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl))
-    .filter((item) =>
-      item.class.toLowerCase().includes(search.toLowerCase())
-    );
-}, [
-  data,
-  search,
-  classFilter,
-  groupFilter,
-  sectionFilter,
-  selectedMonth,
-  sortOrder,
-]);
-
+  const filteredData = useMemo(() => {
+    return data
+      .filter((item) => (classFilter ? item.class === classFilter : true))
+      .map((item) => {
+        const groups = item.groups
+          .map((g) => {
+            if (groupFilter && g.name !== groupFilter) return null;
+            if (sectionFilter && g.section !== sectionFilter) return null;
+            let monthly = g.monthly;
+            if (selectedMonth !== "All")
+              monthly = g.monthly.filter((m) => m.month === selectedMonth);
+            return { ...g, monthly };
+          })
+          .filter((g) => g && g.monthly.length > 0);
+        return { ...item, groups };
+      })
+      .filter((item) => item.groups.length > 0)
+      .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl))
+      .filter((item) =>
+        item.class.toLowerCase().includes(search.toLowerCase()),
+      );
+  }, [
+    data,
+    search,
+    classFilter,
+    groupFilter,
+    sectionFilter,
+    selectedMonth,
+    sortOrder,
+  ]);
 
   const handleAddSection = (formData) => {
-  const { class: cls, group, section } = formData;
+    const { class: cls, group, section } = formData;
 
-  // Check if class already exists
-  const existingClassIndex = data.findIndex((c) => c.class === cls);
+    // Check if class already exists
+    const existingClassIndex = data.findIndex((c) => c.class === cls);
 
-  const newGroup = {
-    name: group,
-    section: section,
-    monthly: [], // initially empty
+    const newGroup = {
+      name: group,
+      section: section,
+      monthly: [], // initially empty
+    };
+
+    let newData = [...data];
+
+    if (existingClassIndex > -1) {
+      // Add to existing class
+      newData[existingClassIndex].groups.push(newGroup);
+    } else {
+      // Add new class
+      newData.push({
+        sl: data.length + 1,
+        class: cls,
+        groups: [newGroup],
+      });
+    }
+
+    setData(newData); // update state
+    setCurrentPage(1); // reset pagination
   };
-
-  let newData = [...data];
-
-  if (existingClassIndex > -1) {
-    // Add to existing class
-    newData[existingClassIndex].groups.push(newGroup);
-  } else {
-    // Add new class
-    newData.push({
-      sl: data.length + 1,
-      class: cls,
-      groups: [newGroup],
-    });
-  }
-
-  setData(newData);       // update state
-  setCurrentPage(1);      // reset pagination
-};
-
 
   // -------------------- Pagination --------------------
   const perPage = 10;
   const totalPages = Math.ceil(filteredData.length / perPage);
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
 
   // -------------------- Export --------------------
@@ -178,7 +199,7 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
         Section: g.section,
         Month: g.monthly.map((m) => m.month).join(", "),
         Details: JSON.stringify(g.monthly),
-      }))
+      })),
     );
     const ws = utils.json_to_sheet(wsData);
     const wb = utils.book_new();
@@ -230,15 +251,15 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={`rounded-md p-3 space-y-3 ${cardBg}`}>
+      <div className={`p-3 space-y-3 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Section List</h2>
+            <h2 className="text-base font-semibold">Section list</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-600">
                 Dashboard
               </Link>
-               / Section List
+              / Section
             </p>
           </div>
 
@@ -246,7 +267,7 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
             <button
               onClick={handleRefresh}
-              className={`w-full flex items-center gap-1 rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+              className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -254,25 +275,25 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
-                Export <BiChevronDown />
+                Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -281,46 +302,40 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
             {canEdit && (
               <button
                 onClick={() => setAddSectionModalOpen(true)}
-                className="w-full flex items-center gap-1 rounded bg-blue-600 text-white px-2 py-2 text-xs"
+                className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
-                 Add section
+                section
               </button>
             )}
             <FormModal
-  open={addSectionModalOpen}
-  title="Add Section"
-  initialValues={newSectionDefaults}
-  onClose={() => setAddSectionModalOpen(false)}
-  onSubmit={(formData) => {
-    handleAddSection(formData);
-    setAddSectionModalOpen(false);
-  }}
-  fields={[
-    {
-      name: "class",
-      label: "Class",
-      type: "select",
-      options: classOptions.map((c) => ({ label: c, value: c })),
-      required: true,
-      placeholder: "Select Class",
-    },
-    {
-      name: "group",
-      label: "Group",
-      type: "text",
-      required: true,
-      placeholder: "Group Name",
-    },
-    {
-      name: "section",
-      label: "Section",
-      type: "text",
-      required: true,
-      placeholder: "Section Name",
-    },
-  ]}
-/>
-
+              open={addSectionModalOpen}
+              title="Add Section"
+              initialValues={newSectionDefaults}
+              onClose={() => setAddSectionModalOpen(false)}
+              onSubmit={(formData) => {
+                handleAddSection(formData);
+                setAddSectionModalOpen(false);
+              }}
+              fields={[
+                {
+                  key: "class",
+                  placeholder: "Select Class",
+                  type: "select",
+                  options: classOptions,
+                },
+                {
+                  key: "group",
+                  placeholder: "Select Group",
+                  type: "select",
+                  options: groupOptions,
+                },
+                {
+                  key: "section",
+                  placeholder: "Section Name",
+                  type: "text",
+                },
+              ]}
+            />
           </div>
         </div>
 
@@ -331,18 +346,13 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
             <div ref={monthRef} className="relative flex-1">
               <button
                 onClick={() => setMonthOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
                 {selectedMonth}{" "}
-                <BiChevronDown
-                  className={`${
-                    monthOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
               </button>
               {monthOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-md max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full border  max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
                 >
                   {months.map((m) => (
                     <button
@@ -352,12 +362,12 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
                         setCurrentPage(1);
                         setMonthOpen(false);
                       }}
-                      className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
                         selectedMonth === m
                           ? "bg-blue-100 text-blue-700 font-medium"
                           : darkMode
-                          ? "text-gray-200"
-                          : "text-gray-700"
+                            ? "text-gray-200"
+                            : "text-gray-700"
                       }`}
                     >
                       {m}
@@ -371,129 +381,71 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
                 Filter{" "}
-                <BiChevronDown
-                  className={`${
-                    filterOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
               </button>
-              {filterOpen && (
-                <div
-                  className={`absolute top-full z-50 mt-1 w-52 rounded border   left-1/2 -translate-x-1/2
-    md:left-0 md:translate-x-0 max-h-40 overflow-y-auto shadow-md p-3 space-y-2 ${borderClr} ${dropdownBg}`}
-                >
-                  {/* Class */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setClassOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${borderClr} ${inputBg}`}
-                    >
-                      {classFilter || "All Classes"} <BiChevronDown />
-                    </button>
-                    {classOpen &&
-                      classOptions.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => {
-                            setClassFilter(c);
-                            setClassOpen(false);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            classFilter === c
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                  </div>
 
-                  {/* Group */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setGroupOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${borderClr} ${inputBg}`}
-                    >
-                      {groupFilter || "All Groups"} <BiChevronDown />
-                    </button>
-                    {groupOpen &&
-                      groupOptions.map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => {
-                            setGroupFilter(g);
-                            setGroupOpen(false);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            groupFilter === g
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                  </div>
-
-                  {/* Section */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setSectionOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center ${borderClr} ${inputBg}`}
-                    >
-                      {sectionFilter || "All Sections"} <BiChevronDown />
-                    </button>
-                    {sectionOpen &&
-                      sectionOptions.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => {
-                            setSectionFilter(s);
-                            setSectionOpen(false);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            sectionFilter === s
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                  </div>
-                   <button
-                    onClick={() => setFilterOpen(false)}
-                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
-                  >
-                    Apply
-                  </button>
-                </div>
-                
-              )}
+              <FilterDropdown
+                title="Filter section"
+                fields={filterFields}
+                selected={filterValues}
+                setSelected={setFilterValues}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
             </div>
 
             {/* Sort */}
-           <div className="flex-1">
-             <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className={`w-full md:w-28 flex items-center  gap-1 rounded border px-2 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
-            >
-              Sort {sortOrder === "asc" ? "↑" : "↓"}
-            </button>
-           </div>
+            <div className="relative flex-1 " ref={sortRef}>
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Search + Pagination */}
@@ -502,7 +454,7 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search class..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs focus:outline-none ${borderClr} ${inputBg}`}
+              className={`w-full md:w-64  border px-3 h-8 text-xs focus:outline-none ${borderClr} ${inputBg}`}
             />
             <Pagination
               currentPage={currentPage}
@@ -514,7 +466,7 @@ const [newSectionDefaults, setNewSectionDefaults] = useState({
       </div>
 
       {/* TABLE */}
-      <div className={`rounded p-2 overflow-x-auto ${cardBg}`}>
+      <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ClassGroupTable data={currentData} month={selectedMonth} />
       </div>
     </div>

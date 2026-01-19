@@ -347,13 +347,13 @@ export default function GuardianList() {
               >
                 <button
                   onClick={() => exportPDF(filteredGuardians)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                 >
                   PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredGuardians)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                 >
                   Excel
                 </button>
@@ -542,7 +542,7 @@ export default function GuardianList() {
       </div>
 
       {/* Table */}
-      <div className={`p-2 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
+      <div className={`p-3 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
         <GuardianTable data={currentGuardians} setData={setGuardians} />
       </div>
     </div>

@@ -10,6 +10,7 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function ClassRoutinePage() {
   const { darkMode } = useTheme();
@@ -21,6 +22,7 @@ export default function ClassRoutinePage() {
   const [groupFilter, setGroupFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOpen, setSortOpen] = useState("false");
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 10;
 
@@ -28,12 +30,17 @@ export default function ClassRoutinePage() {
   const [allDropdownOpen, setAllDropdownOpen] = useState(false);
   const [timeStart, setTimeStart] = useState(""); // e.g. "08:00 AM"
   const [timeEnd, setTimeEnd] = useState(""); // e.g. "10:00 AM"
-
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
   const [filterOpen, setFilterOpen] = useState(false);
   const [classOpen, setClassOpen] = useState(false);
   const [groupOpen, setGroupOpen] = useState(false);
   const [sectionOpen, setSectionOpen] = useState(false);
   const filterRef = useRef(null);
+  const sortRef = useRef(null);
   const exportRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [addRoutineOpen, setAddRoutineOpen] = useState(false);
@@ -59,54 +66,88 @@ export default function ClassRoutinePage() {
 
   // -------------------- Dynamic Filter Options --------------------
   const classOptions = Array.from(
-    new Set(classRoutineData.map((s) => s.class))
+    new Set(classRoutineData.map((s) => s.class)),
   );
   const groupOptions = Array.from(
     new Set(
       classRoutineData
         .filter((s) => !classFilter || s.class === classFilter)
         .map((s) => s.group)
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
   const sectionOptions = Array.from(
     new Set(
       classRoutineData
         .filter((s) => !classFilter || s.class === classFilter)
         .filter((s) => !groupFilter || s.group === groupFilter)
-        .map((s) => s.section)
+        .map((s) => s.section),
+    ),
+  );
+  const teacherOptions = Array.from(
+  new Set(classRoutineData.map((item) => item.teacher))
+)
+// -------------------- Dynamic Subject Options --------------------
+const getSubjectOptions = (selectedClass, selectedGroup, selectedSection) => {
+  return Array.from(
+    new Set(
+      classRoutineData
+        .filter(s => !selectedClass || s.class === selectedClass)
+        .filter(s => !selectedGroup || s.group === selectedGroup)
+        .filter(s => !selectedSection || s.section === selectedSection)
+        .map(s => s.subject)
     )
   );
-const timeToMinutes = (timeStr) => {
-  if (!timeStr) return null;
-  const [time, modifier] = timeStr.split(" "); // e.g., "08:00 AM"
-  let [hours, minutes] = time.split(":").map(Number);
-  if (modifier === "PM" && hours !== 12) hours += 12;
-  if (modifier === "AM" && hours === 12) hours = 0;
-  return hours * 60 + minutes;
 };
 
-  // -------------------- Filter + Search + Sort --------------------
- const filteredData = routineData
-  .filter((s) => s.subject.toLowerCase().includes(search.toLowerCase()))
-  .filter((s) => (classFilter ? s.class === classFilter : true))
-  .filter((s) => (groupFilter ? s.group === groupFilter : true))
-  .filter((s) => (sectionFilter ? s.section === sectionFilter : true))
-  .filter((s) => {
-    const classStartMinutes = timeToMinutes(s.classStartTime);
-    const classEndMinutes = timeToMinutes(s.classEndTime);
-    const startFilter = timeStart ? timeToMinutes(timeStart) : null;
-    const endFilter = timeEnd ? timeToMinutes(timeEnd) : null;
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select Class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select Group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      placeholder: "Select Section",
+      options: sectionOptions,
+    },
+  ];
 
-    if (startFilter !== null && classStartMinutes < startFilter) return false;
-    if (endFilter !== null && classEndMinutes > endFilter) return false;
-    return true;
-  })
-  .sort((a, b) =>
-    sortOrder === "asc"
-      ? a.subject.localeCompare(b.subject)
-      : b.subject.localeCompare(a.subject)
-  );
+  const timeToMinutes = (timeStr) => {
+    if (!timeStr) return null;
+    const [time, modifier] = timeStr.split(" "); // e.g., "08:00 AM"
+    let [hours, minutes] = time.split(":").map(Number);
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  // -------------------- Filter + Search + Sort --------------------
+  const filteredData = routineData
+    .filter((s) => s.subject.toLowerCase().includes(search.toLowerCase()))
+    .filter((s) => (classFilter ? s.class === classFilter : true))
+    .filter((s) => (groupFilter ? s.group === groupFilter : true))
+    .filter((s) => (sectionFilter ? s.section === sectionFilter : true))
+    .filter((s) => {
+      const classStartMinutes = timeToMinutes(s.classStartTime);
+      const classEndMinutes = timeToMinutes(s.classEndTime);
+      const startFilter = timeStart ? timeToMinutes(timeStart) : null;
+      const endFilter = timeEnd ? timeToMinutes(timeEnd) : null;
+
+      if (startFilter !== null && classStartMinutes < startFilter) return false;
+      if (endFilter !== null && classEndMinutes > endFilter) return false;
+      return true;
+    })
+    .sort((a, b) =>
+      sortOrder === "asc"
+        ? a.subject.localeCompare(b.subject)
+        : b.subject.localeCompare(a.subject),
+    );
 
   const handleAddRoutine = (newRoutine) => {
     // Optionally, assign an ID for deletion/editing
@@ -114,71 +155,26 @@ const timeToMinutes = (timeStr) => {
     setRoutineData([...routineData, { id, ...newRoutine }]);
   };
 
-  const routineFields = [
-    {
-      name: "class",
-      label: "Class",
-      type: "select",
-      required: true,
-      options: classOptions,
-    },
-    {
-      name: "group",
-      label: "Group",
-      type: "select",
-      required: false,
-      options: groupOptions,
-    },
-    {
-      name: "section",
-      label: "Section",
-      type: "select",
-      required: false,
-      options: sectionOptions,
-    },
-    {
-      name: "subject",
-      label: "Subject",
-      type: "text",
-      required: true,
-      placeholder: "Enter Subject",
-    },
-    {
-      name: "teacher",
-      label: "Teacher",
-      type: "text",
-      required: true,
-      placeholder: "Enter Teacher",
-    },
-    {
-      name: "classStartTime",
-      label: "Class Start Time",
-      type: "text",
-      required: true,
-      placeholder: "08:00 AM",
-    },
-    {
-      name: "classEndTime",
-      label: "Class End Time",
-      type: "text",
-      required: true,
-      placeholder: "10:00 AM",
-    },
-    {
-      name: "dayStart",
-      label: "Day Start",
-      type: "text",
-      required: true,
-      placeholder: "Monday",
-    },
-    {
-      name: "dayEnd",
-      label: "Day End",
-      type: "text",
-      required: true,
-      placeholder: "Friday",
-    },
-  ];
+ const routineFields = [
+  { key: "class", name: "class", label: "Class", type: "select", required: true, options: classOptions, placeholder: "Select Class" },
+  { key: "group", name: "group", label: "Group", type: "select", required: false, options: groupOptions, placeholder: "Select Group" },
+  { key: "section", name: "section", label: "Section", type: "select", required: false, options: sectionOptions, placeholder: "Select Section" },
+  { key: "teacher", name: "teacher", label: "Teacher", type: "select", required: true, options: teacherOptions, placeholder: "Select Teacher" },
+   {
+    key: "subject",
+    name: "subject",
+    label: "Subject",
+    type: "select",
+    required: true,
+    options: getSubjectOptions(filters.class, filters.group, filters.section), // dynamic
+    placeholder: "Select Subject",
+  },
+  { key: "classStartTime", name: "classStartTime", label: "Class Start Time", type: "text", required: true, placeholder: "08:00 AM" },
+  { key: "classEndTime", name: "classEndTime", label: "Class End Time", type: "text", required: true, placeholder: "10:00 AM" },
+  { key: "dayStart", name: "dayStart", label: "Day Start", type: "text", required: true, placeholder: "Monday" },
+  { key: "dayEnd", name: "dayEnd", label: "Day End", type: "text", required: true, placeholder: "Friday" },
+];
+
 
   const exportExcel = (data) => {
     if (!data.length) return;
@@ -254,7 +250,7 @@ const timeToMinutes = (timeStr) => {
   const totalPages = Math.ceil(filteredData.length / perPage);
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
 
   // -------------------- Actions --------------------
@@ -262,30 +258,40 @@ const timeToMinutes = (timeStr) => {
   const handleEdit = (row) => alert("Edit " + row.subject);
   const handleDelete = (id) => alert("Delete row " + id);
   const handleRefresh = () => {
-  setSearch("");
-  setClassFilter("");
-  setGroupFilter("");
-  setSectionFilter("");
-  setSortOrder("asc");
-  setCurrentPage(1);
-  setTimeStart(""); // reset Start Time
-  setTimeEnd("");   // reset End Time
+    setSearch("");
+    setClassFilter("");
+    setGroupFilter("");
+    setSectionFilter("");
+    setSortOrder("asc");
+    setCurrentPage(1);
+    setTimeStart(""); // reset Start Time
+    setTimeEnd(""); // reset End Time
+  };
+const initialRoutineValues = {
+  class: "",
+  group: "",
+  section: "",
+  subject: "",
+  teacher: "",
+  classStartTime: "",
+  classEndTime: "",
+  dayStart: "",
+  dayEnd: "",
 };
-
 
   // ===================== RENDER =====================
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
       <div
-        className={`rounded shadow-sm ${
+        className={`${
           darkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800"
         } p-3 space-y-3`}
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Class Routine</h2>
-            <p className="text-xs text-blue-400">
+            <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-700">
                 Dashboard
               </Link>
@@ -297,8 +303,8 @@ const timeToMinutes = (timeStr) => {
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={handleRefresh}
-              className={`w-full flex items-center shadow-sm rounded border   px-2 py-2 text-xs ${
-                darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200"
+              className={`w-full flex items-center  border   px-3 h-8 text-xs ${
+                darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
               }`}
             >
               Refresh
@@ -307,29 +313,29 @@ const timeToMinutes = (timeStr) => {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between  shadow-sm rounded border   px-2 py-2 text-xs ${
-                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200"
+                className={`w-full flex items-center  border   px-3 h-8 text-xs ${
+                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
                 }`}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${
-                    darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200"
+                  className={`absolute left-0 top-full z-50 mt-1 w-full border  ${
+                    darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
                   }`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                   PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                 Excel
                   </button>
                 </div>
               )}
@@ -338,7 +344,7 @@ const timeToMinutes = (timeStr) => {
             {canEdit && (
               <button
                 onClick={() => setAddRoutineOpen(true)}
-                className="w-full flex items-center  rounded bg-blue-600 text-white px-2 py-2 text-xs"
+                className="w-full flex items-center   bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Routine
               </button>
@@ -347,7 +353,7 @@ const timeToMinutes = (timeStr) => {
               open={addRoutineOpen}
               title="Add Class Routine"
               fields={routineFields}
-              initialValues={{}}
+              initialValues={initialRoutineValues}
               onClose={() => setAddRoutineOpen(false)}
               onSubmit={(data) => {
                 handleAddRoutine(data);
@@ -358,22 +364,24 @@ const timeToMinutes = (timeStr) => {
         </div>
 
         {/* -------------------- 2nd row: All | Filter | Sort -------------------- */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mt-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mt-2">
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
             <div className="relative ">
               <button
                 onClick={() => setAllDropdownOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between  rounded border  px-2 py-2 text-xs  shadow-sm ${
-                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200"
+                className={`w-full md:w-28 flex items-center border  px-3 h-8 text-xs   ${
+                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
                 }`}
               >
-                All <BiChevronDown />
+                Exam time 
               </button>
 
               {allDropdownOpen && (
                 <div
-                  className={`absolute z-50 mt-1 w-44  border rounded p-3 space-y-2 shadow-sm ${
-                    darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200 bg-white"
+                  className={`absolute z-50 mt-1 w-full  border  p-3 space-y-2  ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700"
+                      : "border-gray-200 bg-white"
                   }`}
                 >
                   <div>
@@ -383,7 +391,7 @@ const timeToMinutes = (timeStr) => {
                       placeholder="08:00 AM"
                       value={timeStart}
                       onChange={(e) => setTimeStart(e.target.value)}
-                      className="w-full border px-2 py-1 text-xs rounded"
+                      className="w-full border border-gray-300 px-3 py-1 text-xs "
                     />
                   </div>
                   <div>
@@ -393,7 +401,7 @@ const timeToMinutes = (timeStr) => {
                       placeholder="10:00 AM"
                       value={timeEnd}
                       onChange={(e) => setTimeEnd(e.target.value)}
-                      className="w-full border px-2 py-1 text-xs rounded"
+                      className="w-full border border-gray-300 px-3 py-1 text-xs "
                     />
                   </div>
                   <button
@@ -401,7 +409,7 @@ const timeToMinutes = (timeStr) => {
                       setAllDropdownOpen(false);
                       setCurrentPage(1);
                     }}
-                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
+                    className="w-full bg-blue-600 text-white text-xs py-1"
                   >
                     Apply
                   </button>
@@ -413,154 +421,74 @@ const timeToMinutes = (timeStr) => {
             <div ref={filterRef} className="relative ">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-1 rounded border  px-2 py-2 text-xs shadow-sm ${
-                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200"
+                className={`w-full md:w-28 flex items-center   border  px-3 h-8 text-xs  ${
+                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
                 }`}
               >
-                Filter <BiChevronDown />
+                Filter 
               </button>
 
-              {filterOpen && (
+              <FilterDropdown
+                title="Filter class  routine"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
+
+            {/* Sort */}
+           <div className="relative flex-1 " ref={sortRef}>
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+              {sortOpen && (
                 <div
-                  className={`absolute z-50 mt-1 w-52 border rounded p-3 space-y-2 shadow-sm
-    left-1/2 -translate-x-1/2
-    md:left-0 md:translate-x-0 max-h-40 overflow-y-auto
-    ${darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200 bg-white"}
-  `}
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
                 >
-                  {/* Class */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setClassOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded  flex justify-between items-center shadow-sm ${
-                        darkMode
-                          ? "border-gray-500 bg-gray-700"
-                          : "border-gray-200 bg-white"
-                      }`}
-                    >
-                      {classFilter || "All Classes"} <BiChevronDown />
-                    </button>
-                    {classOpen &&
-                      classOptions.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => {
-                            setClassFilter(c);
-                            setClassOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs
-  hover:bg-blue-50 hover:text-blue-600
-  ${
-    classFilter === c
-      ? darkMode
-        ? "bg-blue-600 text-white font-medium"
-        : "bg-blue-100 text-blue-700 font-medium"
-      : darkMode
-      ? "text-gray-200"
-      : "text-gray-700"
-  }
-`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                  </div>
-
-                  {/* Group */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setGroupOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center shadow-sm ${
-                        darkMode
-                          ? "border-gray-500 bg-gray-700"
-                          : "border-gray-200 bg-white"
-                      }`}
-                    >
-                      {groupFilter || "All Groups"} <BiChevronDown />
-                    </button>
-                    {groupOpen &&
-                      groupOptions.map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => {
-                            setGroupFilter(g);
-                            setGroupOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs
-  hover:bg-blue-50 hover:text-blue-600
-  ${
-    groupFilter === g
-      ? darkMode
-        ? "bg-blue-600 text-white font-medium"
-        : "bg-blue-100 text-blue-700 font-medium"
-      : darkMode
-      ? "text-gray-200"
-      : "text-gray-700"
-  }
-`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                  </div>
-
-                  {/* Section */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setSectionOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center shadow-sm ${
-                        darkMode
-                          ? "border-gray-500 bg-gray-700"
-                          : "border-gray-200 bg-white"
-                      }`}
-                    >
-                      {sectionFilter || "All Sections"} <BiChevronDown />
-                    </button>
-                    {sectionOpen &&
-                      sectionOptions.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => {
-                            setSectionFilter(s);
-                            setSectionOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs
-  hover:bg-blue-50 hover:text-blue-600
-  ${
-    sectionFilter === s
-      ? darkMode
-        ? "bg-blue-600 text-white font-medium"
-        : "bg-blue-100 text-blue-700 font-medium"
-      : darkMode
-      ? "text-gray-200"
-      : "text-gray-700"
-  }
-`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                  </div>
-
                   <button
-                    onClick={() => setFilterOpen(false)}
-                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >
-                    Apply
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
                   </button>
                 </div>
               )}
             </div>
-
-            {/* Sort */}
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className={`w-full md:w-28 flex items-center  rounded border  px-2 py-2 text-xs shadow-sm ${
-                darkMode ? "border-gray-500  bg-gray-700" : "border-gray-200"
-              }`}
-            >
-              Sort By {sortOrder === "asc" ? "↑" : "↓"}
-            </button>
           </div>
 
           {/* -------------------- 3rd row: Search + Pagination -------------------- */}
@@ -569,8 +497,8 @@ const timeToMinutes = (timeStr) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search subject..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs focus:outline-none shadow-sm ${
-                darkMode ? "border-gray-500 bg-gray-700" : "border-gray-200"
+              className={`w-full md:w-64  border px-3 h-8 text-xs focus:outline-none  ${
+                darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
               }`}
             />
 
@@ -585,7 +513,7 @@ const timeToMinutes = (timeStr) => {
 
       {/* CLASS ROUTINE TABLE */}
       <div
-        className={` rounded p-2 overflow-x-auto ${
+        className={`  p-3 overflow-x-auto ${
           darkMode ? "bg-gray-900" : "bg-white"
         }`}
       >

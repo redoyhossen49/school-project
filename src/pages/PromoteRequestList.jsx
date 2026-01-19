@@ -298,15 +298,15 @@ export default function PromoteRequestList() {
                 >
                   <button
                     onClick={() => exportPDF(filteredRequests)}
-                    className="w-full px-2 h-6 text-left text-sm hover:bg-gray-100"
-                  >
-                    Export PDF
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
+                  > h-6
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredRequests)}
-                    className="w-full px-2 h-61 text-left text-sm hover:bg-gray-100"
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                   >
-                    Export Excel
+                     Excel
                   </button>
                 </div>
               )}
@@ -374,15 +374,15 @@ export default function PromoteRequestList() {
               >
                 <button
                   onClick={() => exportPDF(filteredRequests)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                 >
-                  Export PDF
+                   PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredRequests)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                 >
-                  Export Excel
+                 Excel
                 </button>
               </div>
             )}
@@ -527,7 +527,7 @@ export default function PromoteRequestList() {
       </div>
 
       {/* Table */}
-      <div className={`p-2  ${darkMode ? "bg-gray-900" : "bg-white"}`}>
+      <div className={`p-3  ${darkMode ? "bg-gray-900" : "bg-white"}`}>
         <PromoteRequestTable data={currentData} setData={setRequests} />
       </div>
 

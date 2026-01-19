@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import StudentActions from "../student/StudentActions";
+import ReusableActions from "../common/ReusableActions";
+import ReusableEditModal from "../common/ReusableEditModal";
 
 const headers = [
   "ID No",
@@ -16,7 +18,7 @@ const headers = [
   "Payable due",
 ];
 
-export default function TeacherTable({ data, setData, onEdit }) {
+export default function TeacherTable({ data, setData }) {
   const { darkMode } = useTheme();
 
   const borderCol = darkMode ? "border-gray-700" : "border-gray-200";
@@ -25,8 +27,11 @@ export default function TeacherTable({ data, setData, onEdit }) {
   const userRole = localStorage.getItem("role"); // "school"
   const showAction = userRole === "school";
 
-  const handleEdit = (teacher) => onEdit(teacher);
+  // -------------------- Edit Modal --------------------
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
 
+  // -------------------- Handlers --------------------
   const handleDelete = (id) => {
     if (confirm("Are you sure you want to delete this teacher?")) {
       setData((prev) => prev.filter((t) => t.id !== id));
@@ -34,9 +39,18 @@ export default function TeacherTable({ data, setData, onEdit }) {
     }
   };
 
+  const handleEditSubmit = (updatedData) => {
+    setData((prev) =>
+      prev.map((t) =>
+        t.id === selectedTeacher.id ? { ...t, ...updatedData } : t
+      )
+    );
+    setEditModalOpen(false);
+  };
+
   return (
     <div
-      className={`border  overflow-x-auto ${
+      className={`border overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
@@ -98,7 +112,6 @@ export default function TeacherTable({ data, setData, onEdit }) {
                 {t.designation}
               </td>
 
-              {/* Phone */}
               <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
                 {t.phone ? (
                   <a
@@ -112,7 +125,6 @@ export default function TeacherTable({ data, setData, onEdit }) {
                 )}
               </td>
 
-              {/* Email */}
               <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
                 {t.email ? (
                   <a
@@ -160,12 +172,18 @@ export default function TeacherTable({ data, setData, onEdit }) {
                 )}
               </td>
 
+              {/* Action Column */}
               {showAction && (
                 <td className="px-3 h-8 whitespace-nowrap">
-                  <StudentActions
-                    student={t}
-                    onEdit={handleEdit}
+                  <ReusableActions
+                    item={t}
+                    onEdit={(teacher) => {
+                      setSelectedTeacher(teacher);
+                      setEditModalOpen(true);
+                    }}
                     onDelete={handleDelete}
+                    deleteMessage="Are you sure you want to delete this teacher?"
+                    getId={(item) => item.id}
                   />
                 </td>
               )}
@@ -173,6 +191,24 @@ export default function TeacherTable({ data, setData, onEdit }) {
           ))}
         </tbody>
       </table>
+
+      {/* ===== Edit Modal ===== */}
+      {selectedTeacher && (
+        <ReusableEditModal
+          open={editModalOpen}
+          title="Edit Teacher"
+          item={selectedTeacher}
+          onClose={() => setEditModalOpen(false)}
+          onSubmit={handleEditSubmit}
+          fields={[
+            { name: "teacherName", label: "Name", type: "text", required: true },
+            { name: "designation", label: "Designation", type: "text", required: true },
+            { name: "phone", label: "Phone", type: "text" },
+            { name: "email", label: "Email", type: "text" },
+            { name: "password", label: "Password", type: "text" },
+          ]}
+        />
+      )}
     </div>
   );
 }

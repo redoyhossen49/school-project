@@ -2,6 +2,7 @@ import { useTheme } from "../../context/ThemeContext";
 import GuardianActions from "./GuardianActions";
 
 const headers = [
+  "Sl",
   "Guardian name",
   "Relation",
   "Division",
@@ -27,9 +28,7 @@ export default function GuardianTable({ data, setData, onEdit }) {
   const handleDelete = (studentId) => {
     if (confirm("Are you sure you want to delete this guardian?")) {
       setData((prev) =>
-        prev.map((s) =>
-          s.id === studentId ? { ...s, guardian: null } : s
-        )
+        prev.map((s) => (s.id === studentId ? { ...s, guardian: null } : s))
       );
       alert("Guardian deleted successfully ✅");
     }
@@ -82,14 +81,21 @@ export default function GuardianTable({ data, setData, onEdit }) {
             </tr>
           )}
 
-          {data.map((s) => {
+          {data.map((s, index) => {
             const g = s.guardian;
             if (!g) return null;
 
             return (
               <tr key={s.id} className={`border-b ${borderCol} ${hoverRow}`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {index + 1} {/* 1,2,3… */}
+                </td>
                 {/* Guardian Name */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
                   <div className="flex items-center gap-2 overflow-hidden">
                     <img
                       src={g.photo || "/default-avatar.png"}
@@ -100,24 +106,36 @@ export default function GuardianTable({ data, setData, onEdit }) {
                   </div>
                 </td>
 
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
                   {g.relation}
                 </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
                   {g.division}
                 </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
                   {g.district}
                 </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
                   {g.upazila}
                 </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
                   {g.village}
                 </td>
 
                 {/* Phone */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
                   <a
                     href={`tel:${g.phone}`}
                     className="text-blue-500 hover:underline"

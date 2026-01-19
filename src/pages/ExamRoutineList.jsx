@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
 import ReusableTable from "../components/common/ReusableTable.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function ExamRoutineList() {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export default function ExamRoutineList() {
   const [search, setSearch] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [classFilter, setClassFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("newest");
+ 
 
   const [groupFilter, setGroupFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
@@ -32,7 +33,8 @@ export default function ExamRoutineList() {
   const [examFilter, setExamFilter] = useState("");
 
   // -------------------- Dropdowns --------------------
-  const [monthOpen, setMonthOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+   const [sortOrder, setSortOrder] = useState("newest");
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -44,12 +46,19 @@ export default function ExamRoutineList() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [statusOpen, setStatusOpen] = useState(false);
   const [sectionOpen, setSectionOpen] = useState(false);
-  
+
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+    session: "",
+    exam: "",
+  });
 
   // Dynamically generate status options from examData
 
   // -------------------- Dropdowns --------------------
-  const monthRef = useRef(null);
+  const sortRef = useRef(null);
   const exportRef = useRef(null);
   const filterRef = useRef(null);
   const statusRef = useRef(null);
@@ -78,8 +87,8 @@ export default function ExamRoutineList() {
     new Set(
       examRoutineData
         .filter((item) => (classFilter ? item.Class === classFilter : true))
-        .map((item) => item.Group)
-    )
+        .map((item) => item.Group),
+    ),
   );
 
   // Section Options (dependent on selected class & group)
@@ -88,8 +97,8 @@ export default function ExamRoutineList() {
       examRoutineData
         .filter((item) => (classFilter ? item.Class === classFilter : true))
         .filter((item) => (groupFilter ? item.Group === groupFilter : true))
-        .map((item) => item.Section)
-    )
+        .map((item) => item.Section),
+    ),
   );
 
   // Session Options (dependent on selected class)
@@ -97,16 +106,16 @@ export default function ExamRoutineList() {
     new Set(
       examRoutineData
         .filter((item) => (classFilter ? item.Class === classFilter : true))
-        .map((item) => item.Session)
-    )
+        .map((item) => item.Session),
+    ),
   );
 
   const subjectOptions = Array.from(
     new Set(
       examRoutineData
         .filter((item) => (classFilter ? item.Class === classFilter : true))
-        .map((item) => item.Subject)
-    )
+        .map((item) => item.Subject),
+    ),
   );
 
   // Exam Options (dependent on selected class)
@@ -114,8 +123,8 @@ export default function ExamRoutineList() {
     new Set(
       examRoutineData
         .filter((item) => (classFilter ? item.Class === classFilter : true))
-        .map((item) => item["Exam Name"])
-    )
+        .map((item) => item["Exam Name"]),
+    ),
   );
 
   const exportExcel = (data) => {
@@ -159,14 +168,14 @@ export default function ExamRoutineList() {
       "Group",
       "Section",
       "Session",
-      "Exam Name",
+      "Exam name",
       "Subject",
-      "Exam Date",
-      "Exam Day",
-      "Start Time",
-      "End Time",
-      "Total Hour",
-      "Total Mark",
+      "Exam date",
+      "Exam day",
+      "Start time",
+      "End time",
+      "Total hour",
+      "Total mark",
       "Status",
     ];
 
@@ -215,7 +224,7 @@ export default function ExamRoutineList() {
         (examFilter ? d["Exam Name"] === examFilter : true) &&
         (statusFilter && statusFilter !== "All"
           ? d.Status === statusFilter
-          : true)
+          : true),
     );
 
     // 2️⃣ Apply sorting by Exam Date
@@ -247,102 +256,108 @@ export default function ExamRoutineList() {
 
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select Class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select Group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      placeholder: "Select Section",
+      options: sectionOptions,
+    },
 
+    {
+      key: "session",
+
+      placeholder: "Select session",
+      options: sessionOptions,
+    },
+    {
+      key: "exam",
+
+      placeholder: "Select exam",
+      options: examOptions,
+    },
+  ];
   // -------------------- Add Exam Fields --------------------
   // Form field definitions
   const addExamRoutineFields = [
     {
-      name: "class",
-      label: "Select Class",
+      key: "class",
       type: "select",
-      options: Array.from(new Set(examRoutineData.map((e) => e.Class))),
       placeholder: "Select Class",
-      required: true,
+      options: classOptions,
     },
     {
-      name: "group",
-      label: "Select Group",
+      key: "group",
       type: "select",
-      options: groupOptions, // dynamic based on selected class
       placeholder: "Select Group",
-      required: false, // optional
+      options: groupOptions, // dynamic
     },
     {
-      name: "section",
-      label: "Select Section",
+      key: "section",
       type: "select",
-      options: sectionOptions, // dynamic based on class & group
       placeholder: "Select Section",
-      required: false, // optional
+      options: sectionOptions, // dynamic
     },
     {
-      name: "session",
-      label: "Select Session",
+      key: "session",
       type: "select",
-      options: Array.from(new Set(examRoutineData.map((e) => e.Session))),
       placeholder: "Select Session",
-      required: true,
+      options: sessionOptions,
     },
     {
-      name: "examName",
-      label: "Exam Name",
-      type: "text",
-      placeholder: "Enter Exam Name",
-      required: true,
-    },
-    {
-      name: "subject",
-      label: "Select Subject",
+      key: "examName",
       type: "select",
-      options: subjectOptions,
-      placeholder: "Select Subject",
-      required: true,
+      placeholder: "Select Exam",
+      options: examOptions, // exam list দিলে ভালো হবে
     },
     {
-      name: "examDate",
-      label: "Exam Date",
+      key: "subject",
+      type: "select",
+      placeholder: "Select Subject",
+      options: subjectOptions,
+    },
+    {
+      key: "examDate",
       type: "date",
       placeholder: "Select Exam Date",
-      required: true,
     },
     {
-      name: "examDay",
-      label: "Exam Day",
+      key: "examDay",
       type: "text",
       placeholder: "Auto-calculated from Exam Date",
-      required: true,
-      readOnly: true, // auto-filled
-    },
-    {
-      name: "startTime",
-      label: "Start Time",
-      type: "time",
-      placeholder: "Select Start Time",
-      required: true,
-    },
-    {
-      name: "endTime",
-      label: "End Time",
-      type: "time",
-      placeholder: "Select End Time",
-      required: true,
-    },
-    {
-      name: "totalHour",
-      label: "Total Hour",
-      type: "text",
-      placeholder: "Total hour",
-      required: true,
       readOnly: true,
     },
     {
-      name: "totalMark",
-      label: "Total Mark",
+      key: "startTime",
+      type: "time",
+      placeholder: "Select Start Time",
+    },
+    {
+      key: "endTime",
+      type: "time",
+      placeholder: "Select End Time",
+    },
+    {
+      key: "totalHour",
+      type: "text",
+      placeholder: "Total Hour",
+      readOnly: true,
+    },
+    {
+      key: "totalMark",
       type: "text",
       placeholder: "Total Marks",
-      required: true,
       readOnly: true,
     },
   ];
@@ -382,7 +397,7 @@ export default function ExamRoutineList() {
   // -------------------- Add Class Handler --------------------
   const handleAddClass = (data) => {
     const exists = classData.some(
-      (c) => c.class.toLowerCase() === data.class.toLowerCase()
+      (c) => c.class.toLowerCase() === data.class.toLowerCase(),
     );
     if (exists) {
       alert("Class already exists");
@@ -402,19 +417,19 @@ export default function ExamRoutineList() {
   // -------------------- Styles --------------------
   const cardBg = darkMode
     ? "bg-gray-900 text-gray-100"
-    : "bg-white text-gray-800";
-  const borderClr = darkMode ? "border-gray-500" : "border-gray-200";
+    : "bg-white text-gray-700";
+  const borderClr = darkMode ? "border-gray-500" : "border-gray-300";
   const inputBg = darkMode
     ? "bg-gray-700 text-gray-100"
-    : "bg-white text-gray-800";
+    : "bg-white text-gray-700";
   const dropdownBg = darkMode
     ? "bg-gray-700 text-gray-100"
-    : "bg-white text-gray-800";
+    : "bg-white text-gray-700";
 
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={`rounded-md p-3 space-y-3 ${cardBg}`}>
+      <div className={` p-3 space-y-4 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Exam Routine</h2>
@@ -430,7 +445,7 @@ export default function ExamRoutineList() {
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
             <button
               onClick={handleRefresh}
-              className={`w-full flex items-center gap-1 rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+              className={`w-full flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -438,25 +453,25 @@ export default function ExamRoutineList() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                     PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -465,9 +480,9 @@ export default function ExamRoutineList() {
             {canEdit && (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center gap-1 rounded bg-blue-600 text-white px-2 py-2 text-xs"
+                className="w-full flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
               >
-                Add Routine
+                Routine
               </button>
             )}
 
@@ -536,7 +551,7 @@ export default function ExamRoutineList() {
 
                 if (field === "subject") {
                   const selected = examRoutineData.find(
-                    (e) => e.Subject === value
+                    (e) => e.Subject === value,
                   );
                   if (selected) {
                     setFormValues((prev) => ({
@@ -551,25 +566,21 @@ export default function ExamRoutineList() {
         </div>
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-3 md:gap-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
           <div className="flex gap-2 md:gap-2 w-full md:w-auto">
             {/* Month Dropdown */}
             <div ref={statusRef} className="relative flex-1">
               <button
                 onClick={() => setStatusOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
                 {examFilter || " Exam"}
-                <BiChevronDown
-                  className={`${
-                    statusOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+               
               </button>
 
               {statusOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-md max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full border  max-h-56 text-xs overflow-y-auto ${borderClr} ${dropdownBg}`}
                 >
                   {examOptions.map((exam) => (
                     <button
@@ -579,12 +590,12 @@ export default function ExamRoutineList() {
                         setCurrentPage(1);
                         setStatusOpen(false); // still closes dropdown
                       }}
-                      className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
                         examFilter === exam
                           ? "bg-blue-100 text-blue-700 font-medium"
                           : darkMode
-                          ? "text-gray-200"
-                          : "text-gray-700"
+                            ? "text-gray-200"
+                            : "text-gray-700"
                       }`}
                     >
                       {exam}
@@ -599,294 +610,72 @@ export default function ExamRoutineList() {
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
-                Filter{" "}
-                <BiChevronDown
-                  className={`${
-                    filterOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+                Filter
               </button>
-              {filterOpen && (
-                <div
-                  className={`absolute top-full z-50 mt-1 w-52 rounded border left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 max-h-64 overflow-y-auto shadow-md py-4 px-6 space-y-2 ${borderClr} ${dropdownBg}`}
-                >
-                  <div className="flex flex-col gap-2">
-                    {/* -------- Class Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setClassOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          classFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {classFilter || "Select Class"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            classOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {classOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {classOptions.map((c) => (
-                            <button
-                              key={c}
-                              onClick={() => {
-                                setClassFilter(c);
-                                setGroupFilter(""); // reset dependent filters
-                                setSectionFilter("");
-                                setSessionFilter("");
-                                setExamFilter("");
-                                setClassOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                classFilter === c
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {c}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              <FilterDropdown
+                title="Filter exam routine"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
+                  setExamFilter(values.exam || "");
 
-                    {/* -------- Group Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setGroupOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          groupFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {groupFilter || "Select Group"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            groupOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {groupOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {groupOptions.map((g) => (
-                            <button
-                              key={g}
-                              onClick={() => {
-                                setGroupFilter(g);
-                                setSectionFilter(""); // reset dependent filters
-                                setSessionFilter("");
-                                setExamFilter("");
-                                setGroupOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                groupFilter === g
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {g}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* -------- Section Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setSectionOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          sectionFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {sectionFilter || "Select Section"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            sectionOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {sectionOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          <button
-                            onClick={() => setSectionFilter("")} // 'All' option
-                            className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                              sectionFilter === ""
-                                ? "bg-blue-100 text-blue-700 font-medium"
-                                : darkMode
-                                ? "text-gray-200"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            All
-                          </button>
-                          {sectionOptions.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => {
-                                setSectionFilter(s);
-                                setSectionOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                sectionFilter === s
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* -------- Session Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setSessionOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          sessionFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {sessionFilter || "Select Session"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            sessionOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {sessionOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {sessionOptions.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => {
-                                setSessionFilter(s);
-                                setSessionOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                sessionFilter === s
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* -------- Exam Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setExamOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          examFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {examFilter || "Select Exam"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            examOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {examOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {examOptions.map((e) => (
-                            <button
-                              key={e}
-                              onClick={() => {
-                                setExamFilter(e);
-                                setExamOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                examFilter === e
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {e}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* -------- Apply Filter -------- */}
-                    <button
-                      onClick={() => {
-                        const filteredData = examRoutineData.filter((item) => {
-                          return (
-                            (classFilter === "" ||
-                              item.Class === classFilter) &&
-                            (groupFilter === "" ||
-                              item.Group === groupFilter) &&
-                            (sectionFilter === "" ||
-                              item.Section === sectionFilter) &&
-                            (sessionFilter === "" ||
-                              item.Session === sessionFilter) &&
-                            (examFilter === "" ||
-                              item["Exam Name"] === examFilter)
-                          );
-                        });
-                        setData(filteredData); // ✅ only now data is filtered
-                        setCurrentPage(1);
-                        setFilterOpen(false);
-                      }}
-                      className="w-full bg-blue-600 text-white text-xs py-1 rounded mt-2"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              )}
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
             </div>
 
             {/* Sort Button */}
-            <div className="flex-1">
+            <div className="relative flex-1 " ref={sortRef}>
               <button
-                onClick={() =>
-                  setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
-                }
-                className={`w-full md:w-28 flex items-center gap-1 rounded border px-2 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
               >
-                Sort {sortOrder === "newest" ? "↑" : "↓"}
+                Sort By
               </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -899,7 +688,7 @@ export default function ExamRoutineList() {
                 setCurrentPage(1);
               }}
               placeholder="Search class..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs focus:outline-none ${borderClr} ${inputBg}`}
+              className={`w-full md:w-64 border px-3 h-8 text-xs focus:outline-none ${borderClr} ${inputBg}`}
             />
             <Pagination
               currentPage={currentPage}
@@ -911,13 +700,13 @@ export default function ExamRoutineList() {
       </div>
 
       {/* TABLE */}
-      <div className={`rounded p-2 overflow-x-auto ${cardBg}`}>
+      <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ReusableTable
           columns={columns}
           data={currentData.map((item, idx) => ({
             ...item,
             id: (currentPage - 1) * perPage + idx + 1,
-              SL: (currentPage - 1) * perPage + idx + 1,
+            SL: (currentPage - 1) * perPage + idx + 1,
           }))}
           showActionKey={canEdit}
         />

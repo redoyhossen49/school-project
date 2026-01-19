@@ -1,11 +1,9 @@
+import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import StudentActions from "../student/StudentActions";
+import ReusableActions from "../common/ReusableActions";
+import ReusableEditModal from "../common/ReusableEditModal";
 
-export default function ClassGroupTable({
-  data = [],
-  month = "All",
-  groupFilter,
-}) {
+export default function ClassGroupTable({ data = [], setData, month = "All", groupFilter }) {
   const { darkMode } = useTheme();
   const userRole = localStorage.getItem("role"); // "school"
   const showAction = userRole === "school";
@@ -15,13 +13,47 @@ export default function ClassGroupTable({
   const bgHeader = darkMode ? "bg-gray-800" : "bg-gray-100";
   const textHeader = darkMode ? "text-gray-100" : "text-gray-900";
 
+  // -------------------- Edit Modal --------------------
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleEditSubmit = (updatedData) => {
+    setData((prev) =>
+      prev.map((c) => {
+        if (c.sl === selectedRow.classSl) {
+          return {
+            ...c,
+            groups: c.groups.map((g) =>
+              g.name === selectedRow.groupName ? { ...g, ...updatedData } : g
+            ),
+          };
+        }
+        return c;
+      })
+    );
+    setEditModalOpen(false);
+  };
+
+  const handleDelete = (row) => {
+    if (confirm("Are you sure you want to delete this group?")) {
+      setData((prev) =>
+        prev.map((c) =>
+          c.sl === row.classSl
+            ? { ...c, groups: c.groups.filter((g) => g.name !== row.groupName) }
+            : c
+        )
+      );
+      alert("Group deleted successfully ✅");
+    }
+  };
+
   return (
     <div
       className={`border overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
-      } `}
+      }`}
     >
       <table className="w-full table-auto border-collapse text-xs md:text-sm">
         {/* ===== HEADER ===== */}
@@ -73,74 +105,46 @@ export default function ClassGroupTable({
                           paid: g.monthly.reduce((a, b) => a + b.paid, 0),
                           due: g.monthly.reduce((a, b) => a + b.due, 0),
                         }
-                      : g.monthly.find((m) => m.month === month) || {
-                          paid: 0,
-                          due: 0,
-                        };
+                      : g.monthly.find((m) => m.month === month) || { paid: 0, due: 0 };
 
                   const totalPayable =
-                    month === "All"
-                      ? g.totalPayable
-                      : monthData.paid + monthData.due;
-                  const payableDue =
-                    month === "All"
-                      ? g.monthly.reduce((a, b) => a + b.due, 0)
-                      : monthData.due;
+                    month === "All" ? g.totalPayable : monthData.paid + monthData.due;
+                  const payableDue = month === "All" ? g.monthly.reduce((a, b) => a + b.due, 0) : monthData.due;
+
+                  const rowData = {
+                    classSl: c.sl,
+                    groupName: g.name,
+                    subjects: g.subjects,
+                    totalStudents: g.totalStudents,
+                    totalPayable,
+                    payableDue,
+                  };
 
                   return (
-                    <tr
-                      key={`${c.sl}-${g.name}`}
-                      className={`border-b ${borderCol} ${hoverRow}`}
-                    >
-                      <td
-                        className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
-                      >
-                        {c.sl}
-                      </td>
-                      <td
-                        className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
-                      >
-                        {c.class}
-                      </td>
-                      <td
-                        className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
-                      >
-                        {g.name}
-                      </td>
-                      <td
-                        className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
-                      >
-                        {g.subjects}
-                      </td>
-                      <td
-                        className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
-                      >
-                        {g.totalStudents}
-                      </td>
-                      <td
-                        className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
-                      >
-                        ৳{totalPayable}
-                      </td>
-                      <td
-                        className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
-                      >
+                    <tr key={`${c.sl}-${g.name}`} className={`border-b ${borderCol} ${hoverRow}`}>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{c.sl}</td>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{c.class}</td>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{g.name}</td>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{g.subjects}</td>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{g.totalStudents}</td>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>৳{totalPayable}</td>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
                         {payableDue === 0 ? (
-                          <span className="text-green-600 font-semibold">
-                            Paid
-                          </span>
+                          <span className="text-green-600 font-semibold">Paid</span>
                         ) : (
-                          <span className="text-red-600 font-semibold">
-                            ৳{payableDue}
-                          </span>
+                          <span className="text-red-600 font-semibold">৳{payableDue}</span>
                         )}
                       </td>
+
                       {showAction && (
                         <td className="px-3 h-8 whitespace-nowrap">
-                          <StudentActions
-                            classData={c}
-                            group={g}
-                            month={month}
+                          <ReusableActions
+                            item={rowData}
+                            onEdit={(row) => {
+                              setSelectedRow(row);
+                              setEditModalOpen(true);
+                            }}
+                            onDelete={handleDelete}
                           />
                         </td>
                       )}
@@ -151,6 +155,24 @@ export default function ClassGroupTable({
           )}
         </tbody>
       </table>
+
+      {/* ===== Edit Modal ===== */}
+      {selectedRow && (
+        <ReusableEditModal
+          open={editModalOpen}
+          title="Edit Group"
+          item={selectedRow}
+          onClose={() => setEditModalOpen(false)}
+          onSubmit={handleEditSubmit}
+          fields={[
+            { name: "groupName", label: "Group Name", type: "text", required: true },
+            { name: "subjects", label: "Subjects No", type: "number" },
+            { name: "totalStudents", label: "Total Students", type: "number" },
+            { name: "totalPayable", label: "Total Payable", type: "number" },
+            { name: "payableDue", label: "Payable Due", type: "number" },
+          ]}
+        />
+      )}
     </div>
   );
 }

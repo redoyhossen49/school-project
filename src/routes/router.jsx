@@ -44,6 +44,7 @@ import EmployeeList from "../pages/EmployeeList";
 import AddEmployeePage from "../pages/AddEmployeePage";
 import PayrollList from "../pages/PayrollList";
 import AddPayrollPage from "../pages/AddPayrollPage";
+import ScheduleList from "../pages/ScheduleList";
 
 export const router = createBrowserRouter([
   {
@@ -132,11 +133,12 @@ export const router = createBrowserRouter([
       { path: "permissionlist", element: <ClassPermissionList /> },
       { path: "addclasspermission", element: <AddClassPermissionPage /> },
 
-      { path: "Examlist", element: <Examlist /> },
+      { path: "examlist", element: <Examlist /> },
       { path: "examroutine", element: <ExamRoutineList /> },
       { path: "examgrade", element: <GradeList /> },
       { path: "examadmit", element: <AddmitCardPage /> },
       { path: "examsitnumber", element: <SitNumberPage /> },
+      { path: "examschedule", element: <ScheduleList /> },
 
       // fee management routes
       { path: "fee/feegrouplist", element: <FeeGroupList /> },

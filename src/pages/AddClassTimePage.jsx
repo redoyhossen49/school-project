@@ -33,16 +33,34 @@ export default function AddClassTimePage() {
   };
 
   return (
-    <div className={`py-3 px-2  min-h-screen ${darkMode ? "bg-gray-800" : "bg-gray-50"}`}>
+    <div
+      className={`py-3 px-2  min-h-screen ${
+        darkMode ? "bg-gray-800" : "bg-gray-50"
+      }`}
+    >
       {/* ===== Header ===== */}
-      <div className={`mb-3 p-6  ${darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"}`}>
+      <div
+        className={`mb-3 p-6  ${
+          darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
+        }`}
+      >
         <h1 className="text-base font-bold">Add Class Time</h1>
-        <p className={`text-xs mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-          <Link to="/school/dashboard" className="hover:text-indigo-600">Dashboard</Link>
+        <p
+          className={`text-xs mt-1 ${
+            darkMode ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
+          <Link to="/school/dashboard" className="hover:text-indigo-600">
+            Dashboard
+          </Link>
           <span className="mx-1">/</span>
-          <Link to="/school/dashboard/classtimelist" className="hover:text-indigo-600">Class time </Link>
-           <span className="mx-1">/</span>Add class time
-          
+          <Link
+            to="/school/dashboard/classtimelist"
+            className="hover:text-indigo-600"
+          >
+            Class time{" "}
+          </Link>
+          <span className="mx-1">/</span>Add class time
         </p>
       </div>
 
@@ -53,7 +71,11 @@ export default function AddClassTimePage() {
           darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"
         }`}
       >
-        <h2 className={`text-center font-semibold ${darkMode ? "text-gray-200" : "text-gray-800"}`}>
+        <h2
+          className={`text-center font-semibold ${
+            darkMode ? "text-gray-200" : "text-gray-800"
+          }`}
+        >
           Class Time Information
         </h2>
 
@@ -61,60 +83,58 @@ export default function AddClassTimePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Class */}
           <Input
+            type="select"
             label="Select class"
             name="className"
             value={formData.className}
             onChange={handleChange}
-           
+            options={["1", "2", "3", "4", "5"]} // তুমি চাইলে real options দিতে পারো
           />
 
-          {/* Group (Optional) */}
           <Input
-            label="Select group "
+            type="select"
+            label="Select group"
             name="group"
             value={formData.group}
             onChange={handleChange}
-           
+            options={["Science", "Arts", "Commerce"]}
           />
 
-          {/* Section (Optional) */}
           <Input
-            label="Select section "
-            
+            type="select"
+            label="Select section"
             name="section"
             value={formData.section}
             onChange={handleChange}
-            
+            options={["A", "B", "C"]}
           />
 
           {/* Start Time */}
           <Input
-            label="Class start time"
+            label=" Start time"
             name="startTime"
             type="time"
             value={formData.startTime}
             onChange={handleChange}
-            
+            showDropdownTop={true}
           />
 
           {/* Last Time */}
           <Input
-            label="Attended last time"
+            label="Late time"
             name="lastTime"
             type="time"
             value={formData.lastTime}
             onChange={handleChange}
-          
           />
 
           {/* End Time */}
           <Input
-            label="Class end time"
+            label="End time"
             name="endTime"
             type="time"
             value={formData.endTime}
             onChange={handleChange}
-            
           />
         </div>
 

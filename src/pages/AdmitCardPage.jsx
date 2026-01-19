@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function AdmitCardPage() {
   const canEdit = localStorage.getItem("role") === "school";
@@ -20,6 +21,13 @@ export default function AdmitCardPage() {
   const [sectionFilter, setSectionFilter] = useState("");
   const [sessionFilter, setSessionFilter] = useState("");
   const [examFilter, setExamFilter] = useState("");
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+
+    session: "",
+    exam: "",
+  });
 
   // -------------------- Dropdowns --------------------
   const [monthOpen, setMonthOpen] = useState(false);
@@ -35,8 +43,8 @@ export default function AdmitCardPage() {
   const [sessionOpen, setSessionOpen] = useState(false);
   const [examOpen, setExamOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-
-  const [sortOrder, setSortOrder] = useState("newest");
+const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusOpen, setStatusOpen] = useState(false);
@@ -72,30 +80,24 @@ export default function AdmitCardPage() {
   const classOptions = Array.from(new Set(studentExamData.map((d) => d.Class)));
   const groupOptions = Array.from(new Set(studentExamData.map((d) => d.Group)));
   const sectionOptions = Array.from(
-    new Set(studentExamData.map((d) => d.Section || ""))
+    new Set(studentExamData.map((d) => d.Section || "")),
   );
   const sessionOptions = Array.from(
-    new Set(studentExamData.map((d) => d.Session))
+    new Set(studentExamData.map((d) => d.Session)),
   );
   const examOptions = Array.from(
-    new Set(studentExamData.map((d) => d.ExamName))
+    new Set(studentExamData.map((d) => d.ExamName)),
   );
 
-  const examNameOptions = Array.from(
-    new Set(studentExamData.map((d) => d.ExamName))
-  );
-  const studentOptions = studentExamData.map((d) => ({
-    label: d.StudentName,
-    value: d.IDNumber,
-  }));
+  const studentOptions = studentExamData.map((d) => d.StudentName);
   const subjectOptions = Array.from(
-    new Set(studentExamData.map((d) => d.SubjectName))
+    new Set(studentExamData.map((d) => d.SubjectName)),
   );
 
   const classRef = useRef(null);
   const groupRef = useRef(null);
   const exportRef = useRef(null);
-
+  const sortRef = useRef(null);
   const filterRef = useRef(null);
   const statusRef = useRef(null);
 
@@ -141,7 +143,7 @@ export default function AdmitCardPage() {
         Student: r.StudentName,
         Roll: r.RollNo,
         AdmitCardNo: r.AdmitCardNo,
-      }))
+      })),
     );
 
     const workbook = XLSX.utils.book_new();
@@ -198,37 +200,38 @@ export default function AdmitCardPage() {
   };
 
   // -------------------- Filtered + Sorted Data --------------------
-  const filteredData = useMemo(() => {
-    return studentExamData
-      .filter((d) => {
-        return (
-          (appliedFilters.class ? d.Class === appliedFilters.class : true) &&
-          (appliedFilters.group ? d.Group === appliedFilters.group : true) &&
-          (appliedFilters.section
-            ? d.Section === appliedFilters.section
-            : true) &&
-          (appliedFilters.session
-            ? d.Session === appliedFilters.session
-            : true) &&
-          (appliedFilters.exam ? d.ExamName === appliedFilters.exam : true) &&
-          (search
-            ? d.StudentName.toLowerCase().includes(search.toLowerCase())
-            : true)
-        );
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.ExamStartDate);
-        const dateB = new Date(b.ExamStartDate);
-        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-      });
-  }, [appliedFilters, search, sortOrder]);
+ const filteredData = useMemo(() => {
+  const source = data.length ? data : studentExamData;
+
+  return source
+    .filter((d) => {
+      return (
+        (appliedFilters.class ? d.Class === appliedFilters.class : true) &&
+        (appliedFilters.group ? d.Group === appliedFilters.group : true) &&
+        (appliedFilters.section ? d.Section === appliedFilters.section : true) &&
+        (appliedFilters.session ? d.Session === appliedFilters.session : true) &&
+        (appliedFilters.exam ? d.ExamName === appliedFilters.exam : true) &&
+        (search ? d.StudentName.toLowerCase().includes(search.toLowerCase()) : true)
+      );
+    })
+    .sort((a, b) => {
+      // Sorting by IDNumber (or SL if exists)
+      if (sortOrder === "asc") {
+        return a.IDNumber - b.IDNumber; // oldest first
+      } else {
+        return b.IDNumber - a.IDNumber; // newest first
+      }
+    });
+}, [data, appliedFilters, search, sortOrder]);
+
+
 
   // -------------------- Pagination --------------------
   const perPage = 20;
   const totalPages = Math.max(1, Math.ceil(filteredData.length / perPage));
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
 
   // -------------------- Columns --------------------
@@ -251,113 +254,110 @@ export default function AdmitCardPage() {
     { key: "EndTime", label: "End Time" },
   ];
 
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select Class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select Group",
+      options: groupOptions,
+    },
+
+    {
+      key: "session",
+
+      placeholder: "Select session",
+      options: sessionOptions,
+    },
+    {
+      key: "exam",
+
+      placeholder: "Select exam",
+      options: examOptions,
+    },
+  ];
   const getAdmitCardFields = [
     {
-      name: "class",
-      label: "Class",
+      key: "class",
       type: "select",
-      options: classOptions,
       placeholder: "Select Class",
-      required: true,
+      options: classOptions,
     },
     {
-      name: "group",
-      label: "Group",
+      key: "group",
       type: "select",
-      options: groupOptions,
       placeholder: "Select Group",
-      required: true,
+      options: groupOptions,
     },
     {
-      name: "session",
-      label: "Session",
+      key: "session",
       type: "select",
-      options: sessionOptions,
       placeholder: "Select Session",
-      required: true,
+      options: sessionOptions,
     },
     {
-      name: "examName",
-      label: "Exam Name",
+      key: "examName",
       type: "select",
-      options: examNameOptions,
       placeholder: "Select Exam",
-      required: true,
+      options: examOptions,
     },
     {
-      name: "examYear",
-      label: "Exam Year",
+      key: "examYear",
       type: "number",
       placeholder: "Enter Exam Year",
-      required: true,
     },
     {
-      name: "studentName",
-      label: "Student Name",
+      key: "studentName",
       type: "select",
-      options: studentOptions,
       placeholder: "Select Student",
-      required: true,
+      options: studentOptions,
     },
     {
-      name: "idNumber",
-      label: "ID Number",
+      key: "idNumber",
       type: "text",
       placeholder: "Auto from Student",
-      required: true,
       readOnly: true,
     },
     {
-      name: "rollNo",
-      label: "Roll No",
+      key: "rollNo",
       type: "text",
       placeholder: "Auto from Student",
-      required: true,
       readOnly: true,
     },
     {
-      name: "fathersName",
-      label: "Father's Name",
+      key: "fathersName",
       type: "text",
       placeholder: "Auto from Student",
-      required: true,
       readOnly: true,
     },
     {
-      name: "admitCardNo",
-      label: "Admit Card No",
+      key: "admitCardNo",
       type: "text",
       placeholder: "Auto-generated",
-      required: true,
     },
     {
-      name: "subjectName",
-      label: "Subject Name",
+      key: "subjectName",
       type: "select",
-      options: subjectOptions,
       placeholder: "Select Subject",
-      required: true,
+      options: subjectOptions,
     },
     {
-      name: "examStartDate",
-      label: "Exam Start Date",
+      key: "examStartDate",
       type: "date",
       placeholder: "Select Exam Date",
-      required: true,
     },
     {
-      name: "startTime",
-      label: "Start Time",
+      key: "startTime",
       type: "time",
       placeholder: "Select Start Time",
-      required: true,
     },
     {
-      name: "endTime",
-      label: "End Time",
+      key: "endTime",
       type: "time",
       placeholder: "Select End Time",
-      required: true,
     },
   ];
 
@@ -397,19 +397,19 @@ export default function AdmitCardPage() {
   // -------------------- Styles --------------------
   const cardBg = darkMode
     ? "bg-gray-900 text-gray-100"
-    : "bg-white text-gray-800";
-  const borderClr = darkMode ? "border-gray-500" : "border-gray-200";
+    : "bg-white text-gray-700";
+  const borderClr = darkMode ? "border-gray-500" : "border-gray-300";
   const inputBg = darkMode
     ? "bg-gray-700 text-gray-100"
-    : "bg-white text-gray-800";
+    : "bg-white text-gray-700";
   const dropdownBg = darkMode
     ? "bg-gray-700 text-gray-100"
-    : "bg-white text-gray-800";
+    : "bg-white text-gray-700";
 
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={`rounded-md p-3 space-y-3 ${cardBg}`}>
+      <div className={` p-3 space-y-4 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Admit Card</h2>
@@ -425,7 +425,7 @@ export default function AdmitCardPage() {
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
             <button
               onClick={handleRefresh}
-              className={`w-full flex items-center gap-1 rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+              className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
             >
               Refresh
             </button>
@@ -433,30 +433,31 @@ export default function AdmitCardPage() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between rounded border px-2 py-2 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full flex items-center   border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
-                Export <BiChevronDown />
+                Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border  ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => {
                       exportPDF(filteredData); // download
                       setExportOpen(false); // close dropdown
                     }}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                    PDF
                   </button>
                   <button
-                    onClick={() =>{ exportExcel(filteredData);
-                        setExportOpen(false); 
+                    onClick={() => {
+                      exportExcel(filteredData);
+                      setExportOpen(false);
                     }}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -465,7 +466,7 @@ export default function AdmitCardPage() {
             {canEdit && (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center gap-1 rounded bg-blue-600 text-white px-2 py-2 text-xs"
+                className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Admit Card
               </button>
@@ -494,26 +495,21 @@ export default function AdmitCardPage() {
         </div>
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-3 md:gap-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
           <div className="flex gap-2 md:gap-2 w-full md:w-auto">
             <div ref={statusRef} className="relative flex-1">
               <button
                 onClick={() => setStatusOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center gap-2 border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
-                {classFilter || "Select Class"}
-                <BiChevronDown
-                  className={`${
-                    statusOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+                {classFilter || " Class"}
               </button>
 
               {statusOpen &&
                 Array.isArray(classOptions) &&
                 classOptions.length > 0 && (
                   <div
-                    className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-md max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
+                    className={`absolute left-0 top-full z-50 mt-1 w-full  border  max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
                   >
                     {classOptions.map((cls) => (
                       <button
@@ -524,12 +520,12 @@ export default function AdmitCardPage() {
                           setCurrentPage(1); // reset pagination
                           setStatusOpen(false); // close dropdown
                         }}
-                        className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                        className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
                           classFilter === cls
                             ? "bg-blue-100 text-blue-700 font-medium"
                             : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
+                              ? "text-gray-200"
+                              : "text-gray-700"
                         }`}
                       >
                         {cls}
@@ -544,233 +540,73 @@ export default function AdmitCardPage() {
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
-                Filter{" "}
-                <BiChevronDown
-                  className={`${
-                    filterOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+                Filter
               </button>
 
-              {filterOpen && (
-                <div
-                  className={`absolute top-full z-50 mt-1 w-52 rounded border left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 max-h-64 overflow-y-auto shadow-md py-4 px-6 space-y-2 ${borderClr} ${dropdownBg}`}
-                >
-                  <div className="flex flex-col gap-2">
-                    {/* -------- Class Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setClassOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          classFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {classFilter || "Select Class"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            classOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {classOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {classOptions.map((c) => (
-                            <button
-                              key={c}
-                              onClick={() => {
-                                setClassFilter(c);
-                                setGroupFilter(""); // reset dependent filters
-                                setSectionFilter("");
-                                setSessionFilter("");
-                                setExamFilter("");
-                                setClassOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                classFilter === c
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {c}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              <FilterDropdown
+                title="Filter exam routine"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
 
-                    {/* -------- Group Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setGroupOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          groupFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {groupFilter || "Select Group"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            groupOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {groupOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {groupOptions.map((g) => (
-                            <button
-                              key={g}
-                              onClick={() => {
-                                setGroupFilter(g);
-                                setSectionFilter(""); // reset dependent filters
-                                setSessionFilter("");
-                                setExamFilter("");
-                                setGroupOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                groupFilter === g
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {g}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                  setSessionFilter(values.session || "");
+                  setExamFilter(values.exam || "");
 
-                    {/* -------- Session Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setSessionOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          sessionFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {sessionFilter || "Select Session"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            sessionOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {sessionOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {sessionOptions.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => {
-                                setSessionFilter(s);
-                                setSessionOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                sessionFilter === s
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* -------- Exam Filter -------- */}
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setExamOpen((prev) => !prev)}
-                        className={`w-full text-left px-2 py-1 text-xs rounded flex justify-between items-center hover:bg-blue-50 hover:text-blue-600 ${
-                          examFilter === ""
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {examFilter || "Select Exam"}{" "}
-                        <BiChevronDown
-                          className={`${
-                            examOpen ? "rotate-180" : ""
-                          } transition-transform`}
-                        />
-                      </button>
-                      {examOpen && (
-                        <div className="max-h-40 overflow-y-auto">
-                          {examOptions.map((e) => (
-                            <button
-                              key={e}
-                              onClick={() => {
-                                setExamFilter(e);
-                                setExamOpen(false);
-                              }}
-                              className={`w-full text-left px-2 py-1 text-xs rounded hover:bg-blue-50 hover:text-blue-600 ${
-                                examFilter === e
-                                  ? "bg-blue-100 text-blue-700 font-medium"
-                                  : darkMode
-                                  ? "text-gray-200"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {e}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* -------- Apply Filter -------- */}
-                    <button
-                      onClick={() => {
-                        setAppliedFilters({
-                          class: classFilter,
-                          group: groupFilter,
-                          section: sectionFilter,
-                          session: sessionFilter,
-                          exam: examFilter,
-                        });
-
-                        setCurrentPage(1);
-                        setFilterOpen(false);
-                      }}
-                      className="w-full bg-blue-600 text-white text-xs py-1 rounded mt-2"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              )}
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
             </div>
 
             {/* Sort Button */}
-            <div className="flex-1">
+            <div className="relative flex-1 " ref={sortRef}>
               <button
-                onClick={() =>
-                  setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
-                }
-                className={`w-full md:w-28 flex items-center gap-1 rounded border px-2 py-2 text-xs shadow-sm ${borderClr} ${inputBg}`}
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
               >
-                Sort {sortOrder === "newest" ? "↑" : "↓"}
+                Sort By
               </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -783,7 +619,7 @@ export default function AdmitCardPage() {
                 setCurrentPage(1);
               }}
               placeholder="Search class..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs focus:outline-none ${borderClr} ${inputBg}`}
+              className={`w-full md:w-64 border px-3 h-8 text-xs focus:outline-none ${borderClr} ${inputBg}`}
             />
             <Pagination
               currentPage={currentPage}
@@ -795,13 +631,13 @@ export default function AdmitCardPage() {
       </div>
 
       {/* TABLE */}
-      <div className={`rounded p-2 overflow-x-auto ${cardBg}`}>
+      <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ReusableTable
           columns={columns}
           data={currentData.map((item, idx) => ({
             ...item,
             id: (currentPage - 1) * perPage + idx + 1,
-              SL: (currentPage - 1) * perPage + idx + 1,
+            SL: (currentPage - 1) * perPage + idx + 1,
           }))}
           showActionKey={canEdit}
         />
