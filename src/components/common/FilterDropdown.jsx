@@ -47,11 +47,11 @@ export default function FilterDropdown({
   return (
     <div
       ref={containerRef}
-      className="absolute z-40 mt-2 left-0 w-64 md:w-72 max-h-[60vh] overflow-y-auto"
+      className="absolute z-50 mt-2 left-0  w-[170px] md:w-72 lg:w-72 max-h-[80vh] overflow-y-auto hide-scrollbar"
     >
       {/* ===== MAIN DROPDOWN ===== */}
       <div
-        className={`border shadow-lg p-5 relative 
+        className={`border shadow-lg  p-5 relative 
           ${
             darkMode
               ? "bg-gray-800 text-gray-100 border-gray-600"
@@ -83,7 +83,7 @@ export default function FilterDropdown({
 
               {/* Options Dropdown - Attached to button */}
               {activeField === field.key && (
-                <div className={`absolute top-full left-0 right-0 mt-1 z-50 border shadow-lg max-h-48 overflow-y-auto ${
+                <div className={`absolute top-full left-0 right-0 mt-1 z-50 border shadow-lg max-h-48 overflow-y-auto hide-scrollbar ${
                   darkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-300"
@@ -91,23 +91,20 @@ export default function FilterDropdown({
                   <ul>
                     {/* All option */}
                     <li>
-                      <label className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
-                        darkMode
-                          ? "hover:bg-gray-600 text-gray-100"
-                          : "hover:bg-blue-50 text-gray-900"
-                      }`}>
-                        <input
-                          type="radio"
-                          checked={!tempValues[field.key]}
-                          onChange={() => {
-                            setTempValues((p) => ({
-                              ...p,
-                              [field.key]: "",
-                            }));
-                            setActiveField(null);
-                          }}
-                          className="mr-2"
-                        />
+                      <label 
+                        onClick={() => {
+                          setTempValues((p) => ({
+                            ...p,
+                            [field.key]: "",
+                          }));
+                          setActiveField(null);
+                        }}
+                        className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
+                          darkMode
+                            ? "hover:bg-gray-600 text-gray-100"
+                            : "hover:bg-blue-50 text-gray-900"
+                        }`}
+                      >
                         All
                       </label>
                     </li>
@@ -115,23 +112,20 @@ export default function FilterDropdown({
                     {/* Options */}
                     {field.options?.map((opt) => (
                       <li key={opt}>
-                        <label className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
-                          darkMode
-                            ? "hover:bg-gray-600 text-gray-100"
-                            : "hover:bg-blue-50 text-gray-900"
-                        }`}>
-                          <input
-                            type="radio"
-                            checked={tempValues[field.key] === opt}
-                            onChange={() => {
-                              setTempValues((p) => ({
-                                ...p,
-                                [field.key]: opt,
-                              }));
-                              setActiveField(null);
-                            }}
-                            className="mr-2"
-                          />
+                        <label 
+                          onClick={() => {
+                            setTempValues((p) => ({
+                              ...p,
+                              [field.key]: opt,
+                            }));
+                            setActiveField(null);
+                          }}
+                          className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
+                            darkMode
+                              ? "hover:bg-gray-600 text-gray-100"
+                              : "hover:bg-blue-50 text-gray-900"
+                          }`}
+                        >
                           {opt}
                         </label>
                       </li>
@@ -146,7 +140,13 @@ export default function FilterDropdown({
         {/* Actions */}
         <div className="flex gap-2 mt-4">
           <button
-            onClick={() => setTempValues({})}
+            onClick={() => {
+              setTempValues({});
+              setSelected({});
+              onApply({});
+              onClose();
+              setActiveField(null);
+            }}
             className={`w-1/2 h-8 text-xs border
               ${
                 darkMode

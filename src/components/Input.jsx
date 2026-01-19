@@ -9,6 +9,8 @@ export default function Input({
   options = [], // for select
   error,
   inputClassName = "",
+  step,
+  ...restProps
 }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -50,7 +52,7 @@ export default function Input({
 
       {/* Options dropdown */}
       {open && (
-        <ul className="absolute z-50 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto ">
+        <ul className="absolute z-50 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto hide-scrollbar ">
           {options.map((opt, idx) => (
             <li
               key={idx}
@@ -81,6 +83,8 @@ export default function Input({
         value={value}
         onChange={onChange}
         placeholder=" " // important for floating label
+        step={step}
+        {...restProps}
         className={`
           peer w-full border h-8 px-2 text-xs
           ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}

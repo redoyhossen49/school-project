@@ -45,3 +45,13 @@
   0% { text-shadow: 0 0 4px rgba(245, 7, 7); }
   100% { text-shadow: 0 0 5px rgb(165, 231, 10); }
 }
+
+/* ===== Hide Scrollbar ===== */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}

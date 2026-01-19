@@ -90,6 +90,7 @@ export default function FeeTypeList() {
   const exportRef = useRef(null);
   const sortRef = useRef(null);
   const filterRef = useRef(null);
+  const filterButtonRef = useRef(null);
 
   const dateOptions = [
     { label: "Today", value: "today" },
@@ -536,7 +537,11 @@ export default function FeeTypeList() {
           <div className="hidden md:flex gap-2">
             <button
               onClick={handleRefresh}
-              className={`flex items-center   px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
+              className={`w-28 flex items-center border ${
+                darkMode
+                  ? "bg-gray-700 border-gray-500"
+                  : "bg-white border-gray-200"
+              } px-3 h-8 text-xs`}
             >
               Refresh
             </button>
@@ -544,7 +549,11 @@ export default function FeeTypeList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between  px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
+                className={`w-28 flex items-center border ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-500"
+                    : "bg-white border-gray-200"
+                } px-3 h-8 text-xs`}
               >
                 Export 
               </button>
@@ -558,13 +567,13 @@ export default function FeeTypeList() {
                 >
                   <button
                     onClick={() => exportPDF(filteredFees)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                   >
                     Export PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredFees)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                   >
                     Export Excel
                   </button>
@@ -575,7 +584,7 @@ export default function FeeTypeList() {
             {canEdit && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
+                className="w-28 flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
               >
                 Fee Type
               </button>
@@ -587,21 +596,29 @@ export default function FeeTypeList() {
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
-            className={`w-full  flex items-center  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
+            className={`w-full flex items-center gap-2 border ${
+              darkMode
+                ? "bg-gray-700 border-gray-500"
+                : "bg-white border-gray-200"
+            } px-3 h-8 text-xs`}
           >
             Refresh
           </button>
 
-          <div className="relative w-full " ref={exportRef}>
+          <div className="relative w-full" ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full  flex items-center   px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+              className={`w-full flex items-center border ${
+                darkMode
+                  ? "bg-gray-700 border-gray-500"
+                  : "bg-white border-gray-200"
+              } px-3 h-8 text-xs`}
             >
               Export
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border   ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border  ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -609,15 +626,15 @@ export default function FeeTypeList() {
               >
                 <button
                   onClick={() => exportPDF(filteredFees)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                 >
-                  Export PDF
+                  PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredFees)}
-                  className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                 >
-                  Export Excel
+                  Excel
                 </button>
               </div>
             )}
@@ -626,7 +643,7 @@ export default function FeeTypeList() {
           {canEdit && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
+              className="w-full flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Fee Type
             </button>
@@ -634,13 +651,18 @@ export default function FeeTypeList() {
         </div>
 
         {/* Filters + Search */}
-        <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2">
+          <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
             {/* Filter Button */}
             <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
+                ref={filterButtonRef}
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full flex items-center justify-center md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                    : "bg-white border-gray-300 hover:bg-gray-100"
+                }`}
               >
                 Filter
               </button>
@@ -679,59 +701,61 @@ export default function FeeTypeList() {
                 isOpen={filterOpen}
                 onClose={() => setFilterOpen(false)}
                 onApply={() => setCurrentPage(1)}
-                buttonRef={filterRef}
+                buttonRef={filterButtonRef}
               />
             </div>
 
             {/* Create Fees Button */}
             {canEdit && (
-              <button
-                onClick={() => setShowCreateFeesModal(true)}
-                className={`flex-1 md:flex-none flex items-center justify-center md:w-24 px-3 h-8 text-xs border ${borderClr} ${
-                  darkMode
-                    ? "bg-gray-700 text-gray-200 hover:bg-gray-600"
-                    : "bg-white text-gray-800 hover:bg-gray-50"
-                }`}
-              >
-                Create Fees
-              </button>
+              <div className="relative flex-1 md:flex-none">
+                <button
+                  onClick={() => setShowCreateFeesModal(true)}
+                  className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                      : "bg-white border-gray-300 hover:bg-gray-100"
+                  }`}
+                >
+                  Create Fees
+                </button>
+              </div>
             )}
 
             {/* Sort Dropdown */}
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full flex items-center justify-center md:w-24 px-3 h-8 text-xs border ${
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
                   darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-200"
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                    : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
                 Sort By
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border ${
+                  className={`absolute left-0 mt-2 md:w-36 z-40 w-full border ${
                     darkMode
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
+                      ? "bg-gray-800 text-gray-100 border-gray-700"
+                      : "bg-white text-gray-900 border-gray-200"
                   }`}
                 >
                   <button
-                    className="w-full px-3 h-6 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                     onClick={() => {
                       setSortOrder("newest");
                       setSortOpen(false);
                     }}
+                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
                   >
                     First
                   </button>
                   <button
-                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                     onClick={() => {
                       setSortOrder("oldest");
                       setSortOpen(false);
                     }}
+                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
                   >
                     Last
                   </button>
@@ -741,13 +765,17 @@ export default function FeeTypeList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:w-auto">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 md:mt-0">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by class, group, section, session, fees type..."
-              className={`w-full md:w-64 ${borderClr} ${inputBg}  border  px-3 h-8  text-xs focus:outline-none`}
+              className={`w-full px-3 h-8 text-xs border ${
+                darkMode
+                  ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
+                  : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
+              } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <Pagination
               currentPage={currentPage}
@@ -856,7 +884,7 @@ export default function FeeTypeList() {
                     darkMode
                       ? "bg-gray-700 text-sm hover:bg-gray-600 text-gray-200"
                       : "bg-gray-50 text-sm hover:bg-gray-100 text-gray-700"
-                  } transition rounded`}
+                  } transition`}
                 >
                   Close
                 </button>
