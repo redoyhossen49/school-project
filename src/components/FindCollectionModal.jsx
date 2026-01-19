@@ -8,6 +8,10 @@ export default function FindCollectionModal({
   filterType,
   setFilterType,
   onApplyFilters,
+  options = [
+    { label: "Paid", value: "Paid", colorScheme: "blue" },
+    { label: "Due", value: "Due", colorScheme: "red" },
+  ],
 }) {
   const { darkMode } = useTheme();
   const [isModalClosing, setIsModalClosing] = useState(false);
@@ -76,43 +80,46 @@ export default function FindCollectionModal({
         <div className="space-y-3">
           {/* Button Options */}
           <div className="space-y-2">
-            {/* Paid Option */}
-            <button
-              type="button"
-              onClick={() => setFilterType("Paid")}
-              className={`w-full flex items-center justify-left gap-2 py-2 px-3 border transition ${
-                filterType === "Paid"
-                  ? darkMode
-                    ? "border-blue-500 bg-blue-900/30 text-blue-300"
-                    : "border-blue-600 bg-blue-50 text-blue-600"
-                  : darkMode
-                  ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
-              }`}
-            >
-              <span className="font-semibold text-xs">
-                Paid
-              </span>
-            </button>
+            {options.map((option) => {
+              const isSelected = filterType === option.value;
+              const colorScheme = option.colorScheme || "blue";
+              
+              // Color classes based on colorScheme
+              const selectedClasses = {
+                blue: darkMode
+                  ? "border-blue-500 bg-blue-900/30 text-blue-300"
+                  : "border-blue-600 bg-blue-50 text-blue-600",
+                red: darkMode
+                  ? "border-red-500 bg-red-900/30 text-red-300"
+                  : "border-red-600 bg-red-50 text-red-600",
+              };
 
-            {/* Due Option */}
-            <button
-              type="button"
-              onClick={() => setFilterType("Due")}
-              className={`w-full flex items-center justify-left gap-2 py-2 px-3 border transition ${
-                filterType === "Due"
-                  ? darkMode
-                    ? "border-red-500 bg-red-900/30 text-red-300"
-                    : "border-red-600 bg-red-50 text-red-600"
-                  : darkMode
+              const unselectedClasses = {
+                blue: darkMode
                   ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "border-gray-300 bg-white hover:bg-gray-50 text-red-600"
-              }`}
-            >
-              <span className="font-semibold text-xs">
-                Due
-              </span>
-            </button>
+                  : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800",
+                red: darkMode
+                  ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
+                  : "border-gray-300 bg-white hover:bg-gray-50 text-red-600",
+              };
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setFilterType(option.value)}
+                  className={`w-full flex items-center justify-left gap-2 py-2 px-3 border transition min-h-[36px] shrink-0 ${
+                    isSelected
+                      ? selectedClasses[colorScheme]
+                      : unselectedClasses[colorScheme]
+                  }`}
+                >
+                  <span className="font-semibold text-xs shrink-0">
+                    {option.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Action Buttons */}
