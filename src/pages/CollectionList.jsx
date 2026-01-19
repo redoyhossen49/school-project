@@ -10,13 +10,13 @@ import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
 import FeesCollectionModal from "../components/FeesCollectionModal.jsx";
+import FindCollectionModal from "../components/FindCollectionModal.jsx";
 import {
   getCollectionsAPI,
   initializeCollectionsStorage,
   updateCollectionAPI,
   deleteCollectionAPI,
   saveCollectionAPI,
-  getCollectionsFromStorage,
 } from "../utils/collectionUtils";
 import { studentData } from "../data/studentData";
 import { feeTypeData } from "../data/feeTypeData";
@@ -47,6 +47,22 @@ export default function CollectionList() {
       }
     };
     loadCollections();
+
+    // Listen for collectionsUpdated event (only reload when explicitly triggered)
+    const handleCollectionsUpdate = async () => {
+      try {
+        const data = await getCollectionsAPI();
+        setCollections(data);
+      } catch (error) {
+        console.error("Error reloading collections:", error);
+      }
+    };
+
+    window.addEventListener('collectionsUpdated', handleCollectionsUpdate);
+
+    return () => {
+      window.removeEventListener('collectionsUpdated', handleCollectionsUpdate);
+    };
   }, []);
 
   const userRole = localStorage.getItem("role");
@@ -64,6 +80,8 @@ export default function CollectionList() {
   });
   const [editingCollection, setEditingCollection] = useState(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [showFindModal, setShowFindModal] = useState(false);
+  const [findFilterType, setFindFilterType] = useState(""); // "Paid" or "Due"
 
   const exportRef = useRef(null);
   const sortRef = useRef(null);
@@ -92,10 +110,20 @@ export default function CollectionList() {
       c.fees_type?.toLowerCase().includes(search.toLowerCase())
     )
     .filter((c) => {
+      // Regular filters
       if (filters.className && c.class !== filters.className) return false;
       if (filters.group && c.group !== filters.group) return false;
       if (filters.section && c.section !== filters.section) return false;
       if (filters.session && c.session !== filters.session) return false;
+
+      // Find modal filters (Paid/Due)
+      if (findFilterType === "Paid") {
+        if ((c.total_due || 0) !== 0) return false;
+      } else if (findFilterType === "Due") {
+        if ((c.total_due || 0) === 0) return false;
+      }
+
+
       return true;
     })
     .sort((a, b) => {
@@ -240,10 +268,8 @@ export default function CollectionList() {
         
         // Update in localStorage (ready for API)
         await updateCollectionAPI(editingCollection.sl, updatedData);
-        
-        // Reload collections
-        const data = await getCollectionsAPI();
-        setCollections(data);
+
+        // Collections will reload automatically via collectionsUpdated event listener
         setEditingCollection(null);
         alert("Collection updated successfully ✅");
       } catch (error) {
@@ -317,7 +343,9 @@ export default function CollectionList() {
       const studentFeesDue = student?.feesDue || 0;
 
       // Get existing collections
-      const storedCollections = getCollectionsFromStorage();
+      // TODO: Replace with API call when backend is ready
+      // Example: const allCollections = await getCollectionsAPI();
+      const storedCollections = await getCollectionsAPI();
       const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
       
       // Find existing collections for this student with remaining dues
@@ -379,7 +407,9 @@ export default function CollectionList() {
       await saveCollectionAPI(collectionDataToSave);
 
       // Update student's feesDue
-      const updatedCollections = getCollectionsFromStorage();
+      // TODO: Replace with API call when backend is ready
+      // Example: await updateStudentFeesDueAPI(formData.student_id);
+      const updatedCollections = await getCollectionsAPI();
       const finalCollections = updatedCollections.length > 0 ? updatedCollections : collectionData;
       
       const studentCollections = finalCollections.filter(
@@ -390,6 +420,8 @@ export default function CollectionList() {
         return sum + (collection.total_due || 0);
       }, 0);
       
+      // TODO: Replace with API call when backend is ready
+      // Example: await updateStudentAPI(formData.student_id, { feesDue: totalDueFromAll });
       const storedStudents = localStorage.getItem("students");
       let students = storedStudents ? JSON.parse(storedStudents) : [...studentData];
       
@@ -406,9 +438,7 @@ export default function CollectionList() {
         window.dispatchEvent(new Event('studentsUpdated'));
       }
 
-      // Reload collections
-      const data = await getCollectionsAPI();
-      setCollections(data);
+      // Collections will reload automatically via collectionsUpdated event listener
       
       alert("Collection Added Successfully ✅");
       setShowCollectionModal(false);
@@ -553,6 +583,7 @@ export default function CollectionList() {
               )}
             </div>
 
+
             {canEdit && (
               <button
                 onClick={() => setShowCollectionModal(true)}
@@ -616,8 +647,15 @@ export default function CollectionList() {
 
         {/* Filters + Search */}
         <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="grid grid-cols-2 gap-2 md:flex md:w-auto items-center">
+          <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
             {/* Filter Button */}
+            
+            <button
+              onClick={() => setShowFindModal(true)}
+              className={`flex items-center md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
+            >
+              Find
+            </button>
             <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
@@ -766,6 +804,22 @@ export default function CollectionList() {
         open={showCollectionModal}
         onClose={() => setShowCollectionModal(false)}
         onSubmit={handleCollectionModalSubmit}
+      />
+
+      {/* Find Collection Modal */}
+      <FindCollectionModal
+        open={showFindModal}
+        onClose={() => {
+          setShowFindModal(false);
+          setFindFilterType("");
+        }}
+        collections={collections}
+        filterType={findFilterType}
+        setFilterType={setFindFilterType}
+        onApplyFilters={(filterData) => {
+          setFindFilterType(filterData.filterType);
+          setCurrentPage(1);
+        }}
       />
     </div>
   );
