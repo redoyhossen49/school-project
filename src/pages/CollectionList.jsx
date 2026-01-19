@@ -9,17 +9,19 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
-import FeesCollectionModal from "../components/FeesCollectionModal.jsx";
 import FindCollectionModal from "../components/FindCollectionModal.jsx";
+import Input from "../components/Input.jsx";
 import {
   getCollectionsAPI,
   initializeCollectionsStorage,
   updateCollectionAPI,
   deleteCollectionAPI,
   saveCollectionAPI,
+  getCollectionsFromStorage,
 } from "../utils/collectionUtils";
 import { studentData } from "../data/studentData";
 import { feeTypeData } from "../data/feeTypeData";
+import { feesTypeData } from "../data/feesTypeData";
 import { discountData } from "../data/discountData";
 
 export default function CollectionList() {
@@ -81,7 +83,8 @@ export default function CollectionList() {
   const [editingCollection, setEditingCollection] = useState(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [showFindModal, setShowFindModal] = useState(false);
-  const [findFilterType, setFindFilterType] = useState(""); // "Paid" or "Due"
+  const [findFilterType, setFindFilterType] = useState(""); // "Paid" or "Due" - for modal selection
+  const [appliedFindFilterType, setAppliedFindFilterType] = useState(""); // Applied filter after clicking Finding button
 
   const exportRef = useRef(null);
   const sortRef = useRef(null);
@@ -116,10 +119,10 @@ export default function CollectionList() {
       if (filters.section && c.section !== filters.section) return false;
       if (filters.session && c.session !== filters.session) return false;
 
-      // Find modal filters (Paid/Due)
-      if (findFilterType === "Paid") {
+      // Find modal filters (Paid/Due) - only apply when Finding button is clicked
+      if (appliedFindFilterType === "Paid") {
         if ((c.total_due || 0) !== 0) return false;
-      } else if (findFilterType === "Due") {
+      } else if (appliedFindFilterType === "Due") {
         if ((c.total_due || 0) === 0) return false;
       }
 
@@ -231,6 +234,8 @@ export default function CollectionList() {
     setSearch("");
     setFilters({ className: "", group: "", section: "", session: "" });
     setSortOrder("newest");
+    setFindFilterType("");
+    setAppliedFindFilterType("");
     setCurrentPage(1);
   };
 
@@ -527,6 +532,705 @@ export default function CollectionList() {
     ? "bg-gray-700 text-white"
     : "bg-white text-gray-800";
 
+  // FeesCollectionModal Component (moved from separate file)
+  function FeesCollectionModal({
+    open,
+    onClose,
+    onSubmit,
+  }) {
+    const { darkMode } = useTheme();
+    const [isModalClosing, setIsModalClosing] = useState(false);
+    const [isModalOpening, setIsModalOpening] = useState(false);
+    
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split("T")[0];
+
+    // Handle modal opening animation
+    useEffect(() => {
+      if (open) {
+        setIsModalClosing(false);
+        setTimeout(() => {
+          setIsModalOpening(true);
+        }, 10);
+      } else {
+        setIsModalOpening(false);
+      }
+    }, [open]);
+
+    // Get fees types from localStorage if available
+    const loadFees = () => {
+      const storedData = localStorage.getItem("fees");
+      if (storedData) {
+        try {
+          return JSON.parse(storedData);
+        } catch (e) {
+          return [];
+        }
+      }
+      return [];
+    };
+    
+    const createdFees = loadFees();
+    const createdFeesNames = createdFees.map(fee => fee.name).filter(Boolean);
+    const feesTypeOptions = [...new Set([...feesTypeData, ...createdFeesNames, "Session"])];
+
+    const [formData, setFormData] = useState({
+      student_id: "",
+      student_name: "",
+      student_fees_due: 0,
+      class: "",
+      group: "",
+      section: "",
+      session: "",
+      fees_type: [],
+      fees_amounts: {},
+      total_payable: 0,
+      payable_due: 0,
+      total_fees: 0,
+      total_due: 0,
+      in_total: 0,
+      overdue_amount: 0,
+      paid_amount: "0.00",
+      pay_date: today,
+      payment_method: "",
+    });
+
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [isPaymentModalClosing, setIsPaymentModalClosing] = useState(false);
+    const [isPaymentModalOpening, setIsPaymentModalOpening] = useState(false);
+
+    // Handle payment modal opening animation
+    useEffect(() => {
+      if (showPaymentModal) {
+        setIsPaymentModalClosing(false);
+        setTimeout(() => {
+          setIsPaymentModalOpening(true);
+        }, 10);
+      } else {
+        setIsPaymentModalOpening(false);
+      }
+    }, [showPaymentModal]);
+
+    // Reset form when modal closes
+    useEffect(() => {
+      if (!open) {
+        setFormData({
+          student_id: "",
+          student_name: "",
+          student_fees_due: 0,
+          class: "",
+          group: "",
+          section: "",
+          session: "",
+          fees_type: [],
+          fees_amounts: {},
+          total_payable: 0,
+          payable_due: 0,
+          total_fees: 0,
+          total_due: 0,
+          in_total: 0,
+          overdue_amount: 0,
+          paid_amount: "0.00",
+          pay_date: today,
+          payment_method: "",
+        });
+        setShowPaymentModal(false);
+      }
+    }, [open, today]);
+
+    // Auto-populate student data when Student ID is entered
+    useEffect(() => {
+      if (formData.student_id) {
+        const student = studentData.find(
+          (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase() ||
+                 s.rollNo?.toString() === formData.student_id
+        );
+
+        if (student) {
+          setFormData((prev) => ({
+            ...prev,
+            student_name: student.student_name || student.name || "",
+            student_fees_due: student.feesDue || 0,
+            class: student.className || "",
+            group: student.group || "",
+            section: student.section || "",
+            session: student.session || "",
+          }));
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            student_name: "",
+            student_fees_due: 0,
+            class: "",
+            group: "",
+            section: "",
+            session: "",
+          }));
+        }
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          student_name: "",
+          student_fees_due: 0,
+          class: "",
+          group: "",
+          section: "",
+          session: "",
+        }));
+      }
+    }, [formData.student_id]);
+
+    // Calculate fees amounts based on selected fees types
+    useEffect(() => {
+      if (formData.fees_type.length > 0 && formData.class && formData.group && formData.section && formData.session) {
+        const getAllFeeTypeData = () => {
+          const storedData = localStorage.getItem("feeTypes");
+          const storedItems = storedData ? JSON.parse(storedData) : [];
+          return [...feeTypeData, ...storedItems];
+        };
+        
+        const allFeeTypeData = getAllFeeTypeData();
+        
+        const matchingFees = allFeeTypeData.filter(
+          (fee) =>
+            fee.class === formData.class &&
+            fee.group === formData.group &&
+            fee.section === formData.section &&
+            fee.session === formData.session &&
+            formData.fees_type.includes(fee.fees_type)
+        );
+
+        let feesAmountsObj = {};
+        
+        const totalPayable = matchingFees.reduce((sum, fee) => {
+          let feeAmount = fee.fees_amount || 0;
+          
+          feesAmountsObj[fee.fees_type] = feeAmount;
+          
+          if (formData.student_id) {
+            const student = studentData.find(
+              (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+            );
+            
+            if (student) {
+              const matchingDiscount = discountData.find(
+                (discount) =>
+                  discount.student_name === student.student_name &&
+                  discount.class === formData.class &&
+                  discount.group === formData.group &&
+                  discount.section === formData.section &&
+                  discount.session === formData.session &&
+                  discount.fees_type === fee.fees_type
+              );
+              
+              if (matchingDiscount) {
+                const today = new Date().toISOString().split("T")[0];
+                const startDate = matchingDiscount.start_date;
+                const endDate = matchingDiscount.end_date;
+                
+                if (today >= startDate && today <= endDate) {
+                  feeAmount = Math.max(0, (matchingDiscount.regular || feeAmount) - (matchingDiscount.discount_amount || 0));
+                  feesAmountsObj[fee.fees_type] = feeAmount;
+                }
+              }
+            }
+          }
+          
+          return sum + feeAmount;
+        }, 0);
+
+        setFormData((prev) => ({
+          ...prev,
+          fees_amounts: feesAmountsObj,
+          total_payable: totalPayable,
+          payable_due: totalPayable,
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          fees_amounts: {},
+          total_payable: 0,
+          payable_due: 0,
+        }));
+      }
+    }, [formData.fees_type, formData.student_id, formData.class, formData.group, formData.section, formData.session]);
+
+    // Calculate overdue amount
+    useEffect(() => {
+      if (formData.student_id && formData.class && formData.group && formData.section && formData.session) {
+        const storedCollections = getCollectionsFromStorage();
+        const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
+        
+        const existingCollections = allCollections.filter(
+          (collection) =>
+            collection.student_id?.toUpperCase() === formData.student_id.toUpperCase() &&
+            collection.class === formData.class &&
+            collection.group === formData.group &&
+            collection.section === formData.section &&
+            collection.session === formData.session &&
+            collection.total_due > 0
+        );
+
+        const overdueAmount = existingCollections.reduce((sum, collection) => {
+          return sum + (collection.total_due || 0);
+        }, 0);
+
+        setFormData((prev) => ({
+          ...prev,
+          overdue_amount: overdueAmount,
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          overdue_amount: 0,
+        }));
+      }
+    }, [formData.student_id, formData.class, formData.group, formData.section, formData.session]);
+
+    // Calculate totals when paid amount changes
+    useEffect(() => {
+      const paidAmount = parseFloat(formData.paid_amount) || 0;
+      const totalPayable = formData.total_payable || 0;
+      const overdueAmount = formData.overdue_amount || 0;
+      const studentFeesDue = formData.student_fees_due || 0;
+      
+      const payableDue = Math.max(0, totalPayable - paidAmount);
+      const inTotal = paidAmount;
+      // Total Due includes: new fees (totalPayable) + student existing dues + overdue amounts
+      const calculatedTotalDue = totalPayable + studentFeesDue + overdueAmount;
+      const totalDue = paidAmount >= calculatedTotalDue ? 0 : Math.max(0, calculatedTotalDue - paidAmount);
+
+      setFormData((prev) => ({
+        ...prev,
+        total_fees: totalPayable,
+        payable_due: payableDue,
+        total_due: totalDue,
+        in_total: inTotal,
+      }));
+    }, [formData.paid_amount, formData.total_payable, formData.overdue_amount, formData.student_fees_due]);
+
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleFeesTypeChange = (feesType) => {
+      setFormData((prev) => {
+        const currentTypes = prev.fees_type || [];
+        const isSelected = currentTypes.includes(feesType);
+        
+        if (isSelected) {
+          return {
+            ...prev,
+            fees_type: currentTypes.filter((type) => type !== feesType),
+          };
+        } else {
+          return {
+            ...prev,
+            fees_type: [...currentTypes, feesType],
+          };
+        }
+      });
+    };
+
+    const handleCollection = () => {
+      if (!formData.student_id) {
+        alert("Please enter Student ID");
+        return;
+      }
+      
+      // Allow payment if fees type is selected OR if there's a due amount to pay
+      const hasSelectedFeesType = formData.fees_type.length > 0;
+      const hasDueAmount = formData.student_fees_due > 0 || formData.overdue_amount > 0;
+      
+      if (!hasSelectedFeesType && !hasDueAmount) {
+        alert("Please select at least one Fees Type or there should be a due amount to pay");
+        return;
+      }
+      
+      if (!formData.paid_amount || parseFloat(formData.paid_amount) <= 0) {
+        alert("Please enter a valid Paid Amount");
+        return;
+      }
+      
+      // Show payment method modal
+      setShowPaymentModal(true);
+    };
+
+    const handlePaymentMethodSelect = (method) => {
+      setFormData((prev) => ({
+        ...prev,
+        payment_method: method,
+      }));
+    };
+
+    const handlePaymentClose = () => {
+      setIsPaymentModalClosing(true);
+      setIsPaymentModalOpening(false);
+      setTimeout(() => {
+        setShowPaymentModal(false);
+        setIsPaymentModalClosing(false);
+        setFormData((prev) => ({
+          ...prev,
+          payment_method: "",
+        }));
+      }, 300);
+    };
+
+    // Handle close with animation
+    const handleClose = () => {
+      setIsModalClosing(true);
+      setIsModalOpening(false);
+      setTimeout(() => {
+        onClose();
+        setIsModalClosing(false);
+      }, 300);
+    };
+
+    const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
+    const inputBg = darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800";
+    const readOnlyBg = darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
+    const modalBg = darkMode ? "bg-gray-800" : "bg-white";
+    const textColor = darkMode ? "text-gray-100" : "text-gray-800";
+
+    if (!open && !isModalClosing) return null;
+
+    return (
+      <>
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
+            isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={handleClose}
+        >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`${modalBg} ${textColor} w-full max-w-max border ${borderClr} p-6 max-h-[600px] overflow-y-auto transition-all duration-300 transform ${
+            isModalOpening && !isModalClosing
+              ? "scale-100 opacity-100 translate-y-0"
+              : "scale-95 opacity-0 translate-y-4"
+          }`}
+        >
+            {/* Title */}
+            <h2 className="text-lg font-semibold text-center mb-4">Fees Collection</h2>
+            
+            <div className="space-y-4">
+            {/* Student ID */}
+           <Input
+             label="Student ID"
+             name="student_id"
+             value={formData.student_id}
+             onChange={handleChange}
+             type="text"
+           />
+
+          {/* Class and Group - Side by side */}
+           <div className="grid grid-cols-1 gap-2 mb-2">
+             <div className="relative w-full">
+               <input
+                 type="text"
+                 value={formData.class}
+                 readOnly
+                 placeholder="Class"
+                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+               />
+             </div>
+             <div className="relative w-full">
+               <input
+                 type="text"
+                 value={formData.group}
+                 placeholder="Group"
+                 readOnly
+                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+               />
+             </div>
+           </div>
+
+           {/* Section and Session - Side by side */}
+           <div className="grid grid-cols-1 gap-2 mb-2">
+             <div className="relative w-full">
+               <input
+                 type="text"
+                 value={formData.section}
+                 placeholder="Section"
+                 readOnly
+                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+               />
+             </div>
+             <div className="relative w-full">
+               <input
+                 type="text"
+                 value={formData.session}
+                 placeholder="Session"
+                 readOnly
+                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+               />
+             </div>
+           </div>
+
+           {/* Student Name */}
+           <div className="relative w-full">
+             <input
+               type="text"
+               value={formData.student_name}
+               placeholder="Student Name"
+               readOnly
+               className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+             />
+           </div>
+
+          {/* SELECT FEES TYPE */}
+          <div className="relative w-full">
+            {/* Header */}
+            <div className={`grid grid-cols-3 gap-2 py-2 px-2 border-b ${borderClr} mb-2`}>
+              <div className={`text-xs font-semibold ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                Fees Type
+              </div>
+              <div className={`text-xs font-semibold text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                Payable
+              </div>
+              <div className={`text-xs font-semibold text-right ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                Due
+              </div>
+            </div>
+            <div className="space-y-2">
+              {feesTypeOptions.map((feesType) => {
+                const isSelected = formData.fees_type.includes(feesType);
+                const payableAmount = formData.fees_amounts[feesType] || 0;
+                
+                // Get due amount from studentData
+                const dueAmount = formData.student_fees_due || 0;
+                const hasDue = dueAmount > 0;
+                
+                return (
+                  <div
+                    key={feesType}
+                    className={`grid grid-cols-3 gap-2 items-center py-[8px] px-2 cursor-pointer transition ${
+                      darkMode
+                        ? "bg-gray-700 hover:bg-gray-600"
+                        : "bg-gray-100 hover:bg-gray-200"
+                    }`}
+                    onClick={() => handleFeesTypeChange(feesType)}
+                  >
+                    {/* Left: Checkbox + Name */}
+                    <div className="flex items-center gap-2">
+                      <div className="relative shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleFeesTypeChange(feesType)}
+                          className="sr-only"
+                        />
+                        <div
+                          className={`w-[15px] h-[15px] border-2 rounded transition-all flex items-center justify-center ${
+                            isSelected
+                              ? "bg-blue-600 border-blue-600"
+                              : darkMode
+                              ? "border-gray-500 bg-transparent"
+                              : "border-gray-400 bg-white"
+                          }`}
+                        >
+                          {isSelected && (
+                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <label
+                        className={`text-sm cursor-pointer ${
+                          darkMode ? "text-gray-200" : "text-gray-700"
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFeesTypeChange(feesType);
+                        }}
+                      >
+                        {feesType}
+                      </label>
+                    </div>
+                    
+                    {/* Middle: Payable */}
+                    <div className={`text-sm text-center ${
+                      darkMode ? "text-gray-200" : "text-gray-700"
+                    }`}>
+                      ৳{payableAmount.toFixed(2)}
+                    </div>
+                    
+                    {/* Right: Due */}
+                    <div className={`text-sm text-right flex items-center justify-end gap-1 ${
+                      hasDue
+                        ? darkMode ? "text-red-400" : "text-red-600"
+                        : darkMode ? "text-gray-400" : "text-gray-500"
+                    }`}>
+                      {hasDue && (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      <span>৳{dueAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Summary Section - Total Fees, Total Due, In Total */}
+          <div className="space-y-2">
+            <div className={`flex justify-between items-center border h-8 px-[8px]  ${borderClr} ${
+              darkMode ? "bg-gray-700" : "bg-gray-50"
+            }`}>
+              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total Fees</span>
+              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.total_payable || 0}</span>
+            </div>
+            {formData.overdue_amount > 0 && (
+              <div className={`flex justify-between items-center h-8 px-[8px] border  ${borderClr} ${
+                darkMode ? "bg-gray-700" : "bg-gray-50"
+              }`}>
+                <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Overdue Amount</span>
+                <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.overdue_amount || 0}</span>
+              </div>
+            )}
+            <div className={`flex justify-between items-center border h-8 px-[8px] ${borderClr} ${
+              darkMode ? "bg-gray-700" : "bg-gray-50"
+            }`}>
+              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total Due</span>
+              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.total_due || 0}</span>
+            </div>
+            <div className={`flex justify-between items-center h-8 px-[8px] border  ${borderClr} ${
+              darkMode ? "bg-gray-700" : "bg-gray-50"
+            }`}>
+              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>In Total</span>
+              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.in_total || 0}</span>
+            </div>
+          </div>
+
+         <div className="grid grid-cols-2 gap-4">
+           {/* Paid Amount */}
+           <Input
+             label="Paid Amount"
+             name="paid_amount"
+             value={formData.paid_amount}
+             onChange={handleChange}
+             type="number"
+             step="0.02"
+           />
+
+           {/* Pay Date */}
+           <Input
+             label="Pay Date"
+             name="pay_date"
+             value={formData.pay_date}
+             onChange={handleChange}
+             type="date"
+           />
+         </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={handleClose}
+                className={`flex-1 text-sm h-8 border ${borderClr} ${
+                  darkMode
+                    ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                    : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                } transition `}
+              >
+                Close
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCollection}
+                className="flex-1 text-sm h-8 bg-blue-600 text-white hover:bg-blue-700 transition  font-semibold"
+              >
+                Collection
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Method Modal */}
+        {showPaymentModal && (
+          <div
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
+              isPaymentModalOpening && !isPaymentModalClosing ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={handlePaymentClose}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className={`${modalBg} ${textColor} w-[60%] max-w-[250px] rounded-lg shadow-xl border ${borderClr} p-6 transition-all duration-300 transform ${
+                isPaymentModalOpening && !isPaymentModalClosing
+                  ? "scale-100 opacity-100 translate-y-0"
+                  : "scale-95 opacity-0 translate-y-4"
+              }`}
+            >
+              {/* Title */}
+              <h2 className="text-lg font-semibold text-center mb-6">Payment Method</h2>
+
+              <div className="space-y-4">
+                {/* Payment Method Selection - Cash and Bank in one line */}
+                <div className="flex flex-col gap-1 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handlePaymentMethodSelect("Cash");
+                      // Auto save when Cash is clicked
+                      setTimeout(() => {
+                        if (onSubmit) {
+                          onSubmit({ ...formData, payment_method: "Cash" });
+                        }
+                        onClose();
+                      }, 100);
+                    }}
+                    className={`bg-green-700 text-white py-[8px] px-[10px] hover:bg-green-800 transition`}
+                  >
+                    <div className="font-semibold text-center text-sm">Cash</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handlePaymentMethodSelect("Bank");
+                      // Auto save when Bank is clicked
+                      setTimeout(() => {
+                        if (onSubmit) {
+                          onSubmit({ ...formData, payment_method: "Bank" });
+                        }
+                        onClose();
+                      }, 100);
+                    }}
+                    className={`bg-blue-700 text-white py-[8px] px-[10px] hover:bg-blue-800 transition`}
+                  >
+                    <div className="font-semibold text-center text-sm">Bank</div>
+                  </button>
+                </div>
+
+                {/* Action Button - Close only */}
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={handlePaymentClose}
+                    className={`text-sm py-[8px] px-6 border ${borderClr} ${
+                      darkMode
+                        ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                        : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                    } transition font-semibold`}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="p-3 space-y-4">
       {/* ===== TOP SECTION ===== */}
@@ -547,7 +1251,11 @@ export default function CollectionList() {
           <div className="hidden md:flex gap-2">
             <button
               onClick={handleRefresh}
-              className={`flex items-center   px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
+              className={`w-28 flex items-center border ${
+                darkMode
+                  ? "bg-gray-700 border-gray-500"
+                  : "bg-white border-gray-200"
+              } px-3 h-8 text-xs`}
             >
               Refresh
             </button>
@@ -555,7 +1263,11 @@ export default function CollectionList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between  px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
+                className={`w-28 flex items-center border ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-500"
+                    : "bg-white border-gray-200"
+                } px-3 h-8 text-xs`}
               >
                 Export 
               </button>
@@ -569,13 +1281,13 @@ export default function CollectionList() {
                 >
                   <button
                     onClick={() => exportPDF(filteredCollections)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                   >
                     Export PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredCollections)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                   >
                     Export Excel
                   </button>
@@ -587,7 +1299,7 @@ export default function CollectionList() {
             {canEdit && (
               <button
                 onClick={() => setShowCollectionModal(true)}
-                className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
+                className="w-28 flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
               >
                 Collection
               </button>
@@ -599,21 +1311,29 @@ export default function CollectionList() {
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <button
             onClick={handleRefresh}
-            className={`w-full  flex items-center  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
+            className={`w-full flex items-center gap-2 border ${
+              darkMode
+                ? "bg-gray-700 border-gray-500"
+                : "bg-white border-gray-200"
+            } px-3 h-8 text-xs`}
           >
             Refresh
           </button>
 
-          <div className="relative w-full " ref={exportRef}>
+          <div className="relative w-full" ref={exportRef}>
             <button
               onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full  flex items-center   px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+              className={`w-full flex items-center border ${
+                darkMode
+                  ? "bg-gray-700 border-gray-500"
+                  : "bg-white border-gray-200"
+              } px-3 h-8 text-xs`}
             >
               Export
             </button>
             {exportOpen && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border   ${
+                className={`absolute top-full left-0 mt-1 w-full z-40 border  ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -621,15 +1341,15 @@ export default function CollectionList() {
               >
                 <button
                   onClick={() => exportPDF(filteredCollections)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                 >
-                  Export PDF
+                  PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredCollections)}
-                  className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                 >
-                  Export Excel
+                  Excel
                 </button>
               </div>
             )}
@@ -638,7 +1358,7 @@ export default function CollectionList() {
           {canEdit && (
             <button
               onClick={() => setShowCollectionModal(true)}
-              className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
+              className="w-full flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Collection
             </button>
@@ -646,20 +1366,31 @@ export default function CollectionList() {
         </div>
 
         {/* Filters + Search */}
-        <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
-            {/* Filter Button */}
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2">
+          <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
+            {/* Find Button */}
+            <div className="relative flex-1 md:flex-none">
+              <button
+                onClick={() => setShowFindModal(true)}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                    : "bg-white border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                Find
+              </button>
+            </div>
             
-            <button
-              onClick={() => setShowFindModal(true)}
-              className={`flex items-center md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
-            >
-              Find
-            </button>
-            <div className="relative" ref={filterRef}>
+            {/* Filter Button */}
+            <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                    : "bg-white border-gray-300 hover:bg-gray-100"
+                }`}
               >
                 Filter
               </button>
@@ -703,40 +1434,40 @@ export default function CollectionList() {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="relative" ref={sortRef}>
+            <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs border ${
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
                   darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-200"
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                    : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
                 Sort By
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full md:w-36 z-40 border ${
+                  className={`absolute left-0 mt-2 md:w-36 z-40 w-full border ${
                     darkMode
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
+                      ? "bg-gray-800 text-gray-100 border-gray-700"
+                      : "bg-white text-gray-900 border-gray-200"
                   }`}
                 >
                   <button
-                    className="w-full px-3 h-6 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                     onClick={() => {
                       setSortOrder("newest");
                       setSortOpen(false);
                     }}
+                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
                   >
                     First
                   </button>
                   <button
-                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
                     onClick={() => {
                       setSortOrder("oldest");
                       setSortOpen(false);
                     }}
+                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
                   >
                     Last
                   </button>
@@ -746,13 +1477,17 @@ export default function CollectionList() {
           </div>
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:w-auto">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 md:mt-0">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by student id, class, fees type..."
-              className={`w-full md:w-64 ${borderClr} ${inputBg}  border  px-3 h-8  text-xs focus:outline-none`}
+              className={`w-full px-3 h-8 text-xs border ${
+                darkMode
+                  ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
+                  : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
+              } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
             <Pagination
               currentPage={currentPage}
@@ -767,7 +1502,7 @@ export default function CollectionList() {
       <div
         className={`${
           darkMode ? "bg-gray-900" : "bg-white"
-        } p-2 overflow-x-auto`}
+        } p-2 overflow-x-auto hide-scrollbar`}
       >
         <CollectiontTable
           data={currentCollections}
@@ -817,7 +1552,7 @@ export default function CollectionList() {
         filterType={findFilterType}
         setFilterType={setFindFilterType}
         onApplyFilters={(filterData) => {
-          setFindFilterType(filterData.filterType);
+          setAppliedFindFilterType(filterData.filterType);
           setCurrentPage(1);
         }}
       />

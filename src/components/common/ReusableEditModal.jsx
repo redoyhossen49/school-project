@@ -118,7 +118,7 @@ export default function ReusableEditModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`${modalBg} ${textColor} w-full max-w-md rounded-lg shadow-xl border ${borderClr} p-6 max-h-[90vh] overflow-y-auto transition-all duration-300 transform ${
+        className={`${modalBg} ${textColor} w-full max-w-md shadow-xl border ${borderClr} p-6 max-h-[90vh] overflow-y-auto hide-scrollbar transition-all duration-300 transform ${
           isModalOpening && !isModalClosing
             ? "scale-100 opacity-100 translate-y-0"
             : "scale-95 opacity-0 translate-y-4"
@@ -183,7 +183,7 @@ export default function ReusableEditModal({
             <button
               type="button"
               onClick={handleClose}
-              className={`flex-1 text-sm py-[8px] border ${borderClr} ${
+              className={`flex-1 text-sm h-8 border ${borderClr} ${
                 darkMode
                   ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
                   : "bg-gray-50 hover:bg-gray-100 text-gray-700"
@@ -194,9 +194,9 @@ export default function ReusableEditModal({
 
             <button
               type="submit"
-              className="flex-1 text-sm py-[8px] bg-green-600 text-white hover:bg-green-700 transition "
+              className="flex-1 text-sm h-8 bg-green-600 text-white hover:bg-green-700 transition "
             >
-              Create
+              Update
             </button>
           </div>
         </form>
