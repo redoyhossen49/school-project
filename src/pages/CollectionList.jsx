@@ -889,7 +889,7 @@ export default function CollectionList() {
 
     const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
     const inputBg = darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800";
-    const readOnlyBg = darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
+    const readOnlyBg = darkMode ? "bg-gray-800 text-gray-300" : "bg-white text-gray-600";
     const modalBg = darkMode ? "bg-gray-800" : "bg-white";
     const textColor = darkMode ? "text-gray-100" : "text-gray-800";
 
@@ -932,7 +932,7 @@ export default function CollectionList() {
                  value={formData.class}
                  readOnly
                  placeholder="Class"
-                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
                />
              </div>
              <div className="relative w-full">
@@ -941,7 +941,7 @@ export default function CollectionList() {
                  value={formData.group}
                  placeholder="Group"
                  readOnly
-                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
                />
              </div>
            </div>
@@ -954,7 +954,7 @@ export default function CollectionList() {
                  value={formData.section}
                  placeholder="Section"
                  readOnly
-                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
                />
              </div>
              <div className="relative w-full">
@@ -963,7 +963,7 @@ export default function CollectionList() {
                  value={formData.session}
                  placeholder="Session"
                  readOnly
-                 className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
+                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
                />
              </div>
            </div>
@@ -979,101 +979,106 @@ export default function CollectionList() {
              />
            </div>
 
-          {/* SELECT FEES TYPE */}
+          {/* SELECT FEES TYPE - Table Format */}
           <div className="relative w-full">
-            {/* Header */}
-            <div className={`grid grid-cols-3 gap-2 py-2 px-2 border-b ${borderClr} mb-2`}>
-              <div className={`text-xs font-semibold ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                Fees Type
-              </div>
-              <div className={`text-xs font-semibold text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                Payable
-              </div>
-              <div className={`text-xs font-semibold text-right ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                Due
-              </div>
-            </div>
-            <div className="space-y-2">
-              {feesTypeOptions.map((feesType) => {
-                const isSelected = formData.fees_type.includes(feesType);
-                const payableAmount = formData.fees_amounts[feesType] || 0;
-                
-                // Get due amount from studentData
-                const dueAmount = formData.student_fees_due || 0;
-                const hasDue = dueAmount > 0;
-                
-                return (
-                  <div
-                    key={feesType}
-                    className={`grid grid-cols-3 gap-2 items-center py-[8px] px-2 cursor-pointer transition ${
-                      darkMode
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : "bg-gray-100 hover:bg-gray-200"
-                    }`}
-                    onClick={() => handleFeesTypeChange(feesType)}
-                  >
-                    {/* Left: Checkbox + Name */}
-                    <div className="flex items-center gap-2">
-                      <div className="relative shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleFeesTypeChange(feesType)}
-                          className="sr-only"
-                        />
-                        <div
-                          className={`w-[15px] h-[15px] border-2 rounded transition-all flex items-center justify-center ${
-                            isSelected
-                              ? "bg-blue-600 border-blue-600"
-                              : darkMode
-                              ? "border-gray-500 bg-transparent"
-                              : "border-gray-400 bg-white"
-                          }`}
-                        >
-                          {isSelected && (
-                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
+            <table className={`w-full border-collapse border ${borderClr}`}>
+              <thead >
+                <tr className={`border-b ${borderClr} ${
+                  darkMode ? "bg-gray-700" : "bg-gray-50"
+                }`}>
+                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Fees Type
+                  </th>
+                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Payable
+                  </th>
+                  <th className={`w-1/3 text-xs font-semibold py-2 px-2 text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Due
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {feesTypeOptions.map((feesType) => {
+                  const isSelected = formData.fees_type.includes(feesType);
+                  const payableAmount = formData.fees_amounts[feesType] || 0;
+                  
+                  // Get due amount from studentData
+                  const dueAmount = formData.student_fees_due || 0;
+                  const hasDue = dueAmount > 0;
+                  
+                  return (
+                    <tr
+                      key={feesType}
+                      className={`border-b ${borderClr} cursor-pointer transition ${
+                        darkMode
+                          ? "bg-gray-700 hover:bg-gray-600"
+                          : "bg-white hover:bg-gray-100"
+                      }`}
+                      onClick={() => handleFeesTypeChange(feesType)}
+                    >
+                      {/* Fees Type Column */}
+                      <td className={`border-r ${borderClr} py-2 px-2`}>
+                        <div className="flex items-center gap-2">
+                          <div className="relative shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleFeesTypeChange(feesType)}
+                              className="sr-only"
+                            />
+                            <div
+                              className={`w-[15px] h-[15px] border-2 rounded transition-all flex items-center justify-center ${
+                                isSelected
+                                  ? "bg-blue-600 border-blue-600"
+                                  : darkMode
+                                  ? "border-gray-500 bg-transparent"
+                                  : "border-gray-400 bg-white"
+                              }`}
+                            >
+                              {isSelected && (
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                          <label
+                            className={`text-sm cursor-pointer ${
+                              darkMode ? "text-gray-200" : "text-gray-700"
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFeesTypeChange(feesType);
+                            }}
+                          >
+                            {feesType}
+                          </label>
                         </div>
-                      </div>
-                      <label
-                        className={`text-sm cursor-pointer ${
-                          darkMode ? "text-gray-200" : "text-gray-700"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFeesTypeChange(feesType);
-                        }}
-                      >
-                        {feesType}
-                      </label>
-                    </div>
-                    
-                    {/* Middle: Payable */}
-                    <div className={`text-sm text-center ${
-                      darkMode ? "text-gray-200" : "text-gray-700"
-                    }`}>
-                      ৳{payableAmount.toFixed(2)}
-                    </div>
-                    
-                    {/* Right: Due */}
-                    <div className={`text-sm text-right flex items-center justify-end gap-1 ${
-                      hasDue
-                        ? darkMode ? "text-red-400" : "text-red-600"
-                        : darkMode ? "text-gray-400" : "text-gray-500"
-                    }`}>
-                      {hasDue && (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                      <span>৳{dueAmount.toFixed(2)}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                      </td>
+                      
+                      {/* Payable Column */}
+                      <td className={`border-r ${borderClr} text-sm text-right py-2 px-2 ${
+                        darkMode ? "text-gray-200" : "text-gray-700"
+                      }`}>
+                        {payableAmount.toFixed(0)}
+                      </td>
+                      
+                      {/* Due Column */}
+                      <td className={`text-sm text-right py-2 px-2 ${
+                        hasDue
+                          ? darkMode ? "text-red-400" : "text-red-600"
+                          : darkMode ? "text-gray-400" : "text-gray-500"
+                      }`}>
+                        <div className="flex items-center justify-end gap-1">
+    
+                          <span>{dueAmount.toFixed(0)}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
 
           {/* Summary Section - Total Fees, Total Due, In Total */}
@@ -1163,64 +1168,89 @@ export default function CollectionList() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className={`${modalBg} ${textColor} w-[60%] max-w-[250px] rounded-lg shadow-xl border ${borderClr} p-6 transition-all duration-300 transform ${
+              className={`${modalBg} ${textColor} w-full max-w-[250px] border ${borderClr} p-4 transition-all duration-300 transform ${
                 isPaymentModalOpening && !isPaymentModalClosing
                   ? "scale-100 opacity-100 translate-y-0"
                   : "scale-95 opacity-0 translate-y-4"
               }`}
             >
               {/* Title */}
-              <h2 className="text-lg font-semibold text-center mb-6">Payment Method</h2>
+              <h2 className="text-base font-semibold text-center mb-4">Payment Method</h2>
 
-              <div className="space-y-4">
-                {/* Payment Method Selection - Cash and Bank in one line */}
-                <div className="flex flex-col gap-1 mb-4">
+              <div className="space-y-3">
+                {/* Payment Method Selection */}
+                <div className="space-y-2">
                   <button
                     type="button"
                     onClick={() => {
                       handlePaymentMethodSelect("Cash");
-                      // Auto save when Cash is clicked
-                      setTimeout(() => {
-                        if (onSubmit) {
-                          onSubmit({ ...formData, payment_method: "Cash" });
-                        }
-                        onClose();
-                      }, 100);
                     }}
-                    className={`bg-green-700 text-white py-[8px] px-[10px] hover:bg-green-800 transition`}
+                    className={`w-full flex items-center justify-left gap-2 py-2 px-3 border transition min-h-[36px] shrink-0 ${
+                      formData.payment_method === "Cash"
+                        ? darkMode
+                          ? "border-green-500 bg-green-900/30 text-green-300"
+                          : "border-green-600 bg-green-50 text-green-600"
+                        : darkMode
+                        ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
+                        : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
+                    }`}
                   >
-                    <div className="font-semibold text-center text-sm">Cash</div>
+                    <span className="font-semibold text-xs shrink-0">Cash</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       handlePaymentMethodSelect("Bank");
-                      // Auto save when Bank is clicked
-                      setTimeout(() => {
-                        if (onSubmit) {
-                          onSubmit({ ...formData, payment_method: "Bank" });
-                        }
-                        onClose();
-                      }, 100);
                     }}
-                    className={`bg-blue-700 text-white py-[8px] px-[10px] hover:bg-blue-800 transition`}
+                    className={`w-full flex items-center justify-left gap-2 py-2 px-3 border transition min-h-[36px] shrink-0 ${
+                      formData.payment_method === "Bank"
+                        ? darkMode
+                          ? "border-blue-500 bg-blue-900/30 text-blue-300"
+                          : "border-blue-600 bg-blue-50 text-blue-600"
+                        : darkMode
+                        ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
+                        : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
+                    }`}
                   >
-                    <div className="font-semibold text-center text-sm">Bank</div>
+                    <span className="font-semibold text-xs shrink-0">Bank</span>
                   </button>
                 </div>
 
-                {/* Action Button - Close only */}
-                <div className="flex justify-center">
+                {/* Action Buttons */}
+                <div className="flex justify-center items-center gap-2">
                   <button
                     type="button"
                     onClick={handlePaymentClose}
-                    className={`text-sm py-[8px] px-6 border ${borderClr} ${
+                    className={`w-[50%] text-xs py-2 border ${borderClr} ${
                       darkMode
                         ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                        : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                    } transition font-semibold`}
+                        : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                    } transition font-medium`}
                   >
                     Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!formData.payment_method) {
+                        alert("Please select a payment method (Cash or Bank)");
+                        return;
+                      }
+                      if (onSubmit) {
+                        onSubmit({ ...formData });
+                      }
+                      onClose();
+                    }}
+                    disabled={!formData.payment_method}
+                    className={`w-[50%] text-xs py-2 transition font-semibold uppercase ${
+                      formData.payment_method
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : darkMode
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Pay
                   </button>
                 </div>
               </div>

@@ -420,7 +420,7 @@ export default function DiscountList() {
         const totalAfterDiscount = Math.max(0, totalFees * (1 - discountPercent));
         setFormData((prev) => ({
           ...prev,
-          total_after_discount: totalAfterDiscount.toFixed(2),
+          total_after_discount: totalAfterDiscount.toFixed(),
         }));
       }
     }, [formData.total_fees, formData.discount_amount, formData.discount_type]);
@@ -587,12 +587,13 @@ export default function DiscountList() {
 
             {/* TOTAL FEES - Read-only */}
             <div className="relative w-full">
-              <label className="block text-xs font-medium mb-1">TOTAL FEES</label>
-              <input
-                type="text"
+              <Input
+                label="TOTAL FEES"
+                name="total_fees"
                 value={formData.total_fees}
+                onChange={handleChange}
+                type="text"
                 readOnly
-                className={`w-full border h-8 px-2 text-sm font-semibold ${borderClr} ${readOnlyBg} cursor-not-allowed`}
               />
             </div>
 
@@ -617,18 +618,19 @@ export default function DiscountList() {
             </div>
 
             {/* TOTAL AFTER DISCOUNT - Read-only */}
-            <div className="relative w-full">
-              <label className="block text-xs font-medium mb-1">TOTAL AFTER DISCOUNT</label>
-              <input
-                type="text"
+            <div className="relative w-full pt-2">
+              <Input
+                label="TOTAL AFTER DISCOUNT"
+                name="total_after_discount"
                 value={formData.total_after_discount}
+                onChange={handleChange}
+                type="text"
                 readOnly
-                className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
               />
             </div>
 
             {/* START DATE and CLOSE DATE */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 pt-2">
               <Input
                 label="START DATE"
                 name="start_date"
@@ -664,7 +666,7 @@ export default function DiscountList() {
               onClick={handleSave}
               className="flex-1 text-sm h-8 bg-blue-600 text-white hover:bg-blue-700 transition font-semibold"
             >
-              Create
+              Add
             </button>
           </div>
         </div>
@@ -892,12 +894,12 @@ export default function DiscountList() {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="relative" ref={sortRef}>
+            <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs border ${darkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-200"
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${darkMode
+                  ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                  : "bg-white border-gray-300 hover:bg-gray-100"
                   }`}
               >
                 Sort By

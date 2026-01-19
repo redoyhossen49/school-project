@@ -72,12 +72,24 @@ export default function FeeTypeList() {
   const [isModalClosing, setIsModalClosing] = useState(false);
   const [isModalOpening, setIsModalOpening] = useState(false);
   const [feesName, setFeesName] = useState("");
+  
+  // Add Fees Type Modal states
+  const [isAddModalClosing, setIsAddModalClosing] = useState(false);
+  const [isAddModalOpening, setIsAddModalOpening] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    class: "",
+    group: "",
+    section: "",
+    session: "",
+    fees_type: "",
+    fees_amount: "",
+    payable_last_date: "",
+  });
 
   // Handle modal opening animation
   useEffect(() => {
     if (showCreateFeesModal) {
       setIsModalClosing(false);
-      // Trigger opening animation after a small delay
       setTimeout(() => {
         setIsModalOpening(true);
       }, 10);
@@ -85,6 +97,48 @@ export default function FeeTypeList() {
       setIsModalOpening(false);
     }
   }, [showCreateFeesModal]);
+
+  // Handle Add Fees Type modal opening animation
+  useEffect(() => {
+    if (showAddModal) {
+      setIsAddModalClosing(false);
+      setTimeout(() => {
+        setIsAddModalOpening(true);
+      }, 10);
+    } else {
+      setIsAddModalOpening(false);
+    }
+  }, [showAddModal]);
+
+  // Handle close with animation
+  const handleCreateFeesClose = () => {
+    setIsModalClosing(true);
+    setIsModalOpening(false);
+    setTimeout(() => {
+      setShowCreateFeesModal(false);
+      setIsModalClosing(false);
+      setFeesName("");
+    }, 300);
+  };
+
+  // Handle Add Fees Type modal close with animation
+  const handleAddModalClose = () => {
+    setIsAddModalClosing(true);
+    setIsAddModalOpening(false);
+    setTimeout(() => {
+      setShowAddModal(false);
+      setIsAddModalClosing(false);
+      setAddFormData({
+        class: "",
+        group: "",
+        section: "",
+        session: "",
+        fees_type: "",
+        fees_amount: "",
+        payable_last_date: "",
+      });
+    }, 300);
+  };
 
   const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
@@ -360,10 +414,17 @@ export default function FeeTypeList() {
 
     // Update local state
     setFees(loadFeeTypes());
-    setShowAddModal(false);
     
     console.log("FEE TYPE DATA SAVED TO LOCALSTORAGE 👉", newFeeType);
     alert("Fee Type Added Successfully ✅");
+    
+    // Close modal after submission
+    handleAddModalClose();
+  };
+
+  // Handle custom Add Fees Type form submit
+  const handleCustomAddFeeSubmit = () => {
+    handleAddFeeFormSubmit(addFormData);
   };
 
   // Handle fee form submit (edit only - add is now handled by modal)
@@ -438,7 +499,7 @@ export default function FeeTypeList() {
     
     // Reset form and close modal
     setFeesName("");
-    setShowCreateFeesModal(false);
+    handleCreateFeesClose();
   };
 
   // Create feeFormFields function that returns fields with dynamic options based on formData
@@ -710,7 +771,7 @@ export default function FeeTypeList() {
               <div className="relative flex-1 md:flex-none">
                 <button
                   onClick={() => setShowCreateFeesModal(true)}
-                  className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
+                  className={`w-full md:w-28 flex items-center justify-start border px-3 h-8 text-xs ${
                     darkMode
                       ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                       : "bg-white border-gray-300 hover:bg-gray-100"
@@ -809,56 +870,268 @@ export default function FeeTypeList() {
         fields={feeFormFields}
       />
 
-      {/* Add Fee Type Modal */}
-      <ReusableEditModal
-        open={showAddModal}
-        title="Add Fees Type"
-        item={null}
-        onClose={() => setShowAddModal(false)}
-        onSubmit={handleAddFeeFormSubmit}
-        fields={feeFormFields}
-      />
-
-      {/* Create Fees Modal */}
-      {(showCreateFeesModal || isModalClosing) && (
+      {/* Add Fee Type Modal - Custom */}
+      {(!showAddModal && !isAddModalClosing) ? null : (
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 transition-opacity duration-300 ${
-            isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
+          className={`fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
+            isAddModalOpening && !isAddModalClosing ? "opacity-100" : "opacity-0"
           }`}
-          onClick={() => {
-            setIsModalClosing(true);
-            setIsModalOpening(false);
-            setTimeout(() => {
-              setShowCreateFeesModal(false);
-              setIsModalClosing(false);
-              setFeesName("");
-            }, 300);
-          }}
+          onClick={handleAddModalClose}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`w-full max-w-[400px] border ${borderClr} p-5 transition-all duration-300 transform ${
-              darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-800"
-            } ${
+            className={`${darkMode ? "bg-gray-800" : "bg-white"} ${darkMode ? "text-gray-100" : "text-gray-800"} w-full max-w-[250px] border ${borderClr} p-4 transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${
+              isAddModalOpening && !isAddModalClosing
+                ? "scale-100 opacity-100 translate-y-0"
+                : "scale-95 opacity-0 translate-y-4"
+            }`}
+          >
+            {/* Title */}
+            <h2 className="text-base font-semibold text-center mb-4">Add Fees Type</h2>
+
+            <div className="space-y-3">
+              {/* Class Field */}
+              <div>
+                <select
+                  value={addFormData.class}
+                  onChange={(e) => {
+                    setAddFormData({
+                      ...addFormData,
+                      class: e.target.value,
+                      group: "",
+                      section: "",
+                    });
+                  }}
+                  className={`w-full h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-white text-gray-800"
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                >
+                  <option value="">Class</option>
+                  {classOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Group Field */}
+              <div>
+                <select
+                  value={addFormData.group}
+                  onChange={(e) => {
+                    setAddFormData({
+                      ...addFormData,
+                      group: e.target.value,
+                      section: "",
+                    });
+                  }}
+                  disabled={!addFormData.class}
+                  className={`w-full h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-white text-gray-800"
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                    !addFormData.class ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  <option value="">Group</option>
+                  {getGroupOptions(addFormData.class).map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Section Field */}
+              <div>
+                <select
+                  value={addFormData.section}
+                  onChange={(e) =>
+                    setAddFormData({ ...addFormData, section: e.target.value })
+                  }
+                  disabled={!addFormData.class || !addFormData.group}
+                  className={`w-full h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-white text-gray-800"
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                    !addFormData.class || !addFormData.group
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
+                >
+                  <option value="">Section</option>
+                  {getSectionOptions(addFormData.class, addFormData.group).map(
+                    (option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+
+              {/* Session Field */}
+              <div>
+                <select
+                  value={addFormData.session}
+                  onChange={(e) =>
+                    setAddFormData({ ...addFormData, session: e.target.value })
+                  }
+                  className={`w-full h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-white text-gray-800"
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                >
+                  <option value="">Session</option>
+                  {sessionOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Fees Type Field */}
+              <div>
+                <select
+                  value={addFormData.fees_type}
+                  onChange={(e) =>
+                    setAddFormData({ ...addFormData, fees_type: e.target.value })
+                  }
+                  className={`w-full h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-white text-gray-800"
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                >
+                  <option value="">Fees Type</option>
+                  {feesTypeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Fees Amount Field */}
+              <div>
+                <input
+                  type="number"
+                  value={addFormData.fees_amount}
+                  onChange={(e) =>
+                    setAddFormData({ ...addFormData, fees_amount: e.target.value })
+                  }
+                  placeholder="Type Amount"
+                  className={`w-full h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 text-white placeholder-gray-400"
+                      : "bg-white text-gray-800 placeholder-gray-400"
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                />
+              </div>
+
+              {/* Payable Last Date Field */}
+              <div>
+                <input
+                  type="date"
+                  value={addFormData.payable_last_date}
+                  onChange={(e) =>
+                    setAddFormData({
+                      ...addFormData,
+                      payable_last_date: e.target.value,
+                    })
+                  }
+                  className={`w-full h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-white text-gray-800"
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-center items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleAddModalClose}
+                  className={`w-[50%] text-xs h-8 border ${borderClr} ${
+                    darkMode
+                      ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                      : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                  } transition font-medium`}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCustomAddFeeSubmit}
+                  disabled={
+                    !addFormData.class ||
+                    !addFormData.group ||
+                    !addFormData.section ||
+                    !addFormData.session ||
+                    !addFormData.fees_type ||
+                    !addFormData.fees_amount
+                  }
+                  className={`w-[50%] text-xs h-8 transition font-semibold uppercase ${
+                    addFormData.class &&
+                    addFormData.group &&
+                    addFormData.section &&
+                    addFormData.session &&
+                    addFormData.fees_type &&
+                    addFormData.fees_amount
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : darkMode
+                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Fees Modal */}
+      {(!showCreateFeesModal && !isModalClosing) ? null : (
+        <div
+          className={`fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
+            isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={handleCreateFeesClose}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`${darkMode ? "bg-gray-800" : "bg-white"} ${darkMode ? "text-gray-100" : "text-gray-800"} w-full max-w-[250px] border ${borderClr} p-4 transition-all duration-300 transform ${
               isModalOpening && !isModalClosing
                 ? "scale-100 opacity-100 translate-y-0"
                 : "scale-95 opacity-0 translate-y-4"
             }`}
           >
-            <h2 className="text-base font-semibold text-center mb-6">Create Fees</h2>
-            
-            <div className="space-y-2">
+            {/* Title */}
+            <h2 className="text-base font-semibold text-center mb-4">Create Fees</h2>
+
+            <div className="space-y-3">
+              {/* Input Field */}
               <div>
                 <input
                   type="text"
                   value={feesName}
                   onChange={(e) => setFeesName(e.target.value)}
-                  placeholder="Enter Fees Name"
-                  className={`w-full h-10 border ${borderClr} ${
+                  placeholder="Fees Name"
+                  className={`w-full h-8 border ${borderClr} ${
                     darkMode
                       ? "bg-gray-700 text-white placeholder-gray-400"
                       : "bg-white text-gray-800 placeholder-gray-400"
-                  } px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 `}
+                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
                       handleCreateFeesSubmit();
@@ -868,31 +1141,29 @@ export default function FeeTypeList() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex justify-center items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsModalClosing(true);
-                    setIsModalOpening(false);
-                    setTimeout(() => {
-                      setShowCreateFeesModal(false);
-                      setIsModalClosing(false);
-                      setFeesName("");
-                    }, 300);
-                  }}
-                  className={`flex-1 py-[8px] border ${borderClr} ${
+                  onClick={handleCreateFeesClose}
+                  className={`w-[50%] text-xs h-8 border ${borderClr} ${
                     darkMode
-                      ? "bg-gray-700 text-sm hover:bg-gray-600 text-gray-200"
-                      : "bg-gray-50 text-sm hover:bg-gray-100 text-gray-700"
-                  } transition`}
+                      ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                      : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                  } transition font-medium`}
                 >
                   Close
                 </button>
-
                 <button
                   type="button"
                   onClick={handleCreateFeesSubmit}
-                  className="flex-1 text-sm py-[8px] bg-blue-600 text-white hover:bg-blue-700 transition "
+                  disabled={!feesName.trim()}
+                  className={`w-[50%] text-xs h-8 transition font-semibold uppercase ${
+                    feesName.trim()
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : darkMode
+                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
                 >
                   Create
                 </button>
