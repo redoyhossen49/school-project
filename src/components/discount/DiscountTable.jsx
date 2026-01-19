@@ -61,7 +61,7 @@ export default function DiscountTable({ data, setData, onEdit, onDelete }) {
 
   return (
     <div
-      className={`border overflow-x-auto hide-scrollbar ${
+      className={`border overflow-x-auto overflow-y-visible hide-scrollbar ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
@@ -138,26 +138,26 @@ export default function DiscountTable({ data, setData, onEdit, onDelete }) {
                   <td
                     className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                   >
-                    ৳{regular.toFixed(2)}
+                    {regular.toFixed(0)}
                   </td>
                   <td
                     className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                   >
-                    ৳{discountAmount.toFixed(2)}
+                    {discountAmount.toFixed(2)}
                   </td>
                   <td
                     className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                   >
-                    ৳{totalPayable.toFixed(2)}
+                    {totalPayable.toFixed(0)}
                   </td>
                   <td
                     className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                   >
-                    ৳{payableDue.toFixed(2)}
+                    {payableDue.toFixed(0)}
                   </td>
 
                   {showAction && (
-                    <td className="px-3 h-8">
+                    <td className="px-3 h-8 relative">
                       <ReusableActions
                         item={discount}
                         onEdit={handleEdit}

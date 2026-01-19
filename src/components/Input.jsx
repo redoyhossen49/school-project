@@ -37,7 +37,7 @@ export default function Input({
         `}
         onClick={() => setOpen(!open)}
       >
-        <span className={`${value ? "text-gray-700" : "text-gray-400"}`}>
+        <span className={`${value ? "text-gray-400" : "text-gray-400"}`}>
           {value || label}
         </span>
         <svg
