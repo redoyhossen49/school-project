@@ -123,7 +123,7 @@ const baseBtn =
       </div>
 
       {/* Step Content */}
-    <div className={`w-full max-w-2xl p-5 shadow-sm  ${cardBg}`}>
+    <div className={`w-full max-w-2xl p-5   ${cardBg}`}>
 
         {activeStep === 0 && (
           <Step1
@@ -155,11 +155,11 @@ const baseBtn =
         )}
 
         {/* Navigation */}
-        <div className="flex  pb-6  w-full max-w-2xl gap-2 md:gap-3">
+        <div className="flex  mt-6  w-full max-w-2xl gap-2 md:gap-3">
           <button
             onClick={prevStep}
             disabled={activeStep === 0}
-            className={`px-3 md:px-4 h-8 w-full md:w-1/2 text-sm  border border-gray-300 ${
+            className={`px-3 md:px-4 h-8 w-full md:w-1/2 text-xs  border border-gray-300 ${
               activeStep === 0
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-gray-100"
@@ -171,14 +171,14 @@ const baseBtn =
           {activeStep < steps.length - 1 ? (
             <button
               onClick={nextStep}
-              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-sm bg-indigo-600 text-white  hover:bg-indigo-700"
+              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs bg-indigo-600 text-white  hover:bg-indigo-700"
             >
               Next
             </button>
           ) : (
             <button
               onClick={handleSubmit}
-              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-sm bg-green-600 text-white hover:bg-green-700"
+              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs bg-green-600 text-white hover:bg-green-700"
             >
               Submit
             </button>

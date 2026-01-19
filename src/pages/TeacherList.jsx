@@ -35,7 +35,7 @@ export default function TeacherList() {
   const [sortOrder, setSortOrder] = useState("newest");
   // Get all unique designations dynamically from teacherData
   const uniqueDesignations = Array.from(
-    new Set(teachers.map((t) => t.designation))
+    new Set(teachers.map((t) => t.designation)),
   );
 
   // Modal-এর temporary values
@@ -54,39 +54,36 @@ export default function TeacherList() {
   const exportRef = useRef(null);
   const filterButtonRef = useRef(); // filter button er ref
 
-
   const attendanceOptions = ["Presence", "Absence", "Late", "Leave"];
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (attendanceRef.current && !attendanceRef.current.contains(e.target))
-      setAttendanceOpen(false);
-    if (filterRef.current && !filterRef.current.contains(e.target))
-      setFilterOpen(false);
-    if (sortRef.current && !sortRef.current.contains(e.target))
-      setSortOpen(false);
-    if (exportRef.current && !exportRef.current.contains(e.target))
-      setExportOpen(false);
-  };
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
-
+    const handleClickOutside = (e) => {
+      if (attendanceRef.current && !attendanceRef.current.contains(e.target))
+        setAttendanceOpen(false);
+      if (filterRef.current && !filterRef.current.contains(e.target))
+        setFilterOpen(false);
+      if (sortRef.current && !sortRef.current.contains(e.target))
+        setSortOpen(false);
+      if (exportRef.current && !exportRef.current.contains(e.target))
+        setExportOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Open only one dropdown at a time
-const handleDropdownClick = (type) => {
-  setAttendanceOpen((prev) => (type === "attendance" ? !prev : false));
-  setFilterOpen((prev) => (type === "filter" ? !prev : false));
-  setSortOpen((prev) => (type === "sort" ? !prev : false));
-  setExportOpen((prev) => (type === "export" ? !prev : false));
-};
-
+  const handleDropdownClick = (type) => {
+    setAttendanceOpen((prev) => (type === "attendance" ? !prev : false));
+    setFilterOpen((prev) => (type === "filter" ? !prev : false));
+    setSortOpen((prev) => (type === "sort" ? !prev : false));
+    setExportOpen((prev) => (type === "export" ? !prev : false));
+  };
 
   const filteredTeachers = teachers
 
     .filter((t) =>
-      designationFilter ? t.designation === designationFilter : true
+      designationFilter ? t.designation === designationFilter : true,
     )
     // 1️⃣ Search by name
     .filter((t) => t.teacherName.toLowerCase().includes(search.toLowerCase()))
@@ -126,7 +123,7 @@ const handleDropdownClick = (type) => {
     });
 
   const designationOptions = Array.from(
-    new Set(teacherData.map((t) => t.designation))
+    new Set(teacherData.map((t) => t.designation)),
   );
 
   const totalTeachers = filteredTeachers.length;
@@ -135,7 +132,7 @@ const handleDropdownClick = (type) => {
   const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage;
   const currentTeachers = filteredTeachers.slice(
     indexOfFirstTeacher,
-    indexOfLastTeacher
+    indexOfLastTeacher,
   );
 
   return (
@@ -146,14 +143,12 @@ const handleDropdownClick = (type) => {
     >
       {/* Header */}
       <div
-        className={`space-y-4  p-3 ${
-          darkMode ? "bg-gray-900" : "bg-white"
-        }`}
+        className={`space-y-4  p-3 ${darkMode ? "bg-gray-900" : "bg-white"}`}
       >
         {/* Title + Desktop Buttons */}
         <div className="md:flex md:items-center md:justify-between">
           <div>
-            <h2 className="text-base font-semibold">Teachers List</h2>
+            <h2 className="text-base font-semibold">Teachers list</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
@@ -191,7 +186,7 @@ const handleDropdownClick = (type) => {
                     : "bg-white border-gray-200"
                 } px-3 h-8 text-xs`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -252,7 +247,7 @@ const handleDropdownClick = (type) => {
                   : "bg-white border-gray-200"
               }  px-3 h-8 text-xs`}
             >
-              Export 
+              Export
             </button>
             {exportOpen && (
               <div
@@ -262,11 +257,11 @@ const handleDropdownClick = (type) => {
                     : "bg-white border-gray-200 text-gray-900"
                 }`}
               >
-                <button className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100">
-                   PDF
+                <button className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100">
+                  PDF
                 </button>
-                <button className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100">
-                 Excel
+                <button className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100">
+                  Excel
                 </button>
               </div>
             )}
@@ -296,7 +291,6 @@ const handleDropdownClick = (type) => {
                 }`}
               >
                 {attendanceFilter || "Attendance"}{" "}
-               
               </button>
 
               {attendanceOpen && (
@@ -317,7 +311,6 @@ const handleDropdownClick = (type) => {
                       className="w-full cursor-pointer px-3 h-8 text-xs flex items-center hover:bg-gray-100 transition"
                     >
                       <span>{opt}</span>
-                      
                     </div>
                   ))}
                 </div>
@@ -327,15 +320,15 @@ const handleDropdownClick = (type) => {
             {/* Filter */}
             <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
-                 ref={filterButtonRef}
-                  onClick={() => setFilterOpen(prev => !prev)}
+                ref={filterButtonRef}
+                onClick={() => setFilterOpen((prev) => !prev)}
                 className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Filter  
+                Filter
               </button>
 
               <FilterDropdown
@@ -345,21 +338,20 @@ const handleDropdownClick = (type) => {
                     key: "designation", // state key
                     label: "Designation", // optional, just for clarity
                     options: designationOptions, // ["Math Teacher", "Science Teacher", ...]
-                      placeholder:"All Designations",
+                    placeholder: "All Designations",
                   },
                 ]}
                 selected={{ designation: designationFilter }} // pass as object
                 setSelected={(value) => setDesignationFilter(value.designation)} // update parent
-              
                 darkMode={darkMode}
                 isOpen={filterOpen}
-                  buttonRef={filterButtonRef} 
+                buttonRef={filterButtonRef}
                 onClose={() => setFilterOpen(false)}
                 onApply={(value) => console.log("Applied:", value.designation)}
               />
-               </div>
+            </div>
 
-              {/* {filterOpen && (
+            {/* {filterOpen && (
                 <div
                   className={`absolute top-full z-50 mt-2 w-56 rounded border
     left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0
@@ -413,7 +405,6 @@ const handleDropdownClick = (type) => {
                   </button>
                 </div>
               )} */}
-           
 
             {/* Sort */}
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
@@ -425,7 +416,7 @@ const handleDropdownClick = (type) => {
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Sort By 
+                Sort By
               </button>
               {sortOpen && (
                 <div
@@ -481,9 +472,7 @@ const handleDropdownClick = (type) => {
       </div>
 
       {/* Table */}
-      <div
-        className={` p-2 ${darkMode ? "bg-gray-900" : "bg-white"}`}
-      >
+      <div className={` p-3 ${darkMode ? "bg-gray-900" : "bg-white"}`}>
         <TeacherTable
           data={filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher)}
           setData={setTeachers}

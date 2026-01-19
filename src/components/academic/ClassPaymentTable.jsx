@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import StudentActions from "../student/StudentActions";
+import ReusableActions from "../common/ReusableActions";
+import ReusableEditModal from "../common/ReusableEditModal";
 
 const headers = [
   { label: "SL", key: "sl" },
@@ -10,14 +12,31 @@ const headers = [
   { label: "Payable due", key: "payableDue" },
 ];
 
-export default function ClassPaymentTable({ data = [], month }) {
+export default function ClassPaymentTable({ data = [], setData, month }) {
   const { darkMode } = useTheme();
-
   const userRole = localStorage.getItem("role");
   const showAction = userRole === "school";
 
   const borderCol = darkMode ? "border-gray-700" : "border-gray-200";
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
+
+  // -------------------- Edit Modal --------------------
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleEditSubmit = (updatedData) => {
+    setData((prev) =>
+      prev.map((row) => (row.sl === selectedRow.sl ? { ...row, ...updatedData } : row))
+    );
+    setEditModalOpen(false);
+  };
+
+  const handleDelete = (row) => {
+    if (confirm("Are you sure you want to delete this class payment?")) {
+      setData((prev) => prev.filter((r) => r.sl !== row.sl));
+      alert("Class payment deleted successfully ✅");
+    }
+  };
 
   return (
     <div
@@ -55,7 +74,7 @@ export default function ClassPaymentTable({ data = [], month }) {
 
         {/* ===== BODY ===== */}
         <tbody>
-          {data.length === 0 && (
+          {data.length === 0 ? (
             <tr>
               <td
                 colSpan={showAction ? headers.length + 1 : headers.length}
@@ -64,71 +83,94 @@ export default function ClassPaymentTable({ data = [], month }) {
                 No Data Found
               </td>
             </tr>
-          )}
+          ) : (
+            data.map((row) => {
+              let totalPayable = row.totalPayable;
+              let payableDue = row.payableDue;
 
-          {data.map((c) => {
-            let totalPayable = c.totalPayable;
-            let payableDue = c.payableDue;
-
-            if (month !== "All") {
-              const m = c.monthly?.find((m) => m.month === month);
-              if (m) {
-                totalPayable = m.paid + m.due;
-                payableDue = m.due;
-              } else {
-                totalPayable = 0;
-                payableDue = 0;
+              if (month !== "All") {
+                const m = row.monthly?.find((m) => m.month === month);
+                if (m) {
+                  totalPayable = m.paid + m.due;
+                  payableDue = m.due;
+                } else {
+                  totalPayable = 0;
+                  payableDue = 0;
+                }
               }
-            }
 
-            return (
-              <tr key={c.sl} className={`border-b ${borderCol} ${hoverRow}`}>
-                {/* SL */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {c.sl}
-                </td>
-
-                {/* Class */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {c.class}
-                </td>
-
-                {/* Subjects */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {c.subjects}
-                </td>
-
-                {/* Students */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {c.totalStudents}
-                </td>
-
-                {/* Total Payable */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  ৳{totalPayable}
-                </td>
-
-                {/* Payable Due */}
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {payableDue === 0 ? (
-                    <span className="text-green-600 font-semibold">Paid</span>
-                  ) : (
-                    <span className="text-red-600 font-semibold">
-                      ৳{payableDue}
-                    </span>
-                  )}
-                </td>
-
-                {showAction && (
-                  <td className="px-3 h-8 whitespace-nowrap">
-                    <StudentActions classData={c} month={month} />
+              return (
+                <tr key={row.sl} className={`border-b ${borderCol} ${hoverRow}`}>
+                  {/* SL */}
+                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                    {row.sl}
                   </td>
-                )}
-              </tr>
-            );
-          })}
+
+                  {/* Class */}
+                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                    {row.class}
+                  </td>
+
+                  {/* Subjects */}
+                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                    {row.subjects}
+                  </td>
+
+                  {/* Students */}
+                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                    {row.totalStudents}
+                  </td>
+
+                  {/* Total Payable */}
+                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                    ৳{totalPayable}
+                  </td>
+
+                  {/* Payable Due */}
+                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                    {payableDue === 0 ? (
+                      <span className="text-green-600 font-semibold">Paid</span>
+                    ) : (
+                      <span className="text-red-600 font-semibold">৳{payableDue}</span>
+                    )}
+                  </td>
+
+                  {showAction && (
+                    <td className="px-3 h-8 whitespace-nowrap">
+                      <ReusableActions
+                        item={row}
+                        onEdit={(r) => {
+                          setSelectedRow(r);
+                          setEditModalOpen(true);
+                        }}
+                        onDelete={handleDelete}
+                      />
+                    </td>
+                  )}
+                </tr>
+              );
+            })
+          )}
         </tbody>
       </table>
+
+      {/* ===== Edit Modal ===== */}
+      {selectedRow && (
+        <ReusableEditModal
+          open={editModalOpen}
+          title="Edit Class Payment"
+          item={selectedRow}
+          onClose={() => setEditModalOpen(false)}
+          onSubmit={handleEditSubmit}
+          fields={[
+            { name: "class", label: "Class Name", type: "text", required: true },
+            { name: "subjects", label: "Subjects No", type: "number" },
+            { name: "totalStudents", label: "Total Students", type: "number" },
+            { name: "totalPayable", label: "Total Payable", type: "number" },
+            { name: "payableDue", label: "Payable Due", type: "number" },
+          ]}
+        />
+      )}
     </div>
   );
 }

@@ -60,7 +60,9 @@ export default function Step1({ formData, handleChange }) {
   return (
     <div>
       {/* Title */}
-      <h2 className={`text-center font-semibold text-base md:text-lg mb-4 ${titleClass}`}>
+      <h2
+        className={`text-center font-semibold text-base md:text-lg mb-4 ${titleClass}`}
+      >
         Find Your Location
       </h2>
 
@@ -81,7 +83,9 @@ export default function Step1({ formData, handleChange }) {
           value={formData.district || ""}
           onChange={handleChange}
           options={
-            formData.division ? Object.keys(mockDB[formData.division] || {}) : []
+            formData.division
+              ? Object.keys(mockDB[formData.division] || {})
+              : []
           }
         />
         <Input
@@ -99,11 +103,13 @@ export default function Step1({ formData, handleChange }) {
       </div>
 
       {/* School Info */}
-      <h2 className={`text-center font-semibold text-base md:text-lg my-4 ${titleClass}`}>
+      <h2
+        className={`text-center font-semibold text-base md:text-lg my-4 ${titleClass}`}
+      >
         New School Information
       </h2>
 
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 ">
         <Input
           type="select"
           label=" School"
@@ -156,6 +162,7 @@ export default function Step1({ formData, handleChange }) {
           name="admissionDate"
           value={formData.admissionDate || ""}
           onChange={handleChange}
+           showDropdownTop={true}
         />
       </div>
     </div>

@@ -205,11 +205,11 @@ doc.save("ClassPermissions.pdf");
                       : "bg-white border-gray-200 text-gray-900"
                   } absolute top-full left-0 mt-1 w-28  border `}
                 >
-                  <button className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
-                    Export PDF
+                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
+                    PDF
                   </button>
-                  <button className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
-                    Export Excel
+                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
+                    Excel
                   </button>
                 </div>
               )}
@@ -425,7 +425,7 @@ doc.save("ClassPermissions.pdf");
       <div
         className={`${
           darkMode ? "bg-gray-800" : "bg-white"
-        }  p-2 overflow-x-auto`}
+        }  p-3 overflow-x-auto`}
       >
         <ClassPermissionTable
           data={currentPermissions}

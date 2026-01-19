@@ -378,15 +378,15 @@ export default function StudentsList() {
               >
                 <button
                   onClick={() => exportPDF(filteredStudents)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100 "
                 >
-                  Export PDF
+                  PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredStudents)}
-                  className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100 "
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100 "
                 >
-                  Export Excel
+                  Excel
                 </button>
               </div>
             )}
@@ -589,7 +589,7 @@ export default function StudentsList() {
       <div
         className={` ${
           darkMode ? "bg-gray-900" : "bg-white"
-        } p-2 overflow-x-auto`}
+        } p-3 overflow-x-auto`}
       >
         <StudentTable
           data={currentStudents}

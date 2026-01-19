@@ -42,28 +42,32 @@ export default function AddPromoteRequestPage() {
     <div className="py-4 px-2 md:mx-0 min-h-screen">
       {/* ===== Header ===== */}
       <div
-              className={`mb-6  ${
-                darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
-              } p-6 `}
-            >
-              <h1 className="text-base font-semibold">Add Promote Request</h1>
-              <p className={`text-xs  mt-1 ${darkMode?"text-gray-200":"text-gray-400"}`}>
-                <Link
-                  to="/school/dashboard"
-                  className="hover:text-indigo-600 transition"
-                >
-                  Dashboard
-                </Link>
-                <span className="mx-1">/</span>
-                <Link
-                  to="/school/dashboard/promoterequest"
-                  className="hover:text-indigo-600 transition"
-                >
-                  Promote request
-                </Link>
-                 <span className="mx-1">/</span>Add promote
-              </p>
-            </div>
+        className={`mb-6  ${
+          darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
+        } p-6 `}
+      >
+        <h1 className="text-base font-semibold">Add Promote Request</h1>
+        <p
+          className={`text-xs  mt-1 ${
+            darkMode ? "text-gray-200" : "text-gray-400"
+          }`}
+        >
+          <Link
+            to="/school/dashboard"
+            className="hover:text-indigo-600 transition"
+          >
+            Dashboard
+          </Link>
+          <span className="mx-1">/</span>
+          <Link
+            to="/school/dashboard/promoterequest"
+            className="hover:text-indigo-600 transition"
+          >
+            Promote request
+          </Link>
+          <span className="mx-1">/</span>Add promote
+        </p>
+      </div>
 
       {/* ===== Form ===== */}
       <form
@@ -79,70 +83,78 @@ export default function AddPromoteRequestPage() {
         {/* ===== From Class Grid ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Input
+            type="select"
             label="From class"
             name="fromClass"
             value={formData.fromClass}
             onChange={handleChange}
-           
+            options={["Class 1", "Class 2", "Class 3"]} // Example options
           />
 
           <Input
-            label="From group "
+            type="select"
+            label="From group"
             name="fromGroup"
             value={formData.fromGroup}
             onChange={handleChange}
-           
+            options={["Science", "Commerce", "Arts"]}
           />
 
           <Input
-            label="From section "
+            type="select"
+            label="From section"
             name="fromSection"
             value={formData.fromSection}
             onChange={handleChange}
-            
+            options={["A", "B", "C"]}
           />
 
           <Input
+            type="select"
             label="From session"
             name="fromSession"
             value={formData.fromSession}
             onChange={handleChange}
-            
+            options={["2025-26", "2026-27"]}
           />
         </div>
 
         {/* ===== To Class Grid ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
           <Input
+            type="select"
             label="To class"
             name="toClass"
             value={formData.toClass}
             onChange={handleChange}
-            
+            options={["Class 2", "Class 3", "Class 4"]}
           />
 
           <Input
-            label="To Group "
+            type="select"
+            label="To Group"
             name="toGroup"
             value={formData.toGroup}
             onChange={handleChange}
-           
+            options={["Science", "Commerce", "Arts"]}
           />
 
           <Input
-            label="To section "
+            type="select"
+            label="To section"
             name="toSection"
             value={formData.toSection}
             onChange={handleChange}
-           
+            options={["A", "B", "C"]}
           />
 
           <Input
+            type="select"
             label="To session"
             name="toSession"
             value={formData.toSession}
             onChange={handleChange}
-         
+            options={["2025-26", "2026-27"]}
           />
         </div>
 
@@ -173,7 +185,7 @@ export default function AddPromoteRequestPage() {
 
           <button
             type="submit"
-             className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shdaow-sm hover:bg-green-700 transition"
+            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shdaow-sm hover:bg-green-700 transition"
           >
             Submit
           </button>

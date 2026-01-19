@@ -13,6 +13,7 @@ export default function FilterDropdown({
 }) {
   const [tempValues, setTempValues] = useState({});
   const [activeField, setActiveField] = useState(null);
+  const [overlayDirection, setOverlayDirection] = useState("down"); // up or down
   const containerRef = useRef(null);
 
   /* sync temp values when opened */
@@ -40,92 +41,78 @@ export default function FilterDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose, buttonRef]);
 
+  /* Calculate dropdown direction */
+  const handleOpenDropdown = (fieldKey) => {
+    setActiveField(activeField === fieldKey ? null : fieldKey);
+    setTimeout(() => {
+      const button = document.getElementById(`fd-btn-${fieldKey}`);
+      if (!button) return;
+      const rect = button.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setOverlayDirection(spaceBelow < 200 && spaceAbove > spaceBelow ? "up" : "down");
+    }, 0);
+  };
+
   if (!isOpen) return null;
 
   const activeFieldData = fields.find((f) => f.key === activeField);
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute z-50 mt-2 left-0  w-[170px] md:w-72 lg:w-72 max-h-[80vh] overflow-y-auto hide-scrollbar"
-    >
-      {/* ===== MAIN DROPDOWN ===== */}
+    <div ref={containerRef} className="absolute z-40 mt-2 left-1/2 -translate-x-1/2 w-64 md:w-72">
       <div
-        className={`border shadow-lg  p-5 relative 
-          ${
-            darkMode
-              ? "bg-gray-800 text-gray-100 border-gray-600"
-              : "bg-white text-gray-900 border-gray-200"
-          }`}
+        className={`border shadow-lg p-5 relative
+          ${darkMode ? "bg-gray-800 text-gray-100 border-gray-600" : "bg-white text-gray-900 border-gray-200"}`}
       >
-        {/* Title */}
         <h3 className="text-sm text-center font-semibold mb-4">{title}</h3>
 
-        {/* Fields */}
         <div className="space-y-3">
           {fields.map((field) => (
             <div key={field.key} className="relative">
-              {/* Select Button */}
               <button
-                onClick={() =>
-                  setActiveField(activeField === field.key ? null : field.key)
-                }
-                className={`w-full px-3 h-8 text-left text-xs border flex justify-between items-center
-                  ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-gray-100"
-                      : "bg-white border-gray-300 text-gray-900"
-                  }`}
+                id={`fd-btn-${field.key}`}
+                onClick={() => handleOpenDropdown(field.key)}
+                className={`w-full px-4 h-8 text-left text-xs border flex justify-between items-center
+                  ${darkMode ? "bg-gray-700 border-gray-600 text-gray-100" : "bg-white border-gray-300 text-gray-900"}`}
               >
-                {tempValues[field.key] || "All"}
+                {tempValues[field.key] || field.placeholder}
                 <span className="ml-2">&#9662;</span>
               </button>
 
-              {/* Options Dropdown - Attached to button */}
               {activeField === field.key && (
-                <div className={`absolute top-full left-0 right-0 mt-1 z-50 border shadow-lg max-h-48 overflow-y-auto hide-scrollbar ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
-                }`}>
+                <div
+                  className={`absolute left-0 w-full max-h-30 overflow-y-auto border z-50 text-xs
+                    ${overlayDirection === "up" ? "bottom-full mb-1" : "top-full mt-1"}
+                    ${darkMode ? "bg-gray-700 border-gray-600 text-gray-100" : "bg-white border-gray-300 text-gray-900"}`}
+                >
                   <ul>
-                    {/* All option */}
+                    {/* Placeholder */}
                     <li>
-                      <label 
-                        onClick={() => {
-                          setTempValues((p) => ({
-                            ...p,
-                            [field.key]: "",
-                          }));
-                          setActiveField(null);
-                        }}
-                        className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
-                          darkMode
-                            ? "hover:bg-gray-600 text-gray-100"
-                            : "hover:bg-blue-50 text-gray-900"
-                        }`}
-                      >
-                        All
+                      <label className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600">
+                        <input
+                          type="radio"
+                          checked={!tempValues[field.key]}
+                          onChange={() => {
+                            setTempValues((p) => ({ ...p, [field.key]: "" }));
+                          }}
+                          className="mr-2 hidden"
+                        />
+                        {field.placeholder}
                       </label>
                     </li>
 
                     {/* Options */}
-                    {field.options?.map((opt) => (
+                    {field.options.map((opt) => (
                       <li key={opt}>
-                        <label 
-                          onClick={() => {
-                            setTempValues((p) => ({
-                              ...p,
-                              [field.key]: opt,
-                            }));
-                            setActiveField(null);
-                          }}
-                          className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
-                            darkMode
-                              ? "hover:bg-gray-600 text-gray-100"
-                              : "hover:bg-blue-50 text-gray-900"
-                          }`}
-                        >
+                        <label className="flex items-center px-3 h-8 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600">
+                          <input
+                            type="radio"
+                            checked={tempValues[field.key] === opt}
+                            onChange={() => {
+                              setTempValues((p) => ({ ...p, [field.key]: opt }));
+                            }}
+                            className="mr-2 hidden"
+                          />
                           {opt}
                         </label>
                       </li>
@@ -137,22 +124,11 @@ export default function FilterDropdown({
           ))}
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2 mt-4">
           <button
-            onClick={() => {
-              setTempValues({});
-              setSelected({});
-              onApply({});
-              onClose();
-              setActiveField(null);
-            }}
+            onClick={() => setTempValues({})}
             className={`w-1/2 h-8 text-xs border
-              ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-              }`}
+              ${darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"}`}
           >
             Reset
           </button>

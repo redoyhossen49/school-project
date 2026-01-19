@@ -10,6 +10,7 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 export default function SubjectListPage() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function SubjectListPage() {
   const [sectionFilter, setSectionFilter] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const perPage = 10;
@@ -36,6 +38,11 @@ export default function SubjectListPage() {
   const [groupOpen, setGroupOpen] = useState(false);
   const [sectionOpen, setSectionOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
 
   const monthRef = useRef(null);
   const filterRef = useRef(null);
@@ -66,8 +73,8 @@ export default function SubjectListPage() {
         subjects
           .filter((s) => !selectedClass || s.class === selectedClass)
           .map((s) => s.group)
-          .filter(Boolean)
-      )
+          .filter(Boolean),
+      ),
     );
   const sectionOptions = (selectedClass, selectedGroup) =>
     Array.from(
@@ -76,10 +83,26 @@ export default function SubjectListPage() {
           .filter((s) => !selectedClass || s.class === selectedClass)
           .filter((s) => !selectedGroup || s.group === selectedGroup)
           .map((s) => s.section)
-          .filter(Boolean)
-      )
+          .filter(Boolean),
+      ),
     );
-
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      placeholder: "Select section",
+      options: sectionOptions,
+    },
+  ];
   // -------------------- Outside click handler --------------------
   useEffect(() => {
     const handler = (e) => {
@@ -115,116 +138,117 @@ export default function SubjectListPage() {
     .filter((s) => (groupFilter ? s.group === groupFilter : true))
     .filter((s) => (sectionFilter ? s.section === sectionFilter : true))
     .filter((s) =>
-      selectedMonth === "All" ? true : s.month === selectedMonth
+      selectedMonth === "All" ? true : s.month === selectedMonth,
     );
 
   const sorted = [...filtered].sort((a, b) =>
     sortOrder === "asc"
       ? a.subjectName.localeCompare(b.subjectName)
-      : b.subjectName.localeCompare(a.subjectName)
+      : b.subjectName.localeCompare(a.subjectName),
   );
 
   const totalPages = Math.ceil(sorted.length / perPage);
   const currentSubjects = sorted.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
 
- const modalFields = [
-  {
-    name: "class",
-    label: "Class",
-    type: "select",
-    placeholder: "Select Class",
-    options: classOptions.map((c) => ({ label: c, value: c })),
-    required: true,
-  },
-  {
-    name: "group",
-    label: "Group",
-    type: "select",
-    placeholder: "Select Group",
-    options: groupOptions(classFilter).map((g) => ({ label: g, value: g })),
-    required: false,
-  },
-  {
-    name: "section",
-    label: "Section",
-    type: "select",
-    placeholder: "Select Section",
-    options: sectionOptions(classFilter, groupFilter).map((s) => ({
-      label: s,
-      value: s,
-    })),
-    required: false,
-  },
-  {
-    name: "subjectName",
-    label: "Subject Name",
-    type: "text",
-    placeholder: "Enter Subject Name",
-    required: true,
-  },
-  {
-    name: "subjectType",
-    label: "Subject Type",
-    type: "select",
-    placeholder: "Select Type",
-    options: [
-      { label: "Theory", value: "theory" },
-      { label: "Practical", value: "practical" },
-      { label: "Theory + Practical", value: "both" },
-    ],
-    required: true,
-  },
-  // Theory Marks
-  {
-    name: "theoryFullMark",
-    label: "Theory Full Mark",
-    type: "number",
-    placeholder: "Enter Full Mark (Theory)",
-    required: true,
-  },
-  {
-    name: "theoryPassMark",
-    label: "Theory Pass Mark",
-    type: "number",
-    placeholder: "Enter Pass Mark (Theory)",
-    required: true,
-  },
-  {
-    name: "theoryFailMark",
-    label: "Theory Fail Mark",
-    type: "number",
-    placeholder: "Enter Fail Mark (Theory)",
-    required: true,
-  },
-  // Practical Marks — optional, show only if type has practical
-  {
-    name: "practicalFullMark",
-    label: "Practical Full Mark",
-    type: "number",
-    placeholder: "Enter Full Mark (Practical)",
-    required: false,
-    dependsOn: "subjectType", // custom logic in FormModal to show if type === 'practical' or 'both'
-  },
-  {
-    name: "practicalPassMark",
-    label: "Practical Pass Mark",
-    type: "number",
-    placeholder: "Enter Pass Mark (Practical)",
-    required: false,
-    dependsOn: "subjectType",
-  },
-  {
-    name: "practicalFailMark",
-    label: "Practical Fail Mark",
-    type: "number",
-    placeholder: "Enter Fail Mark (Practical)",
-    required: false,
-    dependsOn: "subjectType",
-  },
-];
+  const modalFields = [
+    {
+      key: "class",
+      name: "class",
+      label: "Class",
+      type: "select",
+      placeholder: "Select Class",
+      options: classOptions, // ✅ just strings
+      required: true,
+    },
+    {
+      key: "group",
+      name: "group",
+      label: "Group",
+      type: "select",
+      placeholder: "Select Group",
+      options: groupOptions(classFilter), // ✅ just strings
+      required: false,
+    },
+    {
+      key: "section",
+      name: "section",
+      label: "Section",
+      type: "select",
+      placeholder: "Select Section",
+      options: sectionOptions(classFilter, groupFilter), // ✅ just strings
+      required: false,
+    },
+    {
+      key: "subjectName",
+      name: "subjectName",
+      label: "Subject Name",
+      type: "text",
+      placeholder: "Enter Subject Name",
+      required: true,
+    },
+    {
+      key: "subjectType",
+      name: "subjectType",
+      label: "Subject Type",
+      type: "select",
+      placeholder: "Select Type",
+      options: ["Theory", "Practical", "Theory + Practical"], // ✅ strings
+      required: true,
+    },
+    // Theory Marks
+    {
+      key: "theoryFullMark",
+      name: "theoryFullMark",
+      label: "Theory Full Mark",
+      type: "number",
+      placeholder: "Enter Full Mark (Theory)",
+      required: true,
+    },
+    {
+      key: "theoryPassMark",
+      name: "theoryPassMark",
+      label: "Theory Pass Mark",
+      type: "number",
+      placeholder: "Enter Pass Mark (Theory)",
+      required: true,
+    },
+    {
+      key: "theoryFailMark",
+      name: "theoryFailMark",
+      label: "Theory Fail Mark",
+      type: "number",
+      placeholder: "Enter Fail Mark (Theory)",
+      required: true,
+    },
+    // Practical Marks
+    {
+      key: "practicalFullMark",
+      name: "practicalFullMark",
+      label: "Practical Full Mark",
+      type: "number",
+      placeholder: "Enter Full Mark (Practical)",
+      required: false,
+    },
+    {
+      key: "practicalPassMark",
+      name: "practicalPassMark",
+      label: "Practical Pass Mark",
+      type: "number",
+      placeholder: "Enter Pass Mark (Practical)",
+      required: false,
+    },
+    {
+      key: "practicalFailMark",
+      name: "practicalFailMark",
+      label: "Practical Fail Mark",
+      type: "number",
+      placeholder: "Enter Fail Mark (Practical)",
+      required: false,
+    },
+  ];
 
   const handleAddSubject = (data) => {
     const newSubject = {
@@ -246,7 +270,7 @@ export default function SubjectListPage() {
         Section: row.section,
         Subject: row.subjectName,
         Month: row.month || "-",
-      }))
+      })),
     );
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Subjects");
@@ -282,16 +306,16 @@ export default function SubjectListPage() {
       <div
         className={`${
           darkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800"
-        } rounded p-3 space-y-3`}
+        }  p-3 space-y-3`}
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Subject List</h2>
-            <p className="text-xs text-blue-400">
+            <h2 className="text-base font-semibold">Subject list</h2>
+            <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-700">
                 Dashboard
               </Link>{" "}
-              / Subject List
+              / Subject list
             </p>
           </div>
 
@@ -299,10 +323,10 @@ export default function SubjectListPage() {
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
             <button
               onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center   rounded border px-2 py-2 text-xs shadow-sm ${
+              className={`w-full md:w-28 flex items-center    border px-3 h-8 text-xs  ${
                 darkMode
                   ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-200"
+                  : "bg-white border-gray-300"
               }`}
             >
               Refresh
@@ -311,33 +335,33 @@ export default function SubjectListPage() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between px-2 py-2 text-xs shadow-sm rounded border ${
+                className={`w-full flex items-center px-3 h-8 text-xs border ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-200"
+                    : "bg-white border-gray-300"
                 }`}
               >
-                Export <BiChevronDown />
+                Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-sm ${
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border  ${
                     darkMode
                       ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-200"
+                      : "bg-white border-gray-300"
                   }`}
                 >
                   <button
                     onClick={() => exportPDF(sorted)}
-                    className="block w-full text-left px-3 py-2 text-xs hover:bg-blue-50"
+                    className="block w-full text-left px-3 py-1 text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(sorted)}
-                    className="block w-full text-left px-3 py-2 text-xs hover:bg-blue-50"
+                    className="block w-full text-left px-3 py-1 text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -346,7 +370,7 @@ export default function SubjectListPage() {
             {canEdit && (
               <button
                 onClick={() => setAddModalOpen(true)}
-                className="w-full md:w-28 flex items-center  bg-blue-600 text-white rounded px-2 py-2 text-xs shadow-sm"
+                className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs "
               >
                 Subject
               </button>
@@ -363,31 +387,26 @@ export default function SubjectListPage() {
         </div>
 
         {/* Filter Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mt-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 ">
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
             {/* Month */}
             <div ref={monthRef} className="relative">
               <button
                 onClick={() => setMonthOpen(!monthOpen)}
-                className={`w-full md:w-28 flex items-center justify-between px-3 py-2 text-xs rounded border shadow-sm ${
+                className={`w-full md:w-28 flex items-center px-3 h-8 text-xs border  ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-200"
+                    : "bg-white border-gray-300"
                 }`}
               >
                 {selectedMonth}{" "}
-                <BiChevronDown
-                  className={`${
-                    monthOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
               </button>
               {monthOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-md max-h-56 overflow-y-auto ${
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border max-h-56 overflow-y-auto ${
                     darkMode
                       ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-200"
+                      : "bg-white border-gray-300"
                   }`}
                 >
                   {months.map((m) => (
@@ -398,12 +417,12 @@ export default function SubjectListPage() {
                         setCurrentPage(1);
                         setMonthOpen(false);
                       }}
-                      className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
                         selectedMonth === m
                           ? "bg-blue-100 text-blue-700 font-medium"
                           : darkMode
-                          ? "text-gray-200"
-                          : "text-gray-700"
+                            ? "text-gray-200"
+                            : "text-gray-700"
                       }`}
                     >
                       {m}
@@ -417,136 +436,75 @@ export default function SubjectListPage() {
             <div ref={filterRef} className="relative">
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className={`w-full md:w-28 flex items-center justify-between px-3 py-2 text-xs rounded border shadow-sm ${
+                className={`w-full md:w-28 flex items-center px-3 h-8 text-xs  border  ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
                     : "bg-white border-gray-200"
                 }`}
               >
-                Filter <BiChevronDown />
+                Filter
               </button>
-              {filterOpen && (
-                <div
-                  className={`absolute z-50 mt-1 w-52   left-1/2 -translate-x-1/2
-    md:left-0 md:translate-x-0 max-h-40 overflow-y-auto p-3 space-y-2 rounded border shadow-md ${
-      darkMode ? "bg-gray-700 border-gray-500" : "bg-white border-gray-200"
-    }`}
-                >
-                  {/* Class */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setClassOpen(!classOpen)}
-                      className={`w-full border text-xs  px-2 py-1 rounded flex justify-between items-center shadow-sm ${
-                        darkMode ? "border-gray-500" : "border-gray-200"
-                      }`}
-                    >
-                      {classFilter || "All Classes"} <BiChevronDown />
-                    </button>
-                    {classOpen &&
-                      classOptions.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => {
-                            setClassFilter(c);
-                            setClassOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            classFilter === c
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                  </div>
-                  {/* Group */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setGroupOpen(!groupOpen)}
-                      className={`w-full border text-xs  px-2 py-1 rounded flex justify-between items-center shadow-sm ${
-                        darkMode ? "border-gray-500" : "border-gray-200"
-                      }`}
-                    >
-                      {groupFilter || "All Groups"} <BiChevronDown />
-                    </button>
-                    {groupOpen &&
-                      groupOptions.map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => {
-                            setGroupFilter(g);
-                            setGroupOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            groupFilter === g
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                  </div>
-                  {/* Section */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setSectionOpen(!sectionOpen)}
-                      className={`w-full border text-xs  px-2 py-1 rounded flex justify-between items-center shadow-sm ${
-                        darkMode ? "border-gray-500" : "border-gray-200"
-                      }`}
-                    >
-                      {sectionFilter || "All Sections"} <BiChevronDown />
-                    </button>
-                    {sectionOpen &&
-                      sectionOptions.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => {
-                            setSectionFilter(s);
-                            setSectionOpen(false);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                            sectionFilter === s
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                  </div>
+              <FilterDropdown
+                title="Filter subject"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                 
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
+            {/* Sort */}
+            <div className="relative flex-1 " ref={sortRef}>
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
+                >
                   <button
                     onClick={() => {
-                      setFilterOpen(false);
-                      setCurrentPage(1);
+                      setSortOrder("asc");
+                      setSortOpen(false);
                     }}
-                    className="w-full bg-blue-600 text-white text-xs py-1 rounded"
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >
-                    Apply
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
                   </button>
                 </div>
               )}
             </div>
-
-            {/* Sort */}
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className={`w-full md:w-28 flex items-center  px-3 py-2 text-xs rounded border shadow-sm ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-200"
-              }`}
-            >
-              Sort {sortOrder === "asc" ? "↑" : "↓"}
-            </button>
           </div>
 
           {/* Search + Pagination */}
@@ -555,10 +513,10 @@ export default function SubjectListPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search subject..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs shadow-sm focus:outline-none ${
+              className={`w-full md:w-64  border px-3 h-8 text-xs focus:outline-none ${
                 darkMode
                   ? "bg-gray-700 border-gray-500 text-gray-100"
-                  : "bg-white border-gray-200 text-gray-800"
+                  : "bg-white border-gray-300 text-gray-800"
               }`}
             />
             <Pagination
@@ -574,7 +532,7 @@ export default function SubjectListPage() {
       <div
         className={`${
           darkMode ? "bg-gray-900" : "bg-white"
-        } rounded p-2 overflow-x-auto`}
+        }  p-3 overflow-x-auto`}
       >
         <SubjectTable
           data={currentSubjects}

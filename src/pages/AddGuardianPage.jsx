@@ -100,32 +100,41 @@ export default function AddGuardianPage() {
           />
 
           <Input
-            label="Division"
-            name="division"
-            value={formData.division}
-            onChange={handleChange}
-          />
+  label="Division"
+  name="division"
+  type="select"
+  value={formData.division}
+  onChange={handleChange}
+  options={["Dhaka", "Chattogram", "Khulna", "Rajshahi"]}
+/>
 
-          <Input
-            label="District"
-            name="district"
-            value={formData.district}
-            onChange={handleChange}
-          />
+<Input
+  label="District"
+  name="district"
+  type="select"
+  value={formData.district}
+  onChange={handleChange}
+  options={["Gazipur", "Narsingdi", "Tangail", "Dhaka"]}
+/>
 
-          <Input
-            label="Upazila"
-            name="upazila"
-            value={formData.upazila}
-            onChange={handleChange}
-          />
+<Input
+  label="Upazila"
+  name="upazila"
+  type="select"
+  value={formData.upazila}
+  onChange={handleChange}
+  options={["Sadar", "Kaliakair", "Narsingdi Sadar"]}
+/>
 
-          <Input
-            label="Village"
-            name="village"
-            value={formData.village}
-            onChange={handleChange}
-          />
+<Input
+  label="Village"
+  name="village"
+  type="select"
+  value={formData.village}
+  onChange={handleChange}
+  options={["Village 1", "Village 2", "Village 3"]}
+/>
+
 
           <Input
             label="Phone"
@@ -134,13 +143,7 @@ export default function AddGuardianPage() {
             onChange={handleChange}
           />
 
-          <Input
-            label="E-mail Address"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
+          
         </div>
 
         {/* Upload Section */}

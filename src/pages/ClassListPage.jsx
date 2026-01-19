@@ -252,13 +252,13 @@ const handleAddClass = (data) => {
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 h-8 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
                     PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 h-8 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
                     Excel
                   </button>
@@ -412,7 +412,7 @@ const handleAddClass = (data) => {
       </div>
 
       {/* TABLE */}
-      <div className={` p-2 overflow-x-auto ${cardBg}`}>
+      <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ClassPaymentTable
           data={currentData.map((item, index) => ({
             ...item,

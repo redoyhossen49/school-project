@@ -8,70 +8,47 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-import { gradeData } from "../data/gradeData.js";
+import { seatNumberData } from "../data/seatNumberData.js";
 import { Link } from "react-router-dom";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
-export default function GradeList() {
+export default function ScheduleList() {
   const { darkMode } = useTheme();
   const canEdit = localStorage.getItem("role") === "school";
 
-  const [formValues, setFormValues] = useState({
-    Class: "",
-    Group: "",
-    Subject: "",
-    LetterGrade: "",
-    MaxNumber: "",
-    MinNumber: "",
-    GradePoint: "",
-  });
-
-  const handleFormChange = (name, value) => {
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: value,
-
-      // 🔁 dependency reset
-      ...(name === "Class" ? { Group: "", Subject: "" } : {}),
-      ...(name === "Group" ? { Subject: "" } : {}),
-    }));
-  };
-
   // -------------------- State --------------------
-
-  const [filters, setFilters] = useState({
-    class: "",
-    group: "",
-  });
-  const [data, setData] = useState(gradeData);
-  const [addClassOpen, setAddClassOpen] = useState(false);
+  const [data, setData] = useState(seatNumberData); // ✅ seatNumberData
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [groupFilter, setGroupFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("newest");
-  // Temporary (UI selection only)
-  const [tempClass, setTempClass] = useState(null);
-  const [tempGroup, setTempGroup] = useState(null);
+  const [sectionFilter, setSectionFilter] = useState("");
+
+  const [addClassOpen, setAddClassOpen] = useState(false);
+  const [selectedClass, setSelectedClass] = useState(false);
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+    session: "",
+    exam: "",
+  });
 
   // -------------------- Dropdown states --------------------
-  const [classOpen, setClassOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [groupOpen, setGroupOpen] = useState(false);
-
-  // -------------------- Dropdowns --------------------
-
+  const [sortOrder, setSortOrder] = useState("newest");
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-
-  // Add these states at the top
-
+  const [sessionFilter, setSessionFilter] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [examFilter, setExamFilter] = useState(false);
+  const [sectionOpen, setSectionOpen] = useState(false);
+  const [sessionOpen, setSessionOpen] = useState(false);
+  const [examOpen, setExamOpen] = useState(false);
 
   const classRef = useRef(null);
   const groupRef = useRef(null);
   const exportRef = useRef(null);
-
   const filterRef = useRef(null);
   const statusRef = useRef(null);
   const sortRef = useRef(null);
@@ -94,38 +71,23 @@ export default function GradeList() {
   }, []);
 
   // -------------------- Filter Options --------------------
-  const classOptions = useMemo(() => {
-    return Array.from(new Set(data.map((i) => i.Class)));
-  }, [data]);
+  const classOptions = Array.from(
+    new Set(seatNumberData.map((i) => i.className)),
+  );
+  // সব unique group seatNumberData থেকে
+  const groupOptions = Array.from(new Set(seatNumberData.map((i) => i.group)));
 
-  // ===== GROUP OPTIONS (modal dependent) =====
-  const groupOptions = useMemo(() => {
-    return Array.from(
-      new Set(
-        data
-          .filter((i) =>
-            formValues.class ? i.Class === formValues.class : true,
-          )
-          .map((i) => i.Group),
-      ),
-    );
-  }, [data, formValues.class]);
+  const sectionOptions = Array.from(
+    new Set(seatNumberData.map((i) => i.section)),
+  );
 
-  // ===== SUBJECT OPTIONS (modal dependent) =====
-  const subjectOptions = useMemo(() => {
-    return Array.from(
-      new Set(
-        data
-          .filter(
-            (i) =>
-              (!formValues.class || i.Class === formValues.class) &&
-              (!formValues.group || i.Group === formValues.group),
-          )
-          .map((i) => i.Subject),
-      ),
-    );
-  }, [data, formValues.class, formValues.group]);
+  const sessionOptions = Array.from(
+    new Set(seatNumberData.map((i) => i.session)),
+  );
 
+  const examOptions = Array.from(
+    new Set(seatNumberData.map((i) => i.examName)),
+  );
   const filterFields = [
     {
       key: "class",
@@ -137,86 +99,47 @@ export default function GradeList() {
       placeholder: "Select Group",
       options: groupOptions,
     },
+
+    {
+      key: "session",
+
+      placeholder: "Select session",
+      options: sessionOptions,
+    },
+    {
+      key: "exam",
+
+      placeholder: "Select exam",
+      options: examOptions,
+    },
   ];
 
-  const exportExcel = (data) => {
-    if (!data.length) return;
-
-    const wsData = data.map((item, idx) => ({
-      SL: idx + 1,
-      Class: item.Class,
-      Group: item.Group,
-      Subject: item.Subject,
-      Grade: item.LetterGrade,
-      "Max Marks": item.MaxNumber,
-      "Min Marks": item.MinNumber,
-      "Grade Point": item.GradePoint,
-    }));
-
-    const ws = utils.json_to_sheet(wsData);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Grades");
-    writeFile(wb, "GradeData.xlsx");
-  };
-  const exportPDF = (data) => {
-    if (!data.length) {
-      alert("No data to export");
-      return;
-    }
-
-    const doc = new jsPDF("landscape", "pt", "a4");
-
-    const tableColumn = [
-      "SL",
-      "Class",
-      "Group",
-      "Subject",
-      "Grade",
-      "Max Marks",
-      "Min Marks",
-      "Grade Point",
-    ];
-
-    const tableRows = data.map((item, idx) => [
-      idx + 1,
-      item.Class,
-      item.Group,
-      item.Subject,
-      item.LetterGrade,
-      item.MaxNumber,
-      item.MinNumber,
-      item.GradePoint,
-    ]);
-
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      theme: "striped",
-      styles: { fontSize: 8 },
-    });
-
-    doc.save("GradeData.pdf");
-  };
   // -------------------- Filter + Search + Sort --------------------
   const filteredData = useMemo(() => {
-    let temp = data
-      .filter((item) => (classFilter ? item.Class === classFilter.value : true))
-      .filter((item) => (groupFilter ? item.Group === groupFilter.value : true))
+    return data
+      .filter((item) => (classFilter ? item.className === classFilter : true))
+      .filter((item) => (groupFilter ? item.group === groupFilter : true))
+      .filter((item) => (sessionFilter ? item.session === sessionFilter : true))
+      .filter((item) => (examFilter ? item.examName === examFilter : true))
       .filter((item) =>
         search
-          ? item.Subject.toLowerCase().includes(search.toLowerCase())
+          ? item.studentName.toLowerCase().includes(search.toLowerCase())
           : true,
+      )
+      .sort((a, b) =>
+        sortOrder === "newest"
+          ? b.className.localeCompare(a.className)
+          : a.className.localeCompare(b.className),
       );
-
-    temp.sort((a, b) =>
-      sortOrder === "newest"
-        ? b.Class.localeCompare(a.Class)
-        : a.Class.localeCompare(b.Class),
-    );
-
-    return temp;
-  }, [data, classFilter, groupFilter, search, sortOrder]);
+  }, [
+    data,
+    classFilter,
+    groupFilter,
+    sessionFilter,
+    examFilter,
+    search,
+    sortOrder,
+  ]);
 
   // -------------------- Pagination --------------------
   const perPage = 20;
@@ -239,80 +162,136 @@ export default function GradeList() {
     setSearch("");
     setSortOrder("newest");
     setCurrentPage(1);
-    setExportOpen("");
-    setFilterOpen("");
+    setExportOpen(false);
+    setFilterOpen(false);
+  };
+
+  // -------------------- Export --------------------
+  const exportExcel = (data) => {
+    if (!data.length) return;
+    const wsData = data.map((item, idx) => ({
+      SL: idx + 1,
+      Class: item.className,
+      Group: item.group,
+      "Exam Name": item.examName,
+      "Exam Year": item.examYear,
+      "Student Name": item.studentName,
+      "ID Number": item.idNumber,
+      "Roll No": item.rollNo,
+      "Father's Name": item.fathersName,
+      "Seat Number": item.seatNumber,
+    }));
+    const ws = utils.json_to_sheet(wsData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "SeatNumberData");
+    writeFile(wb, "SeatNumberData.xlsx");
+  };
+
+  const exportPDF = (data) => {
+    if (!data.length) return alert("No data to export");
+    const doc = new jsPDF("landscape", "pt", "a4");
+    const tableColumn = [
+      "SL",
+      "Class",
+      "Group",
+      "Session",
+      "Exam Name",
+      "Exam Year",
+      "Student Name",
+      "ID Number",
+      "Roll No",
+      "Father's Name",
+      "Seat Number",
+    ];
+    const tableRows = data.map((item, idx) => [
+      idx + 1,
+      item.className,
+      item.group,
+      item.session,
+      item.examName,
+      item.examYear,
+      item.studentName,
+      item.idNumber,
+      item.rollNo,
+      item.fathersName,
+      item.seatNumber,
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 8 },
+    });
+
+    doc.save("SeatNumberData.pdf");
   };
 
   // -------------------- Columns --------------------
   const columns = [
     { key: "SL", label: "SL" },
-    { key: "Class", label: "Class" },
-    { key: "Group", label: "Group" },
-    { key: "Subject", label: "Subject" },
-    { key: "LetterGrade", label: "Grade" },
-    { key: "MaxNumber", label: "Max Marks" },
-    { key: "MinNumber", label: "Min Marks" },
-    { key: "GradePoint", label: "Grade Point" },
+    { key: "className", label: "Class" },
+    { key: "group", label: "Group" },
+    { key: "session", label: "Session" },
+    { key: "examName", label: "Exam Name" },
+    { key: "examYear", label: "Exam Year" },
+    { key: "studentName", label: "Student Name" },
+    { key: "idNumber", label: "ID Number" },
+    { key: "rollNo", label: "Roll No" },
+    { key: "fathersName", label: "Father's Name" },
+    { key: "seatNumber", label: "Seat Number" },
   ];
 
-  // -------------------- Add Class Modal --------------------
-  const addGradeFields = [
+  const addSeatNumberFields = [
     {
       key: "class",
       type: "select",
       placeholder: "Choose a class",
-      options: classOptions,
+      options: classOptions, // dynamic from seatNumberData
     },
     {
       key: "group",
       type: "select",
       placeholder: "Choose a group",
-      options: groupOptions,
+      options: groupOptions, // dynamic based on selected class
     },
     {
-      key: "subject",
+      key: "session",
       type: "select",
-      placeholder: "Choose a subject",
-      options: subjectOptions,
+      placeholder: "Choose Session Year",
+      options: sessionOptions, // dynamic
     },
     {
-      key: "letterGrade",
-      type: "text",
-      placeholder: "Type Grade",
+      key: "examName",
+      type: "select",
+      placeholder: "Choose Exam",
+      options: examOptions, // dynamic
     },
     {
-      key: "maxNumber",
+      key: "totalStudents",
       type: "number",
-      placeholder: "Max Marks",
+      placeholder: "Enter total students",
     },
     {
-      key: "minNumber",
+      key: "setNumberStart",
       type: "number",
-      placeholder: "Min Marks",
-    },
-    {
-      key: "gradePoint",
-      type: "number",
-      placeholder: "Grade Point",
+      placeholder: "Start from 1",
+      helperText: "Roll numbers will start from this number and auto-generate",
     },
   ];
 
-  const handleAddClass = (newEntry) => {
-    setData((prev) => [...prev, newEntry]);
-    setAddClassOpen(false);
-    setCurrentPage(1);
-  };
   // -------------------- Styles --------------------
   const cardBg = darkMode
     ? "bg-gray-900 text-gray-100"
     : "bg-white text-gray-800";
-  const borderClr = darkMode ? "border-gray-500" : "border-gray-200";
+  const borderClr = darkMode ? "border-gray-500" : "border-gray-300";
   const inputBg = darkMode
     ? "bg-gray-700 text-gray-100"
-    : "bg-white text-gray-800";
+    : "bg-white text-gray-700";
   const dropdownBg = darkMode
     ? "bg-gray-700 text-gray-100"
-    : "bg-white text-gray-800";
+    : "bg-white text-gray-700";
 
   return (
     <div className="p-3 space-y-4">
@@ -320,12 +299,12 @@ export default function GradeList() {
       <div className={` p-3 space-y-4 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Grade List</h2>
+            <h2 className="text-base font-semibold">Schedule list</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-600">
                 Dashboard
               </Link>
-              / Grade List
+              / Schedule list
             </p>
           </div>
 
@@ -341,17 +320,17 @@ export default function GradeList() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
                 Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border  ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28  border  ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-1  text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
                     PDF
                   </button>
@@ -370,27 +349,49 @@ export default function GradeList() {
                 onClick={() => setAddClassOpen(true)}
                 className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
-                Grade
+                Schedule
               </button>
             )}
 
             <FormModal
               open={addClassOpen}
-              title="Add Grade"
-              fields={addGradeFields}
+              title="Add seat number"
+              fields={addSeatNumberFields}
               initialValues={{
-                Class: "",
-                Group: "",
-                Subject: "",
-                LetterGrade: "",
-                MaxNumber: "",
-                MinNumber: "",
-                GradePoint: "",
+                class: "",
+                group: "",
+                session: "",
+                examName: "",
+                totalStudents: "",
+                setNumberStart: 1,
               }}
               onClose={() => setAddClassOpen(false)}
               onSubmit={(newEntry) => {
-                setData((prev) => [...prev, newEntry]);
+                const total = parseInt(newEntry.totalStudents, 10);
+                const start = parseInt(newEntry.setNumberStart, 10) || 1;
+
+                if (!total || total <= 0) {
+                  alert("Total students must be greater than 0");
+                  return;
+                }
+
+                const newData = Array.from({ length: total }, (_, i) => ({
+                  className: newEntry.class,
+                  group: newEntry.group,
+                  session: newEntry.session,
+                  examName: newEntry.examName,
+                  examYear: new Date().getFullYear(),
+
+                  studentName: `Student ${i + 1}`,
+                  idNumber: `ID-${i + 1}`,
+                  rollNo: i + 1,
+                  fathersName: "N/A",
+                  seatNumber: `S-${start + i}`,
+                }));
+
+                setData((prev) => [...prev, ...newData]);
                 setCurrentPage(1);
+                setAddClassOpen(false);
               }}
             />
           </div>
@@ -402,33 +403,33 @@ export default function GradeList() {
             <div ref={statusRef} className="relative flex-1">
               <button
                 onClick={() => setStatusOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
-                {classFilter?.label || " Class"}
+                {classFilter || " Class"}
               </button>
 
               {statusOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full border  max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border  max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
                 >
-                  {classOptions.map((cls) => (
+                  {classOptions.map((c) => (
                     <button
-                      key={cls.value}
+                      key={c}
                       onClick={() => {
-                        setClassFilter(cls); // 🔹 filter apply instantly
+                        setClassFilter(c); // 🔹 filter apply instantly
                         setGroupFilter(""); // 🔹 reset dependent filter
                         setCurrentPage(1); // 🔹 pagination reset
                         setStatusOpen(false); // 🔹 close dropdown
                       }}
                       className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                        classFilter?.value === cls.value
+                        classFilter === c
                           ? "bg-blue-100 text-blue-700 font-medium"
                           : darkMode
                             ? "text-gray-200"
                             : "text-gray-700"
                       }`}
                     >
-                      {cls.label}
+                      {c} {/* ✅ c is a string */}
                     </button>
                   ))}
                 </div>
@@ -436,17 +437,16 @@ export default function GradeList() {
             </div>
 
             {/* Filter Dropdown */}
-            {/* Filter Dropdown */}
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
                 Filter
               </button>
 
               <FilterDropdown
-                title="Filter Grade list"
+                title="Filter seat number"
                 fields={filterFields}
                 selected={filters}
                 setSelected={setFilters}
@@ -455,7 +455,9 @@ export default function GradeList() {
                 onApply={(values) => {
                   setClassFilter(values.class || "");
                   setGroupFilter(values.group || "");
-                 
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
+                  setExamFilter(values.exam || "");
 
                   setCurrentPage(1);
                   setFilterOpen(false);
@@ -517,7 +519,7 @@ export default function GradeList() {
                 setCurrentPage(1);
               }}
               placeholder="Search class..."
-              className={`w-full md:w-64  border px-3 h-8 text-xs focus:outline-none ${borderClr} ${inputBg}`}
+              className={`w-full md:w-64 border px-3 h-8 text-xs focus:outline-none ${borderClr} ${inputBg}`}
             />
             <Pagination
               currentPage={currentPage}

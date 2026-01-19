@@ -9,6 +9,7 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
+import FilterDropdown from "../components/common/FilterDropdown.jsx";
 
 // Dummy session data
 const sessionData = Array.from({ length: 30 }, (_, i) => ({
@@ -35,6 +36,11 @@ export default function SessionListPage() {
   const [sectionFilter, setSectionFilter] = useState("");
   const [sessionFilter, setSessionFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [filters, setFilters] = useState({
+    class: "",
+    group: "",
+    section: "",
+  });
 
   const [filterOpen, setFilterOpen] = useState(false);
   const [classOpen, setClassOpen] = useState(false);
@@ -57,8 +63,30 @@ export default function SessionListPage() {
   const groupOptions = Array.from(new Set(sessionData.map((s) => s.group)));
   const sectionOptions = Array.from(new Set(sessionData.map((s) => s.section)));
   const sessionOptions = Array.from(
-    new Set(sessionData.map((s) => s.sessionYear))
+    new Set(sessionData.map((s) => s.sessionYear)),
   );
+  const filterFields = [
+    {
+      key: "class",
+      placeholder: "Select class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      placeholder: "Select group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      placeholder: "Select section",
+      options: sectionOptions,
+    },
+    {
+      key: "session",
+      placeholder: "Select session",
+      options: sessionOptions,
+    },
+  ];
   const months = [
     "All",
     "January",
@@ -108,104 +136,100 @@ export default function SessionListPage() {
     .filter((item) => (groupFilter ? item.group === groupFilter : true))
     .filter((item) => (sectionFilter ? item.section === sectionFilter : true))
     .filter((item) =>
-      sessionFilter ? item.sessionYear === sessionFilter : true
+      sessionFilter ? item.sessionYear === sessionFilter : true,
     )
     .filter((item) =>
-      search ? item.class.toLowerCase().includes(search.toLowerCase()) : true
+      search ? item.class.toLowerCase().includes(search.toLowerCase()) : true,
     )
     .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
 
   const handleAddSession = (formData) => {
-  // 1️⃣ year বের করা
-  const startYear = new Date(formData.sessionStart).getFullYear();
-  const endYear = new Date(formData.sessionEnd).getFullYear();
+    // 1️⃣ year বের করা
+    const startYear = new Date(formData.sessionStart).getFullYear();
+    const endYear = new Date(formData.sessionEnd).getFullYear();
 
-  // 2️⃣ new session object
-  const newSession = {
-    sl: sessions.length + 1,
-    class: formData.class,
-    group: formData.group || "",
-    section: formData.section || "",
-    sessionStart: formData.sessionStart,
-    sessionEnd: formData.sessionEnd,
-    sessionYear: `${startYear}-${endYear}`,
-    totalDays:
-      Math.ceil(
-        (new Date(formData.sessionEnd) -
-          new Date(formData.sessionStart)) /
-          (1000 * 60 * 60 * 24)
-      ) || 0,
+    // 2️⃣ new session object
+    const newSession = {
+      sl: sessions.length + 1,
+      class: formData.class,
+      group: formData.group || "",
+      section: formData.section || "",
+      sessionStart: formData.sessionStart,
+      sessionEnd: formData.sessionEnd,
+      sessionYear: `${startYear}-${endYear}`,
+      totalDays:
+        Math.ceil(
+          (new Date(formData.sessionEnd) - new Date(formData.sessionStart)) /
+            (1000 * 60 * 60 * 24),
+        ) || 0,
+    };
+
+    // 3️⃣ state update → table auto update
+    setSessions((prev) => [...prev, newSession]);
+
+    // 4️⃣ modal close
+    setAddSessionModalOpen(false);
+
+    // 5️⃣ first page
+    setCurrentPage(1);
   };
-
-  // 3️⃣ state update → table auto update
-  setSessions((prev) => [...prev, newSession]);
-
-  // 4️⃣ modal close
-  setAddSessionModalOpen(false);
-
-  // 5️⃣ first page
-  setCurrentPage(1);
-};
-
 
   const perPage = 10;
   const totalPages = Math.ceil(filteredData.length / perPage);
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
+
  const addSessionFields = [
   {
+    key: "class",
     name: "class",
     label: "Class",
     type: "select",
-    placeholder:"Class",
-    options: classOptions.map((c) => ({
-      label: c,
-      value: c,
-    })),
+    placeholder: "Select Class",
+    options: classOptions,
     required: true,
   },
   {
+    key: "group",
     name: "group",
     label: "Group",
     type: "select",
-    placeholder:"Group",
-    options: groupOptions.map((g) => ({
-      label: g,
-      value: g,
-    })),
+    placeholder: "Select Group",
+    options: groupOptions,
   },
   {
+    key: "section",
     name: "section",
     label: "Section",
     type: "select",
-    placeholder:"Section",
-    options: sectionOptions.map((s) => ({
-      label: s,
-      value: s,
-    })),
+    placeholder: "Select Section",
+    options: sectionOptions,
   },
   {
+    key: "sessionStart",
     name: "sessionStart",
     label: "Session Start",
     type: "date",
-    placeholder:"Session Start Time",
+    placeholder: "Session Start",
     required: true,
   },
   {
+    key: "sessionEnd",
     name: "sessionEnd",
     label: "Session End",
     type: "date",
-    placeholder:"Session End Time",
+    placeholder: "Session End",
     required: true,
   },
   {
+    key: "showSession",
     name: "showSession",
     label: "Session",
     type: "text",
-     disabled: false,
-    placeholder:"Show Session",
+    placeholder: "Show Session",
+    disabled: false,
   },
 ];
 
@@ -268,18 +292,18 @@ export default function SessionListPage() {
     <div className="p-3 space-y-4">
       {/* HEADER */}
       <div
-        className={`rounded-md p-3 space-y-3 ${
+        className={` p-3 space-y-3 ${
           darkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800"
         }`}
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Session List</h2>
-            <p className="text-xs text-blue-400">
+            <h2 className="text-base font-semibold">Session list</h2>
+            <p className="text-xs text-400">
               <Link to="/school/dashboard" className="hover:text-blue-700">
                 Dashboard
               </Link>{" "}
-              / Session List
+              / Session list
             </p>
           </div>
 
@@ -287,7 +311,7 @@ export default function SessionListPage() {
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
             <button
               onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center gap-1 rounded border px-2 py-2 text-xs shadow-sm ${
+              className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
                 darkMode
                   ? "bg-gray-700 border-gray-500"
                   : "bg-white border-gray-200"
@@ -299,33 +323,33 @@ export default function SessionListPage() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center justify-between gap-1 rounded border px-2 py-2 text-xs shadow-sm ${
+                className={`w-full flex items-center  border px-3 h-8 text-xs ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-200"
+                    : "bg-white border-gray-300"
                 }`}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 rounded border shadow-sm ${
+                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border  ${
                     darkMode
                       ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-200"
+                      : "bg-white border-gray-300"
                   }`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
-                    className="block w-full px-3 py-2 text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                    Export Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -334,9 +358,9 @@ export default function SessionListPage() {
             {canEdit && (
               <button
                 onClick={() => setAddSessionModalOpen(true)}
-                className="w-full md:w-28 flex items-center gap-1 rounded bg-blue-600 px-2 py-2 text-xs text-white"
+                className="w-full md:w-28 flex items-center  bg-blue-600 px-2 h-8 text-xs text-white"
               >
-                Add Session
+                 Session
               </button>
             )}
             <FormModal
@@ -348,7 +372,7 @@ export default function SessionListPage() {
                 section: "",
                 sessionStart: "",
                 sessionEnd: "",
-                showSession:" ",
+                showSession: " ",
               }}
               onClose={() => setAddSessionModalOpen(false)}
               onSubmit={handleAddSession}
@@ -358,31 +382,27 @@ export default function SessionListPage() {
         </div>
 
         {/* Filters / Month / Sort / Search */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
             {/* Month Dropdown */}
             <div ref={monthRef} className="relative flex-1">
               <button
                 onClick={() => setMonthOpen(!monthOpen)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
                     : "bg-white border-gray-200"
                 }`}
               >
                 {selectedMonth}{" "}
-                <BiChevronDown
-                  className={`${
-                    monthOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+               
               </button>
               {monthOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full rounded border shadow-md max-h-56 overflow-y-auto ${
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border  max-h-56 overflow-y-auto ${
                     darkMode
                       ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-200"
+                      : "bg-white border-gray-300"
                   }`}
                 >
                   {months.map((m) => (
@@ -393,14 +413,14 @@ export default function SessionListPage() {
                         setCurrentPage(1);
                         setMonthOpen(false);
                       }}
-                      className={`block w-full px-3 py-2 text-left text-xs hover:bg-blue-50 ${
+                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 ${
                         selectedMonth === m
                           ? darkMode
                             ? "bg-blue-600 text-white font-medium"
                             : "bg-blue-100 text-blue-700 font-medium"
                           : darkMode
-                          ? "text-gray-200"
-                          : "text-gray-700"
+                            ? "text-gray-200"
+                            : "text-gray-700"
                       }`}
                     >
                       {m}
@@ -414,211 +434,75 @@ export default function SessionListPage() {
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
-                className={`w-full md:w-28 flex items-center justify-between gap-2 rounded border px-3 py-2 text-xs shadow-sm ${
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
                     : "bg-white border-gray-200"
                 }`}
               >
-                Filter{" "}
-                <BiChevronDown
-                  className={`${
-                    filterOpen ? "rotate-180" : ""
-                  } transition-transform`}
-                />
+                Filter
               </button>
-              {filterOpen && (
+              <FilterDropdown
+                title="Filter session"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
+
+            {/* Sort */}
+            <div className="relative flex-1 " ref={sortRef}>
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+              {sortOpen && (
                 <div
-                  className={`absolute z-50 mt-1 w-52
-    left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0
-    h-44 overflow-y-auto p-3 space-y-2 rounded border shadow-md
-    ${darkMode ? "bg-gray-700 border-gray-500" : "bg-white border-gray-200"}`}
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
                 >
-                  {/* Class */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setClassOpen(!classOpen);
-                        setGroupOpen(false);
-                        setSectionOpen(false);
-                        setSessionOpen(false);
-                      }}
-                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
-        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
-                    >
-                      {classFilter || "All Classes"} <BiChevronDown />
-                    </button>
-
-                    {classOpen && (
-                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
-                        {classOptions.map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => {
-                              setClassFilter(c);
-                              setClassOpen(false);
-                            }}
-                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
-              ${
-                classFilter === c
-                  ? "bg-blue-100 text-blue-700 font-medium"
-                  : darkMode
-                  ? "text-gray-200"
-                  : "text-gray-700"
-              }`}
-                          >
-                            {c}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Group */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setGroupOpen(!groupOpen);
-                        setClassOpen(false);
-                        setSectionOpen(false);
-                        setSessionOpen(false);
-                      }}
-                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
-        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
-                    >
-                      {groupFilter || "All Groups"} <BiChevronDown />
-                    </button>
-
-                    {groupOpen && (
-                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
-                        {groupOptions.map((g) => (
-                          <button
-                            key={g}
-                            onClick={() => {
-                              setGroupFilter(g);
-                              setGroupOpen(false);
-                            }}
-                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
-              ${
-                groupFilter === g
-                  ? "bg-blue-100 text-blue-700 font-medium"
-                  : darkMode
-                  ? "text-gray-200"
-                  : "text-gray-700"
-              }`}
-                          >
-                            {g}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Section */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setSectionOpen(!sectionOpen);
-                        setClassOpen(false);
-                        setGroupOpen(false);
-                        setSessionOpen(false);
-                      }}
-                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
-        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
-                    >
-                      {sectionFilter || "All Sections"} <BiChevronDown />
-                    </button>
-
-                    {sectionOpen && (
-                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
-                        {sectionOptions.map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => {
-                              setSectionFilter(s);
-                              setSectionOpen(false);
-                            }}
-                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
-              ${
-                sectionFilter === s
-                  ? "bg-blue-100 text-blue-700 font-medium"
-                  : darkMode
-                  ? "text-gray-200"
-                  : "text-gray-700"
-              }`}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Session */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setSessionOpen(!sessionOpen);
-                        setClassOpen(false);
-                        setGroupOpen(false);
-                        setSectionOpen(false);
-                      }}
-                      className={`w-full border text-xs px-2 py-1 rounded flex justify-between items-center shadow-sm
-        ${darkMode ? "border-gray-500" : "border-gray-200"}`}
-                    >
-                      {sessionFilter || "All Sessions"} <BiChevronDown />
-                    </button>
-
-                    {sessionOpen && (
-                      <div className="mt-1 max-h-24 overflow-y-auto rounded border border-gray-200 dark:border-gray-500">
-                        {sessionOptions.map((y) => (
-                          <button
-                            key={y}
-                            onClick={() => {
-                              setSessionFilter(y);
-                              setSessionOpen(false);
-                            }}
-                            className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
-              ${
-                sessionFilter === y
-                  ? "bg-blue-100 text-blue-700 font-medium"
-                  : darkMode
-                  ? "text-gray-200"
-                  : "text-gray-700"
-              }`}
-                          >
-                            {y}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Apply */}
                   <button
                     onClick={() => {
-                      setFilterOpen(false);
-                      setCurrentPage(1);
+                      setSortOrder("asc");
+                      setSortOpen(false);
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-1.5 rounded"
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >
-                    Apply
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
                   </button>
                 </div>
               )}
             </div>
-
-            {/* Sort */}
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className={`w-full md:w-28 flex items-center rounded border px-2 py-2 text-xs shadow-sm ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-200"
-              }`}
-            >
-              Sort {sortOrder === "asc" ? "↑" : "↓"}
-            </button>
           </div>
 
           {/* Search + Pagination */}
@@ -627,10 +511,10 @@ export default function SessionListPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search class..."
-              className={`w-full md:w-64 rounded border px-3 py-2 text-xs shadow-sm focus:outline-none ${
+              className={`w-full md:w-64  border px-3 h-8 text-xs focus:outline-none ${
                 darkMode
                   ? "bg-gray-700 border-gray-500 text-gray-200"
-                  : "bg-white border-gray-200"
+                  : "bg-white border-gray-300"
               }`}
             />
             <Pagination
@@ -644,7 +528,7 @@ export default function SessionListPage() {
 
       {/* SESSION TABLE */}
       <div
-        className={` rounded-md p-2 overflow-x-auto ${
+        className={`  p-3 overflow-x-auto ${
           darkMode ? "bg-gray-900" : "bg-white"
         }`}
       >

@@ -205,13 +205,13 @@ const filteredClassTimes = classTimes
                 >
                   <button
                     onClick={() => exportPDF(filteredClassTimes)}
-                    className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100"
+                    className="w-full px-3 py-1  text-left text-xs hover:bg-gray-100"
                   >
                      PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredClassTimes)}
-                    className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100"
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                   >
                      Excel
                   </button>
@@ -441,7 +441,7 @@ const filteredClassTimes = classTimes
       </div>
 
       {/* Table */}
-      <div className={`p-2 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
+      <div className={`p-3 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
         <ClassTimeTable data={currentClassTimes} setData={setClassTimes} />
       </div>
     </div>
