@@ -91,51 +91,49 @@ export default function FilterDropdown({
                   <ul>
                     {/* All option */}
                     <li>
-                      <button
-                        onClick={() => {
-                          setTempValues((p) => ({
-                            ...p,
-                            [field.key]: "",
-                          }));
-                          setActiveField(null);
-                        }}
-                        className={`w-full text-left text-xs px-3 py-2 cursor-pointer ${
-                          !tempValues[field.key]
-                            ? darkMode
-                              ? "bg-blue-600 text-white"
-                              : "bg-blue-600 text-white"
-                            : darkMode
-                            ? "hover:bg-gray-600 text-gray-100"
-                            : "hover:bg-blue-50 text-gray-900"
-                        }`}
-                      >
+                      <label className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
+                        darkMode
+                          ? "hover:bg-gray-600 text-gray-100"
+                          : "hover:bg-blue-50 text-gray-900"
+                      }`}>
+                        <input
+                          type="radio"
+                          checked={!tempValues[field.key]}
+                          onChange={() => {
+                            setTempValues((p) => ({
+                              ...p,
+                              [field.key]: "",
+                            }));
+                            setActiveField(null);
+                          }}
+                          className="mr-2"
+                        />
                         All
-                      </button>
+                      </label>
                     </li>
 
                     {/* Options */}
                     {field.options?.map((opt) => (
                       <li key={opt}>
-                        <button
-                          onClick={() => {
-                            setTempValues((p) => ({
-                              ...p,
-                              [field.key]: opt,
-                            }));
-                            setActiveField(null);
-                          }}
-                          className={`w-full text-left text-xs px-3 py-2 cursor-pointer ${
-                            tempValues[field.key] === opt
-                              ? darkMode
-                                ? "bg-blue-600 text-white"
-                                : "bg-blue-600 text-white"
-                              : darkMode
-                              ? "hover:bg-gray-600 text-gray-100"
-                              : "hover:bg-blue-50 text-gray-900"
-                          }`}
-                        >
+                        <label className={`flex items-center text-xs px-3 py-2 cursor-pointer ${
+                          darkMode
+                            ? "hover:bg-gray-600 text-gray-100"
+                            : "hover:bg-blue-50 text-gray-900"
+                        }`}>
+                          <input
+                            type="radio"
+                            checked={tempValues[field.key] === opt}
+                            onChange={() => {
+                              setTempValues((p) => ({
+                                ...p,
+                                [field.key]: opt,
+                              }));
+                              setActiveField(null);
+                            }}
+                            className="mr-2"
+                          />
                           {opt}
-                        </button>
+                        </label>
                       </li>
                     ))}
                   </ul>

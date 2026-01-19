@@ -131,35 +131,33 @@ export default function ReusableEditModal({
           {(typeof fields === "function" ? fields(formData) : fields).map((field) => (
             <div key={field.name}>
               {field.type === "date" ? (
-                <div className="relative w-full">
-                  <label className="block text-sm font-medium mb-1">
-                    {field.label}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
-                  </label>
+                <>
+
                   <div className="relative">
                     <input
                       type="date"
                       name={field.name}
                       value={formData[field.name] || ""}
                       onChange={handleChange}
-                      className={`w-full border h-8 px-2 text-sm pr-8 ${borderClr} ${inputBg} focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                      required={field.required}
+                      className={`w-full h-8 border ${borderClr} ${inputBg} px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
                     />
-                    <svg
-                      className="absolute right-2 top-2 w-4 h-4 text-gray-500 pointer-events-none"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </span>
                   </div>
-                </div>
+                </>
               ) : (
                 <>
                   <Input
@@ -196,7 +194,7 @@ export default function ReusableEditModal({
 
             <button
               type="submit"
-              className="flex-1 text-sm py-[8px] bg-blue-600 text-white hover:bg-blue-700 transition "
+              className="flex-1 text-sm py-[8px] bg-green-600 text-white hover:bg-green-700 transition "
             >
               Create
             </button>
