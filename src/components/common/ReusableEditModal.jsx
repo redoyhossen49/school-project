@@ -13,19 +13,46 @@ export default function ReusableEditModal({
 }) {
   const { darkMode } = useTheme();
   const [formData, setFormData] = useState({});
+  const [isModalClosing, setIsModalClosing] = useState(false);
+  const [isModalOpening, setIsModalOpening] = useState(false);
+
+  // Handle modal opening animation
+  useEffect(() => {
+    if (open) {
+      setIsModalClosing(false);
+      // Trigger opening animation after a small delay to ensure DOM is ready
+      setTimeout(() => {
+        setIsModalOpening(true);
+      }, 10);
+    } else {
+      setIsModalOpening(false);
+    }
+  }, [open]);
 
   // Initialize form data from item or getInitialValues function
   useEffect(() => {
-    if (open && item) {
-      if (getInitialValues) {
-        setFormData(getInitialValues(item));
+    if (open) {
+      // Get fields array (handle both function and array)
+      const fieldsArray = typeof fields === "function" ? fields({}) : fields;
+      
+      if (item) {
+        if (getInitialValues) {
+          setFormData(getInitialValues(item));
+        } else {
+          // Default: map fields to item properties
+          const initialData = {};
+          fieldsArray.forEach((field) => {
+            initialData[field.name] = item[field.name] || "";
+          });
+          setFormData(initialData);
+        }
       } else {
-        // Default: map fields to item properties
-        const initialData = {};
-        fields.forEach((field) => {
-          initialData[field.name] = item[field.name] || "";
+        // For add mode (no item), reset form to empty values
+        const emptyData = {};
+        fieldsArray.forEach((field) => {
+          emptyData[field.name] = "";
         });
-        setFormData(initialData);
+        setFormData(emptyData);
       }
     }
   }, [open, item, fields, getInitialValues]);
@@ -33,13 +60,38 @@ export default function ReusableEditModal({
   // Handle field change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      
+      // Reset dependent fields when parent changes
+      if (name === "class") {
+        // Reset group and section when class changes
+        updated.group = "";
+        updated.section = "";
+      } else if (name === "group") {
+        // Reset section when group changes
+        updated.section = "";
+      }
+      
+      return updated;
+    });
+  };
+
+  // Handle close with animation
+  const handleClose = () => {
+    setIsModalClosing(true);
+    setIsModalOpening(false);
+    setTimeout(() => {
+      onClose();
+      setIsModalClosing(false);
+    }, 300);
   };
 
   // Save handler
   const handleSubmit = () => {
     // Validate required fields
-    for (let field of fields) {
+    const fieldsArray = typeof fields === "function" ? fields(formData) : fields;
+    for (let field of fieldsArray) {
       if (field.required && !formData[field.name]) {
         alert(`${field.label || field.name} is required`);
         return;
@@ -47,63 +99,109 @@ export default function ReusableEditModal({
     }
 
     onSubmit(formData);
-    onClose();
+    handleClose();
   };
 
-  if (!open) return null;
+  if (!open && !isModalClosing) return null;
+
+  const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
+  const inputBg = darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800";
+  const modalBg = darkMode ? "bg-gray-800" : "bg-white";
+  const textColor = darkMode ? "text-gray-100" : "text-gray-800";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 transition-opacity duration-300 ${
+        isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
+      }`}
+      onClick={handleClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-md max-h-[90vh] overflow-y-auto p-6 md:p-8 rounded-none shadow-2xl transition-transform transform scale-100 ${
-          darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+        className={`${modalBg} ${textColor} w-full max-w-md rounded-lg shadow-xl border ${borderClr} p-6 max-h-[90vh] overflow-y-auto transition-all duration-300 transform ${
+          isModalOpening && !isModalClosing
+            ? "scale-100 opacity-100 translate-y-0"
+            : "scale-95 opacity-0 translate-y-4"
         }`}
       >
-        <h2 className="text-lg font-semibold mb-6 text-center text-blue-700">
-          {title}
-        </h2>
+        <h2 className="text-lg font-semibold text-center mb-6">{title}</h2>
 
         {/* Inputs: SINGLE COLUMN */}
-        <div className="flex flex-col gap-4">
-          {fields.map((field) => (
-            <Input
-              key={field.name}
-              label={field.label}
-              name={field.name}
-              value={formData[field.name] || ""}
-              onChange={handleChange}
-              type={field.type || "text"}
-              options={field.options || []}
-            />
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-4">
+          {(typeof fields === "function" ? fields(formData) : fields).map((field) => (
+            <div key={field.name}>
+              {field.type === "date" ? (
+                <div className="relative w-full">
+                  <label className="block text-sm font-medium mb-1">
+                    {field.label}
+                    {field.required && <span className="text-red-500 ml-1">*</span>}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name={field.name}
+                      value={formData[field.name] || ""}
+                      onChange={handleChange}
+                      className={`w-full border h-8 px-2 text-sm pr-8 ${borderClr} ${inputBg} focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                      required={field.required}
+                    />
+                    <svg
+                      className="absolute right-2 top-2 w-4 h-4 text-gray-500 pointer-events-none"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Input
+                    label={field.label}
+                    name={field.name}
+                    value={formData[field.name] || ""}
+                    onChange={handleChange}
+                    type={field.type || "text"}
+                    options={
+                      typeof field.options === "function"
+                        ? field.options(formData)
+                        : field.options || []
+                    }
+                    inputClassName={inputBg}
+                  />
+                </>
+              )}
+            </div>
           ))}
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex w-full gap-4 md:justify-end mt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className={`px-6 h-8 border w-full md:w-auto shadow-sm transition ${
-              darkMode
-                ? "border-gray-600 text-gray-200 hover:bg-gray-600"
-                : "border-gray-300 hover:bg-gray-100"
-            }`}
-          >
-            Cancel
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={handleClose}
+              className={`flex-1 text-sm py-[8px] border ${borderClr} ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                  : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+              } transition `}
+            >
+              Close
+            </button>
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shadow-sm hover:bg-green-700 transition"
-          >
-            Save
-          </button>
-        </div>
+            <button
+              type="submit"
+              className="flex-1 text-sm py-[8px] bg-blue-600 text-white hover:bg-blue-700 transition "
+            >
+              Create
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
