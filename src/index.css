@@ -46,7 +46,17 @@
   100% { text-shadow: 0 0 5px rgb(165, 231, 10); }
 }
 
-/* ===== Hide Scrollbar ===== */
+/* ===== Hide Scrollbar Globally ===== */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Keep the utility class for backward compatibility */
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
