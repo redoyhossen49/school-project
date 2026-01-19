@@ -30,54 +30,70 @@ export default function ReusableActions({
       const dropdownHeight = 70; // approx height of dropdown
       const spaceBelow = window.innerHeight - rect.bottom;
 
-      // Check for horizontal scroll in the table container
-      let hasHorizontalScroll = false;
-      let scrollableParent = ref.current.closest('.overflow-x-auto');
-      
-      if (scrollableParent) {
-        // Check if there's horizontal scroll (scrollWidth > clientWidth)
-        hasHorizontalScroll = scrollableParent.scrollWidth > scrollableParent.clientWidth;
-      }
-
-      // Check if this is the last row in the table
-      let isLastRow = false;
+      // Check if this is the first or last row in the table
       const tableRow = ref.current.closest('tr');
+      let isFirstRow = false;
+      let isLastRow = false;
+      let isSingleRow = false;
+      let tableContainerBottom = null;
+      
       if (tableRow) {
         const tbody = tableRow.closest('tbody');
         if (tbody) {
           const rows = tbody.querySelectorAll('tr');
+          isFirstRow = tableRow === rows[0];
           isLastRow = tableRow === rows[rows.length - 1];
+          isSingleRow = rows.length === 1; // Check if only one row exists
+        }
+
+        // Get table container boundaries
+        const tableContainer = ref.current.closest('.overflow-x-auto, .border, [class*="border"]');
+        if (tableContainer) {
+          const containerRect = tableContainer.getBoundingClientRect();
+          tableContainerBottom = containerRect.bottom;
         }
       }
 
-      // Show above if horizontal scroll exists OR if near bottom OR if it's the last row
-      if (hasHorizontalScroll || spaceBelow < dropdownHeight || isLastRow) {
-        setPositionTop(false); // show above
+      // Calculate space below within table container
+      const spaceBelowInContainer = tableContainerBottom 
+        ? tableContainerBottom - rect.bottom 
+        : spaceBelow;
+
+      // Show above if:
+      // 1. Single row: always show below (on top of button)
+      // 2. First row: prefer showing below, only show above if very little space
+      // 3. Last row (but not single): always show above for last row
+      // 4. Middle rows: check space
+      if (isSingleRow) {
+        // Single row: always show below (on top of action button)
+        setPositionTop(true); // always show below for single row
+      } else if (isFirstRow) {
+        // First row: prefer showing below, only show above if very little space
+        if (spaceBelow < 30) {
+          setPositionTop(false); // show above only if very little space
+        } else {
+          setPositionTop(true); // show below for first row
+        }
+      } else if (isLastRow) {
+        // Last row (but not single): show above
+        setPositionTop(false); // show above for last row
       } else {
-        setPositionTop(true); // show below
+        // Middle rows: check space
+        if (spaceBelow < dropdownHeight || (tableContainerBottom && spaceBelowInContainer < dropdownHeight)) {
+          setPositionTop(false); // show above
+        } else {
+          setPositionTop(true); // show below
+        }
       }
     }
     setOpen(!open);
-  };
-
-  const handleEdit = () => {
-    setOpen(false);
-    onEdit(item);
-  };
-
-  const handleDelete = () => {
-    setOpen(false);
-    if (confirm(deleteMessage)) {
-      const id = getId(item);
-      onDelete(id);
-    }
   };
 
   return (
     <div className="relative h-6 flex items-center" ref={ref}>
       <button
         onClick={toggleDropdown}
-        className={`h-6 w-6 p-0 flex items-center justify-center rounded transition-colors ${
+        className={`h-6 w-6 p-0 flex items-center justify-center transition-colors ${
           darkMode
             ? "hover:bg-gray-700 text-gray-300"
             : "hover:bg-gray-100 text-gray-600"
@@ -89,34 +105,39 @@ export default function ReusableActions({
       {open && (
         <div
           className={`absolute -right-4 w-24 border shadow-sm z-50 ${
-            positionTop ? "top-8" : "bottom-8"
+            positionTop ? "top-7" : "bottom-7"
           } ${
             darkMode
-              ? "bg-gray-500 text-gray-100 border-gray-600"
+              ? "bg-gray-800 text-gray-100 border-gray-600"
               : "bg-white text-gray-900 border-gray-300"
           }`}
         >
           <button
-            onClick={handleEdit}
+            onClick={() => onEdit(item)}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
               darkMode
-                ? "hover:bg-gray-600 text-gray-100"
+                ? "hover:bg-gray-700 text-gray-100"
                 : "hover:bg-gray-100 text-gray-900"
             }`}
           >
-            <FiEdit className={`w-4 h-4 ${darkMode ? "text-blue-400" : "text-blue-600"}`} />
+            <FiEdit className={`w-3 h-3 ${darkMode ? "text-blue-400" : "text-blue-600"}`} />
             Edit
           </button>
 
           <button
-            onClick={handleDelete}
+            onClick={() => {
+              if (confirm(deleteMessage)) {
+                const id = getId(item);
+                onDelete(id);
+              }
+            }}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
               darkMode
-                ? "text-red-400 hover:bg-red-900/30"
+                ? "text-red-400 hover:bg-gray-700"
                 : "text-red-600 hover:bg-red-50"
             }`}
           >
-            <FiTrash2 className="w-4 h-4" />
+            <FiTrash2 className="w-3 h-3" />
             Delete
           </button>
         </div>

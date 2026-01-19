@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import Input from "../components/Input";
 import { discountData } from "../data/discountData";
+import { feeTypeData } from "../data/feeTypeData";
 
 export default function AddDiscountPage() {
   const { darkMode } = useTheme();
@@ -20,8 +21,8 @@ export default function AddDiscountPage() {
   const sessionOptions = getUniqueOptions(discountData, "session");
   const studentNameOptions = getUniqueOptions(discountData, "student_name");
   
-  // Fees type options as specified by user
-  const feesTypeOptions = ["Admission", "Monthly", "Food", "Exam", "Session"];
+  // Fees type options from feeTypeData
+  const feesTypeOptions = getUniqueOptions(feeTypeData, "fees_type");
 
   const [formData, setFormData] = useState({
     group_name: "",
@@ -36,6 +37,58 @@ export default function AddDiscountPage() {
     start_date: "",
     end_date: "",
   });
+
+  // Find matching record when group_name is selected
+  const selectedGroupRecord = useMemo(() => {
+    if (!formData.group_name) return null;
+    // Find first matching record with the same group_name
+    return discountData.find((item) => item.group_name === formData.group_name);
+  }, [formData.group_name]);
+
+  // Auto-populate class, group, section, session when group_name is selected
+  useEffect(() => {
+    if (selectedGroupRecord) {
+      setFormData((prev) => ({
+        ...prev,
+        class: selectedGroupRecord.class || prev.class,
+        group: selectedGroupRecord.group || prev.group,
+        section: selectedGroupRecord.section || prev.section,
+        session: selectedGroupRecord.session || prev.session,
+      }));
+    }
+  }, [selectedGroupRecord]);
+
+  // Find matching fee type record to get regular amount
+  const matchingFeeTypeRecord = useMemo(() => {
+    if (!formData.fees_type || !formData.class || !formData.group || !formData.section || !formData.session) {
+      return null;
+    }
+    // Find matching record based on class, group, section, session, and fees_type
+    return feeTypeData.find(
+      (item) =>
+        item.class === formData.class &&
+        item.group === formData.group &&
+        item.section === formData.section &&
+        item.session === formData.session &&
+        item.fees_type === formData.fees_type
+    );
+  }, [formData.fees_type, formData.class, formData.group, formData.section, formData.session]);
+
+  // Auto-populate regular amount when fees_type is selected
+  useEffect(() => {
+    if (matchingFeeTypeRecord) {
+      setFormData((prev) => ({
+        ...prev,
+        regular: matchingFeeTypeRecord.fees_amount?.toString() || "",
+      }));
+    } else if (formData.fees_type && formData.class && formData.group && formData.section && formData.session) {
+      // If no matching record found, clear regular amount
+      setFormData((prev) => ({
+        ...prev,
+        regular: "",
+      }));
+    }
+  }, [matchingFeeTypeRecord]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,6 +138,9 @@ export default function AddDiscountPage() {
   const canEdit = userRole === "school";
   const basePath = canEdit ? "/school/dashboard" : "/teacher/dashboard";
 
+  const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
+  const inputBg = darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800";
+  const readOnlyBg = darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-700";
 
   return (
     <div className="py-4 px-2 md:mx-0 min-h-screen">
@@ -130,41 +186,41 @@ export default function AddDiscountPage() {
             options={groupNameOptions}
           />
 
-          <Input
-            label="Show Class"
-            name="class"
-            value={formData.class}
-            onChange={handleChange}
-            type="select"
-            options={classOptions}
-          />
+          {/* Show Class (Read-only) */}
+          <div className="relative w-full">
+            <div
+              className={`w-full h-8 border ${borderClr} px-2 text-sm flex items-center ${readOnlyBg}`}
+            >
+              {formData.class || "-"}
+            </div>
+          </div>
 
-          <Input
-            label="Show Group"
-            name="group"
-            value={formData.group}
-            onChange={handleChange}
-            type="select"
-            options={groupOptions}
-          />
+          {/* Show Group (Read-only) */}
+          <div className="relative w-full">
+            <div
+              className={`w-full h-8 border ${borderClr} px-2 text-sm flex items-center ${readOnlyBg}`}
+            >
+              {formData.group || "-"}
+            </div>
+          </div>
 
-          <Input
-            label="Show Section"
-            name="section"
-            value={formData.section}
-            onChange={handleChange}
-            type="select"
-            options={sectionOptions}
-          />
+          {/* Show Section (Read-only) */}
+          <div className="relative w-full">
+            <div
+              className={`w-full h-8 border ${borderClr} px-2 text-sm flex items-center ${readOnlyBg}`}
+            >
+              {formData.section || "-"}
+            </div>
+          </div>
 
-          <Input
-            label="Show Session"
-            name="session"
-            value={formData.session}
-            onChange={handleChange}
-            type="select"
-            options={sessionOptions}
-          />
+          {/* Show Session (Read-only) */}
+          <div className="relative w-full">
+            <div
+              className={`w-full h-8 border ${borderClr} px-2 text-sm flex items-center ${readOnlyBg}`}
+            >
+              {formData.session || "-"}
+            </div>
+          </div>
 
           <Input
             label="Select Student"
@@ -184,13 +240,14 @@ export default function AddDiscountPage() {
             options={feesTypeOptions}
           />
 
-          <Input
-            label="Show Regular Amount"
-            name="regular"
-            value={formData.regular}
-            onChange={handleChange}
-            type="number"
-          />
+          {/* Show Regular Amount (Read-only) */}
+          <div className="relative w-full">
+            <div
+              className={`w-full h-8 border ${borderClr} px-2 text-sm flex items-center ${readOnlyBg}`}
+            >
+              {formData.regular ? `৳${parseFloat(formData.regular).toLocaleString()}` : "-"}
+            </div>
+          </div>
 
           <Input
             label="Type Amount"
@@ -222,7 +279,7 @@ export default function AddDiscountPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className={`px-6 h-8 border w-full md:w-auto shadow-sm transition ${
+            className={`px-6 h-8 border w-full md:w-auto  transition ${
               darkMode
                 ? "border-gray-600 text-gray-200 hover:bg-gray-600"
                 : "border-gray-300 hover:bg-gray-100"
@@ -233,7 +290,7 @@ export default function AddDiscountPage() {
 
           <button
             type="submit"
-            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shadow-sm hover:bg-green-700 transition"
+            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white hover:bg-green-700 transition"
           >
             Save
           </button>

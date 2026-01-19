@@ -2,14 +2,16 @@ import { useTheme } from "../../context/ThemeContext";
 import ReusableActions from "../common/ReusableActions";
 
 const headers = [
-  "Sl",
-  "Group Name",
-  "Class",
-  "Group",
-  "Section",
-  "Session",
-  "Fees Type",
-  "Fees Amount",
+    "Sl",
+    "Class",
+    "Group",
+    "Section",
+    "Session",
+    "Fees Type",
+    "Amount",
+    "Total Payable",
+    "Payable Due",
+    "Payable Last Date",
 ];
 
 export default function FeeTypeTable({ data, setData, onEdit }) {
@@ -23,6 +25,26 @@ export default function FeeTypeTable({ data, setData, onEdit }) {
 
   const handleDelete = (sl) => {
     if (confirm("Are you sure you want to delete this fee type?")) {
+      // Check if item exists in localStorage
+      const storedData = localStorage.getItem("feeTypes");
+      if (storedData) {
+        try {
+          const existingData = JSON.parse(storedData);
+          const isFromStorage = existingData.some(item => item.sl === sl);
+          
+          if (isFromStorage) {
+            // Remove from localStorage
+            const updatedStorage = existingData.filter((f) => f.sl !== sl);
+            localStorage.setItem("feeTypes", JSON.stringify(updatedStorage));
+            // Dispatch custom event to notify other components
+            window.dispatchEvent(new Event('feeTypesUpdated'));
+          }
+        } catch (e) {
+          console.error("Error deleting fee type from localStorage:", e);
+        }
+      }
+      
+      // Remove from state
       setData((prev) => prev.filter((f) => f.sl !== sl));
       alert("Fee type deleted successfully ✅");
     }
@@ -64,7 +86,7 @@ export default function FeeTypeTable({ data, setData, onEdit }) {
         <tbody>
           {data.length === 0 ? (
             <tr>
-              <td colSpan={showAction ? 9 : 8} className="text-center py-4">
+              <td colSpan={showAction ? 11 : 10} className="text-center py-4">
                 No Data Found
               </td>
             </tr>
@@ -75,9 +97,8 @@ export default function FeeTypeTable({ data, setData, onEdit }) {
                   {fee.sl}
                 </td>
                 <td className={`px-3 h-8 border-r ${borderCol}`}>
-                  {fee.group_name}
+                  {fee.class}
                 </td>
-                <td className={`px-3 h-8 border-r ${borderCol}`}>{fee.class}</td>
                 <td className={`px-3 h-8 border-r ${borderCol}`}>
                   {fee.group}
                 </td>
@@ -98,6 +119,27 @@ export default function FeeTypeTable({ data, setData, onEdit }) {
                   className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                 >
                   ৳{fee.fees_amount}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  ৳{fee.total_payable || fee.fees_amount}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {fee.payable_due === 0 ? (
+                    <span className="text-green-600 font-semibold">Paid</span>
+                  ) : (
+                    <span className="text-red-600 font-semibold">
+                      ৳{fee.payable_due !== undefined ? fee.payable_due : (fee.total_payable || fee.fees_amount)}
+                    </span>
+                  )}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap ${fee.payable_due === 0 ? "text-green-600" : "text-red-600"} `}
+                >
+                  {fee.payable_last_date || "N/A"}
                 </td>
 
                 {showAction && (

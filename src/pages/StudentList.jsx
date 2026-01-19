@@ -11,12 +11,54 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import { getCollectionsFromStorage } from "../utils/collectionUtils";
+import { collectionData } from "../data/collectionData";
 
 export default function StudentsList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [students, setStudents] = useState(studentData);
+  // Load students from localStorage or use static data
+  const loadStudents = () => {
+    const storedStudents = localStorage.getItem("students");
+    if (storedStudents) {
+      try {
+        return JSON.parse(storedStudents);
+      } catch (e) {
+        console.error("Error loading students from localStorage:", e);
+        return studentData;
+      }
+    }
+    return studentData;
+  };
+
+  // Calculate feesDue for each student based on collections
+  const calculateStudentFeesDue = (studentList) => {
+    const storedCollections = getCollectionsFromStorage();
+    const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
+    
+    return studentList.map((student) => {
+      // Find all collections for this student
+      const studentCollections = allCollections.filter(
+        (collection) => collection.student_id?.toUpperCase() === student.studentId?.toUpperCase()
+      );
+      
+      // Calculate total due from all collections
+      const totalDue = studentCollections.reduce((sum, collection) => {
+        return sum + (collection.total_due || 0);
+      }, 0);
+      
+      return {
+        ...student,
+        feesDue: totalDue, // Update feesDue based on collections
+      };
+    });
+  };
+
+  const [students, setStudents] = useState(() => {
+    const loadedStudents = loadStudents();
+    return calculateStudentFeesDue(loadedStudents);
+  });
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const studentsPerPage = 20;
@@ -75,9 +117,33 @@ export default function StudentsList() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Listen for collectionsUpdated and studentsUpdated events to refresh feesDue
+  useEffect(() => {
+    const handleStudentsUpdate = () => {
+      const loadedStudents = loadStudents();
+      setStudents(calculateStudentFeesDue(loadedStudents));
+    };
+
+    const handleCollectionsUpdate = () => {
+      // Recalculate feesDue when collections are updated
+      const loadedStudents = loadStudents();
+      setStudents(calculateStudentFeesDue(loadedStudents));
+    };
+
+    window.addEventListener('studentsUpdated', handleStudentsUpdate);
+    window.addEventListener('collectionsUpdated', handleCollectionsUpdate);
+    window.addEventListener('feeTypesUpdated', handleCollectionsUpdate);
+
+    return () => {
+      window.removeEventListener('studentsUpdated', handleStudentsUpdate);
+      window.removeEventListener('collectionsUpdated', handleCollectionsUpdate);
+      window.removeEventListener('feeTypesUpdated', handleCollectionsUpdate);
+    };
+  }, []);
+
   // ===== Filter + Sort Logic =====
   const filteredStudents = students
-    .filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
+    .filter((s) => s.student_name.toLowerCase().includes(search.toLowerCase()))
     .filter((s) => {
       const today = new Date();
       const joinDate = new Date(s.joinDate); // raw ISO string, safe
@@ -126,7 +192,7 @@ export default function StudentsList() {
 
     const sheetData = data.map((s, i) => ({
       Sl: i + 1,
-      Name: s.name,
+      Name: s.student_name,
       Roll: s.roll,
       Class: s.className,
       Group: s.group,
@@ -160,7 +226,7 @@ export default function StudentsList() {
 
     const rows = data.map((s, i) => [
       i + 1,
-      s.name,
+      s.student_name,
       s.roll,
       s.className,
       s.group,
@@ -181,7 +247,8 @@ export default function StudentsList() {
   };
 
   const handleRefresh = () => {
-    setStudents(studentData);
+    const loadedStudents = loadStudents();
+    setStudents(calculateStudentFeesDue(loadedStudents));
     setSearch("");
     setFilters({ className: "", group: "", section: "", session: "" });
     setTempFilters({ className: "", group: "", section: "", session: "" });

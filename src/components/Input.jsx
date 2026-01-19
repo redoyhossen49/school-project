@@ -9,7 +9,6 @@ export default function Input({
   options = [],
   error,
   inputClassName = "",
-  showDropdownTop = false, // ✅ new prop
 }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -48,8 +47,8 @@ export default function Input({
           ${inputClassName}`}
         onClick={() => setOpen((p) => !p)}
       >
-        <span className={value ? "text-gray-700" : "text-gray-400"}>
-          {selectedLabel}
+        <span className={`${value ? "text-gray-700" : "text-gray-400"}`}>
+          {value || label}
         </span>
         <svg
           className="w-3 h-3 text-gray-500"
@@ -67,14 +66,8 @@ export default function Input({
       </div>
 
       {open && (
-        <ul
-          className={`absolute z-50 w-full bg-white border border-gray-300 max-h-28 overflow-y-auto 
-            ${showDropdownTop ? "bottom-full mb-1" : "mt-1"}`}
-        >
-          {normalizedOptions.length === 0 && (
-            <li className="px-3 py-1 text-xs text-gray-400">No options</li>
-          )}
-          {normalizedOptions.map((opt, idx) => (
+        <ul className="absolute z-50 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto ">
+          {options.map((opt, idx) => (
             <li
               key={idx}
               className="px-3 my-2 text-xs hover:bg-indigo-100 cursor-pointer text-gray-700"
@@ -146,10 +139,13 @@ export default function Input({
         name={name}
         value={value}
         onChange={onChange}
-        placeholder=" "
-        className={`peer w-full border h-8 px-3 text-xs ${
-          error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"
-        } focus:outline-none ${inputClassName}`}
+        placeholder=" " // important for floating label
+        className={`
+          peer w-full border h-8 px-2 text-xs
+          ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
+          focus:outline-none 
+          ${inputClassName}
+        `}
       />
       <label
         className={`
