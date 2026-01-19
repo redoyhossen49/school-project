@@ -9,15 +9,45 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
+import FeesCollectionModal from "../components/FeesCollectionModal.jsx";
+import {
+  getCollectionsAPI,
+  initializeCollectionsStorage,
+  updateCollectionAPI,
+  deleteCollectionAPI,
+  saveCollectionAPI,
+  getCollectionsFromStorage,
+} from "../utils/collectionUtils";
+import { studentData } from "../data/studentData";
+import { feeTypeData } from "../data/feeTypeData";
+import { discountData } from "../data/discountData";
 
 export default function CollectionList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [collections, setCollections] = useState(collectionData);
+  const [collections, setCollections] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const collectionsPerPage = 20;
+
+  // Load collections from localStorage on mount
+  useEffect(() => {
+    const loadCollections = async () => {
+      try {
+        // Initialize with default data if storage is empty
+        initializeCollectionsStorage(collectionData);
+        // Load collections (from localStorage, ready for API)
+        const data = await getCollectionsAPI();
+        setCollections(data);
+      } catch (error) {
+        console.error("Error loading collections:", error);
+        // Fallback to default data
+        setCollections(collectionData);
+      }
+    };
+    loadCollections();
+  }, []);
 
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
@@ -33,6 +63,7 @@ export default function CollectionList() {
     session: "",
   });
   const [editingCollection, setEditingCollection] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
 
   const exportRef = useRef(null);
   const sortRef = useRef(null);
@@ -82,21 +113,26 @@ export default function CollectionList() {
   const exportExcel = (data) => {
     if (!data.length) return;
 
-    const sheetData = data.map((c, i) => ({
-      Sl: i + 1,
-      "Student id": c.student_id,
-      Class: c.class,
-      Group: c.group,
-      Section: c.section,
-      Session: c.session,
-      "Fees Type": c.fees_type,
-      "Total payable": c.total_payable,
-      "Payable due": c.payable_due,
-      "Pay type": c.pay_type,
-      "Type amount": c.type_amount,
-      "Total due": c.total_due,
-      "Pay Date": c.pay_date,
-    }));
+    const sheetData = data.map((c, i) => {
+      const student = studentData.find(
+        (s) => s.studentId?.toUpperCase() === c.student_id?.toUpperCase()
+      );
+      const studentName = c.student_name || student?.student_name || "N/A";
+      
+      return {
+        Sl: i + 1,
+        "Collection Date": c.pay_date || "",
+        "Student ID": c.student_id,
+        "Student Name": studentName,
+        Class: c.class,
+        Group: c.group,
+        Section: c.section,
+        Session: c.session,
+        "Fees Type": c.fees_type,
+        "Paid Amount": c.paid_amount || c.type_amount || 0,
+        "Total Due": c.total_due || 0,
+      };
+    });
 
     const ws = utils.json_to_sheet(sheetData);
     const wb = utils.book_new();
@@ -112,35 +148,38 @@ export default function CollectionList() {
 
     const columns = [
       "Sl",
-      "Student id",
+      "Collection Date",
+      "Student ID",
+      "Student Name",
       "Class",
       "Group",
       "Section",
       "Session",
       "Fees Type",
-      "Total payable",
-      "Payable due",
-      "Pay type",
-      "Type amount",
-      "Total due",
-      "Pay Date",
+      "Paid Amount",
+      "Total Due",
     ];
 
-    const rows = data.map((c, i) => [
-      i + 1,
-      c.student_id,
-      c.class,
-      c.group,
-      c.section,
-      c.session,
-      c.fees_type,
-      c.total_payable,
-      c.payable_due,
-      c.pay_type,
-      c.type_amount,
-      c.total_due,
-      c.pay_date,
-    ]);
+    const rows = data.map((c, i) => {
+      const student = studentData.find(
+        (s) => s.studentId?.toUpperCase() === c.student_id?.toUpperCase()
+      );
+      const studentName = c.student_name || student?.student_name || "N/A";
+      
+      return [
+        i + 1,
+        c.pay_date || "",
+        c.student_id,
+        studentName,
+        c.class,
+        c.group,
+        c.section,
+        c.session,
+        c.fees_type,
+        c.paid_amount || c.type_amount || 0,
+        c.total_due || 0,
+      ];
+    });
 
     autoTable(doc, {
       head: [columns],
@@ -153,8 +192,14 @@ export default function CollectionList() {
     doc.save("Collections_List.pdf");
   };
 
-  const handleRefresh = () => {
-    setCollections(collectionData);
+  const handleRefresh = async () => {
+    try {
+      const data = await getCollectionsAPI();
+      setCollections(data);
+    } catch (error) {
+      console.error("Error refreshing collections:", error);
+      setCollections(collectionData);
+    }
     setSearch("");
     setFilters({ className: "", group: "", section: "", session: "" });
     setSortOrder("newest");
@@ -166,38 +211,210 @@ export default function CollectionList() {
     return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
   };
 
-  const classOptions = getUniqueOptions(collectionData, "class");
-  const groupOptions = getUniqueOptions(collectionData, "group");
-  const sectionOptions = getUniqueOptions(collectionData, "section");
-  const sessionOptions = getUniqueOptions(collectionData, "session");
-  const feesTypeOptions = getUniqueOptions(collectionData, "fees_type");
-  const payTypeOptions = ["Due", "Payable", "Advance"];
+  // Generate options from current collections (from localStorage)
+  const classOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "class");
+  const groupOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "group");
+  const sectionOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "section");
+  const sessionOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "session");
+  const feesTypeOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "fees_type");
 
   // Handle collection form submit (edit only)
-  const handleCollectionFormSubmit = (formData) => {
+  const handleCollectionFormSubmit = async (formData) => {
     if (editingCollection) {
-      const updatedCollection = {
-        ...editingCollection,
+      try {
+        const updatedData = {
+          student_id: formData.student_id,
+          student_name: formData.student_name,
+          class: formData.class,
+          group: formData.group,
+          section: formData.section,
+          session: formData.session,
+          fees_type: formData.fees_type,
+          total_payable: parseFloat(formData.total_payable) || 0,
+          payable_due: parseFloat(formData.payable_due) || 0,
+          type_amount: parseFloat(formData.type_amount) || 0,
+          paid_amount: parseFloat(formData.type_amount) || 0, // Also update paid_amount
+          total_due: parseFloat(formData.total_due) || 0,
+          pay_date: formData.pay_date || new Date().toISOString().split("T")[0],
+        };
+        
+        // Update in localStorage (ready for API)
+        await updateCollectionAPI(editingCollection.sl, updatedData);
+        
+        // Reload collections
+        const data = await getCollectionsAPI();
+        setCollections(data);
+        setEditingCollection(null);
+        alert("Collection updated successfully ✅");
+      } catch (error) {
+        console.error("Error updating collection:", error);
+        alert("Error updating collection. Please try again.");
+      }
+    }
+  };
+
+  // Handle collection form submit from modal
+  const handleCollectionModalSubmit = async (formData) => {
+    try {
+      // Get all fee types data (static + localStorage)
+      const getAllFeeTypeData = () => {
+        const storedData = localStorage.getItem("feeTypes");
+        const storedItems = storedData ? JSON.parse(storedData) : [];
+        return [...feeTypeData, ...storedItems];
+      };
+      
+      const allFeeTypeData = getAllFeeTypeData();
+      
+      // Calculate fees amounts based on selected fees types
+      const matchingFees = allFeeTypeData.filter(
+        (fee) =>
+          fee.class === formData.class &&
+          fee.group === formData.group &&
+          fee.section === formData.section &&
+          fee.session === formData.session &&
+          formData.fees_type.includes(fee.fees_type)
+      );
+
+      let totalPayable = matchingFees.reduce((sum, fee) => {
+        let feeAmount = fee.fees_amount || 0;
+        
+        // Check if there's a discount for this student and fees_type
+        if (formData.student_id) {
+          const student = studentData.find(
+            (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+          );
+          
+          if (student) {
+            const matchingDiscount = discountData.find(
+              (discount) =>
+                discount.student_name === student.student_name &&
+                discount.class === formData.class &&
+                discount.group === formData.group &&
+                discount.section === formData.section &&
+                discount.session === formData.session &&
+                discount.fees_type === fee.fees_type
+            );
+            
+            if (matchingDiscount) {
+              const today = new Date().toISOString().split("T")[0];
+              const startDate = matchingDiscount.start_date;
+              const endDate = matchingDiscount.end_date;
+              
+              if (today >= startDate && today <= endDate) {
+                feeAmount = Math.max(0, (matchingDiscount.regular || feeAmount) - (matchingDiscount.discount_amount || 0));
+              }
+            }
+          }
+        }
+        
+        return sum + feeAmount;
+      }, 0);
+
+      // Get student fees due
+      const student = studentData.find(
+        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+      );
+      const studentFeesDue = student?.feesDue || 0;
+
+      // Get existing collections
+      const storedCollections = getCollectionsFromStorage();
+      const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
+      
+      // Find existing collections for this student with remaining dues
+      const existingCollections = allCollections.filter(
+        (collection) =>
+          collection.student_id?.toUpperCase() === formData.student_id.toUpperCase() &&
+          collection.class === formData.class &&
+          collection.group === formData.group &&
+          collection.section === formData.section &&
+          collection.session === formData.session &&
+          collection.total_due > 0
+      );
+
+      const overdueAmount = existingCollections.reduce((sum, collection) => {
+        return sum + (collection.total_due || 0);
+      }, 0);
+
+      const paidAmount = parseFloat(formData.paid_amount) || 0;
+      const payableDue = Math.max(0, totalPayable - paidAmount);
+      const calculatedTotalDue = totalPayable + studentFeesDue;
+      const totalDue = paidAmount >= calculatedTotalDue ? 0 : calculatedTotalDue - paidAmount;
+
+      // If paid amount covers all existing due, update previous collections' total_due to 0
+      const totalExistingDue = existingCollections.reduce((sum, collection) => {
+        return sum + (collection.total_due || 0);
+      }, 0);
+
+      if (paidAmount >= totalExistingDue && totalExistingDue > 0) {
+        for (const collection of existingCollections) {
+          if (collection.total_due > 0) {
+            await updateCollectionAPI(collection.sl, {
+              ...collection,
+              total_due: 0,
+              payable_due: 0,
+            });
+          }
+        }
+      }
+
+      const collectionDataToSave = {
         student_id: formData.student_id,
+        student_name: formData.student_name,
         class: formData.class,
         group: formData.group,
         section: formData.section,
         session: formData.session,
-        fees_type: formData.fees_type,
-        total_payable: parseFloat(formData.total_payable) || 0,
-        payable_due: parseFloat(formData.payable_due) || 0,
-        pay_type: formData.pay_type,
-        type_amount: parseFloat(formData.type_amount) || 0,
-        total_due: parseFloat(formData.total_due) || 0,
-        pay_date: formData.pay_date || new Date().toISOString().split("T")[0],
+        fees_type: formData.fees_type.join(", "),
+        total_payable: totalPayable,
+        payable_due: payableDue,
+        type_amount: paidAmount,
+        paid_amount: paidAmount,
+        total: totalPayable + overdueAmount + studentFeesDue,
+        total_due: totalDue,
+        overdue_amount: overdueAmount,
+        pay_date: formData.pay_date,
+        payment_method: "Cash", // Default payment method
       };
-      setCollections(
-        collections.map((c) =>
-          c.sl === editingCollection.sl ? updatedCollection : c
-        )
+
+      await saveCollectionAPI(collectionDataToSave);
+
+      // Update student's feesDue
+      const updatedCollections = getCollectionsFromStorage();
+      const finalCollections = updatedCollections.length > 0 ? updatedCollections : collectionData;
+      
+      const studentCollections = finalCollections.filter(
+        (collection) => collection.student_id?.toUpperCase() === formData.student_id.toUpperCase()
       );
-      setEditingCollection(null);
-      alert("Collection updated successfully ✅");
+      
+      const totalDueFromAll = studentCollections.reduce((sum, collection) => {
+        return sum + (collection.total_due || 0);
+      }, 0);
+      
+      const storedStudents = localStorage.getItem("students");
+      let students = storedStudents ? JSON.parse(storedStudents) : [...studentData];
+      
+      const studentIndex = students.findIndex(
+        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+      );
+      
+      if (studentIndex !== -1) {
+        students[studentIndex] = {
+          ...students[studentIndex],
+          feesDue: totalDueFromAll,
+        };
+        localStorage.setItem("students", JSON.stringify(students));
+        window.dispatchEvent(new Event('studentsUpdated'));
+      }
+
+      // Reload collections
+      const data = await getCollectionsAPI();
+      setCollections(data);
+      
+      alert("Collection Added Successfully ✅");
+      setShowCollectionModal(false);
+    } catch (error) {
+      console.error("Error saving collection:", error);
+      alert("Error saving collection. Please try again.");
     }
   };
 
@@ -206,6 +423,12 @@ export default function CollectionList() {
     {
       name: "student_id",
       label: "Student id",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "student_name",
+      label: "Student Name",
       type: "text",
       required: true,
     },
@@ -245,39 +468,20 @@ export default function CollectionList() {
       required: true,
     },
     {
-      name: "total_payable",
-      label: "Total payable",
-      type: "number",
-      required: true,
-    },
-    {
-      name: "payable_due",
-      label: "Payable due",
-      type: "number",
-      required: true,
-    },
-    {
-      name: "pay_type",
-      label: "Pay type",
-      type: "select",
-      options: payTypeOptions,
-      required: true,
-    },
-    {
-      name: "type_amount",
-      label: "Type amount",
+      name: "paid_amount",
+      label: "Paid Amount",
       type: "number",
       required: true,
     },
     {
       name: "total_due",
-      label: "Total due",
+      label: "Total Due",
       type: "number",
       required: true,
     },
     {
       name: "pay_date",
-      label: "Pay Date",
+      label: "Collection Date",
       type: "date",
       required: true,
     },
@@ -304,12 +508,8 @@ export default function CollectionList() {
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>
-              <button
-                onClick={() => navigate("/school/dashboard/fee/collection")}
-                className="hover:text-indigo-600"
-              >
-                / Collection List
-              </button>
+              <span className="mx-1">/</span>
+              <span>Collection List</span>
             </p>
           </div>
 
@@ -355,11 +555,7 @@ export default function CollectionList() {
 
             {canEdit && (
               <button
-                onClick={() => {
-                  const userRole = localStorage.getItem("role");
-                  const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                  navigate(`${basePath}/fee/addcollection`);
-                }}
+                onClick={() => setShowCollectionModal(true)}
                 className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
               >
                 Collection
@@ -410,11 +606,7 @@ export default function CollectionList() {
 
           {canEdit && (
             <button
-              onClick={() => {
-                const userRole = localStorage.getItem("role");
-                const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
-                navigate(`${basePath}/fee/addcollection`);
-              }}
+              onClick={() => setShowCollectionModal(true)}
               className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Collection
@@ -543,6 +735,15 @@ export default function CollectionList() {
           data={currentCollections}
           setData={setCollections}
           onEdit={(collection) => setEditingCollection(collection)}
+          onDelete={async () => {
+            // Reload collections after delete
+            try {
+              const data = await getCollectionsAPI();
+              setCollections(data);
+            } catch (error) {
+              console.error("Error reloading collections:", error);
+            }
+          }}
         />
       </div>
 
@@ -558,6 +759,13 @@ export default function CollectionList() {
           ...item,
           pay_date: item.pay_date || new Date().toISOString().split("T")[0],
         })}
+      />
+
+      {/* Fees Collection Modal */}
+      <FeesCollectionModal
+        open={showCollectionModal}
+        onClose={() => setShowCollectionModal(false)}
+        onSubmit={handleCollectionModalSubmit}
       />
     </div>
   );

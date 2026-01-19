@@ -99,10 +99,10 @@ const formatDateShort = (dateStr) => {
                 <div className="flex items-center gap-2">
                   <img
                     src={s.photo}
-                    alt={s.name}
-                    className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                    alt={s.student_name}
+                    className="w-6 h-6 rounded-full object-cover flex shrink-0"
                   />
-                  <span className="truncate">{s.name}</span>
+                  <span className="truncate">{s.student_name}</span>
                 </div>
               </td>
 
