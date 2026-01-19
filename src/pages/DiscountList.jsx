@@ -509,13 +509,13 @@ export default function DiscountList() {
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`${modalBg} ${textColor} w-full max-w-max border ${borderClr} p-6 max-h-[90vh] overflow-y-auto hide-scrollbar transition-all duration-300 transform ${isModalOpening && !isModalClosing
+          className={`${modalBg} ${textColor} w-full max-w-[320px] border ${borderClr} p-6 max-h-[550px] overflow-y-auto hide-scrollbar transition-all duration-300 transform ${isModalOpening && !isModalClosing
             ? "scale-100 opacity-100 translate-y-0"
             : "scale-95 opacity-0 translate-y-4"
             }`}
         >
           {/* Title */}
-          <h2 className="text-lg font-semibold text-center mb-4">Add Discount</h2>
+          <h2 className="text-base font-semibold text-center mb-4">Add Discount</h2>
 
           <div
             className="space-y-4"
@@ -613,7 +613,7 @@ export default function DiscountList() {
                 value={formData.discount_amount}
                 onChange={handleChange}
                 type="number"
-                step="0.01"
+                step="0.02"
               />
             </div>
 
@@ -653,7 +653,7 @@ export default function DiscountList() {
             <button
               type="button"
               onClick={handleClose}
-              className={`flex-1 text-sm h-8 border ${borderClr} ${darkMode
+              className={`flex-1 text-[12px] h-8 border ${borderClr} ${darkMode
                 ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
                 : "bg-gray-50 hover:bg-gray-100 text-gray-700"
                 } transition`}
@@ -664,7 +664,7 @@ export default function DiscountList() {
             <button
               type="button"
               onClick={handleSave}
-              className="flex-1 text-sm h-8 bg-blue-600 text-white hover:bg-blue-700 transition font-semibold"
+              className="flex-1 text-[12px] h-8 bg-blue-600 text-white hover:bg-blue-700 transition font-semibold"
             >
               Add
             </button>

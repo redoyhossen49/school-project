@@ -905,16 +905,16 @@ export default function CollectionList() {
         >
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`${modalBg} ${textColor} w-full max-w-max border ${borderClr} p-6 max-h-[600px] overflow-y-auto transition-all duration-300 transform ${
+          className={`${modalBg} ${textColor} w-full max-w-[320px] border ${borderClr} p-6 max-h-[550px] overflow-y-auto transition-all duration-300 transform ${
             isModalOpening && !isModalClosing
               ? "scale-100 opacity-100 translate-y-0"
               : "scale-95 opacity-0 translate-y-4"
           }`}
         >
             {/* Title */}
-            <h2 className="text-lg font-semibold text-center mb-4">Fees Collection</h2>
+            <h2 className="text-base font-semibold text-center mb-4">Fees Collection</h2>
             
-            <div className="space-y-4">
+            <div className="space-y-4 py-2">
             {/* Student ID */}
            <Input
              label="Student ID"
@@ -924,60 +924,60 @@ export default function CollectionList() {
              type="text"
            />
 
-          {/* Class and Group - Side by side */}
-           <div className="grid grid-cols-1 gap-2 mb-2">
-             <div className="relative w-full">
-               <input
-                 type="text"
-                 value={formData.class}
-                 readOnly
-                 placeholder="Class"
-                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
-               />
-             </div>
-             <div className="relative w-full">
-               <input
-                 type="text"
-                 value={formData.group}
-                 placeholder="Group"
-                 readOnly
-                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
-               />
-             </div>
-           </div>
+          {/* Class */}
+           <Input
+             label="Class"
+             name="class"
+             value={formData.class}
+             onChange={handleChange}
+             type="text"
+             readOnly
+             inputClassName={`${readOnlyBg} cursor-not-allowed`}
+           />
 
-           {/* Section and Session - Side by side */}
-           <div className="grid grid-cols-1 gap-2 mb-2">
-             <div className="relative w-full">
-               <input
-                 type="text"
-                 value={formData.section}
-                 placeholder="Section"
-                 readOnly
-                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
-               />
-             </div>
-             <div className="relative w-full">
-               <input
-                 type="text"
-                 value={formData.session}
-                 placeholder="Session"
-                 readOnly
-                 className={`w-full border h-8 px-2 text-sm border-gray-300 ${readOnlyBg} cursor-not-allowed`}
-               />
-             </div>
-           </div>
+          {/* Group */}
+           <Input
+             label="Group"
+             name="group"
+             value={formData.group}
+             onChange={handleChange}
+             type="text"
+             readOnly
+             inputClassName={`${readOnlyBg} cursor-not-allowed`}
+           />
+
+           {/* Section */}
+           <Input
+             label="Section"
+             name="section"
+             value={formData.section}
+             onChange={handleChange}
+             type="text"
+             readOnly
+             inputClassName={`${readOnlyBg} cursor-not-allowed`}
+           />
+
+           {/* Session */}
+           <Input
+             label="Session"
+             name="session"
+             value={formData.session}
+             onChange={handleChange}
+             type="text"
+             readOnly
+             inputClassName={`${readOnlyBg} cursor-not-allowed`}
+           />
 
            {/* Student Name */}
-           <div className="relative w-full">
-             <input
-               type="text"
-               value={formData.student_name}
-               placeholder="Student Name"
-               readOnly
-               className={`w-full border h-8 px-2 text-sm ${borderClr} ${readOnlyBg} cursor-not-allowed`}
-             />
-           </div>
+           <Input
+             label="Student Name"
+             name="student_name"
+             value={formData.student_name}
+             onChange={handleChange}
+             type="text"
+             readOnly
+             inputClassName={`${readOnlyBg} cursor-not-allowed`}
+           />
 
           {/* SELECT FEES TYPE - Table Format */}
           <div className="relative w-full">
@@ -986,13 +986,13 @@ export default function CollectionList() {
                 <tr className={`border-b ${borderClr} ${
                   darkMode ? "bg-gray-700" : "bg-gray-50"
                 }`}>
-                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                     Fees Type
                   </th>
-                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                     Payable
                   </th>
-                  <th className={`w-1/3 text-xs font-semibold py-2 px-2 text-center ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                  <th className={`w-1/3 text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                     Due
                   </th>
                 </tr>
@@ -1111,7 +1111,7 @@ export default function CollectionList() {
             </div>
           </div>
 
-         <div className="grid grid-cols-2 gap-4">
+         <div className="grid grid-cols-2 gap-4 pt-2">
            {/* Paid Amount */}
            <Input
              label="Paid Amount"
@@ -1138,7 +1138,7 @@ export default function CollectionList() {
               <button
                 type="button"
                 onClick={handleClose}
-                className={`flex-1 text-sm h-8 border ${borderClr} ${
+                className={`flex-1 text-[12px] h-8 border ${borderClr} ${
                   darkMode
                     ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
                     : "bg-gray-50 hover:bg-gray-100 text-gray-700"
@@ -1150,7 +1150,7 @@ export default function CollectionList() {
               <button
                 type="button"
                 onClick={handleCollection}
-                className="flex-1 text-sm h-8 bg-blue-600 text-white hover:bg-blue-700 transition  font-semibold"
+                className="flex-1 text-[12px] h-8 bg-blue-600 text-white hover:bg-blue-700 transition  font-semibold"
               >
                 Collection
               </button>

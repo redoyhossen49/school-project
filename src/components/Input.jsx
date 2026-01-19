@@ -31,7 +31,7 @@ export default function Input({
     <div className="relative w-full" ref={wrapperRef}>
       <div
         className={`
-          w-full h-8 border px-2 text-sm flex items-center justify-between cursor-pointer
+          w-full h-8 border px-2 text-[12px] flex items-center justify-between cursor-pointer
           ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
           ${inputClassName}
         `}
@@ -56,7 +56,7 @@ export default function Input({
           {options.map((opt, idx) => (
             <li
               key={idx}
-              className="px-2 py-1 text-sm hover:bg-indigo-100 cursor-pointer text-gray-700"
+              className="px-2 py-1 text-[12px] hover:bg-indigo-100 cursor-pointer text-gray-700"
               onClick={() => {
                 onChange({ target: { name, value: opt } });
                 setOpen(false);
@@ -86,7 +86,7 @@ export default function Input({
         step={step}
         {...restProps}
         className={`
-          peer w-full border h-8 px-2 text-xs
+          peer w-full border h-8 px-2 text-[12px]
           ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
           focus:outline-none 
           ${inputClassName}
@@ -96,22 +96,22 @@ export default function Input({
       {/* Floating Label */}
       <label
         className={`
-          absolute left-2 top-1/2 -translate-y-1/2 text-sm text-gray-400
+          absolute left-2 top-1/2 -translate-y-1/2 text-[12px] text-gray-400
           pointer-events-none transition-all duration-300
 
           peer-placeholder-shown:top-1/2
           peer-placeholder-shown:-translate-y-1/2
-          peer-placeholder-shown:text-xs
+          peer-placeholder-shown:text-[12px]
           peer-placeholder-shown:text-gray-400
 
           peer-focus:-top-0.5
-          peer-focus:text-xs
+          peer-focus:text-[12px]
           peer-focus:text-indigo-600
           peer-focus:bg-white
           peer-focus:px-1
 
           peer-not-placeholder-shown:-top-1
-          peer-not-placeholder-shown:text-xs
+          peer-not-placeholder-shown:text-[12px]
           peer-not-placeholder-shown:text-gray-600
           peer-not-placeholder-shown:bg-white
           peer-not-placeholder-shown:px-1

@@ -10,6 +10,9 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import ReusableEditModal from "../components/common/ReusableEditModal.jsx";
+import ReusableActions from "../components/common/ReusableActions.jsx";
+import { FiX } from "react-icons/fi";
+import Input from "../components/Input.jsx";
 
 // Load data from localStorage and merge with static data
 const loadFeeTypes = () => {
@@ -57,9 +60,14 @@ export default function FeeTypeList() {
   const [selectedDate, setSelectedDate] = useState("Monthly");
   const [dateOpen, setDateOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [showFeeListModal, setShowFeeListModal] = useState(false);
+  const [feeListSearch, setFeeListSearch] = useState("");
+  const [editingFeeName, setEditingFeeName] = useState(null);
+  const [feeListModalClosing, setFeeListModalClosing] = useState(false);
+  const [feeListModalOpening, setFeeListModalOpening] = useState(false);
+  const [feeList, setFeeList] = useState([]);
   const [filters, setFilters] = useState({
     className: "",
     group: "",
@@ -110,6 +118,69 @@ export default function FeeTypeList() {
     }
   }, [showAddModal]);
 
+  // Load deleted static fees from localStorage
+  const getDeletedStaticFees = () => {
+    const storedData = localStorage.getItem("deletedStaticFees");
+    if (storedData) {
+      try {
+        return JSON.parse(storedData);
+      } catch (e) {
+        console.error("Error loading deleted static fees:", e);
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // Save deleted static fees to localStorage
+  const saveDeletedStaticFees = (deletedFees) => {
+    try {
+      localStorage.setItem("deletedStaticFees", JSON.stringify(deletedFees));
+    } catch (e) {
+      console.error("Error saving deleted static fees:", e);
+    }
+  };
+
+  // Load fee list (static + dynamic, excluding deleted static)
+  const loadFeeList = () => {
+    const allFees = loadFees();
+    const deletedStaticFees = getDeletedStaticFees();
+    const staticFees = feesTypeData
+      .map((name, index) => ({
+        id: `static-${index}`,
+        name: name,
+        isStatic: true,
+      }))
+      .filter((fee) => !deletedStaticFees.includes(fee.name));
+    return [...staticFees, ...allFees];
+  };
+
+  // Handle Fee List modal opening animation
+  useEffect(() => {
+    if (showFeeListModal) {
+      setFeeListModalClosing(false);
+      // Load fees when modal opens
+      setFeeList(loadFeeList());
+      setTimeout(() => {
+        setFeeListModalOpening(true);
+      }, 10);
+    } else {
+      setFeeListModalOpening(false);
+    }
+  }, [showFeeListModal]);
+
+  // Update fee list when fees are updated
+  useEffect(() => {
+    const handleFeesUpdated = () => {
+      if (showFeeListModal) {
+        setFeeList(loadFeeList());
+      }
+    };
+    
+    window.addEventListener('feesUpdated', handleFeesUpdated);
+    return () => window.removeEventListener('feesUpdated', handleFeesUpdated);
+  }, [showFeeListModal]);
+
   // Handle close with animation
   const handleCreateFeesClose = () => {
     setIsModalClosing(true);
@@ -140,9 +211,20 @@ export default function FeeTypeList() {
     }, 300);
   };
 
+  // Handle Fee List modal close with animation
+  const handleFeeListModalClose = () => {
+    setFeeListModalClosing(true);
+    setFeeListModalOpening(false);
+    setTimeout(() => {
+      setShowFeeListModal(false);
+      setFeeListModalClosing(false);
+      setFeeListSearch("");
+      setEditingFeeName(null);
+    }, 300);
+  };
+
   const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
-  const sortRef = useRef(null);
   const filterRef = useRef(null);
   const filterButtonRef = useRef(null);
 
@@ -163,8 +245,6 @@ export default function FeeTypeList() {
       }
       if (exportRef.current && !exportRef.current.contains(e.target))
         setExportOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
     };
@@ -502,6 +582,89 @@ export default function FeeTypeList() {
     handleCreateFeesClose();
   };
 
+  // Handle edit fee name
+  const handleEditFeeName = (fee) => {
+    setEditingFeeName(fee);
+  };
+
+  // Handle update fee name
+  const handleUpdateFeeName = () => {
+    if (!editingFeeName || !editingFeeName.name.trim()) {
+      alert("Please enter a valid fee name");
+      return;
+    }
+
+    const storedData = localStorage.getItem("fees");
+    const existingFees = storedData ? JSON.parse(storedData) : [];
+    
+    // Check if it's a static fee
+    if (editingFeeName.isStatic) {
+      // Convert static fee to dynamic fee in localStorage
+      const maxId = existingFees.length > 0 
+        ? Math.max(...existingFees.map(item => item.id || 0))
+        : 0;
+      
+      const newFee = {
+        id: maxId + 1,
+        name: editingFeeName.name.trim(),
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Add to localStorage and mark original static as deleted
+      const updatedFees = [...existingFees, newFee];
+      localStorage.setItem("fees", JSON.stringify(updatedFees));
+      
+      // Mark original static fee as deleted
+      const deletedStaticFees = getDeletedStaticFees();
+      // Extract index from static ID (e.g., "static-0" -> 0)
+      const staticIndex = parseInt(editingFeeName.id.replace('static-', ''));
+      const originalStaticFeeName = feesTypeData[staticIndex];
+      if (originalStaticFeeName && !deletedStaticFees.includes(originalStaticFeeName)) {
+        saveDeletedStaticFees([...deletedStaticFees, originalStaticFeeName]);
+      }
+    } else {
+      // Update existing dynamic fee
+      const updatedFees = existingFees.map((f) =>
+        f.id === editingFeeName.id
+          ? { ...f, name: editingFeeName.name.trim() }
+          : f
+      );
+      localStorage.setItem("fees", JSON.stringify(updatedFees));
+    }
+    
+    window.dispatchEvent(new Event('feesUpdated'));
+    setFeeList(loadFeeList());
+    
+    setEditingFeeName(null);
+    alert("Fee name updated successfully ✅");
+  };
+
+  // Handle delete fee (called by ReusableActions - confirmation already handled)
+  const handleDeleteFee = (id) => {
+    // Find the fee from feeList
+    const fee = feeList.find((f) => f.id === id);
+    if (!fee) return;
+
+    if (fee.isStatic) {
+      // Mark static fee as deleted
+      const deletedStaticFees = getDeletedStaticFees();
+      if (!deletedStaticFees.includes(fee.name)) {
+        saveDeletedStaticFees([...deletedStaticFees, fee.name]);
+      }
+    } else {
+      // Delete dynamic fee from localStorage
+      const storedData = localStorage.getItem("fees");
+      const existingFees = storedData ? JSON.parse(storedData) : [];
+      const updatedFees = existingFees.filter((f) => f.id !== id);
+      localStorage.setItem("fees", JSON.stringify(updatedFees));
+    }
+    
+    window.dispatchEvent(new Event('feesUpdated'));
+    setFeeList(loadFeeList());
+    
+    alert("Fee deleted successfully ✅");
+  };
+
   // Create feeFormFields function that returns fields with dynamic options based on formData
   const feeFormFields = (formData = {}) => [
     {
@@ -782,46 +945,18 @@ export default function FeeTypeList() {
               </div>
             )}
 
-            {/* Sort Dropdown */}
-            <div className="relative flex-1 md:flex-none" ref={sortRef}>
+            {/* Fee List Button */}
+            <div className="relative flex-1 md:flex-none">
               <button
-                onClick={() => setSortOpen((prev) => !prev)}
+                onClick={() => setShowFeeListModal(true)}
                 className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Sort By
+                Fee list
               </button>
-              {sortOpen && (
-                <div
-                  className={`absolute left-0 mt-2 md:w-36 z-40 w-full border ${
-                    darkMode
-                      ? "bg-gray-800 text-gray-100 border-gray-700"
-                      : "bg-white text-gray-900 border-gray-200"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setSortOrder("newest");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
-                  >
-                    First
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOrder("oldest");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
-                  >
-                    Last
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
@@ -831,7 +966,7 @@ export default function FeeTypeList() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by class, group, section, session, fees type..."
+              placeholder="Search"
               className={`w-full px-3 h-8 text-xs border ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
@@ -880,14 +1015,14 @@ export default function FeeTypeList() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`${darkMode ? "bg-gray-800" : "bg-white"} ${darkMode ? "text-gray-100" : "text-gray-800"} w-full max-w-[250px] border ${borderClr} p-4 transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${
+            className={`${darkMode ? "bg-gray-800" : "bg-white"} ${darkMode ? "text-gray-100" : "text-gray-800"} w-full max-w-[320px] max-h-[550px] border ${borderClr} p-4 transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${
               isAddModalOpening && !isAddModalClosing
                 ? "scale-100 opacity-100 translate-y-0"
                 : "scale-95 opacity-0 translate-y-4"
             }`}
           >
             {/* Title */}
-            <h2 className="text-base font-semibold text-center mb-4">Add Fees Type</h2>
+            <h2 className="text-base font-semibold text-center mb-4"> Fees Type</h2>
 
             <div className="space-y-3">
               {/* Class Field */}
@@ -906,7 +1041,7 @@ export default function FeeTypeList() {
                     darkMode
                       ? "bg-gray-700 text-white"
                       : "bg-white text-gray-800"
-                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  } px-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 >
                   <option value="">Class</option>
                   {classOptions.map((option) => (
@@ -933,7 +1068,7 @@ export default function FeeTypeList() {
                     darkMode
                       ? "bg-gray-700 text-white"
                       : "bg-white text-gray-800"
-                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  } px-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500 ${
                     !addFormData.class ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
@@ -958,7 +1093,7 @@ export default function FeeTypeList() {
                     darkMode
                       ? "bg-gray-700 text-white"
                       : "bg-white text-gray-800"
-                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  } px-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500 ${
                     !addFormData.class || !addFormData.group
                       ? "opacity-50 cursor-not-allowed"
                       : ""
@@ -986,7 +1121,7 @@ export default function FeeTypeList() {
                     darkMode
                       ? "bg-gray-700 text-white"
                       : "bg-white text-gray-800"
-                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  } px-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 >
                   <option value="">Session</option>
                   {sessionOptions.map((option) => (
@@ -1008,7 +1143,7 @@ export default function FeeTypeList() {
                     darkMode
                       ? "bg-gray-700 text-white"
                       : "bg-white text-gray-800"
-                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  } px-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 >
                   <option value="">Fees Type</option>
                   {feesTypeOptions.map((option) => (
@@ -1032,26 +1167,26 @@ export default function FeeTypeList() {
                     darkMode
                       ? "bg-gray-700 text-white placeholder-gray-400"
                       : "bg-white text-gray-800 placeholder-gray-400"
-                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                  } px-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
               </div>
 
               {/* Payable Last Date Field */}
-              <div>
-                <input
-                  type="date"
+              <div className="pt-2">
+                <Input
+                  label="Payable Last Date"
+                  name="payable_last_date"
                   value={addFormData.payable_last_date}
                   onChange={(e) =>
-                    setAddFormData({
-                      ...addFormData,
-                      payable_last_date: e.target.value,
-                    })
+                    setAddFormData({ ...addFormData, payable_last_date: e.target.value })
                   }
+                  type="date"
+                  placeholder="Payable Last Date"
                   className={`w-full h-8 border ${borderClr} ${
                     darkMode
-                      ? "bg-gray-700 text-white"
-                      : "bg-white text-gray-800"
-                  } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                      ? "bg-gray-700 text-white placeholder-gray-400"
+                      : "bg-white text-gray-800 placeholder-gray-400"
+                  } px-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-500`}
                 />
               </div>
 
@@ -1060,7 +1195,7 @@ export default function FeeTypeList() {
                 <button
                   type="button"
                   onClick={handleAddModalClose}
-                  className={`w-[50%] text-xs h-8 border ${borderClr} ${
+                  className={`w-[50%] text-[12px] h-8 border ${borderClr} ${
                     darkMode
                       ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
                       : "bg-gray-50 hover:bg-gray-100 text-gray-800"
@@ -1079,7 +1214,7 @@ export default function FeeTypeList() {
                     !addFormData.fees_type ||
                     !addFormData.fees_amount
                   }
-                  className={`w-[50%] text-xs h-8 transition font-semibold uppercase ${
+                  className={`w-[50%] text-[12px] h-8 transition font-semibold  ${
                     addFormData.class &&
                     addFormData.group &&
                     addFormData.section &&
@@ -1169,6 +1304,206 @@ export default function FeeTypeList() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fee List Modal */}
+      {(!showFeeListModal && !feeListModalClosing) ? null : (
+        <div
+          className={`fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
+            feeListModalOpening && !feeListModalClosing ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={handleFeeListModalClose}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`${darkMode ? "bg-gray-800" : "bg-white"} ${darkMode ? "text-gray-100" : "text-gray-800"} w-full max-w-[320px] border ${borderClr} p-4 transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${
+              feeListModalOpening && !feeListModalClosing
+                ? "scale-100 opacity-100 translate-y-0"
+                : "scale-95 opacity-0 translate-y-4"
+            }`}
+          >
+            {/* Title with Close Button */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-base font-semibold">Fee List</h2>
+              <button
+                onClick={handleFeeListModalClose}
+                className={`p-1 rounded transition ${
+                  darkMode
+                    ? "hover:bg-gray-700 text-gray-300"
+                    : "hover:bg-gray-100 text-gray-600"
+                }`}
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Search Row */}
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={feeListSearch}
+                onChange={(e) => setFeeListSearch(e.target.value)}
+                placeholder="Search"
+                className={`flex-1 h-8 border ${borderClr} ${
+                  darkMode
+                    ? "bg-gray-700 text-white placeholder-gray-400"
+                    : "bg-white text-gray-800 placeholder-gray-400"
+                } px-3 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    // Search functionality is handled by filter
+                  }
+                }}
+              />
+              <button
+                onClick={() => {
+                  // Search is handled by filter state
+                }}
+                className={`w-20 h-8 border ${borderClr} ${
+                  darkMode
+                    ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                    : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                } text-xs transition font-medium`}
+              >
+                Search
+              </button>
+            </div>
+
+            {/* Table */}
+            <div className={`border ${borderClr} overflow-x-auto ${
+              darkMode ? "bg-gray-900" : "bg-white"
+            }`}>
+              <table className="w-full border-collapse text-xs">
+                <thead className={`${
+                  darkMode
+                    ? "bg-gray-800 border-b border-gray-700"
+                    : "bg-gray-100 border-b border-gray-200"
+                }`}>
+                  <tr>
+                    <th className={`px-3 h-8 text-left font-semibold border-r ${borderClr} ${
+                      darkMode ? "text-gray-200" : "text-gray-800"
+                    }`}>SI</th>
+                    <th className={`px-3 h-8 text-left font-semibold border-r ${borderClr} ${
+                      darkMode ? "text-gray-200" : "text-gray-800"
+                    }`}>Fee Name</th>
+                    <th className={`px-3 h-8 text-left font-semibold ${
+                      darkMode ? "text-gray-200" : "text-gray-800"
+                    }`}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const filteredFees = feeList.filter((fee) =>
+                      fee.name?.toLowerCase().includes(feeListSearch.toLowerCase())
+                    );
+
+                    // Sort: fees being edited should appear first
+                    const sortedFees = [...filteredFees].sort((a, b) => {
+                      if (editingFeeName) {
+                        if (a.id === editingFeeName.id) return -1;
+                        if (b.id === editingFeeName.id) return 1;
+                      }
+                      return 0;
+                    });
+
+                    if (sortedFees.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan="3" className={`px-3 h-8 text-center border-r ${borderClr} ${
+                            darkMode ? "text-gray-400" : "text-gray-500"
+                          }`}>
+                            No fees found
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return sortedFees.map((fee, index) => (
+                      <tr
+                        key={fee.id || `static-${index}`}
+                        className={`border-b ${borderClr} ${
+                          darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <td className={`px-3 h-8 border-r ${borderClr} ${
+                          darkMode ? "text-gray-200" : "text-gray-800"
+                        }`}>
+                          {index + 1}
+                        </td>
+                        <td className={`px-3 h-8 border-r ${borderClr} ${
+                          darkMode ? "text-gray-200" : "text-gray-800"
+                        }`}>
+                          {editingFeeName?.id === fee.id ? (
+                            <input
+                              type="text"
+                              value={editingFeeName.name}
+                              onChange={(e) =>
+                                setEditingFeeName({
+                                  ...editingFeeName,
+                                  name: e.target.value,
+                                })
+                              }
+                              className={`w-full h-8 border ${borderClr} ${
+                                darkMode
+                                  ? "bg-gray-700 text-white"
+                                  : "bg-white text-gray-800"
+                              } px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                              onKeyPress={(e) => {
+                                if (e.key === "Enter") {
+                                  handleUpdateFeeName();
+                                }
+                              }}
+                              autoFocus
+                            />
+                          ) : (
+                            fee.name
+                          )}
+                        </td>
+                        <td className={`px-3 h-8 ${
+                          darkMode ? "text-gray-200" : "text-gray-800"
+                        }`}>
+                          {editingFeeName?.id === fee.id ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={handleUpdateFeeName}
+                                className={`px-2 py-1 text-xs border ${borderClr} ${
+                                  darkMode
+                                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                                } transition`}
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingFeeName(null)}
+                                className={`px-2 py-1 text-xs border ${borderClr} ${
+                                  darkMode
+                                    ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                                    : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                                } transition`}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <ReusableActions
+                              item={fee}
+                              onEdit={handleEditFeeName}
+                              onDelete={handleDeleteFee}
+                              deleteMessage="Are you sure you want to delete this fee?"
+                              getId={(item) => item.id}
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            </div>
+
           </div>
         </div>
       )}
