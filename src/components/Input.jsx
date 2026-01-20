@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTheme } from "../context/ThemeContext.jsx";
 
 export default function Input({
   label,
@@ -12,6 +13,7 @@ export default function Input({
   step,
   ...restProps
 }) {
+  const { darkMode } = useTheme();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
 
@@ -27,49 +29,61 @@ export default function Input({
   }, []);
 
   // Custom Select Option component
-  const SelectField = () => (
-    <div className="relative w-full" ref={wrapperRef}>
-      <div
-        className={`
-          w-full h-8 border px-2 text-[12px] flex items-center justify-between cursor-pointer
-          ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
-          ${inputClassName}
-        `}
-        onClick={() => setOpen(!open)}
-      >
-        <span className={`${value ? "text-gray-400" : "text-gray-400"}`}>
-          {value || label}
-        </span>
-        <svg
-          className="w-3 h-3 text-gray-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+  const SelectField = () => {
+    const isDisabled = restProps.disabled;
+    return (
+      <div className="relative w-full" ref={wrapperRef}>
+        <div
+          className={`
+            w-full h-8 border px-2 text-[12px] flex items-center justify-between
+            ${isDisabled ? "cursor-not-allowed opacity-50 bg-gray-100" : "cursor-pointer"}
+            ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
+            ${inputClassName}
+          `}
+          onClick={() => !isDisabled && setOpen(!open)}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-        </svg>
-      </div>
+          <span className={`${value ? "text-gray-400" : "text-gray-400"}`}>
+            {value || label}
+          </span>
+          <svg
+            className="w-3 h-3 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
 
-      {/* Options dropdown */}
-      {open && (
-        <ul className="absolute z-50 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto hide-scrollbar ">
-          {options.map((opt, idx) => (
-            <li
-              key={idx}
-              className="px-2 py-1 text-[12px] hover:bg-indigo-100 cursor-pointer text-gray-700"
-              onClick={() => {
-                onChange({ target: { name, value: opt } });
-                setOpen(false);
-              }}
-            >
-              {opt}
-            </li>
-          ))}
-        </ul>
-      )}
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-    </div>
-  );
+        {/* Options dropdown */}
+        {open && !isDisabled && (
+          <ul className={`absolute z-50 w-full border mt-1 max-h-48 overflow-y-auto hide-scrollbar ${
+            darkMode 
+              ? "bg-gray-700 border-gray-600" 
+              : "bg-white border-gray-300"
+          }`}>
+            {options.map((opt, idx) => (
+              <li
+                key={idx}
+                className={`px-2 py-1 text-[12px] cursor-pointer ${
+                  darkMode
+                    ? "hover:bg-gray-600 text-gray-200"
+                    : "hover:bg-indigo-100 text-gray-700"
+                }`}
+                onClick={() => {
+                  onChange({ target: { name, value: opt } });
+                  setOpen(false);
+                }}
+              >
+                {opt}
+              </li>
+            ))}
+          </ul>
+        )}
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      </div>
+    );
+  };
 
   // Render
   if (type === "select") return <SelectField />;
