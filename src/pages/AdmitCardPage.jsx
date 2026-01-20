@@ -6,16 +6,20 @@ import Pagination from "../components/Pagination.jsx";
 import ReusableTable from "../components/common/ReusableTable.jsx";
 import ReusableActions from "../components/common/ReusableActions.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
-import { FiMoreHorizontal, FiEdit, FiTrash2, FiPrinter, FiEye } from "react-icons/fi";
-import FormModal from "../components/FormModal.jsx";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
-import Input from "../components/Input.jsx";
+import FormModal from "../components/FormModal.jsx";
+import AdmitCardModal from "../components/admitCard/AdmitCardModal.jsx";
+import ViewAdmitCardModal from "../components/admitCard/ViewAdmitCardModal.jsx";
+import AdmitCardActions from "../components/admitCard/AdmitCardActions.jsx";
+import { generateAdmitCardHTML, getStudentSubjects, getStudentPhoto, getStudentSubjectDetails, formatDate } from "../components/admitCard/admitCardUtils.js";
 import classTeacherSignature from "../assets/images/class-teacher.png";
 import headteacherSignature from "../assets/images/signature-headteacher.png";
+import schoolLogo from "../assets/images/sidebar-logo.avif";
+import schoolWatermark from "../assets/images/school.webp";
 
 export default function AdmitCardPage() {
   const canEdit = localStorage.getItem("role") === "school";
@@ -287,13 +291,14 @@ export default function AdmitCardPage() {
           (search ? d.StudentName.toLowerCase().includes(search.toLowerCase()) : true)
         );
       })
-      .map((d) => {
+      .map((d, index) => {
         // Add generated admit card number to the data
         const admitCardKey = `${d.IDNumber}_${d.Class}_${d.Section || ""}_${d.Session}_${d.ExamName}`;
         const admitCardNo = generatedAdmitCards[admitCardKey] || "";
         return {
           ...d,
           AdmitCardNo: admitCardNo,
+          SL: d.SL || d.sl || index + 1, // Add SL field (serial number)
         };
       })
       .sort((a, b) => {
@@ -315,6 +320,7 @@ export default function AdmitCardPage() {
     (currentPage - 1) * perPage,
     currentPage * perPage,
   );
+  // Keep SL from studentExamData (already set in filteredData)
 
   // -------------------- Columns --------------------
   const columns = [
@@ -335,138 +341,13 @@ export default function AdmitCardPage() {
     { key: "EndTime", label: "End Time" },
   ];
 
-  // Reset selected cards when page changes (not on every data change)
+  // Don't reset selected cards automatically - let user control it
+  // Reset only when filters change significantly
   useEffect(() => {
-    setSelectedAdmitCards(new Set());
-  }, [currentPage]);
+    // Only reset if filters change, not on page change
+    // This allows selection to persist across pages
+  }, [appliedFilters]);
 
-  // Helper function to get student photo
-  const getStudentPhoto = (idNumber) => {
-    const student = studentData.find(
-      (s) => s.studentId?.toUpperCase() === idNumber?.toUpperCase()
-    );
-    return student?.photo || "https://via.placeholder.com/100";
-  };
-
-  // Helper function to get subjects for a student
-  const getStudentSubjects = (row) => {
-    // Get all subjects for this class, group, section
-    const subjects = studentExamData
-      .filter(
-        (d) =>
-          d.Class === row.Class &&
-          d.Group === row.Group &&
-          (d.Section || "") === (row.Section || "") &&
-          d.Session === row.Session &&
-          d.ExamName === row.ExamName
-      )
-      .map((d) => d.SubjectName);
-
-    return Array.from(new Set(subjects));
-  };
-
-  // Helper function to generate single admit card HTML
-  const generateAdmitCardHTML = (row) => {
-    const studentPhoto = getStudentPhoto(row.IDNumber);
-    const subjects = getStudentSubjects(row);
-    const examYear = row.ExamYear || row.Session?.split("-")[0] || new Date().getFullYear();
-
-    return `
-      <div class="admit-card">
-        <!-- Header: Left Photo, Middle School Info, Right Logo -->
-        <div class="school-header">
-          <!-- Left: Student Photo -->
-          <div class="header-left">
-            <div class="student-photo-header">
-              <img src="${studentPhoto}" alt="${row.StudentName}" />
-            </div>
-          </div>
-          
-          <!-- Middle: School Name and Address -->
-          <div class="header-middle">
-            <h1 class="school-name">Mohakhali Model High School</h1>
-            <p class="school-address">Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212</p>
-          </div>
-          
-          <!-- Right: School Logo -->
-          <div class="header-right">
-            <div class="logo-placeholder"></div>
-          </div>
-        </div>
-        
-        <!-- Admit Card Title Button -->
-        <div class="admit-title">Admit Card</div>
-        
-        <!-- Exam Info -->
-        <div class="exam-info">
-          <u>Exam: ${row.ExamName} - ${examYear}</u>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="card-content">
-          <!-- Left Side - Student Details -->
-          <div class="student-details">
-            <div class="detail-row">
-              <span class="label">Name:</span>
-              <span class="value">${row.StudentName}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Student ID:</span>
-              <span class="value">${row.AdmitCardNo || row.IDNumber}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Medium/version:</span>
-              <span class="value">Bangla</span>
-            </div>
-          </div>
-          
-          <!-- Right Side - Academic Details -->
-          <div class="right-section">
-            <div class="academic-details">
-              <div class="detail-row">
-                <span class="label">Roll:</span>
-                <span class="box">${row.RollNo}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Class:</span>
-                <span class="box">${row.Class}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Group:</span>
-                <span class="box">${row.Group || "---"}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Section:</span>
-                <span class="box">${row.Section || "N/A"}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Subject List -->
-        <div class="subject-section">
-          <h3>Subject Code and Name</h3>
-          <div class="subject-grid">
-            ${subjects.map((subject, idx) => `
-              <div class="subject-item">${subject}</div>
-            `).join("")}
-          </div>
-        </div>
-        
-        <!-- Signatures -->
-        <div class="signature-section">
-          <div class="signature-box">
-            <img src="${classTeacherSignature}" alt="Class Teacher Signature" class="signature-image" />
-            <p>Class Teacher's Signature</p>
-          </div>
-          <div class="signature-box">
-            <img src="${headteacherSignature}" alt="Headteacher Signature" class="signature-image" />
-            <p>Headmaster's (In Charge) Signature</p>
-          </div>
-        </div>
-      </div>
-    `;
-  };
 
   // -------------------- Handlers --------------------
   const handlePrint = (row) => {
@@ -489,183 +370,174 @@ export default function AdmitCardPage() {
               margin: 10mm;
             }
             .page-container {
-              max-width: 70% !important;
+              max-width: 850px;
               margin: 0 auto;
               background: white;
-              padding: 15mm;
             }
             .admit-card {
-              border: 3px solid #8B7355;
-              border-radius: 8px;
-              margin-bottom: 20px;
-              background: white;
+              width: 850px;
+              background: #fff;
+              padding: 40px;
               position: relative;
+              box-shadow: 0 0 20px rgba(0,0,0,0.1);
+              border: 1px solid gray;
+              box-sizing: border-box;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
-              padding: 20px;
-            }
-            .school-header {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: -10px;
-              gap: 15px;
-            }
-            .header-left {
-              flex: 0 0 auto;
-            }
-            .header-middle {
-              flex: 1;
-              text-align: center;
-            }
-            .header-right {
-              flex: 0 0 auto;
-            }
-            .student-photo-header {
-              width: 80px;
-              height: 100px;
-              border: 2px solid #8B7355;
-              border-radius: 5px;
               overflow: hidden;
-              background: #f0f0f0;
             }
-            .student-photo-header img {
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              opacity: 0.1;
+              z-index: 0;
+              pointer-events: none;
+            }
+            .watermark img {
+              width: 600px;
+              height: auto;
+              object-fit: contain;
+            }
+            .header {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              margin-bottom: 20px;
+            }
+            .logo{
+              border: 1px solid gray;
+              padding: 2px;
+              width: 100px;
+              height: 100px;
+              border-radius: 300% !important;
+            }
+            .logo img {
               width: 100%;
               height: 100%;
+              display: block;
               object-fit: cover;
+              border-radius: 300% !important;
             }
-            .logo-placeholder {
-              width: 80px;
-              height: 80px;
-              border: 2px solid #8B7355;
-              border-radius: 50%;
-              background: #f0f0f0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
+            .school-info {
+              text-align: center;
+              flex-grow: 1;
             }
-            .school-name {
-              font-size: 20px;
+            .school-info h1 {
+              margin: 0;
+              font-size: 26px;
+              color: #1a1a1a;
+              font-weight: 700;
+            }
+            .school-info p {
+              margin: 5px 0;
+              font-size: 11px;
               font-weight: bold;
-              margin-bottom: 5px;
               color: #333;
             }
-            .school-address {
-              font-size: 11px;
-              color: #666;
-            }
-            .admit-title {
-              background: #20B2AA;
+            .admit-badge {
+              background-color: #26a69a;
               color: white;
-              text-align: center;
-              padding: 8px;
-              border-radius: 5px;
+              padding: 4px 15px;
+              display: inline-block;
+              border-radius: 4px;
+              font-size: 18px;
               font-weight: bold;
-              font-size: 12px;
-              width: 15%;
-              margin: 0 auto;
+              margin: 10px 0;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-            .exam-info {
-              margin-top: 10px;
-              text-align: center;
-              margin-bottom: 15px;
-              font-size: 14px;
+            .exam-title {
+              font-size: 16px;
               font-weight: bold;
+              border-bottom: 2px solid #00c2cb;
+              display: inline-block;
+              padding-bottom: 2px;
             }
-            .card-content {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 20px;
-              gap: 30px;
+            .student-photo {
+              border: 1px solid gray;
+              padding: 2px;
+              width: 100px;
+              height: 100px;
+              border-radius: 300% !important;
             }
-            .student-details {
-              flex: 1 1 50%;
-              display: flex;
-              flex-direction: column;
-            }
-            .right-section {
-              flex: 1 1 50%;
-              display: flex;
-              flex-direction: column;
-            }
-            .detail-row {
-              display: flex;
-              align-items: center;
-              margin-bottom: 10px;
-              font-size: 12px;
-            }
-            .student-details .detail-row {
-              justify-content: flex-start;
-            }
-            .academic-details .detail-row {
-              justify-content: flex-start;
-            }
-            .detail-row .label {
-              font-weight: bold;
-              margin-right: 8px;
-              min-width: 120px;
-            }
-            .detail-row .value {
-              margin-right: 10px;
-            }
-            .detail-row .box {
-              width: 80px;
-              min-height: 22px;
-              border: 1px solid #333;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              padding: 3px 8px;
-              font-size: 11px;
-              background: #fff;
-              text-align: center;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .academic-details {
-              flex: 1;
+            .student-photo img {
               width: 100%;
-              margin-left: 90px !important;
+              height: 100%;
+              display: block;
+              object-fit: cover;
+              border-radius: 300% !important;
             }
-            @media print {
-              .academic-details {
-                padding-left: 90px !important;
-                margin-left: 90px !important;
+            .info-section {
+              display: grid;
+              grid-template-columns: 1.5fr 1fr;
+              gap: 40px;
+              margin-top: 20px;
+            }
+            .right-info{
+              margin-left: 40% !important;
               }
+            .info-row {
+              display: flex;
+              margin-bottom: 8px;
+              font-size: 12px;
             }
-            .subject-section {
-              margin: 20px 0;
-              border-top: 2px solid #8B7355;
-              padding-top: 15px;
+            .label {
+              font-weight: bold;
+              width: 110px;
             }
-            .subject-section h3 {
+            .value-box {
+              border: 1px solid #999;
+              padding: 2px 8px;
+              flex-grow: 1;
+              min-height: 22px;
+              border-radius: 3px;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .subjects-wrapper {
+              margin-top: 30px;
+              position: relative;
+              z-index: 1;
+            }
+            .subjects-header {
+              font-weight: bold;
               font-size: 14px;
-              margin-bottom: 10px;
-              text-decoration: underline;
+              text-align: center;
             }
-            .subject-grid {
+            .subjects-container {
+              border: 1px solid #ddd;
+              border-radius: 3px;
+            }
+            .subjects-grid {
               display: grid;
               grid-template-columns: 1fr 1fr;
               gap: 8px;
-              font-size: 12px;
             }
             .subject-item {
-              padding: 5px;
-              border-bottom: 1px dotted #ccc;
+              padding: 6px 10px;
+              border: none;
+              font-size: 12px;
+              background-color: transparent;
             }
-            .signature-section {
+            .footer {
+              margin-top: 5%;
               display: flex;
-              justify-content: center;
-              align-items: center;
-              gap: 100px;
-              margin-top: 30px;
-              padding-top: 20px;
+              justify-content: flex-end;
             }
-            .signature-box {
-              flex: 0 0 auto;
+            .sig-box {
               text-align: center;
+              width: 250px;
+            }
+            .sig-line {
+              margin-bottom: 5px;
+            }
+            .sig-text {
+            border-top: 1px dashed gray;
+            padding-top: 8px;
+              font-size: 12px;
+              font-weight: bold;
             }
             .signature-image {
               width: 150px;
@@ -679,15 +551,20 @@ export default function AdmitCardPage() {
               margin-left: auto;
               margin-right: auto;
             }
-            .signature-line {
-              width: 150px;
-              height: 2px;
-              background: #333;
-              margin: 0 auto 5px;
+            .copyright {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 40px;
+              text-align: center;
+              position: relative;
+              margin-bottom: -30px;
             }
-            .signature-box p {
-              font-size: 11px;
-              margin-top: 5px;
+            .copyright p {
+              font-size: 12px;
+              color: #666;
+              margin: 0;
+              padding-bottom: 10px;
             }
             @media print {
               * {
@@ -696,65 +573,76 @@ export default function AdmitCardPage() {
                 color-adjust: exact !important;
               }
               body { 
-                background: white !important; 
+                background: none !important; 
                 padding: 0 !important;
                 margin: 0 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              @page {
-                size: A4 landscape;
-                margin: 10mm;
-              }
-              .page-container { 
-                max-width: 70% !important;
-                margin: 0 auto !important;
-                padding: 15mm !important;
-                width: auto !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              button { display: none; }
-              .admit-card { 
-                page-break-inside: avoid !important; 
-                margin-bottom: 20px !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 20px !important;
-                border: 3px solid #8B7355 !important;
-                border-radius: 8px !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .signature-section {
                 display: flex !important;
                 justify-content: center !important;
                 align-items: center !important;
-                gap: 100px !important;
+                min-height: 100vh !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
               }
-              .signature-box {
-                flex: 0 0 auto !important;
+            @page {
+              size: A4 landscape;
+              margin: 10mm;
+            }
+            .page-container { 
+              max-width: 850px !important;
+              margin: 0 auto !important;
+              padding: 40px !important;
+              width: auto !important;
+              display: flex !important;
+              justify-content: center !important;
+              align-items: center !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            button { display: none; }
+            .admit-card { 
+              page-break-inside: avoid !important; 
+              margin-bottom: 20px !important;
+              width: 850px !important;
+              max-width: 850px !important;
+              padding: 40px !important;
+              border: 1px solid gray !important;
+              box-shadow: none !important;
+              overflow: hidden !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+              .watermark {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(-45deg) !important;
+                opacity: 0.08 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
               }
-              .signature-image {
-                display: block !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
+              .watermark img {
+                width: 600px !important;
+                height: auto !important;
+                object-fit: contain !important;
               }
-              .academic-details {
-                padding-left: 90px;
-                margin-left: 90px !important;
-              }
-              .admit-title {
+              .admit-badge {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                background: #20B2AA !important;
+                background-color: #26a69a !important;
                 color: white !important;
               }
-              .detail-row .box {
+              .value-box {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                border: 1px solid #333 !important;
+                border: 1px solid #999 !important;
                 background: #fff !important;
+              }
+              .student-photo {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background: transparent !important;
+                border: 1px solid gray !important;
+                border-radius: 300px !important;
               }
             }
           </style>
@@ -793,14 +681,18 @@ export default function AdmitCardPage() {
     e.stopPropagation();
     if (currentData.length === 0) return;
 
-    const allSelected = currentData.every((row) => selectedAdmitCards.has(row.IDNumber));
+    const allSelected = currentData.every((row) => {
+      const rowId = row.IDNumber || row.idNumber || row.sl;
+      return selectedAdmitCards.has(rowId);
+    });
 
     if (allSelected) {
       // Deselect all
       setSelectedAdmitCards((prev) => {
         const newSet = new Set(prev);
         currentData.forEach((row) => {
-          newSet.delete(row.IDNumber);
+          const rowId = row.IDNumber || row.idNumber || row.sl;
+          newSet.delete(rowId);
         });
         return newSet;
       });
@@ -809,7 +701,8 @@ export default function AdmitCardPage() {
       setSelectedAdmitCards((prev) => {
         const newSet = new Set(prev);
         currentData.forEach((row) => {
-          newSet.add(row.IDNumber);
+          const rowId = row.IDNumber || row.idNumber || row.sl;
+          newSet.add(rowId);
         });
         return newSet;
       });
@@ -979,41 +872,502 @@ export default function AdmitCardPage() {
     doc.text("Headmaster's (In Charge) Signature", x + cardWidth - 90, currentY + signatureHeight + 8, { align: "center" });
   };
 
-  // Download selected admit cards
-  const handleDownloadSelected = () => {
+  // Helper function to convert image path to absolute URL
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    if (imagePath.startsWith('/')) {
+      return window.location.origin + imagePath;
+    }
+    // For Vite imported assets, try to get the actual URL
+    try {
+      return new URL(imagePath, window.location.origin).href;
+    } catch {
+      return window.location.origin + '/' + imagePath;
+    }
+  };
+
+  // Download selected admit cards - Print like handlePrint
+  const handleDownloadSelected = async () => {
     if (selectedAdmitCards.size === 0) {
       alert("Please select at least one admit card to download");
       return;
     }
 
-    const selectedRows = currentData.filter((row) =>
-      selectedAdmitCards.has(row.IDNumber)
-    );
-
-    // Generate PDF for selected admit cards - 2 cards per page (landscape)
-    const doc = new jsPDF("landscape", "pt", "a4");
-    const pageWidth = doc.internal.pageSize.getWidth(); // 842pt for landscape
-    const pageHeight = doc.internal.pageSize.getHeight(); // 595pt for landscape
-    const margin = 30;
-    const cardHeight = (pageHeight - (margin * 3)) / 2; // Two cards with spacing
-    const cardWidth = pageWidth - (margin * 2);
-
-    selectedRows.forEach((row, index) => {
-      // Add new page if needed (every 2 cards)
-      if (index > 0 && index % 2 === 0) {
-        doc.addPage();
-      }
-
-      // Calculate position (top or bottom of page)
-      const cardIndex = index % 2;
-      const yPosition = margin + (cardIndex * (cardHeight + margin));
-
-      // Generate admit card
-      generateAdmitCardPDF(doc, row, margin, yPosition, cardWidth, cardHeight);
+    const selectedRows = currentData.filter((row) => {
+      const rowId = row.IDNumber || row.idNumber || row.sl;
+      return selectedAdmitCards.has(rowId);
     });
 
-    doc.save(`Admit_Cards_${selectedRows.length}_students.pdf`);
-    alert(`Successfully downloaded ${selectedRows.length} admit card(s)!`);
+    // Helper to generate HTML with absolute image URLs using generateAdmitCardHTML
+    const generateCardHTMLWithUrls = (row) => {
+      // Generate HTML using the same function as ViewAdmitCardModal
+      let html = generateAdmitCardHTML(row);
+      
+      // Replace image URLs with absolute URLs
+      const logoUrl = getImageUrl(schoolLogo);
+      const watermarkUrl = getImageUrl(schoolWatermark);
+      const signatureUrl = getImageUrl(headteacherSignature);
+      const studentPhoto = getStudentPhoto(row.IDNumber);
+      const photoUrl = studentPhoto.startsWith('http') ? studentPhoto : getImageUrl(studentPhoto);
+
+      // Replace image sources with absolute URLs
+      html = html.replace(/src="[^"]*sidebar-logo[^"]*"/g, `src="${logoUrl}"`);
+      html = html.replace(/src="[^"]*school\.webp[^"]*"/g, `src="${watermarkUrl}"`);
+      html = html.replace(/src="[^"]*signature-headteacher[^"]*"/g, `src="${signatureUrl}"`);
+      html = html.replace(/(<div class="student-photo">[\s\S]*?<img[^>]*src=")[^"]*("[^>]*>)/g, `$1${photoUrl}$2`);
+
+      return html;
+    };
+
+    // Open print window in new tab with A4 size
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow popups to print admit cards");
+      return;
+    }
+    
+    // Generate HTML for all selected cards (2 cards per page, portrait mode)
+    let printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Admit Cards - ${selectedRows.length} Students</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+              font-family: Arial, sans-serif;
+              background: white;
+              width: 210mm;
+              min-height: 297mm;
+              margin: 0 auto;
+              padding: 0;
+            }
+            .page-container {
+              width: 210mm;
+              min-height: 297mm;
+              max-height: 297mm;
+              height: 297mm;
+              margin: 0;
+              padding: 0;
+              background: white;
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+            }
+            .admit-card {
+              width: 100%;
+              background: #fff;
+              padding: 25px;
+              position: relative;
+              border: 1px solid gray;
+              box-sizing: border-box;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              overflow: hidden;
+              flex: 0 0 50vh;
+              height: 50vh;
+              min-height: 50vh;
+              max-height: 50vh;
+              margin: 0;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            }
+            .admit-card:first-child {
+              border-bottom: 1px solid gray;
+            }
+            .admit-card:last-child {
+              border-top: 1px solid gray;
+            }
+            .subjects-wrapper {
+              flex-shrink: 1;
+              overflow: hidden;
+              margin-top: 15px;
+            }
+            .subjects-container {
+              max-height: 100px;
+              overflow: hidden;
+            }
+            .subjects-grid {
+              max-height: 90px;
+              overflow-y: auto;
+              font-size: 10px;
+              padding: 5px;
+            }
+            .subject-item {
+              padding: 3px 5px;
+              font-size: 10px;
+            }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              opacity: 0.08;
+              z-index: 0;
+              pointer-events: none;
+            }
+            .watermark img {
+              width: 600px;
+              height: auto;
+              object-fit: contain;
+            }
+            .header {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              margin-bottom: 20px;
+              position: relative;
+              z-index: 1;
+            }
+            .logo{
+              border: 1px solid gray;
+              padding: 2px;
+              width: 100px;
+              height: 100px;
+              border-radius: 300% !important;
+            }
+            .logo img {
+              width: 100%;
+              height: 100%;
+              display: block;
+              object-fit: cover;
+              border-radius: 300% !important;
+            }
+            .school-info {
+              text-align: center;
+              flex-grow: 1;
+            }
+            .school-info h1 {
+              margin: 0;
+              font-size: 26px;
+              color: #1a1a1a;
+              font-weight: 700;
+            }
+            .school-info p {
+              margin: 5px 0;
+              font-size: 11px;
+              font-weight: bold;
+              color: #333;
+            }
+            .admit-badge {
+              background-color: #26a69a;
+              color: white;
+              padding: 4px 15px;
+              display: inline-block;
+              border-radius: 4px;
+              font-size: 18px;
+              font-weight: bold;
+              margin: 10px 0;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .exam-title {
+              font-size: 16px;
+              font-weight: bold;
+              border-bottom: 2px solid #00c2cb;
+              display: inline-block;
+              padding-bottom: 2px;
+            }
+            .student-photo {
+              border: 1px solid gray;
+              padding: 2px;
+              width: 100px;
+              height: 100px;
+              border-radius: 300% !important;
+            }
+            .student-photo img {
+              width: 100%;
+              height: 100%;
+              display: block;
+              object-fit: cover;
+              border-radius: 300% !important;
+            }
+            .info-section {
+              display: grid;
+              grid-template-columns: 1.5fr 1fr;
+              gap: 40px;
+              margin-top: 20px;
+              position: relative;
+              z-index: 1;
+            }
+            .right-info{
+              margin-left: 40% !important;
+            }
+            .info-row {
+              display: flex;
+              margin-bottom: 8px;
+              font-size: 12px;
+            }
+            .label {
+              font-weight: bold;
+              width: 110px;
+            }
+            .value-box {
+              border: 1px solid #999;
+              padding: 2px 8px;
+              flex-grow: 1;
+              min-height: 22px;
+              border-radius: 3px;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .subjects-wrapper {
+              margin-top: 30px;
+              position: relative;
+              z-index: 1;
+            }
+            .subjects-header {
+              font-weight: bold;
+              font-size: 14px;
+              text-align: center;
+            }
+            .subjects-container {
+              border: 1px solid #ddd;
+              border-radius: 3px;
+            }
+            .subjects-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+            }
+            .subject-item {
+              padding: 6px 10px;
+              border: none;
+              font-size: 12px;
+              background-color: transparent;
+            }
+            .footer {
+              margin-top: 5%;
+              display: flex;
+              justify-content: flex-end;
+            }
+            .sig-box {
+              text-align: center;
+              width: 250px;
+            }
+            .sig-text {
+              border-top: 1px dashed gray;
+              padding-top: 8px;
+              font-size: 12px;
+              font-weight: bold;
+            }
+            .signature-image {
+              width: 150px;
+              height: auto;
+              max-height: 50px;
+              object-fit: contain;
+              margin-bottom: 5px;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            .copyright {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: auto;
+              text-align: center;
+              position: relative;
+              padding-top: 10px;
+            }
+            .copyright p {
+              font-size: 12px;
+              color: #666;
+              margin: 0;
+              padding-bottom: 10px;
+            }
+            .copyright a {
+              color: #26a69a;
+              text-decoration: none;
+            }
+            @media print {
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+              body { 
+                background: none !important; 
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              @page {
+                size: A4 portrait;
+                margin: 0;
+              }
+              .page-container { 
+                padding: 0 !important;
+                margin: 0 !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
+                height: 100vh !important;
+                display: flex !important;
+                flex-direction: column !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+              }
+              .page-container:last-child {
+                page-break-after: auto !important;
+              }
+              .admit-card { 
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+                margin: 0 !important;
+                width: 100% !important;
+                padding: 20px !important;
+                border: 1px solid gray !important;
+                box-shadow: none !important;
+                overflow: hidden !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                flex: 0 0 50vh !important;
+                height: 50vh !important;
+                min-height: 50vh !important;
+                max-height: 50vh !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+              }
+              .copyright {
+                margin-top: auto !important;
+                padding-top: 10px !important;
+              }
+              .subjects-wrapper {
+                flex-shrink: 1 !important;
+                overflow: hidden !important;
+                margin-top: 10px !important;
+                max-height: 80px !important;
+              }
+              .subjects-container {
+                max-height: 70px !important;
+                overflow: hidden !important;
+              }
+              .subjects-grid {
+                max-height: 60px !important;
+                overflow-y: auto !important;
+                font-size: 9px !important;
+                padding: 4px !important;
+                gap: 4px !important;
+              }
+              .subject-item {
+                padding: 2px 4px !important;
+                font-size: 9px !important;
+              }
+              .subjects-wrapper {
+                flex-shrink: 1 !important;
+                overflow: hidden !important;
+                max-height: 100px !important;
+              }
+              .subjects-container {
+                max-height: 90px !important;
+                overflow: hidden !important;
+              }
+              .subjects-grid {
+                max-height: 80px !important;
+                overflow-y: auto !important;
+                font-size: 10px !important;
+                padding: 5px !important;
+              }
+              .subject-item {
+                padding: 3px 5px !important;
+                font-size: 10px !important;
+              }
+              .admit-card:first-child {
+                border-top: 1px solid gray !important;
+                border-bottom: 1px solid gray !important;
+              }
+              .admit-card:last-child {
+                border-bottom: 1px solid gray !important;
+                border-top: 1px solid gray !important;
+              }
+              .watermark {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(-45deg) !important;
+                opacity: 0.08 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+              }
+              .watermark img {
+                width: 400px !important;
+                height: auto !important;
+                object-fit: contain !important;
+              }
+              .admit-badge {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #26a69a !important;
+                color: white !important;
+              }
+              .value-box {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                border: 1px solid #999 !important;
+                background: #fff !important;
+              }
+              .student-photo {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background: transparent !important;
+                border: 1px solid gray !important;
+                border-radius: 300px !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
+    `;
+
+    // Add all selected cards (exactly 2 per page, no empty space)
+    // Process cards in pairs to ensure exactly 2 per page
+    for (let i = 0; i < selectedRows.length; i += 2) {
+      // Start new page container for every pair
+      printContent += '<div class="page-container">';
+      
+      // Add first card
+      printContent += generateCardHTMLWithUrls(selectedRows[i]);
+      
+      // Add second card if exists, otherwise duplicate the first card to fill the page
+      if (i + 1 < selectedRows.length) {
+        printContent += generateCardHTMLWithUrls(selectedRows[i + 1]);
+      } else {
+        // If odd number, duplicate the last card to ensure 2 cards per page
+        printContent += generateCardHTMLWithUrls(selectedRows[i]);
+      }
+      
+      // Close page container
+      printContent += '</div>';
+    }
+
+    printContent += `
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    // Wait for images to load, then show content in new tab and trigger print dialog
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus(); // Focus the new tab to show content
+        printWindow.print();
+        // Close window after print dialog is closed
+        printWindow.onafterprint = () => {
+          printWindow.close();
+        };
+      }, 500);
+    };
   };
 
   const filterFields = [
@@ -1283,10 +1637,10 @@ export default function AdmitCardPage() {
                           setStatusOpen(false); // close dropdown
                         }}
                         className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${classFilter === cls
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : darkMode
-                              ? "text-gray-200"
-                              : "text-gray-700"
+                          ? "bg-blue-100 text-blue-700 font-medium"
+                          : darkMode
+                            ? "text-gray-200"
+                            : "text-gray-700"
                           }`}
                       >
                         {cls}
@@ -1333,8 +1687,8 @@ export default function AdmitCardPage() {
               <button
                 onClick={() => setSortOpen(!sortOpen)}
                 className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-800"
+                  ? "border-gray-500 bg-gray-700 text-gray-100"
+                  : "border-gray-200 bg-white text-gray-800"
                   }`}
               >
                 Sort By
@@ -1342,8 +1696,8 @@ export default function AdmitCardPage() {
               {sortOpen && (
                 <div
                   className={`absolute mt-2 w-full z-40 border  ${darkMode
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
+                    ? "bg-gray-800 border-gray-700 text-gray-100"
+                    : "bg-white border-gray-200 text-gray-900"
                     }  left-0`}
                 >
                   <button
@@ -1412,10 +1766,10 @@ export default function AdmitCardPage() {
                       onClick={handleDownloadSelected}
                       disabled={selectedAdmitCards.size === 0}
                       className={`text-xs px-3 h-7 rounded transition font-semibold ${selectedAdmitCards.size === 0
-                          ? darkMode
-                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-600 text-white hover:bg-blue-700"
+                        ? darkMode
+                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
                         }`}
                     >
                       Download ({selectedAdmitCards.size})
@@ -1428,7 +1782,10 @@ export default function AdmitCardPage() {
                 <th className={`h-8 px-3 text-left font-semibold border-r ${borderClr} whitespace-nowrap`}>
                   <input
                     type="checkbox"
-                    checked={currentData.length > 0 && currentData.every((row) => selectedAdmitCards.has(row.IDNumber))}
+                    checked={currentData.length > 0 && currentData.every((row) => {
+                      const rowId = row.IDNumber || row.idNumber || row.sl;
+                      return selectedAdmitCards.has(rowId);
+                    })}
                     onChange={handleSelectAll}
                     className="cursor-pointer w-4 h-4"
                   />
@@ -1554,1156 +1911,8 @@ export default function AdmitCardPage() {
           }}
           row={viewingAdmitCard}
           darkMode={darkMode}
-          generateAdmitCardHTML={generateAdmitCardHTML}
         />
       )}
-    </div>
-  );
-}
-
-// Custom Admit Card Modal Component
-function AdmitCardModal({
-  open,
-  onClose,
-  selections,
-  setSelections,
-  classOptions,
-  sectionOptions,
-  sessionOptions,
-  examOptions,
-  filteredStudents,
-  darkMode,
-  generatedAdmitCards: parentGeneratedAdmitCards,
-  setGeneratedAdmitCards: setParentGeneratedAdmitCards,
-}) {
-  const [isModalClosing, setIsModalClosing] = useState(false);
-  const [isModalOpening, setIsModalOpening] = useState(false);
-  const [localGeneratedAdmitCards, setLocalGeneratedAdmitCards] = useState({});
-  const [isGenerating, setIsGenerating] = useState(false);
-  const modalRef = useRef(null);
-
-  useEffect(() => {
-    if (open) {
-      setIsModalClosing(false);
-      setTimeout(() => {
-        setIsModalOpening(true);
-      }, 10);
-    } else {
-      setIsModalOpening(false);
-    }
-  }, [open]);
-
-  const handleClose = () => {
-    setIsModalClosing(true);
-    setIsModalOpening(false);
-    setTimeout(() => {
-      onClose();
-      setIsModalClosing(false);
-    }, 300);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setSelections((prev) => {
-      const updated = { ...prev, [name]: value };
-      // Reset dependent fields when class changes
-      if (name === "class") {
-        updated.section = "";
-        updated.session = "";
-        updated.exam = "";
-        setLocalGeneratedAdmitCards({});
-      } else if (name === "section") {
-        updated.session = "";
-        updated.exam = "";
-        setLocalGeneratedAdmitCards({});
-      } else if (name === "session") {
-        updated.exam = "";
-        setLocalGeneratedAdmitCards({});
-      } else if (name === "exam") {
-        setLocalGeneratedAdmitCards({});
-      }
-      return updated;
-    });
-  };
-
-  // Generate Admit Card Numbers
-  const handleGenerateAdmitCards = () => {
-    if (!allSelected || filteredStudents.length === 0) {
-      alert("Please select all fields and ensure students are available");
-      return;
-    }
-
-    setIsGenerating(true);
-
-    // Generate admit card numbers locally
-    const newAdmitCards = {};
-    const examCode = selections.exam === "Mid" ? "MID" : "FINAL";
-    const year = selections.session.split("-")[0] || "2026";
-    const classCode = selections.class.padStart(2, "0");
-    const sectionCode = selections.section.toUpperCase();
-    const examNameMap = {
-      "Mid": "Mid Term",
-      "Final": "Final"
-    };
-    const examName = examNameMap[selections.exam] || selections.exam;
-
-    // Check which students already have admit cards
-    const studentsToGenerate = filteredStudents.filter((student) => {
-      const key = `${student.IDNumber}_${student.Class}_${student.Section || ""}_${student.Session}_${examName}`;
-      // Only generate if admit card doesn't exist
-      return !parentGeneratedAdmitCards[key];
-    });
-
-    if (studentsToGenerate.length === 0) {
-      setIsGenerating(false);
-      alert("All students already have admit card numbers for this exam!");
-      return;
-    }
-
-    studentsToGenerate.forEach((student, index) => {
-      // Extract Session (e.g., "2025-26" -> "2526" or "202526")
-      let sessionCode = student.Session || selections.session;
-      // Remove dashes and take last 4 digits or format as YYYY-YY -> YYYY
-      sessionCode = sessionCode.replace(/-/g, ""); // Remove dashes
-      // If format is like "2025-26", take "2025" part, else use as is
-      if (sessionCode.length > 4) {
-        sessionCode = sessionCode.substring(0, 4); // Take first 4 digits (year)
-      }
-
-      // Extract Class (e.g., "10" -> "10")
-      const classCode = student.Class || selections.class;
-
-      // Extract student ID number (remove STU, STU-, or any prefix)
-      // Example: STU1001 -> 1001, STU-1001 -> 1001, 1001 -> 1001
-      let studentId = student.IDNumber.toString();
-      // Remove common prefixes
-      studentId = studentId.replace(/^STU[-_]?/i, ""); // Remove STU, STU-, STU_
-      studentId = studentId.replace(/^ST[-_]?/i, ""); // Remove ST, ST-, ST_
-      studentId = studentId.replace(/[^0-9]/g, ""); // Remove any remaining non-numeric characters
-
-      // Format: Session + Class + StudentID (e.g., 2025101001 for Session 2025-26, Class 10, Student 1001)
-      const admitCardNo = `${sessionCode}${classCode}${studentId}`;
-
-      // Create unique key: IDNumber_Class_Section_Session_ExamName
-      const key = `${student.IDNumber}_${student.Class}_${student.Section || ""}_${student.Session}_${examName}`;
-      newAdmitCards[key] = admitCardNo;
-    });
-
-    // Simulate API call delay
-    setTimeout(() => {
-      // Update local state for modal display (merge with existing)
-      const mergedLocalCards = { ...localGeneratedAdmitCards, ...newAdmitCards };
-      setLocalGeneratedAdmitCards(mergedLocalCards);
-
-      // Update parent state and localStorage (merge with existing)
-      const updatedCards = { ...parentGeneratedAdmitCards, ...newAdmitCards };
-      setParentGeneratedAdmitCards(updatedCards);
-      localStorage.setItem("generatedAdmitCards", JSON.stringify(updatedCards));
-
-      setIsGenerating(false);
-      const totalGenerated = Object.keys(newAdmitCards).length;
-      const alreadyExists = filteredStudents.length - totalGenerated;
-      if (alreadyExists > 0) {
-        alert(`Successfully generated ${totalGenerated} new admit card numbers! ${alreadyExists} students already had admit cards.`);
-      } else {
-        alert(`Successfully generated ${totalGenerated} admit card numbers!`);
-      }
-    }, 500);
-  };
-
-  // Reset local generated cards when modal closes
-  useEffect(() => {
-    if (!open) {
-      setLocalGeneratedAdmitCards({});
-      setIsGenerating(false);
-    }
-  }, [open]);
-
-  const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
-  const modalBg = darkMode ? "bg-gray-800" : "bg-white";
-  const textColor = darkMode ? "text-gray-100" : "text-gray-800";
-  const inputBg = darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800";
-
-  if (!open && !isModalClosing) return null;
-
-  const allSelected =
-    selections.class &&
-    selections.section &&
-    selections.session &&
-    selections.exam;
-
-  return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
-        }`}
-      onClick={handleClose}
-    >
-      <div
-        ref={modalRef}
-        onClick={(e) => e.stopPropagation()}
-        className={`${modalBg} ${textColor} w-full max-w-[500px] border ${borderClr} p-6 max-h-[90vh] overflow-y-auto transition-all duration-300 transform ${isModalOpening && !isModalClosing
-            ? "scale-100 opacity-100 translate-y-0"
-            : "scale-95 opacity-0 translate-y-4"
-          }`}
-      >
-        {/* Title */}
-        <h2 className="text-base font-semibold text-center mb-6">Admit Card</h2>
-
-        {/* Select Fields */}
-        <div className="space-y-4">
-          {/* Class */}
-          <Input
-            label="Class"
-            name="class"
-            value={selections.class}
-            onChange={handleChange}
-            type="select"
-            options={classOptions}
-            inputClassName={inputBg}
-          />
-
-          {/* Section */}
-          <Input
-            label="Section"
-            name="section"
-            value={selections.section}
-            onChange={handleChange}
-            type="select"
-            options={sectionOptions}
-            inputClassName={inputBg}
-            disabled={!selections.class}
-          />
-
-          {/* Session */}
-          <Input
-            label="Session"
-            name="session"
-            value={selections.session}
-            onChange={handleChange}
-            type="select"
-            options={sessionOptions}
-            inputClassName={inputBg}
-            disabled={!selections.section}
-          />
-
-          {/* Exam */}
-          <Input
-            label="Exam"
-            name="exam"
-            value={selections.exam}
-            onChange={handleChange}
-            type="select"
-            options={examOptions}
-            inputClassName={inputBg}
-            disabled={!selections.session}
-          />
-
-          {/* Student Quantity */}
-          {allSelected && (
-            <div
-              className={`border ${borderClr} py-[6px] px-2  ${darkMode ? "bg-gray-700" : "bg-gray-50"
-                }`}
-            >
-              <div className="flex justify-between items-center">
-                <span className="text-[12px] font-medium">Student Quantity:</span>
-                <span className="text-[12px] font-bold text-blue-600">
-                  {filteredStudents.length}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {allSelected && filteredStudents.length === 0 && (
-            <div
-              className={`border ${borderClr} p-4 rounded text-center ${darkMode ? "bg-gray-700" : "bg-gray-50"
-                }`}
-            >
-              <p className="text-sm text-gray-500">No students found</p>
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 mt-6">
-          <button
-            type="button"
-            onClick={handleClose}
-            className={`flex-1 text-[12px] h-8 border ${borderClr} ${darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-              } transition`}
-          >
-            Close
-          </button>
-
-          {allSelected && filteredStudents.length > 0 && (
-            <button
-              type="button"
-              onClick={handleGenerateAdmitCards}
-              disabled={isGenerating}
-              className={`flex-1 text-[12px] h-8 bg-blue-600 text-white hover:bg-blue-700 transition font-semibold ${isGenerating ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-            >
-              {isGenerating ? "Generating..." : "Generate"}
-            </button>
-          )}
-        </div>
-
-        {/* Generated Admit Cards Display */}
-        {allSelected && Object.keys(localGeneratedAdmitCards).length > 0 && (
-          <div className="mt-4">
-            <div
-              className={`border ${borderClr} max-h-[300px] overflow-y-auto ${darkMode ? "bg-gray-700" : "bg-gray-50"
-                }`}
-            >
-              <table className="w-full text-[12px]">
-                <thead>
-                  <tr className={`border-b ${borderClr} ${darkMode ? "bg-gray-800" : "bg-gray-100"
-                    }`}>
-                    <th className={`px-2 py-[6px] text-left font-semibold border-r ${borderClr} ${darkMode ? "text-gray-300" : "text-gray-700"
-                      }`}>
-                      Student Name
-                    </th>
-                    <th className={`px-2 py-[6px] text-right font-semibold ${darkMode ? "text-gray-300" : "text-gray-700"
-                      }`}>
-                      Admit Card No
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.map((student, index) => {
-                    const examNameMap = {
-                      "Mid": "Mid Term",
-                      "Final": "Final"
-                    };
-                    const examName = examNameMap[selections.exam] || selections.exam;
-                    const key = `${student.IDNumber}_${student.Class}_${student.Section || ""}_${student.Session}_${examName}`;
-                    const admitCardNo = localGeneratedAdmitCards[key];
-                    if (!admitCardNo) return null;
-
-                    return (
-                      <tr
-                        key={student.IDNumber}
-                        className={`border-b ${borderClr} last:border-b-0 ${darkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
-                          }`}
-                      >
-                        <td className={`px-2 py-[6px] border-r ${borderClr} ${darkMode ? "text-gray-300" : "text-gray-500"
-                          }`}>
-                          {student.StudentName}
-                        </td>
-                        <td className={`px-2 py-[6px] text-[12px] text-right font-semibold text-blue-600 ${darkMode ? "text-blue-400" : "text-blue-600"
-                          }`}>
-                          {admitCardNo}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Custom Admit Card Actions Component
-function AdmitCardActions({ row, onEdit, onDelete, onPrint, onView, darkMode, canEdit }) {
-  const [open, setOpen] = useState(false);
-  const [positionTop, setPositionTop] = useState(true);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const toggleDropdown = () => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      const dropdownHeight = canEdit ? 140 : 70; // Height based on number of options (View + Print + Edit/Delete)
-      const spaceBelow = window.innerHeight - rect.bottom;
-
-      const tableRow = ref.current.closest('tr');
-      let isFirstRow = false;
-      let isLastRow = false;
-      let isSingleRow = false;
-
-      if (tableRow) {
-        const tbody = tableRow.closest('tbody');
-        if (tbody) {
-          const rows = tbody.querySelectorAll('tr');
-          isFirstRow = tableRow === rows[0];
-          isLastRow = tableRow === rows[rows.length - 1];
-          isSingleRow = rows.length === 1;
-        }
-      }
-
-      if (isSingleRow) {
-        setPositionTop(true);
-      } else if (isFirstRow) {
-        setPositionTop(spaceBelow >= 30);
-      } else if (isLastRow) {
-        setPositionTop(false);
-      } else {
-        setPositionTop(spaceBelow >= dropdownHeight);
-      }
-    }
-    setOpen(!open);
-  };
-
-  const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
-
-  return (
-    <div className="relative h-6 flex items-center" ref={ref}>
-      <button
-        onClick={toggleDropdown}
-        className={`h-6 w-6 p-0 flex items-center justify-center transition-colors ${darkMode
-            ? "hover:bg-gray-700 text-gray-300"
-            : "hover:bg-gray-100 text-gray-600"
-          }`}
-      >
-        <FiMoreHorizontal className="w-4 h-4" />
-      </button>
-
-      {open && (
-        <div
-          className={`absolute -right-4 w-28 border shadow-sm z-50 ${positionTop ? "top-7" : "bottom-7"
-            } ${darkMode
-              ? "bg-gray-800 text-gray-100 border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"
-            }`}
-        >
-          {/* View Button - Always visible */}
-          <button
-            onClick={() => {
-              onView(row);
-              setOpen(false);
-            }}
-            className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${darkMode
-                ? "hover:bg-gray-700 text-gray-100"
-                : "hover:bg-gray-100 text-gray-900"
-              }`}
-          >
-            <FiEye className={`w-3 h-3 ${darkMode ? "text-blue-400" : "text-blue-600"}`} />
-            View
-          </button>
-
-          {/* Print Button - Always visible */}
-          <button
-            onClick={() => {
-              onPrint(row);
-              setOpen(false);
-            }}
-            className={`w-full flex items-center gap-2 px-3 py-1 text-xs border-t ${borderClr} ${darkMode
-                ? "hover:bg-gray-700 text-gray-100"
-                : "hover:bg-gray-100 text-gray-900"
-              }`}
-          >
-            <FiPrinter className={`w-3 h-3 ${darkMode ? "text-green-400" : "text-green-600"}`} />
-            Print
-          </button>
-
-          {/* Edit and Delete - Only if canEdit */}
-          {canEdit && (
-            <>
-              <button
-                onClick={() => {
-                  onEdit(row);
-                  setOpen(false);
-                }}
-                className={`w-full flex items-center gap-2 px-3 py-1 text-xs border-t ${borderClr} ${darkMode
-                    ? "hover:bg-gray-700 text-gray-100"
-                    : "hover:bg-gray-100 text-gray-900"
-                  }`}
-              >
-                <FiEdit className={`w-3 h-3 ${darkMode ? "text-blue-400" : "text-blue-600"}`} />
-                Edit
-              </button>
-
-              <button
-                onClick={() => {
-                  onDelete(row);
-                  setOpen(false);
-                }}
-                className={`w-full flex items-center gap-2 px-3 py-1 text-xs border-t ${borderClr} ${darkMode
-                    ? "text-red-400 hover:bg-gray-700"
-                    : "text-red-600 hover:bg-red-50"
-                  }`}
-              >
-                <FiTrash2 className="w-3 h-3" />
-                Delete
-              </button>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// View Admit Card Modal Component
-function ViewAdmitCardModal({ open, onClose, row, darkMode, generateAdmitCardHTML }) {
-  const [isModalClosing, setIsModalClosing] = useState(false);
-  const [isModalOpening, setIsModalOpening] = useState(false);
-  const modalRef = useRef(null);
-
-  useEffect(() => {
-    if (open) {
-      setIsModalClosing(false);
-      setTimeout(() => {
-        setIsModalOpening(true);
-      }, 10);
-    } else {
-      setIsModalOpening(false);
-    }
-  }, [open]);
-
-  const handleClose = () => {
-    setIsModalClosing(true);
-    setIsModalOpening(false);
-    setTimeout(() => {
-      onClose();
-      setIsModalClosing(false);
-    }, 300);
-  };
-
-  const handlePrint = () => {
-    const printWindow = window.open("", "_blank");
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Admit Card - ${row.StudentName}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: Arial, sans-serif; 
-              padding: 20px;
-              background: #f5f5f5;
-            }
-            .page-container {
-              max-width: 210mm;
-              margin: 0 auto;
-              background: white;
-              padding: 15mm;
-            }
-            .admit-card {
-              border: 3px solid #8B7355;
-              border-radius: 8px;
-              padding: 20px;
-              margin-bottom: 20px;
-              background: white;
-              position: relative;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .school-header {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: -10px;
-              gap: 15px;
-            }
-            .header-left {
-              flex: 0 0 auto;
-            }
-            .header-middle {
-              flex: 1;
-              text-align: center;
-            }
-            .header-right {
-              flex: 0 0 auto;
-            }
-            .student-photo-header {
-              width: 80px;
-              height: 100px;
-              border: 2px solid #8B7355;
-              border-radius: 5px;
-              overflow: hidden;
-              background: #f0f0f0;
-            }
-            .student-photo-header img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-            .logo-placeholder {
-              width: 80px;
-              height: 80px;
-              border: 2px solid #8B7355;
-              border-radius: 50%;
-              background: #f0f0f0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .school-name {
-              font-size: 20px;
-              font-weight: bold;
-              margin-bottom: 5px;
-              color: #333;
-            }
-            .school-address {
-              font-size: 11px;
-              color: #666;
-            }
-            .admit-title {
-              background: #20B2AA;
-              color: white;
-              text-align: center;
-              padding: 8px;
-              border-radius: 5px;
-              font-weight: bold;
-              font-size: 12px;
-              width: 15%;
-              margin: 0 auto;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .exam-info {
-              margin-top: 10px;
-              text-align: center;
-              margin-bottom: 15px;
-              font-size: 14px;
-              font-weight: bold;
-            }
-            .card-content {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 20px;
-              gap: 30px;
-            }
-            .student-details {
-              flex: 1 1 50%;
-              display: flex;
-              flex-direction: column;
-            }
-            .right-section {
-              flex: 1 1 50%;
-              display: flex;
-              flex-direction: column;
-            }
-            .detail-row {
-              display: flex;
-              align-items: center;
-              margin-bottom: 10px;
-              font-size: 12px;
-            }
-            .student-details .detail-row {
-              justify-content: flex-start;
-            }
-            .academic-details .detail-row {
-              justify-content: flex-start;
-            }
-            .detail-row .label {
-              font-weight: bold;
-              margin-right: 8px;
-              min-width: 120px;
-            }
-            .detail-row .value {
-              margin-right: 10px;
-            }
-            .detail-row .box {
-              width: 80px;
-              min-height: 22px;
-              border: 1px solid #333;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              padding: 3px 8px;
-              font-size: 11px;
-              background: #fff;
-              text-align: center;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .academic-details {
-              flex: 1;
-              padding-left: 90px;
-              margin-left: 90px; !important;
-            }
-            @media print {
-              .academic-details {
-                padding-left: 90px !important;
-                margin-left: 90px !important;
-              }
-            }
-            .subject-section {
-              margin: 20px 0;
-              border-top: 2px solid #8B7355;
-              padding-top: 15px;
-            }
-            .subject-section h3 {
-              font-size: 14px;
-              margin-bottom: 10px;
-              text-decoration: underline;
-            }
-            .subject-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 8px;
-              font-size: 12px;
-            }
-            .subject-item {
-              padding: 5px;
-              border-bottom: 1px dotted #ccc;
-            }
-            .signature-section {
-              display: flex;
-              justify-content: space-between;
-              margin-top: 30px;
-              padding-top: 20px;
-            }
-            .signature-box {
-              flex: 1;
-              text-align: center;
-            }
-            .signature-image {
-              width: 150px;
-              height: auto;
-              max-height: 50px;
-              object-fit: contain;
-              margin-bottom: 5px;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .signature-line {
-              width: 150px;
-              height: 2px;
-              background: #333;
-              margin: 0 auto 5px;
-            }
-            .signature-box p {
-              font-size: 11px;
-              margin-top: 5px;
-            }
-            @media print {
-              * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-              }
-              body { 
-                background: white; 
-                padding: 0;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .page-container { 
-                padding: 10mm;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              @page {
-                size: A4 landscape;
-                margin: 10mm;
-              }
-              button { display: none; }
-              .admit-card { 
-                page-break-inside: avoid !important; 
-                margin-bottom: 10mm !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .academic-details {
-                padding-left: 90px 
-                margin-left: 90px !important;
-              }
-              .page-container {
-                padding: 0 !important;
-                margin: 0 !important;
-                max-width: 100% !important;
-                width: 100% !important;
-              }
-              body {
-                padding: 0 !important;
-                margin: 0 !important;
-              }
-              .admit-title {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                background: #20B2AA !important;
-                color: white !important;
-              }
-              .detail-row .box {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                border: 1px solid #333 !important;
-                background: #fff !important;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="page-container">
-            ${generateAdmitCardHTML(row)}
-          </div>
-          <div style="text-align: center; margin-top: 20px;">
-            <button onclick="window.print()" style="padding: 10px 20px; background: #20B2AA; color: white; border: none; border-radius: 5px; cursor: pointer;">Print</button>
-          </div>
-        </body>
-      </html>
-    `;
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-  };
-
-  if (!open && !isModalClosing) return null;
-
-  const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
-  const cardBg = darkMode ? "bg-gray-800" : "bg-white";
-  const textColor = darkMode ? "text-gray-100" : "text-gray-900";
-
-  return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center ${isModalClosing ? "animate-fadeOut" : "animate-fadeIn"
-        }`}
-      style={{
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-      }}
-      onClick={handleClose}
-    >
-      <div
-        ref={modalRef}
-        className={`${cardBg} ${textColor} max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col ${isModalOpening ? "animate-scaleIn" : isModalClosing ? "animate-scaleOut" : ""
-          }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={`flex items-center justify-between p-4 border-b ${borderClr}`}>
-          <h2 className="text-[12px] font-semibold">{row.StudentName}</h2>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
-              className={`px-3 py-1 text-xs border ${borderClr} ${darkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                } transition`}
-            >
-              Print
-            </button>
-            <button
-              onClick={handleClose}
-              className={`px-3 py-1 text-xs border ${borderClr} ${darkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                } transition`}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div
-            className={`admit-card-view ${darkMode ? "bg-gray-900" : "bg-white"}`}
-            dangerouslySetInnerHTML={{
-              __html: generateAdmitCardHTML(row),
-            }}
-            style={{
-              width: "100%",
-              position: "relative",
-            }}
-          />
-        </div>
-      </div>
-
-      <style>{`
-            .page-container {
-              max-width: 210mm;
-              margin: 0 auto;
-              background: white;
-              padding: 15mm;
-            }
-            .admit-card {
-              border: 3px solid #8B7355;
-              border-radius: 8px;
-              margin-bottom: 20px;
-              background: white;
-              position: relative;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-              padding: 20px;
-            }
-            .school-header {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: -10px;
-              gap: 15px;
-            }
-            .header-left {
-              flex: 0 0 auto;
-            }
-            .header-middle {
-              flex: 1;
-              text-align: center;
-            }
-            .header-right {
-              flex: 0 0 auto;
-            }
-            .student-photo-header {
-              width: 80px;
-              height: 100px;
-              border: 2px solid #8B7355;
-              border-radius: 5px;
-              overflow: hidden;
-              background: #f0f0f0;
-            }
-            .student-photo-header img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-            .logo-placeholder {
-              width: 80px;
-              height: 80px;
-              border: 2px solid #8B7355;
-              border-radius: 50%;
-              background: #f0f0f0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .school-name {
-              font-size: 20px;
-              font-weight: bold;
-              margin-bottom: 5px;
-              color: #333;
-            }
-            .school-address {
-              font-size: 11px;
-              color: #666;
-            }
-            .admit-title {
-              background: #20B2AA;
-              color: white;
-              text-align: center;
-              padding: 8px;
-              border-radius: 5px;
-              font-weight: bold;
-              font-size: 12px;
-              width: 15%;
-              margin: 0 auto;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .exam-info {
-              margin-top: 10px;
-              text-align: center;
-              margin-bottom: 15px;
-              font-size: 14px;
-              font-weight: bold;
-            }
-            .card-content {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 20px;
-              gap: 30px;
-            }
-            .student-details {
-              flex: 1 1 50%;
-              display: flex;
-              flex-direction: column;
-            }
-            .right-section {
-              flex: 1 1 50%;
-              display: flex;
-              flex-direction: column;
-            }
-            .detail-row {
-              display: flex;
-              align-items: center;
-              margin-bottom: 10px;
-              font-size: 12px;
-            }
-            .student-details .detail-row {
-              justify-content: flex-start;
-            }
-            .academic-details .detail-row {
-              justify-content: flex-start;
-            }
-            .detail-row .label {
-              font-weight: bold;
-              margin-right: 8px;
-              min-width: 120px;
-            }
-            .detail-row .value {
-              margin-right: 10px;
-            }
-            .detail-row .box {
-              width: 80px;
-              min-height: 22px;
-              border: 1px solid #333;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              padding: 3px 8px;
-              font-size: 11px;
-              background: #fff;
-              text-align: center;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .academic-details {
-              flex: 1;
-              padding-left: 90px;
-              margin-left: 90px !important;
-            }
-            @media print {
-              .academic-details {
-                padding-left: 90px !important;
-              }
-            }
-            .subject-section {
-              margin: 20px 0;
-              border-top: 2px solid #8B7355;
-              padding-top: 15px;
-            }
-            .subject-section h3 {
-              font-size: 14px;
-              margin-bottom: 10px;
-              text-decoration: underline;
-            }
-            .subject-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 8px;
-              font-size: 12px;
-            }
-            .subject-item {
-              padding: 5px;
-              border-bottom: 1px dotted #ccc;
-            }
-            .signature-section {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              gap: 100px;
-              margin-top: 30px;
-              padding-top: 20px;
-            }
-            .signature-box {
-              flex: 0 0 auto;
-              text-align: center;
-            }
-            .signature-image {
-              width: 150px;
-              height: auto;
-              max-height: 50px;
-              object-fit: contain;
-              margin-bottom: 5px;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-              display: block;
-              margin-left: auto;
-              margin-right: auto;
-            }
-            .signature-line {
-              width: 150px;
-              height: 2px;
-              background: #333;
-              margin: 0 auto 5px;
-            }
-            .signature-box {
-              flex: 0 0 auto;
-              text-align: center;
-            }
-            .signature-image {
-              width: 150px;
-              height: auto;
-              max-height: 50px;
-              object-fit: contain;
-              margin-bottom: 5px;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-              display: block;
-              margin-left: auto;
-              margin-right: auto;
-            }
-            .signature-box p {
-              font-size: 11px;
-              margin-top: 5px;
-            }
-            @media print {
-              * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-              }
-              body { 
-                background: white !important; 
-                padding: 0 !important;
-                margin: 0 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              @page {
-                size: A4 landscape;
-                margin: 10mm;
-              }
-              .page-container { 
-                max-width: 210mm !important;
-                margin: 0 auto !important;
-                padding: 15mm !important;
-                width: auto !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              button { display: none; }
-              .admit-card { 
-                page-break-inside: avoid !important; 
-                margin-bottom: 20px !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 20px !important;
-                border: 3px solid #8B7355 !important;
-                border-radius: 8px !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .signature-section {
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                gap: 100px !important;
-              }
-              .signature-box {
-                flex: 0 0 auto !important;
-              }
-              .signature-image {
-                display: block !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
-              }
-              .academic-details {
-                padding-left: 90px !important;
-              }
-              .admit-title {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                background: #20B2AA !important;
-                color: white !important;
-              }
-              .detail-row .box {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                border: 1px solid #333 !important;
-                background: #fff !important;
-              }
-            }
-      `}</style>
     </div>
   );
 }
