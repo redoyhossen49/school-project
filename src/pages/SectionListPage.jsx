@@ -5,12 +5,13 @@ import { BiChevronDown } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Pagination from "../components/Pagination.jsx";
 import ClassGroupTable from "../components/academic/ClassGroupTable.jsx";
-import { classGroupData } from "../data/classGroupData.js";
+import { sectionData } from "../data/sectionData.js";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import ReusableTable from "../components/common/ReusableTable.jsx";
 
 export default function SectionListPage() {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export default function SectionListPage() {
   const [classOpen, setClassOpen] = useState(false);
   const [groupOpen, setGroupOpen] = useState(false);
   const [sectionOpen, setSectionOpen] = useState(false);
-  const [data, setData] = useState(classGroupData);
+  const [data, setData] = useState(sectionData);
   const [addSectionModalOpen, setAddSectionModalOpen] = useState(false);
   const [newSectionDefaults, setNewSectionDefaults] = useState({
     class: "",
@@ -69,30 +70,59 @@ export default function SectionListPage() {
   ];
 
   // -------------------- Dynamic Options --------------------
-  const classOptions = Array.from(new Set(classGroupData.map((c) => c.class)));
+  const classOptions = Array.from(
+    new Set(sectionData.map((item) => item.class)),
+  );
   const groupOptions = Array.from(
-    new Set(classGroupData.flatMap((c) => c.groups.map((g) => g.name))),
+    new Set(sectionData.map((item) => item.group)),
   );
   const sectionOptions = Array.from(
-    new Set(classGroupData.flatMap((c) => c.groups.map((g) => g.section))),
+    new Set(sectionData.map((item) => item.section)),
   );
+
   const filterFields = [
-    {
-      key: "class",
-      placeholder: "Select Class",
-      options: classOptions,
-    },
-    {
-      key: "group",
-      placeholder: "Select Group",
-      options: groupOptions,
-    },
-    {
-      key: "section",
-      placeholder: "Select Section",
-      options: sectionOptions,
-    },
+    { key: "class", placeholder: "Select Class", options: classOptions },
+    { key: "group", placeholder: "Select Group", options: groupOptions },
+    { key: "section", placeholder: "Select Section", options: sectionOptions },
   ];
+
+  // -------------------- Table columns --------------------
+  const columns = [
+    { key: "sl", label: "SL" },
+    { key: "class", label: "Class" },
+    { key: "group", label: "Group" },
+    { key: "section", label: "Section" },
+    { key: "totalStudents", label: "Total Students" },
+    { key: "totalPayable", label: "Total Payable" },
+    { key: "payableDue", label: "Payable Due" },
+  ];
+
+  // -------------------- Edit modal fields --------------------
+  const modalFields = [
+    { key: "class", placeholder: "Class" },
+    { key: "group", placeholder: "Group" },
+    { key: "section", placeholder: "Section" },
+    { key: "totalStudents", placeholder: "Total Students", type: "number" },
+    { key: "totalPayable", placeholder: "Total Payable", type: "number" },
+    { key: "payableDue", placeholder: "Payable Due", type: "number" },
+  ];
+
+  // -------------------- Filtered + searched + sorted data --------------------
+  const filteredData = useMemo(() => {
+    return data
+      .filter((item) => (classFilter ? item.class === classFilter : true))
+      .filter((item) => (groupFilter ? item.group === groupFilter : true))
+      .filter((item) => (sectionFilter ? item.section === sectionFilter : true))
+      .filter(
+        (item) =>
+          item.class.toLowerCase().includes(search.toLowerCase()) ||
+          item.group.toLowerCase().includes(search.toLowerCase()) ||
+          item.section.toLowerCase().includes(search.toLowerCase()),
+      )
+
+      .filter((item) => item.class.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
+  }, [data, search, classFilter, groupFilter, sectionFilter, sortOrder]);
 
   // -------------------- Outside Click --------------------
   useEffect(() => {
@@ -118,38 +148,6 @@ export default function SectionListPage() {
     setSortOrder("asc");
     setCurrentPage(1);
   };
-
-  // -------------------- Filter + Sort + Search --------------------
-  const filteredData = useMemo(() => {
-    return data
-      .filter((item) => (classFilter ? item.class === classFilter : true))
-      .map((item) => {
-        const groups = item.groups
-          .map((g) => {
-            if (groupFilter && g.name !== groupFilter) return null;
-            if (sectionFilter && g.section !== sectionFilter) return null;
-            let monthly = g.monthly;
-            if (selectedMonth !== "All")
-              monthly = g.monthly.filter((m) => m.month === selectedMonth);
-            return { ...g, monthly };
-          })
-          .filter((g) => g && g.monthly.length > 0);
-        return { ...item, groups };
-      })
-      .filter((item) => item.groups.length > 0)
-      .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl))
-      .filter((item) =>
-        item.class.toLowerCase().includes(search.toLowerCase()),
-      );
-  }, [
-    data,
-    search,
-    classFilter,
-    groupFilter,
-    sectionFilter,
-    selectedMonth,
-    sortOrder,
-  ]);
 
   const handleAddSection = (formData) => {
     const { class: cls, group, section } = formData;
@@ -190,51 +188,57 @@ export default function SectionListPage() {
   );
 
   // -------------------- Export --------------------
-  const exportExcel = (data) => {
-    if (!data.length) return;
-    const wsData = data.flatMap((item) =>
-      item.groups.map((g) => ({
-        Class: item.class,
-        Group: g.name,
-        Section: g.section,
-        Month: g.monthly.map((m) => m.month).join(", "),
-        Details: JSON.stringify(g.monthly),
-      })),
-    );
-    const ws = utils.json_to_sheet(wsData);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Section List");
-    writeFile(wb, "SectionList.xlsx");
-  };
+ const exportExcel = (data) => {
+  if (!data.length) return;
+  const wsData = data.map((item) => ({
+    SL: item.sl,
+    Class: item.class,
+    Group: item.group,
+    Section: item.section,
+    TotalStudents: item.totalStudents,
+    TotalPayable: item.totalPayable,
+    PayableDue: item.payableDue,
+  }));
 
-  const exportPDF = (data) => {
-    if (!data.length) {
-      alert("No data to export");
-      return;
-    }
-    const doc = new jsPDF("landscape", "pt", "a4");
-    const tableColumn = ["Sl", "Class", "Group", "Section", "Month"];
-    const tableRows = [];
-    data.forEach((item, index) => {
-      item.groups.forEach((g) => {
-        tableRows.push([
-          index + 1,
-          item.class,
-          g.name,
-          g.section,
-          g.monthly.map((m) => m.month).join(", "),
-        ]);
-      });
-    });
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      theme: "striped",
-      styles: { fontSize: 8 },
-    });
-    doc.save("SectionList.pdf");
-  };
+  const ws = utils.json_to_sheet(wsData);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, "Section List");
+  writeFile(wb, "SectionList.xlsx");
+};
+
+const exportPDF = (data) => {
+  if (!data.length) return alert("No data to export");
+
+  const doc = new jsPDF("landscape", "pt", "a4");
+  const tableColumn = [
+    "SL",
+    "Class",
+    "Group",
+    "Section",
+    "Total Students",
+    "Total Payable",
+    "Payable Due",
+  ];
+  const tableRows = data.map((item) => [
+    item.sl,
+    item.class,
+    item.group,
+    item.section,
+    item.totalStudents,
+    item.totalPayable,
+    item.payableDue,
+  ]);
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 20,
+    theme: "striped",
+    styles: { fontSize: 8 },
+  });
+  doc.save("SectionList.pdf");
+};
+
 
   // -------------------- Styles --------------------
   const cardBg = darkMode
@@ -361,10 +365,7 @@ export default function SectionListPage() {
 
         {/* Filters + Sort + Search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-3 md:gap-0">
-         
-           
-
-            {/* Sort 
+          {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -426,7 +427,14 @@ export default function SectionListPage() {
 
       {/* TABLE */}
       <div className={` p-3 overflow-x-auto ${cardBg}`}>
-        <ClassGroupTable data={currentData} month={selectedMonth} />
+        <ReusableTable
+  columns={columns}
+  data={currentData}
+  setData={setData}
+  showActionKey={true} 
+  modalFields={modalFields}
+/>
+
       </div>
     </div>
   );

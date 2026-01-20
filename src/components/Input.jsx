@@ -3,92 +3,89 @@ import { useTheme } from "../context/ThemeContext.jsx";
 
 export default function Input({
   label,
-  type = "text", // "text" | "select"
+  type = "text", // text | select
   name,
-  value,
+  value = "",
   onChange,
-  options = [], // for select
+  options = [],
   error,
-  inputClassName = "",
+  disabled = false,
+  className = "",
   step,
-  ...restProps
+  ...rest
 }) {
   const { darkMode } = useTheme();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
 
-  // Close dropdown if clicked outside
+  /* close select dropdown */
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handler = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Custom Select Option component
-  const SelectField = () => {
-    const isDisabled = restProps.disabled;
+  /* ================= SELECT ================= */
+  if (type === "select") {
     return (
       <div className="relative w-full" ref={wrapperRef}>
         <div
+          onClick={() => !disabled && setOpen(!open)}
           className={`
-            w-full h-8 border px-2 text-[12px] flex items-center justify-between
-            ${isDisabled ? "cursor-not-allowed opacity-50 bg-gray-100" : "cursor-pointer"}
-            ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
-            ${inputClassName}
+            h-8 px-2 text-[12px] flex items-center justify-between border
+            ${darkMode
+              ? "bg-gray-700 text-gray-200 border-gray-600"
+              : "bg-white text-gray-900 border-gray-300"}
+            ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+            ${error ? "border-red-500" : ""}
+            ${className}
           `}
-          onClick={() => !isDisabled && setOpen(!open)}
         >
-          <span className={`${value ? "text-gray-400" : "text-gray-400"}`}>
+          <span className={value ? "" : "text-gray-400"}>
             {value || label}
           </span>
-          <svg
-            className="w-3 h-3 text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-          </svg>
+           <span className="h-4 w-4">&#9662;</span>
         </div>
 
-        {/* Options dropdown */}
-        {open && !isDisabled && (
-          <ul className={`absolute z-50 w-full border mt-1 max-h-48 overflow-y-auto hide-scrollbar ${
-            darkMode 
-              ? "bg-gray-700 border-gray-600" 
-              : "bg-white border-gray-300"
-          }`}>
-            {options.map((opt, idx) => (
+        {open && !disabled && (
+          <ul
+            className={`
+              absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border
+              ${darkMode
+                ? "bg-gray-700 border-gray-600"
+                : "bg-white border-gray-300"}
+            `}
+          >
+            {options.map((opt, i) => (
               <li
-                key={idx}
-                className={`px-2 py-1 text-[12px] cursor-pointer ${
-                  darkMode
-                    ? "hover:bg-gray-600 text-gray-200"
-                    : "hover:bg-indigo-100 text-gray-700"
-                }`}
+                key={i}
                 onClick={() => {
                   onChange({ target: { name, value: opt } });
                   setOpen(false);
                 }}
+                className={`
+                  px-2 py-1 text-[12px] cursor-pointer
+                  ${darkMode
+                    ? "hover:bg-gray-600 text-gray-200"
+                    : "hover:bg-indigo-100 text-gray-700"}
+                `}
               >
                 {opt}
               </li>
             ))}
           </ul>
         )}
+
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
     );
-  };
+  }
 
-  // Render
-  if (type === "select") return <SelectField />;
-
-  // Regular input
+  /* ================= INPUT ================= */
   return (
     <div className="relative w-full">
       <input
@@ -96,39 +93,41 @@ export default function Input({
         name={name}
         value={value}
         onChange={onChange}
-        placeholder=" " // important for floating label
+        placeholder=" "
         step={step}
-        {...restProps}
+        autoComplete="off"
+        disabled={disabled}
+        {...rest}
         className={`
-          peer w-full border h-8 px-2 text-[12px]
-          ${error ? "border-red-500" : "border-gray-300 focus:border-indigo-600"}
-          focus:outline-none 
-          ${inputClassName}
+          peer h-8 w-full px-2 text-[12px] border focus:outline-none
+          ${darkMode
+            ? "bg-gray-500 text-white border-gray-600 focus:border-indigo-500"
+            : "bg-white text-gray-900 border-gray-300 focus:border-indigo-600"}
+          ${error ? "border-red-500" : ""}
+          ${className}
         `}
       />
 
       {/* Floating Label */}
       <label
         className={`
-          absolute left-2 top-1/2 -translate-y-1/2 text-[12px] text-gray-400
-          pointer-events-none transition-all duration-300
+          absolute left-2 top-1/2 -translate-y-1/2 text-[12px]
+          pointer-events-none transition-all duration-200
+          ${darkMode ? "text-white" : "text-gray-400"}
 
           peer-placeholder-shown:top-1/2
           peer-placeholder-shown:-translate-y-1/2
-          peer-placeholder-shown:text-[12px]
-          peer-placeholder-shown:text-gray-400
 
-          peer-focus:-top-0.5
-          peer-focus:text-[12px]
-          peer-focus:text-indigo-600
-          peer-focus:bg-white
+          peer-focus:-top-1
           peer-focus:px-1
+          peer-focus:text-indigo-600
+          ${darkMode ? "peer-focus:bg-gray-700" : "peer-focus:bg-white"}
 
           peer-not-placeholder-shown:-top-1
-          peer-not-placeholder-shown:text-[12px]
-         
-          peer-not-placeholder-shown:bg-white
           peer-not-placeholder-shown:px-1
+          ${darkMode
+            ? "peer-not-placeholder-shown:bg-gray-700 peer-not-placeholder-shown:text-white"
+            : "peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:text-indigo-600"}
         `}
       >
         {label}

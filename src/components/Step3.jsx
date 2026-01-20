@@ -28,7 +28,7 @@ export default function Step3({ formData, handleChange }) {
           key={field.name}
           label={field.label}
           name={field.name}
-          placeholder={field.label}
+       
           value={formData[field.name]}
           onChange={handleChange}
           inputClassName={` ${

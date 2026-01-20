@@ -25,7 +25,6 @@ export default function ExamRoutineList() {
   const [search, setSearch] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [classFilter, setClassFilter] = useState("");
- 
 
   const [groupFilter, setGroupFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
@@ -34,7 +33,7 @@ export default function ExamRoutineList() {
 
   // -------------------- Dropdowns --------------------
   const [sortOpen, setSortOpen] = useState(false);
-   const [sortOrder, setSortOrder] = useState("newest");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -290,74 +289,96 @@ export default function ExamRoutineList() {
   ];
   // -------------------- Add Exam Fields --------------------
   // Form field definitions
+  const weekDays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
   const addExamRoutineFields = [
     {
       key: "class",
+      label: "Class",
       type: "select",
       placeholder: "Select Class",
-      options: classOptions,
+      options: ["All", ...classOptions],
     },
     {
       key: "group",
+      label: "Group",
       type: "select",
       placeholder: "Select Group",
-      options: groupOptions, // dynamic
+      options: ["All", ...groupOptions], // dynamic
     },
     {
       key: "section",
+      label: "Section",
       type: "select",
       placeholder: "Select Section",
-      options: sectionOptions, // dynamic
+      options: ["All", ...sectionOptions], // dynamic
     },
     {
       key: "session",
+      label: "Session",
       type: "select",
       placeholder: "Select Session",
-      options: sessionOptions,
+      options: ["All", ...sessionOptions],
     },
     {
       key: "examName",
+      label: "Exam Name",
       type: "select",
       placeholder: "Select Exam",
-      options: examOptions, // exam list দিলে ভালো হবে
+      options: ["All", ...examOptions],
     },
     {
       key: "subject",
+      label: "Subject",
       type: "select",
       placeholder: "Select Subject",
-      options: subjectOptions,
+      options: ["All", ...subjectOptions],
     },
     {
       key: "examDate",
+      label: "Exam date",
       type: "date",
-      placeholder: "Select Exam Date",
+      placeholder: " Exam date",
     },
     {
       key: "examDay",
-      type: "text",
-      placeholder: "Auto-dayname",
-      readOnly: true,
+      label: "Exam day",
+      type: "text", // ✅ dropdown for 7 days
+      placeholder: "Exam day",
+      options: weekDays,
     },
     {
       key: "startTime",
+      label: "Start time",
       type: "time",
-      placeholder: "Select Start Time",
+      placeholder: " Start time",
     },
     {
       key: "endTime",
+      label: "End time",
       type: "time",
-      placeholder: "Select End Time",
+      placeholder: " End time",
     },
     {
       key: "totalHour",
+      label: "Total hour",
       type: "text",
-      placeholder: "Total Hour",
+      placeholder: "Total hour",
       readOnly: true,
     },
     {
       key: "totalMark",
+      label: "Total mark",
       type: "text",
-      placeholder: "Total Marks",
+      placeholder: "Total mark",
       readOnly: true,
     },
   ];
@@ -443,7 +464,6 @@ export default function ExamRoutineList() {
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-           
             {/* Filter Dropdown */}
             <div ref={filterRef} className="relative flex-1">
               <button
@@ -479,7 +499,7 @@ export default function ExamRoutineList() {
                 onClick={() => setExportOpen(!exportOpen)}
                 className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -489,7 +509,7 @@ export default function ExamRoutineList() {
                     onClick={() => exportPDF(filteredData)}
                     className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                     PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
@@ -534,8 +554,8 @@ export default function ExamRoutineList() {
                 // 1️⃣ Update the field normally
                 setFormValues({ ...formValues, [field]: value });
 
-                // 2️⃣ Auto-calc Exam Day
-                if (field === "examDate") {
+                // 2️⃣ Auto-calc Exam Day only when examDate changes
+                if (field === "examDate" && value) {
                   const dateObj = new Date(value);
                   const days = [
                     "Sunday",
@@ -551,39 +571,6 @@ export default function ExamRoutineList() {
                     examDay: days[dateObj.getDay()],
                   }));
                 }
-
-                // 3️⃣ Auto-calc Total Hour
-                if (field === "startTime" || field === "endTime") {
-                  const startTime =
-                    field === "startTime" ? value : formValues.startTime;
-                  const endTime =
-                    field === "endTime" ? value : formValues.endTime;
-
-                  if (startTime && endTime) {
-                    const [sh, sm] = startTime.split(":").map(Number);
-                    const [eh, em] = endTime.split(":").map(Number);
-                    let totalMinutes = eh * 60 + em - (sh * 60 + sm);
-                    if (totalMinutes < 0) totalMinutes = 0;
-                    const hours = Math.floor(totalMinutes / 60);
-                    const minutes = totalMinutes % 60;
-                    setFormValues((prev) => ({
-                      ...prev,
-                      totalHour: `${hours}h ${minutes}m`,
-                    }));
-                  }
-                }
-
-                if (field === "subject") {
-                  const selected = examRoutineData.find(
-                    (e) => e.Subject === value,
-                  );
-                  if (selected) {
-                    setFormValues((prev) => ({
-                      ...prev,
-                      totalMark: selected["Total Mark"],
-                    }));
-                  }
-                }
               }}
             />
           </div>
@@ -591,11 +578,7 @@ export default function ExamRoutineList() {
 
         {/* / Filter / Sort */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between  gap-2 md:gap-0">
-         
-
-        
-
-            {/* Sort Button 
+          {/* Sort Button 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}

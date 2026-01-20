@@ -30,7 +30,7 @@ export default function Step2({ formData, handleChange }) {
           key={field.name}
           label={field.label}
           name={field.name}
-          placeholder={field.label}
+         
           value={formData[field.name]}
           onChange={handleChange}
           inputClassName={`py-1 ${
@@ -38,7 +38,7 @@ export default function Step2({ formData, handleChange }) {
               ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               : "bg-white border-gray-300 text-gray-700 placeholder-gray-400"
           }`}
-          labelClassName={darkMode ? "text-gray-300" : "text-gray-600"}
+          
         />
       ))}
     </div>

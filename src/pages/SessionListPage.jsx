@@ -143,12 +143,89 @@ export default function SessionListPage() {
     )
     .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
 
-  const handleAddSession = (formData) => {
-    // 1️⃣ year বের করা
-    const startYear = new Date(formData.sessionStart).getFullYear();
-    const endYear = new Date(formData.sessionEnd).getFullYear();
+  const perPage = 10;
+  const totalPages = Math.ceil(filteredData.length / perPage); // <-- declare here
+  const currentData = filteredData.slice(
+    (currentPage - 1) * perPage,
+    currentPage * perPage,
+  );
 
-    // 2️⃣ new session object
+  const addSessionFields = [
+    {
+      key: "class",
+      name: "class",
+      label: "Class",
+      type: "select",
+      placeholder: " Class",
+      options: classOptions,
+      required: true,
+    },
+    {
+      key: "group",
+      name: "group",
+      label: "Group",
+      type: "select",
+      placeholder: " Group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      name: "section",
+      label: "Section",
+      type: "select",
+      placeholder: " Section",
+      options: sectionOptions,
+    },
+    {
+      key: "sessionStart",
+      name: "sessionStart",
+      label: "Session Start",
+      type: "date",
+      placeholder: " Start",
+      required: true,
+    },
+    {
+      key: "sessionEnd",
+      name: "sessionEnd",
+      label: "Session End",
+      type: "date",
+      placeholder: " End",
+      required: true,
+    },
+    {
+      key: "showSession",
+      name: "showSession",
+      label: "Session",
+      type: "text",
+      placeholder: "Session Start - End",
+      disabled: true, // user cannot type, auto-update
+    },
+  ];
+
+  const initialValues = {
+    class: "",
+    group: "",
+    section: "",
+    sessionStart: "",
+    sessionEnd: "",
+    showSession: "",
+  };
+  const handleAddSession = (formData) => {
+    const startDate = new Date(formData.sessionStart);
+    const endDate = new Date(formData.sessionEnd);
+
+    const startYear = startDate.getFullYear();
+    const endYear = endDate.getFullYear();
+
+    // ✅ Total days calculation (inclusive)
+    const totalDays =
+      startDate && endDate && !isNaN(startDate) && !isNaN(endDate)
+        ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
+        : 0;
+
+    // ✅ showSession auto-update
+    const showSession = `${formData.sessionStart} - ${formData.sessionEnd}`;
+
     const newSession = {
       sl: sessions.length + 1,
       class: formData.class,
@@ -157,82 +234,15 @@ export default function SessionListPage() {
       sessionStart: formData.sessionStart,
       sessionEnd: formData.sessionEnd,
       sessionYear: `${startYear}-${endYear}`,
-      totalDays:
-        Math.ceil(
-          (new Date(formData.sessionEnd) - new Date(formData.sessionStart)) /
-            (1000 * 60 * 60 * 24),
-        ) || 0,
+      totalDays: totalDays,
+      showSession: showSession,
     };
 
-    // 3️⃣ state update → table auto update
+    // ✅ Add new session to state and reset modal/pagination
     setSessions((prev) => [...prev, newSession]);
-
-    // 4️⃣ modal close
     setAddSessionModalOpen(false);
-
-    // 5️⃣ first page
     setCurrentPage(1);
   };
-
-  const perPage = 10;
-  const totalPages = Math.ceil(filteredData.length / perPage);
-  const currentData = filteredData.slice(
-    (currentPage - 1) * perPage,
-    currentPage * perPage,
-  );
-
- const addSessionFields = [
-  {
-    key: "class",
-    name: "class",
-    label: "Class",
-    type: "select",
-    placeholder: "Select Class",
-    options: classOptions,
-    required: true,
-  },
-  {
-    key: "group",
-    name: "group",
-    label: "Group",
-    type: "select",
-    placeholder: "Select Group",
-    options: groupOptions,
-  },
-  {
-    key: "section",
-    name: "section",
-    label: "Section",
-    type: "select",
-    placeholder: "Select Section",
-    options: sectionOptions,
-  },
-  {
-    key: "sessionStart",
-    name: "sessionStart",
-    label: "Session Start",
-    type: "date",
-    placeholder: "Session Start",
-    required: true,
-  },
-  {
-    key: "sessionEnd",
-    name: "sessionEnd",
-    label: "Session End",
-    type: "date",
-    placeholder: "Session End",
-    required: true,
-  },
-  {
-    key: "showSession",
-    name: "showSession",
-    label: "Session",
-    type: "text",
-    placeholder: "Show Session",
-    disabled: false,
-  },
-];
-
 
   // -------------------- Export Functions --------------------
   const exportExcel = (data) => {
@@ -309,7 +319,7 @@ export default function SessionListPage() {
 
           {/* Buttons: Refresh / Export / Add */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-             {/* Filter */}
+            {/* Filter */}
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen(!filterOpen)}
@@ -350,7 +360,7 @@ export default function SessionListPage() {
                     : "bg-white border-gray-300"
                 }`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -381,20 +391,13 @@ export default function SessionListPage() {
                 onClick={() => setAddSessionModalOpen(true)}
                 className="w-full md:w-28 flex items-center  bg-blue-600 px-2 h-8 text-xs text-white"
               >
-                 Session
+                Session
               </button>
             )}
             <FormModal
               open={addSessionModalOpen}
               title="Add Session"
-              initialValues={{
-                class: "",
-                group: "",
-                section: "",
-                sessionStart: "",
-                sessionEnd: "",
-                showSession: " ",
-              }}
+              initialValues={initialValues}
               onClose={() => setAddSessionModalOpen(false)}
               onSubmit={handleAddSession}
               fields={addSessionFields}
@@ -404,11 +407,7 @@ export default function SessionListPage() {
 
         {/* Filters / Month / Sort / Search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-         
-
-           
-
-            {/* Sort 
+          {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}

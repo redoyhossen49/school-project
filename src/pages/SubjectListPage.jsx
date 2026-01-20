@@ -95,14 +95,15 @@ export default function SubjectListPage() {
     {
       key: "group",
       placeholder: "Select group",
-      options: groupOptions,
+      options: groupOptions(filters.class), // selected class diye filter
     },
     {
       key: "section",
       placeholder: "Select section",
-      options: sectionOptions,
+      options: sectionOptions(filters.class, filters.group), // selected class & group
     },
   ];
+
   // -------------------- Outside click handler --------------------
   useEffect(() => {
     const handler = (e) => {
@@ -184,9 +185,9 @@ export default function SubjectListPage() {
     {
       key: "subjectName",
       name: "subjectName",
-      label: "Subject Name",
+      label: "Subject name",
       type: "text",
-      placeholder: " Subject Name",
+      placeholder: " Subject name",
       required: true,
     },
     {
@@ -202,7 +203,7 @@ export default function SubjectListPage() {
     {
       key: "theoryFullMark",
       name: "theoryFullMark",
-      label: "Theory Full Mark",
+      label: "Full mark",
       type: "number",
       placeholder: " Full Mark ",
       required: true,
@@ -210,12 +211,11 @@ export default function SubjectListPage() {
     {
       key: "theoryPassMark",
       name: "theoryPassMark",
-      label: "Theory Pass Mark",
+      label: " Pass mark",
       type: "number",
       placeholder: " Pass Mark ",
       required: true,
     },
-   
   ];
 
   const handleAddSubject = (data) => {
@@ -309,12 +309,9 @@ export default function SubjectListPage() {
                 isOpen={filterOpen}
                 onClose={() => setFilterOpen(false)}
                 onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-                 
-                  setCurrentPage(1);
-                  setFilterOpen(false);
+                  setClassFilter(values.class === "" ? "" : values.class);
+                  setGroupFilter(values.group === "" ? "" : values.group);
+                  setSectionFilter(values.section === "" ? "" : values.section);
                 }}
                 darkMode={darkMode}
                 buttonRef={filterRef}
@@ -377,11 +374,7 @@ export default function SubjectListPage() {
 
         {/* Filter Row */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between  md:gap-0 ">
-          
-
-          
-
-            {/* Sort 
+          {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}

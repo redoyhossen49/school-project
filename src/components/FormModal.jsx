@@ -34,8 +34,29 @@ export default function FormModal({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  /* 🔹 Updated: handleFieldChange with examDay auto calc */
   const handleFieldChange = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [key]: value };
+
+      // Auto-calc examDay when examDate changes
+      if (key === "examDate" && value) {
+        const dateObj = new Date(value);
+        const days = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
+        updated.examDay = days[dateObj.getDay()];
+      }
+
+      return updated;
+    });
+
     setActiveField(null);
   };
 
@@ -80,13 +101,15 @@ export default function FormModal({
         className={`relative w-64 max-h-[70vh] overflow-y-auto p-6 text-xs border
           ${darkMode
             ? "bg-gray-800 border-gray-600 text-gray-100"
-            : "bg-white border-gray-200 text-gray-900"}`}
+            : "bg-white border-gray-200 text-gray-900"
+          }`}
       >
         <h3 className="text-sm font-semibold text-center mb-4">{title}</h3>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {fields.map((field) => (
-            <div key={field.key}>
+            <div key={field.key} className="relative w-full">
+              {/* Select field */}
               {field.type === "select" ? (
                 <button
                   ref={(el) => (fieldRefs.current[field.key] = el)}
@@ -96,26 +119,64 @@ export default function FormModal({
                       : openDropdown(field.key)
                   }
                   className={`w-full h-8 px-3 flex justify-between items-center border text-left
-                    ${darkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"}`}
+          ${darkMode
+            ? "bg-gray-700 border-gray-600 text-gray-100"
+            : "bg-white border-gray-300 text-gray-900"
+          }`}
                 >
                   {formData[field.key] || field.placeholder}
                   <span>▾</span>
                 </button>
               ) : (
-                <input
-                  type={field.type || "text"}
-                  value={formData[field.key] || ""}
-                  placeholder={field.placeholder}
-                  onChange={(e) =>
-                    handleFieldChange(field.key, e.target.value)
-                  }
-                  className={`w-full h-8 px-3 border
-                    ${darkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"}`}
-                />
+                /* Input field */
+                <div className="relative">
+                  <input
+                    type={field.type || "text"}
+                    id={field.key}
+                    value={formData[field.key] || ""}
+                    onChange={(e) =>
+                      handleFieldChange(field.key, e.target.value)
+                    }
+                    placeholder=" "
+                    readOnly={field.readOnly || false}
+                    className={`peer w-full h-8 px-3 border
+            ${field.readOnly
+              ? darkMode
+                ? "bg-gray-700 text-gray-100"
+                : "bg-gray-100 text-gray-700"
+              : darkMode
+                ? "bg-gray-700 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
+                  />
+                  <label
+                    htmlFor={field.key}
+                    className={`
+          absolute left-2 top-1/2 -translate-y-1/2 text-[8px] text-gray-400
+          pointer-events-none transition-all duration-300
+
+          peer-placeholder-shown:top-1/2
+          peer-placeholder-shown:-translate-y-1/2
+          peer-placeholder-shown:text-[12px]
+          peer-placeholder-shown:text-gray-400
+            peer-placeholder-shown:bg-white
+
+          peer-focus:-top-0.5
+          peer-focus:text-[12px]
+          peer-focus:text-indigo-600
+             ${darkMode ? "peer-focus:bg-gray-700" : "peer-focus:bg-white"}
+          peer-focus:px-1
+
+          peer-not-placeholder-shown:-top-1
+          peer-not-placeholder-shown:text-[12px]
+         ${darkMode ? "peer-not-placeholder-shown: bg-white text-gray-200" : "peer-not-placeholder-shown:bg-white"}
+          
+          peer-not-placeholder-shown:px-1
+        `}
+                  >
+                    {field.label}
+                  </label>
+                </div>
               )}
             </div>
           ))}
@@ -123,10 +184,7 @@ export default function FormModal({
 
         {/* Actions */}
         <div className="flex gap-2 mt-5">
-          <button
-            onClick={onClose}
-            className="w-1/2 h-8 border text-xs"
-          >
+          <button onClick={onClose} className="w-1/2 h-8 border text-xs">
             Cancel
           </button>
           <button
@@ -143,9 +201,11 @@ export default function FormModal({
         <div style={dropdownStyle}>
           <div
             className={`max-h-60 overflow-y-auto border text-xs
-              ${darkMode
-                ? "bg-gray-800 border-gray-600 text-gray-100"
-                : "bg-white border-gray-300 text-gray-900"}`}
+              ${
+                darkMode
+                  ? "bg-gray-800 border-gray-600 text-gray-100"
+                  : "bg-white border-gray-300 text-gray-900"
+              }`}
           >
             <ul>
               <li

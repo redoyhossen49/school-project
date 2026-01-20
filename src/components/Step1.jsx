@@ -151,7 +151,7 @@ export default function Step1({ formData, handleChange }) {
           label="Admission fee"
           name="admissionFee"
           value={formData.admissionFee || ""}
-          inputClassName={darkMode ? "bg-gray-600" : "bg-gray-100"}
+         
           error={false}
           readOnly
         />

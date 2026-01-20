@@ -8,6 +8,7 @@ export default function AddClassPermissionPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    teacherName:"",
     className: "",
     group: "",
     section: "",
@@ -75,7 +76,7 @@ export default function AddClassPermissionPage() {
             onChange={handleChange}
             options={["1", "2", "3", "4", "5"]}
           />
-
+         
           {/* Group */}
           <Input
             type="select"
@@ -106,6 +107,16 @@ export default function AddClassPermissionPage() {
             options={["Math", "Physics", "Chemistry", "Biology", "English"]}
               showDropdownTop={true}
           />
+
+           <Input
+            type="select"
+            label="Select teacher"
+            name="teacherName"
+            value={formData.teacherName}
+            onChange={handleChange}
+            options={["Redoy", "Sagor", "Rahim", "Karim", "Nasim"]}
+          />
+
         </div>
 
         {/* ===== Action Buttons ===== */}

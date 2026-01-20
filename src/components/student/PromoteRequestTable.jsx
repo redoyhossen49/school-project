@@ -7,7 +7,7 @@ import ReusableActions from "../common/ReusableActions";
 
 const headers = [
   { label: "Sl", key: "sl" },
-    { label: "Id number", key: "idNumber" },
+  { label: "Id number", key: "idNumber" },
   { label: "Student name", key: "studentName" },
   { label: "Father's name", key: "fatherName" },
 
@@ -23,7 +23,10 @@ const headers = [
   { label: "Status", key: "status" },
 ];
 
-export default function PromoteRequestTable({ data = promoteRequestData, setData }) {
+export default function PromoteRequestTable({
+  data = promoteRequestData,
+  setData,
+}) {
   const { darkMode } = useTheme();
   const userRole = localStorage.getItem("role"); // "school"
   const showAction = userRole === "school";
@@ -37,7 +40,7 @@ export default function PromoteRequestTable({ data = promoteRequestData, setData
 
   const handleEditSubmit = (updatedData) => {
     setData((prev) =>
-      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...updatedData } : r))
+      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...updatedData } : r)),
     );
     setEditModalOpen(false);
   };
@@ -98,10 +101,7 @@ export default function PromoteRequestTable({ data = promoteRequestData, setData
           )}
 
           {data.map((row) => (
-            <tr
-              key={row.sl}
-              className={`border-b ${borderCol} ${hoverRow}`}
-            >
+            <tr key={row.sl} className={`border-b ${borderCol} ${hoverRow}`}>
               {headers.map((h) => (
                 <td
                   key={h.key}
@@ -114,12 +114,14 @@ export default function PromoteRequestTable({ data = promoteRequestData, setData
               {showAction && (
                 <td className="px-3 py-2 whitespace-nowrap">
                   <ReusableActions
-                    row={row}
+                    item={row}
                     onEdit={(r) => {
                       setSelectedRow(r);
                       setEditModalOpen(true);
                     }}
-                    onDelete={handleDelete}
+                    onDelete={(r) => handleDelete(r)}
+                    onAccept={(r) => alert(`Accepted ${r.studentName}`)}
+                    onReject={(r) => alert(`Rejected ${r.studentName}`)}
                   />
                 </td>
               )}
@@ -137,7 +139,12 @@ export default function PromoteRequestTable({ data = promoteRequestData, setData
           onClose={() => setEditModalOpen(false)}
           onSubmit={handleEditSubmit}
           fields={[
-            { name: "studentName", label: "Student Name", type: "text", required: true },
+            {
+              name: "studentName",
+              label: "Student Name",
+              type: "text",
+              required: true,
+            },
             { name: "fatherName", label: "Father's Name", type: "text" },
             { name: "idNumber", label: "ID Number", type: "text" },
             { name: "fromClass", label: "From Class", type: "text" },

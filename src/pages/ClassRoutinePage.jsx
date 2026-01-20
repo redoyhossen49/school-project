@@ -154,6 +154,7 @@ const getSubjectOptions = (selectedClass, selectedGroup, selectedSection) => {
     const id = routineData.length + 1;
     setRoutineData([...routineData, { id, ...newRoutine }]);
   };
+const weekDays = ["Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
  const routineFields = [
   { key: "class", name: "class", label: "Class", type: "select", required: true, options: classOptions, placeholder: "Select Class" },
@@ -171,8 +172,25 @@ const getSubjectOptions = (selectedClass, selectedGroup, selectedSection) => {
   },
   { key: "classStartTime", name: "classStartTime", label: "Class Start Time",  type:"time", required: true, placeholder: "Start time" },
   { key: "classEndTime", name: "classEndTime", label: "Class End Time", type: "time", required: true, placeholder: "End  time" },
-  { key: "dayStart", name: "dayStart", label: "Day Start", type: "text", required: true, placeholder: "Start day" },
-  { key: "dayEnd", name: "dayEnd", label: "Day End", type: "text", required: true, placeholder: "End day" },
+  {
+  key: "dayStart",
+  name: "dayStart",
+  label: "Day Start",
+  type: "select", // ✅ select type
+  required: true,
+  placeholder: "Select start day",
+  options: weekDays, // ✅ dropdown options
+},
+{
+  key: "dayEnd",
+  name: "dayEnd",
+  label: "Day End",
+  type: "select", // ✅ select type
+  required: true,
+  placeholder: "Select end day",
+  options: weekDays, // ✅ dropdown options
+},
+
 ];
 
 
