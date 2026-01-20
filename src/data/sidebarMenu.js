@@ -209,7 +209,7 @@ export const sidebarMenu = (role) => {
         { title: "Admit Card", path: "examadmit" },
         { title: "Seat Number", path: "examsitnumber" },
 
-        { title: "Schedule", path: "examschedule" },
+        { title: "Schedule", path: "/exam/schedule" },
         { title: "Result Find", path: "/exam/result" },
         { title: "Certificate", path: "/exam/certificate" },
       ],
@@ -219,11 +219,9 @@ export const sidebarMenu = (role) => {
       title: "Fee Management",
       icon: CreditCard,
       children: [
-        { title: "Fees Group", path: "/fee/group" },
-        { title: "Fees Type", path: "/fee/type" },
-        { title: "Discount", path: "/fee/discount" },
-        { title: "Fees List", path: "/fee/list" },
-        { title: "Collection", path: "/fee/collection" },
+        { title: "Fees Type", path: "fee/type" },
+        { title: "Discount", path: "fee/discount" },
+        { title: "Collection", path: "fee/collection" },
       ],
     },
 
@@ -305,7 +303,7 @@ export const sidebarMenu = (role) => {
       icon: RiAccountPinBoxLine,
       children: [
         {
-          title: "Opening ",
+          title: "Opening",
           path: "/notice",
         },
         {
