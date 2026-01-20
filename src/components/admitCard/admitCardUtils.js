@@ -1,8 +1,8 @@
 import { studentExamData } from "../../data/studentExamData.js";
 import { studentData } from "../../data/studentData.js";
-import classTeacherSignature from "../../assets/images/class-teacher.png";
 import headteacherSignature from "../../assets/images/signature-headteacher.png";
 import schoolLogo from "../../assets/images/sidebar-logo.avif";
+import schoolWatermark from "../../assets/images/school.webp";
 
 // Helper function to get student photo
 export const getStudentPhoto = (idNumber) => {
@@ -86,6 +86,9 @@ export const generateAdmitCardHTML = (row) => {
 
   return `
     <div class="admit-card">
+      <div class="watermark">
+        <img src="${schoolWatermark}" alt="Watermark" />
+      </div>
       <header class="header">
         <div class="logo">
           <img src="${schoolLogo}" alt="Logo" />
@@ -115,11 +118,11 @@ export const generateAdmitCardHTML = (row) => {
           </div>
           <div class="info-row">
             <span class="label">Roll</span>
-            <span class="value">: ${row.AdmitCardNo || row.IDNumber}</span>
+            <span class="value">: ${row.RollNo || ""}</span>
           </div>
           <div class="info-row">
-            <span class="label">Father's Name</span>
-            <span class="value">: ${row.FathersName}</span>
+            <span class="label">Admit Card No</span>
+            <span class="value">: ${row.AdmitCardNo || ""}</span>
           </div>
         </div>
 
@@ -143,32 +146,18 @@ export const generateAdmitCardHTML = (row) => {
         </div>
       </div>
 
-      <div class="subjects-container">
-        <table class="subject-table">
-          <thead>
-            <tr>
-              <th>Subject Name</th>
-              <th>Exam Date</th>
-              <th>Exam Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${subjectDetails.map((subject) => `
-              <tr>
-                <td>${subject.subjectName}</td>
-                <td>${formatDate(subject.examDate)}</td>
-                <td>${subject.examTime || "N/A"}</td>
-              </tr>
+      <div class="subjects-wrapper">
+        <h3 class="subjects-header">Subject Name</h3>
+        <div class="subjects-container">
+          <div class="subjects-grid">
+            ${subjectDetails.map((subject, index) => `
+              <div class="subject-item">${subject.subjectName}</div>
             `).join("")}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
       <footer class="footer">
-        <div class="sig-box">
-          <img src="${classTeacherSignature}" alt="Class Teacher Signature" class="signature-image" />
-          <div class="sig-text">Teacher's Signature</div>
-        </div>
         <div class="sig-box">
           <img src="${headteacherSignature}" alt="Headteacher Signature" class="signature-image" />
           <div class="sig-text">Principal's Signature</div>
@@ -176,8 +165,7 @@ export const generateAdmitCardHTML = (row) => {
       </footer>
       
       <div class="copyright">
-        <p>&copy; ${new Date().getFullYear()} ${schoolName}. All rights reserved.</p>
-        <p>Developed by <a href="https://mrmsakib.com" target="_blank" rel="noopener noreferrer" style="color:#26a69a; text-decoration:none;">MRM Sakib</a></p>
+        <p>&copy; ${new Date().getFullYear()} Astha Academic. All rights reserved.</p>
       </div>
     </div>
   `;

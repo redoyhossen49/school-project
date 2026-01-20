@@ -11,6 +11,7 @@ import autoTable from "jspdf-autotable";
 import { seatNumberData } from "../data/seatNumberData.js";
 import { Link } from "react-router-dom";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import SeatPlanModal from "../components/seatPlan/SeatPlanModal.jsx";
 
 export default function SitNumberPage() {
   const { darkMode } = useTheme();
@@ -25,6 +26,7 @@ export default function SitNumberPage() {
   const [sectionFilter, setSectionFilter] = useState("");
 
   const [addClassOpen, setAddClassOpen] = useState(false);
+  const [seatPlanModalOpen, setSeatPlanModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState(false);
   const [filters, setFilters] = useState({
     class: "",
@@ -345,12 +347,14 @@ export default function SitNumberPage() {
             </div>
 
             {canEdit && (
-              <button
-                onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
-              >
-                Add Seat
-              </button>
+              <>
+                <button
+                  onClick={() => setSeatPlanModalOpen(true)}
+                  className="w-full flex items-center  bg-green-600 text-white px-3 h-8 text-xs"
+                >
+                   Seat Plan
+                </button>
+              </>
             )}
 
             <FormModal
@@ -396,6 +400,12 @@ export default function SitNumberPage() {
             />
           </div>
         </div>
+
+        {/* Seat Plan Modal */}
+        <SeatPlanModal
+          open={seatPlanModalOpen}
+          onClose={() => setSeatPlanModalOpen(false)}
+        />
 
         {/* / Filter / Sort */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">

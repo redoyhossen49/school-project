@@ -59,12 +59,29 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               box-sizing: border-box;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
+              overflow: hidden;
+            }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              opacity: 0.08;
+              z-index: 0;
+              pointer-events: none;
+            }
+            .watermark img {
+              width: 600px;
+              height: auto;
+              object-fit: contain;
             }
             .header {
               display: flex;
               align-items: flex-start;
               justify-content: space-between;
               margin-bottom: 20px;
+              position: relative;
+              z-index: 1;
             }
             .logo{
               border: 1px solid gray;
@@ -134,6 +151,8 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               grid-template-columns: 1.5fr 1fr;
               gap: 40px;
               margin-top: 20px;
+              position: relative;
+              z-index: 1;
             }
             .right-info{
               margin-left: 40% !important;
@@ -156,45 +175,35 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-            .subjects-container {
+            .subjects-wrapper {
               margin-top: 30px;
+              position: relative;
+              z-index: 1;
             }
             .subjects-header {
               font-weight: bold;
-              margin-bottom: 10px;
-              padding-bottom: 5px;
+              font-size: 14px;
+              text-align: center;
             }
-            .subject-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 10px;
-              font-size: 13px;
-            }
-            .subject-table thead {
-              background-color: #f5f5f5;
-            }
-            .subject-table th {
-              padding: 8px;
-              text-align: left;
+            .subjects-container {
               border: 1px solid #ddd;
-              font-weight: bold;
+              border-radius: 3px;
+            }
+            .subjects-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+            }
+            .subject-item {
+              padding: 6px 10px;
+              border: none;
               font-size: 12px;
-            }
-            .subject-table td {
-              padding: 8px;
-              border: 1px solid #ddd;
-              text-align: left;
-            }
-            .subject-table tbody tr:nth-child(even) {
-              background-color: #f9f9f9;
-            }
-            .subject-table tbody tr:hover {
-              background-color: #f0f0f0;
+              background-color: transparent;
             }
             .footer {
               margin-top: 5%;
               display: flex;
-              justify-content: space-between;
+              justify-content: flex-end;
             }
             .sig-box {
               text-align: center;
@@ -277,8 +286,23 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
                 padding: 40px !important;
                 border: 1px solid gray !important;
                 box-shadow: none !important;
+                overflow: hidden !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+              }
+              .watermark {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(-45deg) !important;
+                opacity: 0.08 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+              }
+              .watermark img {
+                width: 600px !important;
+                height: auto !important;
+                object-fit: contain !important;
               }
               .admit-badge {
                 -webkit-print-color-adjust: exact !important;
@@ -295,8 +319,8 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               .student-photo {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                background: #e91e63 !important;
-                border: 2px solid #00c2cb !important;
+                background: transparent !important;
+                border: 1px solid gray !important;
                 border-radius: 300px !important;
               }
             }
@@ -401,12 +425,29 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               box-sizing: border-box;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
+              overflow: hidden;
+            }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              opacity: 0.08;
+              z-index: 0;
+              pointer-events: none;
+            }
+            .watermark img {
+              width: 600px;
+              height: auto;
+              object-fit: contain;
             }
             .header {
               display: flex;
               align-items: flex-start;
               justify-content: space-between;
               margin-bottom: 20px;
+              position: relative;
+              z-index: 1;
             }
             .logo{
               border: 1px solid gray;
@@ -476,6 +517,8 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               grid-template-columns: 1.5fr 1fr;
               gap: 40px;
               margin-top: 20px;
+              position: relative;
+              z-index: 1;
             }
             .right-info{
               margin-left: 40% !important;
@@ -498,45 +541,35 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-            .subjects-container {
+            .subjects-wrapper {
               margin-top: 30px;
+              position: relative;
+              z-index: 1;
             }
             .subjects-header {
               font-weight: bold;
-              margin-bottom: 10px;
-              padding-bottom: 5px;
+              font-size: 14px;
+              text-align: center;
             }
-            .subject-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 10px;
-              font-size: 13px;
-            }
-            .subject-table thead {
-              background-color: #f5f5f5;
-            }
-            .subject-table th {
-              padding: 8px;
-              text-align: left;
+            .subjects-container {
               border: 1px solid #ddd;
-              font-weight: bold;
+              border-radius: 3px;
+            }
+            .subjects-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+            }
+            .subject-item {
+              padding: 6px 10px;
+              border: none;
               font-size: 12px;
-            }
-            .subject-table td {
-              padding: 8px;
-              border: 1px solid #ddd;
-              text-align: left;
-            }
-            .subject-table tbody tr:nth-child(even) {
-              background-color: #f9f9f9;
-            }
-            .subject-table tbody tr:hover {
-              background-color: #f0f0f0;
+              background-color: transparent;
             }
             .footer {
               margin-top: 5%;
               display: flex;
-              justify-content: space-between;
+              justify-content: flex-end;
             }
             .sig-box {
               text-align: center;
@@ -619,8 +652,23 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
                 padding: 40px !important;
                 border: 1px solid gray !important;
                 box-shadow: none !important;
+                overflow: hidden !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+              }
+              .watermark {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(-45deg) !important;
+                opacity: 0.08 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+              }
+              .watermark img {
+                width: 600px !important;
+                height: auto !important;
+                object-fit: contain !important;
               }
               .admit-badge {
                 -webkit-print-color-adjust: exact !important;
@@ -637,8 +685,8 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               .student-photo {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                background: #e91e63 !important;
-                border: 2px solid #00c2cb !important;
+                background: transparent !important;
+                border: 1px solid gray !important;
                 border-radius: 300px !important;
               }
             }

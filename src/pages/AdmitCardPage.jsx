@@ -19,6 +19,7 @@ import { generateAdmitCardHTML, getStudentSubjects, getStudentPhoto, getStudentS
 import classTeacherSignature from "../assets/images/class-teacher.png";
 import headteacherSignature from "../assets/images/signature-headteacher.png";
 import schoolLogo from "../assets/images/sidebar-logo.avif";
+import schoolWatermark from "../assets/images/school.webp";
 
 export default function AdmitCardPage() {
   const canEdit = localStorage.getItem("role") === "school";
@@ -290,13 +291,14 @@ export default function AdmitCardPage() {
           (search ? d.StudentName.toLowerCase().includes(search.toLowerCase()) : true)
         );
       })
-      .map((d) => {
+      .map((d, index) => {
         // Add generated admit card number to the data
         const admitCardKey = `${d.IDNumber}_${d.Class}_${d.Section || ""}_${d.Session}_${d.ExamName}`;
         const admitCardNo = generatedAdmitCards[admitCardKey] || "";
         return {
           ...d,
           AdmitCardNo: admitCardNo,
+          SL: d.SL || d.sl || index + 1, // Add SL field (serial number)
         };
       })
       .sort((a, b) => {
@@ -318,6 +320,7 @@ export default function AdmitCardPage() {
     (currentPage - 1) * perPage,
     currentPage * perPage,
   );
+  // Keep SL from studentExamData (already set in filteredData)
 
   // -------------------- Columns --------------------
   const columns = [
@@ -338,10 +341,12 @@ export default function AdmitCardPage() {
     { key: "EndTime", label: "End Time" },
   ];
 
-  // Reset selected cards when page changes (not on every data change)
+  // Don't reset selected cards automatically - let user control it
+  // Reset only when filters change significantly
   useEffect(() => {
-    setSelectedAdmitCards(new Set());
-  }, [currentPage]);
+    // Only reset if filters change, not on page change
+    // This allows selection to persist across pages
+  }, [appliedFilters]);
 
 
   // -------------------- Handlers --------------------
@@ -379,6 +384,21 @@ export default function AdmitCardPage() {
               box-sizing: border-box;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
+              overflow: hidden;
+            }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              opacity: 0.1;
+              z-index: 0;
+              pointer-events: none;
+            }
+            .watermark img {
+              width: 600px;
+              height: auto;
+              object-fit: contain;
             }
             .header {
               display: flex;
@@ -476,45 +496,35 @@ export default function AdmitCardPage() {
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-            .subjects-container {
+            .subjects-wrapper {
               margin-top: 30px;
+              position: relative;
+              z-index: 1;
             }
             .subjects-header {
               font-weight: bold;
-              margin-bottom: 10px;
-              padding-bottom: 5px;
+              font-size: 14px;
+              text-align: center;
             }
-            .subject-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 10px;
-              font-size: 13px;
-            }
-            .subject-table thead {
-              background-color: #f5f5f5;
-            }
-            .subject-table th {
-              padding: 8px;
-              text-align: left;
+            .subjects-container {
               border: 1px solid #ddd;
-              font-weight: bold;
+              border-radius: 3px;
+            }
+            .subjects-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+            }
+            .subject-item {
+              padding: 6px 10px;
+              border: none;
               font-size: 12px;
-            }
-            .subject-table td {
-              padding: 8px;
-              border: 1px solid #ddd;
-              text-align: left;
-            }
-            .subject-table tbody tr:nth-child(even) {
-              background-color: #f9f9f9;
-            }
-            .subject-table tbody tr:hover {
-              background-color: #f0f0f0;
+              background-color: transparent;
             }
             .footer {
               margin-top: 5%;
               display: flex;
-              justify-content: space-between;
+              justify-content: flex-end;
             }
             .sig-box {
               text-align: center;
@@ -573,32 +583,47 @@ export default function AdmitCardPage() {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
-              @page {
-                size: A4 landscape;
-                margin: 10mm;
+            @page {
+              size: A4 landscape;
+              margin: 10mm;
+            }
+            .page-container { 
+              max-width: 850px !important;
+              margin: 0 auto !important;
+              padding: 40px !important;
+              width: auto !important;
+              display: flex !important;
+              justify-content: center !important;
+              align-items: center !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            button { display: none; }
+            .admit-card { 
+              page-break-inside: avoid !important; 
+              margin-bottom: 20px !important;
+              width: 850px !important;
+              max-width: 850px !important;
+              padding: 40px !important;
+              border: 1px solid gray !important;
+              box-shadow: none !important;
+              overflow: hidden !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+              .watermark {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(-45deg) !important;
+                opacity: 0.08 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
               }
-              .page-container { 
-                max-width: 850px !important;
-                margin: 0 auto !important;
-                padding: 40px !important;
-                width: auto !important;
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              button { display: none; }
-              .admit-card { 
-                page-break-inside: avoid !important; 
-                margin-bottom: 20px !important;
-                width: 850px !important;
-                max-width: 850px !important;
-                padding: 40px !important;
-                border: 1px solid gray !important;
-                box-shadow: none !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+              .watermark img {
+                width: 600px !important;
+                height: auto !important;
+                object-fit: contain !important;
               }
               .admit-badge {
                 -webkit-print-color-adjust: exact !important;
@@ -615,8 +640,8 @@ export default function AdmitCardPage() {
               .student-photo {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                background: #e91e63 !important;
-                border: 2px solid #00c2cb !important;
+                background: transparent !important;
+                border: 1px solid gray !important;
                 border-radius: 300px !important;
               }
             }
@@ -656,14 +681,18 @@ export default function AdmitCardPage() {
     e.stopPropagation();
     if (currentData.length === 0) return;
 
-    const allSelected = currentData.every((row) => selectedAdmitCards.has(row.IDNumber));
+    const allSelected = currentData.every((row) => {
+      const rowId = row.IDNumber || row.idNumber || row.sl;
+      return selectedAdmitCards.has(rowId);
+    });
 
     if (allSelected) {
       // Deselect all
       setSelectedAdmitCards((prev) => {
         const newSet = new Set(prev);
         currentData.forEach((row) => {
-          newSet.delete(row.IDNumber);
+          const rowId = row.IDNumber || row.idNumber || row.sl;
+          newSet.delete(rowId);
         });
         return newSet;
       });
@@ -672,7 +701,8 @@ export default function AdmitCardPage() {
       setSelectedAdmitCards((prev) => {
         const newSet = new Set(prev);
         currentData.forEach((row) => {
-          newSet.add(row.IDNumber);
+          const rowId = row.IDNumber || row.idNumber || row.sl;
+          newSet.add(rowId);
         });
         return newSet;
       });
@@ -842,41 +872,502 @@ export default function AdmitCardPage() {
     doc.text("Headmaster's (In Charge) Signature", x + cardWidth - 90, currentY + signatureHeight + 8, { align: "center" });
   };
 
-  // Download selected admit cards
-  const handleDownloadSelected = () => {
+  // Helper function to convert image path to absolute URL
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    if (imagePath.startsWith('/')) {
+      return window.location.origin + imagePath;
+    }
+    // For Vite imported assets, try to get the actual URL
+    try {
+      return new URL(imagePath, window.location.origin).href;
+    } catch {
+      return window.location.origin + '/' + imagePath;
+    }
+  };
+
+  // Download selected admit cards - Print like handlePrint
+  const handleDownloadSelected = async () => {
     if (selectedAdmitCards.size === 0) {
       alert("Please select at least one admit card to download");
       return;
     }
 
-    const selectedRows = currentData.filter((row) =>
-      selectedAdmitCards.has(row.IDNumber)
-    );
-
-    // Generate PDF for selected admit cards - 2 cards per page (landscape)
-    const doc = new jsPDF("landscape", "pt", "a4");
-    const pageWidth = doc.internal.pageSize.getWidth(); // 842pt for landscape
-    const pageHeight = doc.internal.pageSize.getHeight(); // 595pt for landscape
-    const margin = 30;
-    const cardHeight = (pageHeight - (margin * 3)) / 2; // Two cards with spacing
-    const cardWidth = pageWidth - (margin * 2);
-
-    selectedRows.forEach((row, index) => {
-      // Add new page if needed (every 2 cards)
-      if (index > 0 && index % 2 === 0) {
-        doc.addPage();
-      }
-
-      // Calculate position (top or bottom of page)
-      const cardIndex = index % 2;
-      const yPosition = margin + (cardIndex * (cardHeight + margin));
-
-      // Generate admit card
-      generateAdmitCardPDF(doc, row, margin, yPosition, cardWidth, cardHeight);
+    const selectedRows = currentData.filter((row) => {
+      const rowId = row.IDNumber || row.idNumber || row.sl;
+      return selectedAdmitCards.has(rowId);
     });
 
-    doc.save(`Admit_Cards_${selectedRows.length}_students.pdf`);
-    alert(`Successfully downloaded ${selectedRows.length} admit card(s)!`);
+    // Helper to generate HTML with absolute image URLs using generateAdmitCardHTML
+    const generateCardHTMLWithUrls = (row) => {
+      // Generate HTML using the same function as ViewAdmitCardModal
+      let html = generateAdmitCardHTML(row);
+      
+      // Replace image URLs with absolute URLs
+      const logoUrl = getImageUrl(schoolLogo);
+      const watermarkUrl = getImageUrl(schoolWatermark);
+      const signatureUrl = getImageUrl(headteacherSignature);
+      const studentPhoto = getStudentPhoto(row.IDNumber);
+      const photoUrl = studentPhoto.startsWith('http') ? studentPhoto : getImageUrl(studentPhoto);
+
+      // Replace image sources with absolute URLs
+      html = html.replace(/src="[^"]*sidebar-logo[^"]*"/g, `src="${logoUrl}"`);
+      html = html.replace(/src="[^"]*school\.webp[^"]*"/g, `src="${watermarkUrl}"`);
+      html = html.replace(/src="[^"]*signature-headteacher[^"]*"/g, `src="${signatureUrl}"`);
+      html = html.replace(/(<div class="student-photo">[\s\S]*?<img[^>]*src=")[^"]*("[^>]*>)/g, `$1${photoUrl}$2`);
+
+      return html;
+    };
+
+    // Open print window in new tab with A4 size
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow popups to print admit cards");
+      return;
+    }
+    
+    // Generate HTML for all selected cards (2 cards per page, portrait mode)
+    let printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Admit Cards - ${selectedRows.length} Students</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+              font-family: Arial, sans-serif;
+              background: white;
+              width: 210mm;
+              min-height: 297mm;
+              margin: 0 auto;
+              padding: 0;
+            }
+            .page-container {
+              width: 210mm;
+              min-height: 297mm;
+              max-height: 297mm;
+              height: 297mm;
+              margin: 0;
+              padding: 0;
+              background: white;
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+            }
+            .admit-card {
+              width: 100%;
+              background: #fff;
+              padding: 25px;
+              position: relative;
+              border: 1px solid gray;
+              box-sizing: border-box;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              overflow: hidden;
+              flex: 0 0 50vh;
+              height: 50vh;
+              min-height: 50vh;
+              max-height: 50vh;
+              margin: 0;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            }
+            .admit-card:first-child {
+              border-bottom: 1px solid gray;
+            }
+            .admit-card:last-child {
+              border-top: 1px solid gray;
+            }
+            .subjects-wrapper {
+              flex-shrink: 1;
+              overflow: hidden;
+              margin-top: 15px;
+            }
+            .subjects-container {
+              max-height: 100px;
+              overflow: hidden;
+            }
+            .subjects-grid {
+              max-height: 90px;
+              overflow-y: auto;
+              font-size: 10px;
+              padding: 5px;
+            }
+            .subject-item {
+              padding: 3px 5px;
+              font-size: 10px;
+            }
+            .watermark {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-45deg);
+              opacity: 0.08;
+              z-index: 0;
+              pointer-events: none;
+            }
+            .watermark img {
+              width: 600px;
+              height: auto;
+              object-fit: contain;
+            }
+            .header {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              margin-bottom: 20px;
+              position: relative;
+              z-index: 1;
+            }
+            .logo{
+              border: 1px solid gray;
+              padding: 2px;
+              width: 100px;
+              height: 100px;
+              border-radius: 300% !important;
+            }
+            .logo img {
+              width: 100%;
+              height: 100%;
+              display: block;
+              object-fit: cover;
+              border-radius: 300% !important;
+            }
+            .school-info {
+              text-align: center;
+              flex-grow: 1;
+            }
+            .school-info h1 {
+              margin: 0;
+              font-size: 26px;
+              color: #1a1a1a;
+              font-weight: 700;
+            }
+            .school-info p {
+              margin: 5px 0;
+              font-size: 11px;
+              font-weight: bold;
+              color: #333;
+            }
+            .admit-badge {
+              background-color: #26a69a;
+              color: white;
+              padding: 4px 15px;
+              display: inline-block;
+              border-radius: 4px;
+              font-size: 18px;
+              font-weight: bold;
+              margin: 10px 0;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .exam-title {
+              font-size: 16px;
+              font-weight: bold;
+              border-bottom: 2px solid #00c2cb;
+              display: inline-block;
+              padding-bottom: 2px;
+            }
+            .student-photo {
+              border: 1px solid gray;
+              padding: 2px;
+              width: 100px;
+              height: 100px;
+              border-radius: 300% !important;
+            }
+            .student-photo img {
+              width: 100%;
+              height: 100%;
+              display: block;
+              object-fit: cover;
+              border-radius: 300% !important;
+            }
+            .info-section {
+              display: grid;
+              grid-template-columns: 1.5fr 1fr;
+              gap: 40px;
+              margin-top: 20px;
+              position: relative;
+              z-index: 1;
+            }
+            .right-info{
+              margin-left: 40% !important;
+            }
+            .info-row {
+              display: flex;
+              margin-bottom: 8px;
+              font-size: 12px;
+            }
+            .label {
+              font-weight: bold;
+              width: 110px;
+            }
+            .value-box {
+              border: 1px solid #999;
+              padding: 2px 8px;
+              flex-grow: 1;
+              min-height: 22px;
+              border-radius: 3px;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .subjects-wrapper {
+              margin-top: 30px;
+              position: relative;
+              z-index: 1;
+            }
+            .subjects-header {
+              font-weight: bold;
+              font-size: 14px;
+              text-align: center;
+            }
+            .subjects-container {
+              border: 1px solid #ddd;
+              border-radius: 3px;
+            }
+            .subjects-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+            }
+            .subject-item {
+              padding: 6px 10px;
+              border: none;
+              font-size: 12px;
+              background-color: transparent;
+            }
+            .footer {
+              margin-top: 5%;
+              display: flex;
+              justify-content: flex-end;
+            }
+            .sig-box {
+              text-align: center;
+              width: 250px;
+            }
+            .sig-text {
+              border-top: 1px dashed gray;
+              padding-top: 8px;
+              font-size: 12px;
+              font-weight: bold;
+            }
+            .signature-image {
+              width: 150px;
+              height: auto;
+              max-height: 50px;
+              object-fit: contain;
+              margin-bottom: 5px;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            .copyright {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: auto;
+              text-align: center;
+              position: relative;
+              padding-top: 10px;
+            }
+            .copyright p {
+              font-size: 12px;
+              color: #666;
+              margin: 0;
+              padding-bottom: 10px;
+            }
+            .copyright a {
+              color: #26a69a;
+              text-decoration: none;
+            }
+            @media print {
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+              body { 
+                background: none !important; 
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              @page {
+                size: A4 portrait;
+                margin: 0;
+              }
+              .page-container { 
+                padding: 0 !important;
+                margin: 0 !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
+                height: 100vh !important;
+                display: flex !important;
+                flex-direction: column !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+              }
+              .page-container:last-child {
+                page-break-after: auto !important;
+              }
+              .admit-card { 
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+                margin: 0 !important;
+                width: 100% !important;
+                padding: 20px !important;
+                border: 1px solid gray !important;
+                box-shadow: none !important;
+                overflow: hidden !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                flex: 0 0 50vh !important;
+                height: 50vh !important;
+                min-height: 50vh !important;
+                max-height: 50vh !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+              }
+              .copyright {
+                margin-top: auto !important;
+                padding-top: 10px !important;
+              }
+              .subjects-wrapper {
+                flex-shrink: 1 !important;
+                overflow: hidden !important;
+                margin-top: 10px !important;
+                max-height: 80px !important;
+              }
+              .subjects-container {
+                max-height: 70px !important;
+                overflow: hidden !important;
+              }
+              .subjects-grid {
+                max-height: 60px !important;
+                overflow-y: auto !important;
+                font-size: 9px !important;
+                padding: 4px !important;
+                gap: 4px !important;
+              }
+              .subject-item {
+                padding: 2px 4px !important;
+                font-size: 9px !important;
+              }
+              .subjects-wrapper {
+                flex-shrink: 1 !important;
+                overflow: hidden !important;
+                max-height: 100px !important;
+              }
+              .subjects-container {
+                max-height: 90px !important;
+                overflow: hidden !important;
+              }
+              .subjects-grid {
+                max-height: 80px !important;
+                overflow-y: auto !important;
+                font-size: 10px !important;
+                padding: 5px !important;
+              }
+              .subject-item {
+                padding: 3px 5px !important;
+                font-size: 10px !important;
+              }
+              .admit-card:first-child {
+                border-top: 1px solid gray !important;
+                border-bottom: 1px solid gray !important;
+              }
+              .admit-card:last-child {
+                border-bottom: 1px solid gray !important;
+                border-top: 1px solid gray !important;
+              }
+              .watermark {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(-45deg) !important;
+                opacity: 0.08 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+              }
+              .watermark img {
+                width: 400px !important;
+                height: auto !important;
+                object-fit: contain !important;
+              }
+              .admit-badge {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #26a69a !important;
+                color: white !important;
+              }
+              .value-box {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                border: 1px solid #999 !important;
+                background: #fff !important;
+              }
+              .student-photo {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background: transparent !important;
+                border: 1px solid gray !important;
+                border-radius: 300px !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
+    `;
+
+    // Add all selected cards (exactly 2 per page, no empty space)
+    // Process cards in pairs to ensure exactly 2 per page
+    for (let i = 0; i < selectedRows.length; i += 2) {
+      // Start new page container for every pair
+      printContent += '<div class="page-container">';
+      
+      // Add first card
+      printContent += generateCardHTMLWithUrls(selectedRows[i]);
+      
+      // Add second card if exists, otherwise duplicate the first card to fill the page
+      if (i + 1 < selectedRows.length) {
+        printContent += generateCardHTMLWithUrls(selectedRows[i + 1]);
+      } else {
+        // If odd number, duplicate the last card to ensure 2 cards per page
+        printContent += generateCardHTMLWithUrls(selectedRows[i]);
+      }
+      
+      // Close page container
+      printContent += '</div>';
+    }
+
+    printContent += `
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    // Wait for images to load, then show content in new tab and trigger print dialog
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus(); // Focus the new tab to show content
+        printWindow.print();
+        // Close window after print dialog is closed
+        printWindow.onafterprint = () => {
+          printWindow.close();
+        };
+      }, 500);
+    };
   };
 
   const filterFields = [
@@ -1291,7 +1782,10 @@ export default function AdmitCardPage() {
                 <th className={`h-8 px-3 text-left font-semibold border-r ${borderClr} whitespace-nowrap`}>
                   <input
                     type="checkbox"
-                    checked={currentData.length > 0 && currentData.every((row) => selectedAdmitCards.has(row.IDNumber))}
+                    checked={currentData.length > 0 && currentData.every((row) => {
+                      const rowId = row.IDNumber || row.idNumber || row.sl;
+                      return selectedAdmitCards.has(rowId);
+                    })}
                     onChange={handleSelectAll}
                     className="cursor-pointer w-4 h-4"
                   />

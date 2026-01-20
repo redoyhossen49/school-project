@@ -928,56 +928,56 @@ export default function CollectionList() {
            <Input
              label="Class"
              name="class"
-             value={formData.class}
+                 value={formData.class}
              onChange={handleChange}
              type="text"
-             readOnly
+                 readOnly
              inputClassName={`${readOnlyBg} cursor-not-allowed`}
-           />
+               />
 
           {/* Group */}
            <Input
              label="Group"
              name="group"
-             value={formData.group}
+                 value={formData.group}
              onChange={handleChange}
              type="text"
-             readOnly
+                 readOnly
              inputClassName={`${readOnlyBg} cursor-not-allowed`}
-           />
+               />
 
            {/* Section */}
            <Input
              label="Section"
              name="section"
-             value={formData.section}
+                 value={formData.section}
              onChange={handleChange}
              type="text"
-             readOnly
+                 readOnly
              inputClassName={`${readOnlyBg} cursor-not-allowed`}
-           />
+               />
 
            {/* Session */}
            <Input
              label="Session"
              name="session"
-             value={formData.session}
+                 value={formData.session}
              onChange={handleChange}
              type="text"
-             readOnly
+                 readOnly
              inputClassName={`${readOnlyBg} cursor-not-allowed`}
-           />
+               />
 
            {/* Student Name */}
            <Input
              label="Student Name"
              name="student_name"
-             value={formData.student_name}
+               value={formData.student_name}
              onChange={handleChange}
              type="text"
-             readOnly
+               readOnly
              inputClassName={`${readOnlyBg} cursor-not-allowed`}
-           />
+             />
 
           {/* SELECT FEES TYPE - Table Format */}
           <div className="relative w-full">

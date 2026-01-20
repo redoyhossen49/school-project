@@ -4,6 +4,7 @@
 export const studentExamData = [
   // Class 10 - Section A - Mid Term
   {
+    SL: 1,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -21,6 +22,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 2,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -38,6 +40,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 3,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -55,6 +58,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 4,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -72,6 +76,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 5,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -91,6 +96,7 @@ export const studentExamData = [
 
   // Class 10 - Section A - Final
   {
+    SL: 6,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -108,6 +114,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 7,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -125,6 +132,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 8,
     Class: "10",
     Group: "Science",
     Section: "A",
@@ -144,6 +152,7 @@ export const studentExamData = [
 
   // Class 10 - Section B - Mid Term
   {
+    SL: 9,
     Class: "10",
     Group: "Science",
     Section: "B",
@@ -161,6 +170,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 10,
     Class: "10",
     Group: "Science",
     Section: "B",
@@ -178,6 +188,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 11,
     Class: "10",
     Group: "Science",
     Section: "B",
@@ -197,6 +208,7 @@ export const studentExamData = [
 
   // Class 10 - Section B - Final
   {
+    SL: 12,
     Class: "10",
     Group: "Science",
     Section: "B",
@@ -214,6 +226,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 13,
     Class: "10",
     Group: "Science",
     Section: "B",
@@ -233,6 +246,7 @@ export const studentExamData = [
 
   // Class 11 - Section A - Mid Term
   {
+    SL: 14,
     Class: "11",
     Group: "Science",
     Section: "A",
@@ -250,6 +264,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 15,
     Class: "11",
     Group: "Science",
     Section: "A",
@@ -267,6 +282,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 16,
     Class: "11",
     Group: "Science",
     Section: "A",
@@ -286,6 +302,7 @@ export const studentExamData = [
 
   // Class 11 - Section A - Final
   {
+    SL: 17,
     Class: "11",
     Group: "Science",
     Section: "A",
@@ -303,6 +320,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 18,
     Class: "11",
     Group: "Science",
     Section: "A",
@@ -322,6 +340,7 @@ export const studentExamData = [
 
   // Class 12 - Section A - Mid Term
   {
+    SL: 19,
     Class: "12",
     Group: "Science",
     Section: "A",
@@ -339,6 +358,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 20,
     Class: "12",
     Group: "Science",
     Section: "A",
@@ -356,6 +376,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 21,
     Class: "12",
     Group: "Science",
     Section: "A",
@@ -375,6 +396,7 @@ export const studentExamData = [
 
   // Class 12 - Section A - Final
   {
+    SL: 22,
     Class: "12",
     Group: "Science",
     Section: "A",
@@ -392,6 +414,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 23,
     Class: "12",
     Group: "Science",
     Section: "A",
@@ -411,6 +434,7 @@ export const studentExamData = [
 
   // Class 10 - Section C - Mid Term
   {
+    SL: 24,
     Class: "10",
     Group: "Science",
     Section: "C",
@@ -428,6 +452,7 @@ export const studentExamData = [
     EndTime: "12:00",
   },
   {
+    SL: 25,
     Class: "10",
     Group: "Science",
     Section: "C",
