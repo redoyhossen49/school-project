@@ -153,15 +153,15 @@ export default function Examlist() {
 
   // -------------------- Columns --------------------
   const columns = [
-    { key: "SL", label: "SL" },
+    { key: "SL", label: "Sl" },
     { key: "Class", label: "Class" },
     { key: "Group", label: "Group" },
     { key: "Section", label: "Section" },
     { key: "Session", label: "Session" },
-    { key: "Exam Name", label: "Exam Name" },
-    { key: "Total Exam", label: "Total Exam" },
-    { key: "Upcoming Exam Fee", label: "Upcoming Exam Fee" },
-    { key: "Exam Fee Due", label: "Exam Fee Due" },
+    { key: "Exam Name", label: "Exam name" },
+    { key: "Total Exam", label: "Total exam" },
+    { key: "Upcoming Exam Fee", label: "Upcoming exam fee" },
+    { key: "Exam Fee Due", label: "Exam fee due" },
   ];
 
   // -------------------- Filter + Sort + Search --------------------
@@ -369,13 +369,35 @@ const addExamFields = [
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-            >
-              Refresh
-            </button>
+              {/* Filter Dropdown */}
+            <div ref={filterRef} className="relative flex-1">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+              >
+                Filter
+              </button>
 
+              <FilterDropdown
+                title="Filter exam"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
@@ -424,77 +446,13 @@ const addExamFields = [
         </div>
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
-          <div className="flex gap-2 md:gap-2 w-full md:w-auto">
-            {/* Month Dropdown */}
-            <div ref={statusRef} className="relative flex-1">
-              <button
-                onClick={() => setStatusOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                {examFilter || " Exam"}
-                
-              </button>
-
-              {statusOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full  border shadow-md max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
-                >
-                  {examOptions.map((exam) => (
-                    <button
-                      key={exam}
-                      onClick={() => {
-                        setExamFilter(exam);
-                        setCurrentPage(1);
-                        setStatusOpen(false); // still closes dropdown
-                      }}
-                      className={`block w-full px-3 py-1 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                        examFilter === exam
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                      }`}
-                    >
-                      {exam}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+          
 
             {/* Filter Dropdown */}
-            {/* Filter Dropdown */}
-            <div ref={filterRef} className="relative flex-1">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
+          
 
-              <FilterDropdown
-                title="Filter exam"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-                  setSessionFilter(values.session || "");
-
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort Button */}
+            {/* Sort Button 
            <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -535,7 +493,7 @@ const addExamFields = [
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* Search + Pagination */}
           <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">

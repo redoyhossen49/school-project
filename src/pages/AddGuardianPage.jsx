@@ -129,7 +129,7 @@ export default function AddGuardianPage() {
 <Input
   label="Village"
   name="village"
-  type="select"
+  type="text"
   value={formData.village}
   onChange={handleChange}
   options={["Village 1", "Village 2", "Village 3"]}
@@ -146,44 +146,8 @@ export default function AddGuardianPage() {
           
         </div>
 
-        {/* Upload Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            {!photoPreview ? (
-              <div
-                className="border border-dashed border-gray-300 h-18 flex flex-col items-center justify-center
-                  text-gray-400 relative cursor-pointer hover:border-indigo-400 transition"
-              >
-                <span className="text-xs flex items-center gap-2">
-                  <TfiGallery /> Upload Photo
-                </span>
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageChange(e, "photo")}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                />
-              </div>
-            ) : (
-              <div className="relative h-12 w-full border rounded-lg overflow-hidden">
-                <img
-                  src={photoPreview}
-                  alt="Photo Preview"
-                  className="w-full h-full object-cover"
-                />
-
-                <button
-                  onClick={() => removeImage("photo")}
-                  className="absolute top-2 right-2 bg-black/60 text-white rounded-full
-                    w-7 h-7 flex items-center justify-center hover:bg-red-600 transition"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+       
+      
 
         {/* Action Buttons */}
         <div className="flex w-full gap-4 md:justify-end mt-4">

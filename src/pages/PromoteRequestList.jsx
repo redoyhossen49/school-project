@@ -258,29 +258,7 @@ export default function PromoteRequestList() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2 w-full md:w-auto">
-            <button
-              onClick={() => {
-                setRequests(promoteRequestData); // মূল data reload
-                setSearch(""); // search clear
-                setAppliedClass(""); // applied filters clear
-                setAppliedGroup("");
-                setAppliedSection("");
-                setAppliedSession("");
-                setSelectedFilters({
-                  // filter dropdown reset
-                  class: "",
-                  group: "",
-                  section: "",
-                  session: "",
-                });
-                setSortOrder("asc");
-                setSelectedSection("All"); // section dropdown reset
-                setCurrentPage(1); // page reset
-              }}
-              className={buttonClass}
-            >
-              Refresh
-            </button>
+            
             <div className="relative w-28" ref={exportRef}>
               <button
                 onClick={() => setExportOpen(!exportOpen)}
@@ -325,33 +303,33 @@ export default function PromoteRequestList() {
 
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={() => {
-              setRequests(promoteRequestData); // মূল data reload
-              setSearch(""); // search clear
-              setAppliedClass(""); // applied filters clear
-              setAppliedGroup("");
-              setAppliedSection("");
-              setAppliedSession("");
-              setSelectedFilters({
-                // filter dropdown reset
-                class: "",
-                group: "",
-                section: "",
-                session: "",
-              });
-              setSortOrder("asc");
-              setSelectedSection("All"); // section dropdown reset
-              setCurrentPage(1); // page reset
-            }}
-            className={`flex items-center  w-full  border px-3 h-8 text-xs  ${
-              darkMode
-                ? "border-gray-500 bg-gray-700 text-gray-100"
-                : "border-gray-200 bg-white text-gray-900"
-            }`}
-          >
-            Refresh
-          </button>
+          <div className="relative" ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={buttonClass + " w-full md:w-28 justify-between"}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                darkMode={darkMode}
+                fields={filterFields}
+                selected={selectedFilters}
+                setSelected={setSelectedFilters}
+                onApply={(values) => {
+                  // IMPORTANT: Use the correct keys from your data
+                  setAppliedClass(values.class); // values.class corresponds to fromClass
+                  setAppliedGroup(values.group); // values.group -> fromGroup
+                  setAppliedSection(values.section); // values.section -> fromSection
+                  setAppliedSession(values.session); // values.session -> fromSession
+                  setCurrentPage(1);
+                }}
+                buttonRef={filterRef}
+                title="Filter Options"
+              />
+            </div>
 
           <div className="relative" ref={exportRef}>
             <button
@@ -401,108 +379,7 @@ export default function PromoteRequestList() {
 
         {/* Controls */}
         <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
-            {/* Section */}
-            <div className="relative" ref={sectionRef}>
-              <button
-                onClick={() => setSectionOpen((prev) => !prev)}
-                className={buttonClass + " w-full md:w-28 justify-between"}
-              >
-                {selectedSection || "All Sections"}
-              </button>
-
-              {sectionOpen && (
-                <div
-                  className={`absolute mt-2 w-full z-40  border  max-h-48 overflow-y-auto ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-500 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  }`}
-                >
-                  {["All", ...sectionOptions].map((s) => (
-                    <div
-                      key={s}
-                      onClick={() => {
-                        setSelectedSection(s); // table filter state
-                        setSectionOpen(false);
-                      }}
-                      className={`px-3 h-8 flex items-center  text-xs cursor-pointer hover:bg-blue-50 `}
-                    >
-                      {s}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Filter */}
-            {/* Filter */}
-            <div className="relative" ref={filterRef}>
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={buttonClass + " w-full md:w-28 justify-between"}
-              >
-                Filter
-              </button>
-
-              <FilterDropdown
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                darkMode={darkMode}
-                fields={filterFields}
-                selected={selectedFilters}
-                setSelected={setSelectedFilters}
-                onApply={(values) => {
-                  // IMPORTANT: Use the correct keys from your data
-                  setAppliedClass(values.class); // values.class corresponds to fromClass
-                  setAppliedGroup(values.group); // values.group -> fromGroup
-                  setAppliedSection(values.section); // values.section -> fromSection
-                  setAppliedSession(values.session); // values.session -> fromSession
-                  setCurrentPage(1);
-                }}
-                buttonRef={filterRef}
-                title="Filter Options"
-              />
-            </div>
-
-            {/* Sort */}
-            <div className="relative" ref={sortRef}>
-              <button
-                onClick={() => setSortOpen(!sortOpen)}
-                className={buttonClass + " w-full md:w-28 justify-between"}
-              >
-                Sort By
-              </button>
-              {sortOpen && (
-                <div
-                  className={`absolute mt-2 w-full z-40  border  ${
-                    darkMode
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setSortOrder("asc");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-left text-sm hover:bg-gray-100"
-                  >
-                    First
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOrder("desc");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-left text-sm hover:bg-gray-100"
-                  >
-                    Last
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+         
 
           {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">

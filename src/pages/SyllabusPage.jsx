@@ -334,7 +334,7 @@ export default function SyllabusPage() {
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={`p-3 space-y-4 ${cardBg}`}>
+      <div className={`p-3 space-y-3 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Syllabus list</h2>
@@ -348,12 +348,34 @@ export default function SyllabusPage() {
 
           {/* -------------------- 1st row: Refresh | Export | Add Syllabus -------------------- */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center   border  px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-            >
-              Refresh
-            </button>
+            {/* Filter */}
+            <div ref={filterRef} className="relative w-full">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter syllabus"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -409,78 +431,11 @@ export default function SyllabusPage() {
 
         {/* Filters + Sort Row */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0  ">
-          <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            <div className="flex-1 relative">
-              <button
-                onClick={() => setSessionOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center justify-between border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-              >
-                {sessionFilter || "All Sessions"}
-              </button>
+          
 
-              {sessionOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full border max-h-56 overflow-y-auto ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-300"
-                  }`}
-                >
-                  {sessionOptions.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => {
-                        setSessionFilter(s);
-                        setCurrentPage(1); // page reset
-                        setSessionOpen(false);
-                      }}
-                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 ${
-                        sessionFilter === s
-                          ? darkMode
-                            ? "bg-blue-600 text-white font-medium"
-                            : "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+           
 
-            {/* Filter */}
-            <div ref={filterRef} className="relative w-full">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
-
-              <FilterDropdown
-                title="Filter syllabus"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort */}
+            {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -521,7 +476,7 @@ export default function SyllabusPage() {
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* -------------------- 3rd row: Search + Pagination -------------------- */}
           <div className="flex items-center md:justify-between gap-2 ">

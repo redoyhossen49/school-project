@@ -60,7 +60,7 @@ export default function ClasssectionTable({ data = [], setData, month }) {
           }`}
         >
           <tr>
-            {["SL", "Class", "Group Name", "Section Name", "Total Student", "Total Payable", "Payable Due"].map(
+            {["Sl", "Class", "Group name", "Section name", "Total Student", "Total Payable", "Payable Due"].map(
               (h) => (
                 <th
                   key={h}

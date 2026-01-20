@@ -77,7 +77,7 @@ export default function AddPromoteRequestPage() {
         }`}
       >
         <h2 className="text-center font-semibold text-lg mb-4">
-          Promote Request Information
+          Promote Request 
         </h2>
 
         {/* ===== From Class Grid ===== */}
@@ -187,7 +187,7 @@ export default function AddPromoteRequestPage() {
             type="submit"
             className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shdaow-sm hover:bg-green-700 transition"
           >
-            Submit
+            Payment
           </button>
         </div>
       </form>

@@ -55,12 +55,10 @@ export default function SubjectTable({ data = [], setData }) {
               "Group",
               "Section",
               "Subject name",
-              "Type",
-              "Theory full",
-              "Theory pass",
-              "Theory fail",
-              "Practical full",
-              "Practical pass",
+              "Subject type",
+              "Full mark",
+              "Pass mark",
+             
             ].map((h) => (
               <th
                 key={h}
@@ -121,15 +119,7 @@ export default function SubjectTable({ data = [], setData }) {
                 <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
                   {s.theoryPassMark ?? "-"}
                 </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {s.theoryFailMark ?? "-"}
-                </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {s.practicalFullMark ?? "-"}
-                </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {s.practicalPassMark ?? "-"}
-                </td>
+                
 
                 {showAction && (
                   <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>

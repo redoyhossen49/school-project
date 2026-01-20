@@ -113,7 +113,7 @@ export default function AddClassPermissionPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 h-8 border border-gray-300 w-full md:w-auto shadow-sm hover:bg-gray-100 transition"
+            className="px-6 h-8 border border-gray-300 w-full md:w-auto  hover:bg-gray-100 transition"
           >
             Cancel
           </button>

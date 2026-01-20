@@ -186,7 +186,7 @@ export default function SubjectListPage() {
       name: "subjectName",
       label: "Subject Name",
       type: "text",
-      placeholder: "Enter Subject Name",
+      placeholder: " Subject Name",
       required: true,
     },
     {
@@ -194,7 +194,7 @@ export default function SubjectListPage() {
       name: "subjectType",
       label: "Subject Type",
       type: "select",
-      placeholder: "Select Type",
+      placeholder: "Sbuject Type",
       options: ["Theory", "Practical", "Theory + Practical"], // ✅ strings
       required: true,
     },
@@ -204,7 +204,7 @@ export default function SubjectListPage() {
       name: "theoryFullMark",
       label: "Theory Full Mark",
       type: "number",
-      placeholder: "Enter Full Mark (Theory)",
+      placeholder: " Full Mark ",
       required: true,
     },
     {
@@ -212,42 +212,10 @@ export default function SubjectListPage() {
       name: "theoryPassMark",
       label: "Theory Pass Mark",
       type: "number",
-      placeholder: "Enter Pass Mark (Theory)",
+      placeholder: " Pass Mark ",
       required: true,
     },
-    {
-      key: "theoryFailMark",
-      name: "theoryFailMark",
-      label: "Theory Fail Mark",
-      type: "number",
-      placeholder: "Enter Fail Mark (Theory)",
-      required: true,
-    },
-    // Practical Marks
-    {
-      key: "practicalFullMark",
-      name: "practicalFullMark",
-      label: "Practical Full Mark",
-      type: "number",
-      placeholder: "Enter Full Mark (Practical)",
-      required: false,
-    },
-    {
-      key: "practicalPassMark",
-      name: "practicalPassMark",
-      label: "Practical Pass Mark",
-      type: "number",
-      placeholder: "Enter Pass Mark (Practical)",
-      required: false,
-    },
-    {
-      key: "practicalFailMark",
-      name: "practicalFailMark",
-      label: "Practical Fail Mark",
-      type: "number",
-      placeholder: "Enter Fail Mark (Practical)",
-      required: false,
-    },
+   
   ];
 
   const handleAddSubject = (data) => {
@@ -321,16 +289,37 @@ export default function SubjectListPage() {
 
           {/* Refresh | Export | Add */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            <button
-              onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center    border px-3 h-8 text-xs  ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-300"
-              }`}
-            >
-              Refresh
-            </button>
+            {/* Filter */}
+            <div ref={filterRef} className="relative">
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`w-full md:w-28 flex items-center px-3 h-8 text-xs  border  ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-500"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                Filter
+              </button>
+              <FilterDropdown
+                title="Filter subject"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                 
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -387,84 +376,12 @@ export default function SubjectListPage() {
         </div>
 
         {/* Filter Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 ">
-          <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            {/* Month */}
-            <div ref={monthRef} className="relative">
-              <button
-                onClick={() => setMonthOpen(!monthOpen)}
-                className={`w-full md:w-28 flex items-center px-3 h-8 text-xs border  ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-300"
-                }`}
-              >
-                {selectedMonth}{" "}
-              </button>
-              {monthOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full  border max-h-56 overflow-y-auto ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-300"
-                  }`}
-                >
-                  {months.map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => {
-                        setSelectedMonth(m);
-                        setCurrentPage(1);
-                        setMonthOpen(false);
-                      }}
-                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                        selectedMonth === m
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between  md:gap-0 ">
+          
 
-            {/* Filter */}
-            <div ref={filterRef} className="relative">
-              <button
-                onClick={() => setFilterOpen(!filterOpen)}
-                className={`w-full md:w-28 flex items-center px-3 h-8 text-xs  border  ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-200"
-                }`}
-              >
-                Filter
-              </button>
-              <FilterDropdown
-                title="Filter subject"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-                 
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
+          
 
-            {/* Sort */}
+            {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -505,7 +422,7 @@ export default function SubjectListPage() {
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* Search + Pagination */}
           <div className="flex items-center gap-2 w-full md:w-auto">

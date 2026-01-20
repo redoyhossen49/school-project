@@ -4,10 +4,10 @@ import ReusableActions from "../common/ReusableActions";
 import ReusableEditModal from "../common/ReusableEditModal";
 
 const headers = [
-  { label: "SL", key: "sl" },
+  { label: "Sl", key: "sl" },
   { label: "Class", key: "class" },
-  { label: "Subjects No", key: "subjects" },
-  { label: "Student No", key: "totalStudents" },
+  { label: "Subjects ", key: "subjects" },
+  { label: "Students ", key: "totalStudents" },
   { label: "Total payable", key: "totalPayable" },
   { label: "Payable due", key: "payableDue" },
 ];

@@ -4,7 +4,7 @@ import ReusableActions from "../common/ReusableActions";
 import ReusableEditModal from "../common/ReusableEditModal";
 
 const headers = [
-  "ID No",
+  "Id number",
   "Name",
   "Designation",
   "Phone",

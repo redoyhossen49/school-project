@@ -245,14 +245,14 @@ export default function GradeList() {
 
   // -------------------- Columns --------------------
   const columns = [
-    { key: "SL", label: "SL" },
+    { key: "SL", label: "Sl" },
     { key: "Class", label: "Class" },
     { key: "Group", label: "Group" },
     { key: "Subject", label: "Subject" },
     { key: "LetterGrade", label: "Grade" },
-    { key: "MaxNumber", label: "Max Marks" },
-    { key: "MinNumber", label: "Min Marks" },
-    { key: "GradePoint", label: "Grade Point" },
+    { key: "MaxNumber", label: "Max mark" },
+    { key: "MinNumber", label: "Min mark" },
+    { key: "GradePoint", label: " Point no" },
   ];
 
   // -------------------- Add Class Modal --------------------
@@ -260,40 +260,40 @@ export default function GradeList() {
     {
       key: "class",
       type: "select",
-      placeholder: "Choose a class",
+      placeholder: "Class",
       options: classOptions,
     },
     {
       key: "group",
       type: "select",
-      placeholder: "Choose a group",
+      placeholder: "Group",
       options: groupOptions,
     },
     {
       key: "subject",
       type: "select",
-      placeholder: "Choose a subject",
+      placeholder: "Subject",
       options: subjectOptions,
     },
     {
       key: "letterGrade",
       type: "text",
-      placeholder: "Type Grade",
+      placeholder: " Grade name",
     },
     {
       key: "maxNumber",
       type: "number",
-      placeholder: "Max Marks",
+      placeholder: "Max mark",
     },
     {
       key: "minNumber",
       type: "number",
-      placeholder: "Min Marks",
+      placeholder: "Min mark",
     },
     {
       key: "gradePoint",
       type: "number",
-      placeholder: "Grade Point",
+      placeholder: " Point no",
     },
   ];
 
@@ -317,7 +317,7 @@ export default function GradeList() {
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={` p-3 space-y-4 ${cardBg}`}>
+      <div className={` p-3 space-y-3 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Grade List</h2>
@@ -331,12 +331,33 @@ export default function GradeList() {
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-            >
-              Refresh
-            </button>
+             <div ref={filterRef} className="relative flex-1">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter Grade list"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                 
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -397,75 +418,13 @@ export default function GradeList() {
         </div>
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
-          <div className="flex gap-2 md:gap-2 w-full md:w-auto">
-            <div ref={statusRef} className="relative flex-1">
-              <button
-                onClick={() => setStatusOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                {classFilter?.label || " Class"}
-              </button>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between  gap-2 md:gap-0">
+          
 
-              {statusOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full border  max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
-                >
-                  {classOptions.map((cls) => (
-                    <button
-                      key={cls.value}
-                      onClick={() => {
-                        setClassFilter(cls); // 🔹 filter apply instantly
-                        setGroupFilter(""); // 🔹 reset dependent filter
-                        setCurrentPage(1); // 🔹 pagination reset
-                        setStatusOpen(false); // 🔹 close dropdown
-                      }}
-                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                        classFilter?.value === cls.value
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                      }`}
-                    >
-                      {cls.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+          
+           
 
-            {/* Filter Dropdown */}
-            {/* Filter Dropdown */}
-            <div ref={filterRef} className="relative flex-1">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
-
-              <FilterDropdown
-                title="Filter Grade list"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                 
-
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort Button */}
+            {/* Sort Button 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -506,7 +465,7 @@ export default function GradeList() {
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* Search + Pagination */}
           <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">

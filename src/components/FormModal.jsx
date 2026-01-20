@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 export default function FormModal({
   open,
   title = "Form",
-  fields = [], // [{ key, placeholder, options, type }]
+  fields = [],
   initialValues = {},
   onClose,
   onSubmit,
@@ -11,8 +11,9 @@ export default function FormModal({
 }) {
   const [formData, setFormData] = useState(initialValues);
   const [activeField, setActiveField] = useState(null);
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const containerRef = useRef(null);
-  const fieldRefs = useRef({}); // For dropdown width
+  const fieldRefs = useRef({});
 
   /* Reset form when opened */
   useEffect(() => {
@@ -22,23 +23,48 @@ export default function FormModal({
     }
   }, [open, initialValues]);
 
-  /* Outside click to close dropdown */
+  /* Outside click close */
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handler = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setActiveField(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const handleFieldChange = (key, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: value === "" ? "" : isNaN(value) ? value : Number(value),
-    }));
+    setFormData((prev) => ({ ...prev, [key]: value }));
     setActiveField(null);
+  };
+
+  const openDropdown = (key) => {
+    const el = fieldRefs.current[key];
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const dropdownHeight = 240;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    const style = {
+      position: "fixed",
+      left: rect.left,
+      width: rect.width,
+      zIndex: 50,
+    };
+
+    if (spaceBelow < dropdownHeight && spaceAbove > rect.height) {
+      // open above input
+      style.bottom = window.innerHeight - rect.top + 4;
+    } else {
+      // open below input
+      style.top = rect.bottom + 4;
+    }
+
+    setDropdownStyle(style);
+    setActiveField(key);
   };
 
   if (!open) return null;
@@ -46,44 +72,49 @@ export default function FormModal({
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center px-4">
       {/* Overlay */}
-      <div className="absolute inset-0" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-black/20" onClick={onClose}></div>
 
-      {/* Main container */}
+      {/* Modal */}
       <div
         ref={containerRef}
-        className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-          w-64 max-w-md p-6 max-h-[60vh] overflow-y-auto text-xs
-          ${darkMode ? "bg-gray-800 text-gray-100 border border-gray-600" : "bg-white text-gray-900 border border-gray-200"}`}
-        onClick={(e) => e.stopPropagation()}
+        className={`relative w-64 max-h-[70vh] overflow-y-auto p-6 text-xs border
+          ${darkMode
+            ? "bg-gray-800 border-gray-600 text-gray-100"
+            : "bg-white border-gray-200 text-gray-900"}`}
       >
-        {/* Title */}
-        <h3 className="text-base font-semibold mb-4 text-center">{title}</h3>
+        <h3 className="text-sm font-semibold text-center mb-4">{title}</h3>
 
-        {/* Fields */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {fields.map((field) => (
-            <div key={field.key} className="relative">
+            <div key={field.key}>
               {field.type === "select" ? (
                 <button
                   ref={(el) => (fieldRefs.current[field.key] = el)}
                   onClick={() =>
-                    setActiveField(activeField === field.key ? null : field.key)
+                    activeField === field.key
+                      ? setActiveField(null)
+                      : openDropdown(field.key)
                   }
-                  className={`w-full h-8 px-3 text-xs text-left border flex justify-between items-center
-                    ${darkMode ? "bg-gray-700 border-gray-600 text-gray-100" : "bg-white border-gray-300 text-gray-900"}`}
+                  className={`w-full h-8 px-3 flex justify-between items-center border text-left
+                    ${darkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"}`}
                 >
                   {formData[field.key] || field.placeholder}
-                  <span className="ml-2">&#9662;</span>
+                  <span>▾</span>
                 </button>
               ) : (
                 <input
                   type={field.type || "text"}
                   value={formData[field.key] || ""}
                   placeholder={field.placeholder}
-                  onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                  className={`w-full h-8 px-3 text-xs border
-                    ${darkMode ? "bg-gray-700 border-gray-600 text-gray-100" : "bg-white border-gray-300 text-gray-900"}`}
-                  readOnly={field.readOnly}
+                  onChange={(e) =>
+                    handleFieldChange(field.key, e.target.value)
+                  }
+                  className={`w-full h-8 px-3 border
+                    ${darkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"}`}
                 />
               )}
             </div>
@@ -91,73 +122,54 @@ export default function FormModal({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 mt-6 text-xs">
+        <div className="flex gap-2 mt-5">
           <button
-            onClick={() => {
-              setFormData(initialValues); // Form reset
-              setActiveField(null);
-              onClose();
-            }}
-            className={`w-1/2 h-8 border text-xs
-              ${darkMode ? "bg-gray-700 border-gray-600 text-gray-100" : "bg-white border-gray-300 text-gray-900"}`}
+            onClick={onClose}
+            className="w-1/2 h-8 border text-xs"
           >
             Cancel
           </button>
           <button
             onClick={() => onSubmit(formData)}
-            className="w-1/2 h-8 bg-blue-600 text-white text-xs hover:bg-blue-700"
+            className="w-1/2 h-8 bg-blue-600 text-white text-xs"
           >
             Save
           </button>
         </div>
+      </div>
 
-        {/* Select Options Overlay */}
-        {activeField && fields.find((f) => f.key === activeField)?.options && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-32">
-            <div
-              className="absolute inset-0"
-              onClick={() => setActiveField(null)}
-            ></div>
+      {/* Select dropdown */}
+      {activeField && (
+        <div style={dropdownStyle}>
+          <div
+            className={`max-h-60 overflow-y-auto border text-xs
+              ${darkMode
+                ? "bg-gray-800 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"}`}
+          >
+            <ul>
+              <li
+                className="px-3 h-8 flex items-center cursor-pointer hover:bg-blue-50"
+                onClick={() => handleFieldChange(activeField, "")}
+              >
+                {fields.find((f) => f.key === activeField)?.placeholder}
+              </li>
 
-            <div
-              className={`absolute bg-white border border-gray-300 max-h-60 overflow-y-auto text-xs
-                ${darkMode ? "bg-gray-800 border-gray-600 text-gray-100" : "bg-white border-gray-300 text-gray-900"}`}
-              style={{
-                width: fieldRefs.current[activeField]?.offsetWidth || "16rem",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ul className="space-y-1">
-                {/* Default empty option */}
-                {[
-                  {
-                    label: fields.find((f) => f.key === activeField)
-                      ?.placeholder,
-                    value: "",
-                  },
-                  ...fields
-                    .find((f) => f.key === activeField)
-                    ?.options.map((o) => ({ label: o, value: o })),
-                ].map((opt) => (
-                  <li key={opt.value}>
-                    <label className="flex items-center h-8 px-3 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700">
-                      <input
-                        type="radio"
-                        checked={formData[activeField] === opt.value}
-                        onChange={() =>
-                          handleFieldChange(activeField, opt.value)
-                        }
-                        className="hidden"
-                      />
-                      {opt.label}
-                    </label>
+              {fields
+                .find((f) => f.key === activeField)
+                ?.options?.map((opt) => (
+                  <li
+                    key={opt}
+                    className="px-3 h-8 flex items-center cursor-pointer hover:bg-blue-50"
+                    onClick={() => handleFieldChange(activeField, opt)}
+                  >
+                    {opt}
                   </li>
                 ))}
-              </ul>
-            </div>
+            </ul>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

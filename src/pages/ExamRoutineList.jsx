@@ -335,7 +335,7 @@ export default function ExamRoutineList() {
     {
       key: "examDay",
       type: "text",
-      placeholder: "Auto-calculated from Exam Date",
+      placeholder: "Auto-dayname",
       readOnly: true,
     },
     {
@@ -364,19 +364,19 @@ export default function ExamRoutineList() {
 
   // -------------------- Columns --------------------
   const columns = [
-    { key: "SL", label: "SL" }, // Serial number
+    { key: "SL", label: "Sl" }, // Serial number
     { key: "Class", label: "Class" },
     { key: "Group", label: "Group" },
     { key: "Section", label: "Section" },
     { key: "Session", label: "Session" },
-    { key: "Exam Name", label: "Exam Name" },
+    { key: "Exam Name", label: "Exam name" },
     { key: "Subject", label: "Subject" },
-    { key: "Exam Date", label: "Exam Date" },
-    { key: "Exam Day", label: "Exam Day" },
-    { key: "Start Time", label: "Start Time" },
-    { key: "End Time", label: "End Time" },
-    { key: "Total Hour", label: "Total Hour" },
-    { key: "Total Mark", label: "Total Mark" },
+    { key: "Exam Date", label: "Exam date" },
+    { key: "Exam Day", label: "Exam day" },
+    { key: "Start Time", label: "Start time" },
+    { key: "End Time", label: "End time" },
+    { key: "Total Hour", label: "Total hour" },
+    { key: "Total Mark", label: "Total mark" },
     { key: "Status", label: "Status" },
   ];
 
@@ -443,12 +443,36 @@ export default function ExamRoutineList() {
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-full flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-            >
-              Refresh
-            </button>
+           
+            {/* Filter Dropdown */}
+            <div ref={filterRef} className="relative flex-1">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+              >
+                Filter
+              </button>
+              <FilterDropdown
+                title="Filter exam routine"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
+                  setExamFilter(values.exam || "");
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -566,77 +590,12 @@ export default function ExamRoutineList() {
         </div>
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
-          <div className="flex gap-2 md:gap-2 w-full md:w-auto">
-            {/* Month Dropdown */}
-            <div ref={statusRef} className="relative flex-1">
-              <button
-                onClick={() => setStatusOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                {examFilter || " Exam"}
-               
-              </button>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between  gap-2 md:gap-0">
+         
 
-              {statusOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full border  max-h-56 text-xs overflow-y-auto ${borderClr} ${dropdownBg}`}
-                >
-                  {examOptions.map((exam) => (
-                    <button
-                      key={exam}
-                      onClick={() => {
-                        setExamFilter(exam);
-                        setCurrentPage(1);
-                        setStatusOpen(false); // still closes dropdown
-                      }}
-                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                        examFilter === exam
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                      }`}
-                    >
-                      {exam}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+        
 
-            {/* Filter Dropdown */}
-            {/* Filter Dropdown */}
-            <div ref={filterRef} className="relative flex-1">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
-              <FilterDropdown
-                title="Filter exam routine"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-                  setSessionFilter(values.session || "");
-                  setExamFilter(values.exam || "");
-
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort Button */}
+            {/* Sort Button 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -677,7 +636,7 @@ export default function ExamRoutineList() {
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* Search + Pagination */}
           <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">

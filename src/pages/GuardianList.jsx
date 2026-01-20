@@ -244,8 +244,8 @@ export default function GuardianList() {
         <div className="md:flex md:items-center md:justify-between gap-3">
           {/* Title + Breadcrumb */}
           <div className="md:mb-3">
-            <h1 className="text-base font-semibold">Guardians List</h1>
-            <nav className="text-sm w-full truncate">
+            <h1 className="text-base font-semibold ">Guardians List</h1>
+            <nav className="text-sm w-full text-gray-400 truncate">
               <Link
                 to="/school/dashboard"
                 className="hover:text-indigo-600 transition"
@@ -258,15 +258,32 @@ export default function GuardianList() {
 
           {/* Buttons (Desktop) */}
           <div className="hidden md:flex gap-2 w-full md:w-auto">
-            <button
-              onClick={() => {
-                setGuardians(studentData);
-                setSearch("");
-              }}
-              className={buttonClass}
-            >
-              Refresh
-            </button>
+            <div className="relative " ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter Guardians"
+                fields={filterFields}
+                selected={appliedFilters}
+                setSelected={setAppliedFilters}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setAppliedFilters(values);
+                }}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div className="relative w-28" ref={exportRef}>
               <button
@@ -312,19 +329,32 @@ export default function GuardianList() {
 
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={() => {
-              setGuardians(studentData);
-              setSearch("");
-            }}
-            className={`flex items-center   w-full  border  px-2 py-2 text-xs   ${
-              darkMode
-                ? "border-gray-500 bg-gray-700 text-gray-100"
-                : "border-gray-200 bg-white text-gray-800"
-            }`}
-          >
-            Refresh
-          </button>
+          <div className="relative " ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter Guardians"
+                fields={filterFields}
+                selected={appliedFilters}
+                setSelected={setAppliedFilters}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setAppliedFilters(values);
+                }}
+                buttonRef={filterRef}
+              />
+            </div>
 
           <div className="relative w-full" ref={exportRef}>
             <button
@@ -373,149 +403,7 @@ export default function GuardianList() {
 
         {/* Controls: Date, Filter, Sort + Search */}
         <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
-            {/* Date */}
-            <div className="relative " ref={dateDropdownRef}>
-              <button
-                onClick={() => setDateOpen((prev) => !prev)}
-                className={`w-full flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs border ${borderClr} ${inputBg}`}
-              >
-                {selectedDate || "Select Date"}
-              </button>
-
-              {/* Main Dropdown */}
-              {dateOpen && (
-                <div
-                  className={`absolute left-0 mt-2 py-2 w-full max-h-[60vh] overflow-y-auto space-y-2  z-40 ${
-                    darkMode
-                      ? "bg-gray-700 text-gray-100 border border-gray-600"
-                      : "bg-white text-gray-900 border border-gray-300"
-                  }`}
-                >
-                  {/* Date Options */}
-                  {dateOptions.map((opt) => (
-                    <div
-                      key={opt.value}
-                      onClick={() => {
-                        setSelectedDate(opt.label);
-                        setDateOpen(false);
-                        setShowSession(false);
-                      }}
-                      className="w-full cursor-pointer px-3 h-6 text-xs flex items-center justify-between   hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-                    >
-                      <span>{opt.label}</span>
-                    </div>
-                  ))}
-
-                  {/* Session Button */}
-                  <div
-                    onClick={() => setShowSession(!showSession)}
-                    className="w-full cursor-pointer px-3  text-xs flex items-center hover:bg-gray-100  transition"
-                  >
-                    <span>Session</span>
-                  </div>
-
-                  {/* Sub-options Overlay (CENTERED) */}
-                  {showSession && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                      <div
-                        className={`w-10/12   overflow-y-auto pointer-events-auto ${
-                          darkMode
-                            ? "bg-gray-700 text-gray-100 border border-gray-600"
-                            : "bg-white text-gray-900 border border-gray-300"
-                        }`}
-                        onClick={(e) => e.stopPropagation()} // sub-options click handle
-                      >
-                        {sessionKeys.map((s) => (
-                          <div
-                            key={s}
-                            onClick={() => {
-                              setSelectedDate(s);
-                              setDateOpen(false);
-                              setShowSession(false);
-                            }}
-                            className="w-full cursor-pointer px-3 py-1  text-xs flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-                          >
-                            <span>{s}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Filter */}
-            <div className="relative " ref={filterRef}>
-              <button
-                onClick={() => setFilterOpen(!filterOpen)}
-                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-800"
-                }`}
-              >
-                Filter
-              </button>
-
-              <FilterDropdown
-                title="Filter Guardians"
-                fields={filterFields}
-                selected={appliedFilters}
-                setSelected={setAppliedFilters}
-                darkMode={darkMode}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setAppliedFilters(values);
-                }}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort */}
-            <div className="relative " ref={sortRef}>
-              <button
-                onClick={() => setSortOpen(!sortOpen)}
-                className={`flex items-center  md:w-28 justify-between w-full  border  px-3 h-8 text-xs   ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-800"
-                }`}
-              >
-                Sort By
-              </button>
-              {sortOpen && (
-                <div
-                  className={`absolute mt-2 w-full z-40 border  ${
-                    darkMode
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  }  left-0`}
-                >
-                  <button
-                    onClick={() => {
-                      setSortOrder("oldest");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
-                  >
-                    First
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOrder("newest");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
-                  >
-                    Last
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          
 
           {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">

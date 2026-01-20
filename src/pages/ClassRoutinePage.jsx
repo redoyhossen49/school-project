@@ -22,7 +22,7 @@ export default function ClassRoutinePage() {
   const [groupFilter, setGroupFilter] = useState("");
   const [sectionFilter, setSectionFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [sortOpen, setSortOpen] = useState("false");
+  const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 10;
 
@@ -169,10 +169,10 @@ const getSubjectOptions = (selectedClass, selectedGroup, selectedSection) => {
     options: getSubjectOptions(filters.class, filters.group, filters.section), // dynamic
     placeholder: "Select Subject",
   },
-  { key: "classStartTime", name: "classStartTime", label: "Class Start Time", type: "text", required: true, placeholder: "08:00 AM" },
-  { key: "classEndTime", name: "classEndTime", label: "Class End Time", type: "text", required: true, placeholder: "10:00 AM" },
-  { key: "dayStart", name: "dayStart", label: "Day Start", type: "text", required: true, placeholder: "Monday" },
-  { key: "dayEnd", name: "dayEnd", label: "Day End", type: "text", required: true, placeholder: "Friday" },
+  { key: "classStartTime", name: "classStartTime", label: "Class Start Time",  type:"time", required: true, placeholder: "Start time" },
+  { key: "classEndTime", name: "classEndTime", label: "Class End Time", type: "time", required: true, placeholder: "End  time" },
+  { key: "dayStart", name: "dayStart", label: "Day Start", type: "text", required: true, placeholder: "Start day" },
+  { key: "dayEnd", name: "dayEnd", label: "Day End", type: "text", required: true, placeholder: "End day" },
 ];
 
 
@@ -301,14 +301,36 @@ const initialRoutineValues = {
 
           {/* -------------------- 1st row: Refresh | Export | Add Routine -------------------- */}
           <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-full flex items-center  border   px-3 h-8 text-xs ${
-                darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
-              }`}
-            >
-              Refresh
-            </button>
+             {/* Filter */}
+            <div ref={filterRef} className="relative ">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center   border  px-3 h-8 text-xs  ${
+                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
+                }`}
+              >
+                Filter 
+              </button>
+
+              <FilterDropdown
+                title="Filter class  routine"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -364,91 +386,12 @@ const initialRoutineValues = {
         </div>
 
         {/* -------------------- 2nd row: All | Filter | Sort -------------------- */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mt-2">
-          <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            <div className="relative ">
-              <button
-                onClick={() => setAllDropdownOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border  px-3 h-8 text-xs   ${
-                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
-                }`}
-              >
-                Exam time 
-              </button>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 ">
+         
 
-              {allDropdownOpen && (
-                <div
-                  className={`absolute z-50 mt-1 w-full  border  p-3 space-y-2  ${
-                    darkMode
-                      ? "border-gray-500 bg-gray-700"
-                      : "border-gray-200 bg-white"
-                  }`}
-                >
-                  <div>
-                    <label className="text-xs">Start Time</label>
-                    <input
-                      type="text"
-                      placeholder="08:00 AM"
-                      value={timeStart}
-                      onChange={(e) => setTimeStart(e.target.value)}
-                      className="w-full border border-gray-300 px-3 py-1 text-xs "
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs">End Time</label>
-                    <input
-                      type="text"
-                      placeholder="10:00 AM"
-                      value={timeEnd}
-                      onChange={(e) => setTimeEnd(e.target.value)}
-                      className="w-full border border-gray-300 px-3 py-1 text-xs "
-                    />
-                  </div>
-                  <button
-                    onClick={() => {
-                      setAllDropdownOpen(false);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full bg-blue-600 text-white text-xs py-1"
-                  >
-                    Apply
-                  </button>
-                </div>
-              )}
-            </div>
+           
 
-            {/* Filter */}
-            <div ref={filterRef} className="relative ">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center   border  px-3 h-8 text-xs  ${
-                  darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
-                }`}
-              >
-                Filter 
-              </button>
-
-              <FilterDropdown
-                title="Filter class  routine"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort */}
+            {/* Sort 
            <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -489,7 +432,7 @@ const initialRoutineValues = {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* -------------------- 3rd row: Search + Pagination -------------------- */}
           <div className="flex items-center md:justify-between gap-2">

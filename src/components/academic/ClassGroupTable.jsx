@@ -60,11 +60,11 @@ export default function ClassGroupTable({ data = [], setData, month = "All", gro
         <thead className={`${bgHeader} border-b ${borderCol}`}>
           <tr>
             {[
-              "SL",
-              "Class",
-              "Group",
-              "Subjects No",
-              "Student No",
+              "Sl",
+              "Class ",
+              "Group ",
+              "Subjects ",
+              "Student ",
               "Total payable",
               "Payable due",
             ].map((h) => (

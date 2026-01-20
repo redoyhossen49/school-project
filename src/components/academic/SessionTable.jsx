@@ -51,7 +51,7 @@ export default function SessionTable({ data = [], setData, month }) {
         >
           <tr>
             {[
-              "SL",
+              "Sl",
               "Class",
               "Group",
               "Section",
