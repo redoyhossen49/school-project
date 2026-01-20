@@ -29,19 +29,17 @@ export default function ClassTimeList() {
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("asc");
   const [filterOpen, setFilterOpen] = useState(false);
-   const [filters, setFilters] = useState({
-      className: "",
-      group: "",
-      section: "",
-      session: "",
-    });
+  const [filters, setFilters] = useState({
+    className: "",
+    group: "",
+    section: "",
+    session: "",
+  });
 
   const sectionDropdownRef = useRef(null);
   const exportRef = useRef(null);
   const sortRef = useRef(null);
   const filterRef = useRef(null);
-
-  
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -63,37 +61,27 @@ export default function ClassTimeList() {
   }, []);
 
   // Filter + Sort + Search
-const filteredClassTimes = classTimes
-  // Search
-  .filter((c) =>
-    c.className.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredClassTimes = classTimes
+    // Search
+    .filter((c) => c.className.toLowerCase().includes(search.toLowerCase()))
 
-  // Class filter
-  .filter((c) =>
-    filters.className ? c.className === filters.className : true
-  )
+    // Class filter
+    .filter((c) =>
+      filters.className ? c.className === filters.className : true,
+    )
 
-  // Group filter
-  .filter((c) =>
-    filters.group ? c.group === filters.group : true
-  )
+    // Group filter
+    .filter((c) => (filters.group ? c.group === filters.group : true))
 
-  // Section filter
-  .filter((c) =>
-    filters.section ? c.section === filters.section : true
-  )
+    // Section filter
+    .filter((c) => (filters.section ? c.section === filters.section : true))
 
-  // Session filter
-  
+    // Session filter
 
-  // Old section dropdown (optional)
-  
-  // Sort
-  .sort((a, b) =>
-    sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl
-  );
+    // Old section dropdown (optional)
 
+    // Sort
+    .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
 
   const totalClassTimes = filteredClassTimes.length;
   const totalPages = Math.ceil(totalClassTimes / classTimesPerPage);
@@ -139,17 +127,16 @@ const filteredClassTimes = classTimes
     doc.save("ClassTimes.pdf");
   };
 
-   // Generate dynamic options from studentData
-    const getUniqueOptions = (data, key) => {
-      return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
-    };
-  
-    // Example usage in parent component
-    const classOptions = getUniqueOptions(classTimeData, "className"); // ["I", "II", "III", ...]
-    const groupOptions = getUniqueOptions(classTimeData, "group"); // ["N/A", "Science", ...]
-    const sectionOptions = getUniqueOptions(classTimeData, "section"); // ["A", "B", "C", ...]
-    const sessionOptions = getUniqueOptions(classTimeData, "session"); // ["2025-26", ...]
-  
+  // Generate dynamic options from studentData
+  const getUniqueOptions = (data, key) => {
+    return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
+  };
+
+  // Example usage in parent component
+  const classOptions = getUniqueOptions(classTimeData, "className"); // ["I", "II", "III", ...]
+  const groupOptions = getUniqueOptions(classTimeData, "group"); // ["N/A", "Science", ...]
+  const sectionOptions = getUniqueOptions(classTimeData, "section"); // ["A", "B", "C", ...]
+  const sessionOptions = getUniqueOptions(classTimeData, "session"); // ["2025-26", ...]
 
   // Button base class
   const buttonClass = `flex items-center  w-28  px-3 h-8 text-xs hover:bg-gray-100 ${
@@ -173,27 +160,60 @@ const filteredClassTimes = classTimes
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>{" "}
-               / Class Time 
+              / Class Time
             </p>
           </div>
 
           <div className="hidden md:flex gap-2 w-full md:w-auto">
-            <button
-              onClick={() => {
-                setClassTimes(classTimeData);
-                setSearch("");
-              }}
-              className={buttonClass}
-            >
-             Refresh
-            </button>
+            <div className="relative" ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs  ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-900"
+                }`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter Students"
+                fields={[
+                  {
+                    key: "className",
+                    label: "Class",
+                    options: classOptions,
+                    placeholder: "All Classes",
+                  },
+                  {
+                    key: "group",
+                    label: "Group",
+                    options: groupOptions,
+                    placeholder: "All Groups",
+                  },
+                  {
+                    key: "section",
+                    label: "Section",
+                    options: sectionOptions,
+                    placeholder: "All Sections",
+                  },
+                ]}
+                selected={filters}
+                setSelected={setFilters}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={() => setCurrentPage(1)}
+              />
+            </div>
 
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen(!exportOpen)}
                 className={buttonClass}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -207,13 +227,13 @@ const filteredClassTimes = classTimes
                     onClick={() => exportPDF(filteredClassTimes)}
                     className="w-full px-3 py-1  text-left text-xs hover:bg-gray-100"
                   >
-                     PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredClassTimes)}
                     className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                   >
-                     Excel
+                    Excel
                   </button>
                 </div>
               )}
@@ -232,19 +252,48 @@ const filteredClassTimes = classTimes
 
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={() => {
-              setClassTimes(classTimeData);
-              setSearch("");
-            }}
-            className={`flex items-center  w-full  border px-3 h-8 text-xs  ${
-              darkMode
-                ? "border-gray-500 bg-gray-700 text-gray-100"
-                : "border-gray-200 bg-white text-gray-900"
-            }`}
-          >
-            Refresh
-          </button>
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => setFilterOpen(!filterOpen)}
+              className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs  ${
+                darkMode
+                  ? "border-gray-500 bg-gray-700 text-gray-100"
+                  : "border-gray-200 bg-white text-gray-900"
+              }`}
+            >
+              Filter
+            </button>
+
+            <FilterDropdown
+              title="Filter Students"
+              fields={[
+                {
+                  key: "className",
+                  label: "Class",
+                  options: classOptions,
+                  placeholder: "All Classes",
+                },
+                {
+                  key: "group",
+                  label: "Group",
+                  options: groupOptions,
+                  placeholder: "All Groups",
+                },
+                {
+                  key: "section",
+                  label: "Section",
+                  options: sectionOptions,
+                  placeholder: "All Sections",
+                },
+              ]}
+              selected={filters}
+              setSelected={setFilters}
+              darkMode={darkMode}
+              isOpen={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              onApply={() => setCurrentPage(1)}
+            />
+          </div>
 
           <div className="relative" ref={exportRef}>
             <button
@@ -255,7 +304,7 @@ const filteredClassTimes = classTimes
                   : "border-gray-200 bg-white text-gray-900"
               }`}
             >
-              Export 
+              Export
             </button>
             {exportOpen && (
               <div
@@ -269,7 +318,7 @@ const filteredClassTimes = classTimes
                   onClick={() => exportPDF(filteredClassTimes)}
                   className="w-full px-3 text-left text-xs hover:bg-gray-100"
                 >
-                   PDF
+                  PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredClassTimes)}
@@ -286,139 +335,16 @@ const filteredClassTimes = classTimes
               onClick={() => navigate("/school/dashboard/addclasstime")}
               className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white "
             >
-               Class Time
+              Class Time
             </button>
           )}
         </div>
 
         {/* Controls */}
         <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          <div className="grid grid-cols-3 gap-2 md:flex md:w-auto items-center">
-            {/* Section Dropdown */}
-            <div className="relative" ref={sectionDropdownRef}>
-              <button
-                onClick={() => setSectionOpen(!sectionOpen)}
-                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs  ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-900"
-                }`}
-              >
-                {selectedSection} 
-              </button>
-              {sectionOpen && (
-                <div
-                  className={`absolute left-0 mt-2 w-full  z-30 flex flex-col ${
-                    darkMode
-                      ? "bg-gray-600 text-gray-100 border border-gray-700"
-                      : "bg-white text-gray-900 border border-gray-200"
-                  }`}
-                >
-                  {sectionOptions.map((opt) => (
-                    <div
-                      key={opt}
-                      onClick={() => {
-                        setSelectedSection(opt);
-                        setSectionOpen(false);
-                      }}
-                      className="w-full cursor-pointer px-3 h-8 text-xs hover:bg-gray-100 flex  items-center"
-                    >
-                      {opt} 
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Filter */}
-            <div className="relative" ref={filterRef}>
-              <button
-                onClick={() => setFilterOpen(!filterOpen)}
-                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs  ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-900"
-                }`}
-              >
-                Filter 
-              </button>
-              
-                            <FilterDropdown
-                              title="Filter Students"
-                              fields={[
-                                {
-                                  key: "className",
-                                  label: "Class",
-                                  options: classOptions,
-                                  placeholder: "All Classes",
-                                },
-                                {
-                                  key: "group",
-                                  label: "Group",
-                                  options: groupOptions,
-                                  placeholder: "All Groups",
-                                },
-                                {
-                                  key: "section",
-                                  label: "Section",
-                                  options: sectionOptions,
-                                  placeholder: "All Sections",
-                                },
-                               
-                              ]}
-                              selected={filters}
-                              setSelected={setFilters}
-                              darkMode={darkMode}
-                              isOpen={filterOpen}
-                              onClose={() => setFilterOpen(false)}
-                              onApply={() => setCurrentPage(1)}
-                            />
-            </div>
-
-            {/* Sort */}
-            <div className="relative" ref={sortRef}>
-              <button
-                onClick={() => setSortOpen(!sortOpen)}
-                className={`flex items-center  w-full md:w-28  border px-3 h-8 text-xs ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-900"
-                }`}
-              >
-                Sort By 
-              </button>
-              {sortOpen && (
-                <div
-                  className={`absolute left-0 mt-2 w-28 border ${
-                    darkMode
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setSortOrder("asc");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-8 text-left hover:bg-gray-100"
-                  >
-                    First 
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOrder("desc");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-8 text-left hover:bg-gray-100"
-                  >
-                    Last 
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Search + Pagination */}
+          
+          
+                {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
             <input
               type="text"

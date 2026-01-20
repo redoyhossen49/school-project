@@ -70,23 +70,24 @@ export default function GroupListPage() {
   }, []);
 
   // New group form state (optional if you want to prefill)
-  const groupFormFields = [
-    {
-      name: "class",
-      label: "Class",
-      type: "select",
-      options: classGroupData.map((c) => ({ value: c.class, label: c.class })),
-      required: true,
-      placeholder: "Select Class",
-    },
-    {
-      name: "groupName",
-      label: "Group Name",
-      type: "text",
-      required: true,
-      placeholder: "Enter Group Name",
-    },
-  ];
+ const groupFormFields = [
+  {
+    key: "class",
+    label: "Class",
+    type: "select",
+    options: ["Class 1", "Class 2"],
+    placeholder: "Select Class",
+    required: true,
+  },
+  {
+    key: "groupName",
+    label: "Group Name",
+    type: "text",
+    placeholder: "Enter Group Name",
+    required: true,
+  },
+];
+
   const handleAddGroup = (formData) => {
     const { class: selectedClass, groupName } = formData;
 
@@ -270,17 +271,44 @@ export default function GroupListPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            {/* Refresh */}
-            <button
-              onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
-                darkMode
-                  ? "border-gray-500 bg-gray-700"
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              Refresh
-            </button>
+           <div className="relative  flex-1 w-full md:w-28" ref={buttonRef}>
+              <button
+                ref={buttonRef}
+                onClick={() => setIsOpen((p) => !p)}
+                className={`px-3 h-8 text-xs border flex items-center justify-between w-full
+          ${
+            darkMode
+              ? "bg-gray-700 border-gray-600 text-gray-100"
+              : "bg-white border-gray-300 text-gray-700"
+          }`}
+              >
+                Filter
+              </button>
+
+              {/* FilterDropdown */}
+              <FilterDropdown
+                title="Filter Sections"
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                selected={groupFilter}
+                setSelected={setGroupFilter}
+                darkMode={darkMode}
+                buttonRef={buttonRef}
+                onApply={(filters) => console.log("Applied Filters:", filters)}
+                fields={[
+                  {
+                    key: "class",
+                    placeholder: "Select Class",
+                    options: ["Class 1", "Class 2", "Class 3"],
+                  },
+                  {
+                    key: "group",
+                    placeholder: "Select Group",
+                    options: ["Science", "Commerce", "Arts"],
+                  },
+                ]}
+              />
+            </div>
 
             {/* Export */}
             <div ref={exportRef} className="relative w-full md:w-28">
@@ -339,90 +367,11 @@ export default function GroupListPage() {
         </div>
 
         {/* FILTER / SORT / MONTH */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-2">
-          {/* Left: Month / Group / Sort */}
-          <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            {/* Month */}
-            <div ref={monthRef} className="relative w-full md:w-28">
-              <button
-                onClick={() => setMonthOpen((prev) => !prev)}
-                className={`w-full flex items-center border px-3 h-8 text-xs ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700"
-                    : "border-gray-200 bg-white"
-                }`}
-              >
-                {selectedMonth}{" "}
-              </button>
-              {monthOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full  border max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
-                >
-                  {months.map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => {
-                        setSelectedMonth(m);
-                        setCurrentPage(1);
-                        setMonthOpen(false);
-                      }}
-                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                        selectedMonth === m
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 ">
+        
+           
 
-            {/* Group Filter */}
-            {/* Group Filter with custom icon */}
-            <div className="relative  flex-1 w-full md:w-28" ref={buttonRef}>
-              <button
-                ref={buttonRef}
-                onClick={() => setIsOpen((p) => !p)}
-                className={`px-3 h-8 text-xs border flex items-center justify-between w-full
-          ${
-            darkMode
-              ? "bg-gray-700 border-gray-600 text-gray-100"
-              : "bg-white border-gray-300 text-gray-700"
-          }`}
-              >
-                Filter
-              </button>
-
-              {/* FilterDropdown */}
-              <FilterDropdown
-                title="Filter Sections"
-                isOpen={isOpen}
-                onClose={() => setIsOpen(false)}
-                selected={groupFilter}
-                setSelected={setGroupFilter}
-                darkMode={darkMode}
-                buttonRef={buttonRef}
-                onApply={(filters) => console.log("Applied Filters:", filters)}
-                fields={[
-                  {
-                    key: "class",
-                    placeholder: "Select Class",
-                    options: ["Class 1", "Class 2", "Class 3"],
-                  },
-                  {
-                    key: "group",
-                    placeholder: "Select Group",
-                    options: ["Science", "Commerce", "Arts"],
-                  },
-                ]}
-              />
-            </div>
-
-            {/* Sort */}
+            {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -463,7 +412,7 @@ export default function GroupListPage() {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Right: Search + Pagination */}
           <div className="flex items-center gap-2 md:mt-0 w-full md:w-auto">

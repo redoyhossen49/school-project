@@ -12,7 +12,7 @@ const headers = [
   { label: "Start time", key: "startTime" },
   { label: "Late time", key: "lastTime" },
   { label: "Close time", key: "endTime" },
-  { label: "Subject", key: "subject" },
+ 
 ];
 
 export default function ClassTimeTable({ data = classTimeData, setData }) {

@@ -232,12 +232,28 @@ const handleAddClass = (data) => {
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-            >
-              Refresh
-            </button>
+            <div ref={filterRef} className="relative flex-1">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+              >
+                Filter
+              </button>
+              <FilterDropdown
+                title="Filter Classes"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                buttonRef={filterRef}
+                onApply={(vals) => {
+                  setClassFilter(vals.class || "");
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -288,67 +304,9 @@ const handleAddClass = (data) => {
 
         {/* Month / Filter / Sort */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between  gap-2 md:gap-0">
-          <div className="flex gap-2 md:gap-2 w-full md:w-auto">
-            {/* Month Dropdown */}
-            <div ref={monthRef} className="relative flex-1">
-              <button
-                onClick={() => setMonthOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                {selectedMonth}{" "}
-              </button>
-              {monthOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full  border  max-h-56 overflow-y-auto ${borderClr} ${dropdownBg}`}
-                >
-                  {months.map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => {
-                        setSelectedMonth(m);
-                        setCurrentPage(1);
-                        setMonthOpen(false);
-                      }}
-                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
-                        selectedMonth === m
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                          ? "text-gray-200"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Filter Dropdown */}
-            <div ref={filterRef} className="relative flex-1">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
-              <FilterDropdown
-                title="Filter Classes"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                darkMode={darkMode}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                buttonRef={filterRef}
-                onApply={(vals) => {
-                  setClassFilter(vals.class || "");
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
-
-            {/* Sort Button */}
+          
+            
+            {/* Sort Button 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -389,7 +347,7 @@ const handleAddClass = (data) => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Search + Pagination */}
           <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">

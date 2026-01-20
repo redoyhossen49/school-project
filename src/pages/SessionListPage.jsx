@@ -309,16 +309,37 @@ export default function SessionListPage() {
 
           {/* Buttons: Refresh / Export / Add */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            <button
-              onClick={handleRefresh}
-              className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-200"
-              }`}
-            >
-              Refresh
-            </button>
+             {/* Filter */}
+            <div ref={filterRef} className="relative flex-1">
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-500"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                Filter
+              </button>
+              <FilterDropdown
+                title="Filter session"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -383,86 +404,11 @@ export default function SessionListPage() {
 
         {/* Filters / Month / Sort / Search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          <div className="grid grid-cols-3 gap-2 md:flex md:gap-2 w-full md:w-auto">
-            {/* Month Dropdown */}
-            <div ref={monthRef} className="relative flex-1">
-              <button
-                onClick={() => setMonthOpen(!monthOpen)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-200"
-                }`}
-              >
-                {selectedMonth}{" "}
-               
-              </button>
-              {monthOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full  border  max-h-56 overflow-y-auto ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-300"
-                  }`}
-                >
-                  {months.map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => {
-                        setSelectedMonth(m);
-                        setCurrentPage(1);
-                        setMonthOpen(false);
-                      }}
-                      className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 ${
-                        selectedMonth === m
-                          ? darkMode
-                            ? "bg-blue-600 text-white font-medium"
-                            : "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+         
 
-            {/* Filter */}
-            <div ref={filterRef} className="relative flex-1">
-              <button
-                onClick={() => setFilterOpen(!filterOpen)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-200"
-                }`}
-              >
-                Filter
-              </button>
-              <FilterDropdown
-                title="Filter session"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-                  setSessionFilter(values.session || "");
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
+           
 
-            {/* Sort */}
+            {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -503,7 +449,7 @@ export default function SessionListPage() {
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:mt-0 w-full md:w-auto">

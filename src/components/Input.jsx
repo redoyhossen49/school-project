@@ -126,7 +126,7 @@ export default function Input({
 
           peer-not-placeholder-shown:-top-1
           peer-not-placeholder-shown:text-[12px]
-          peer-not-placeholder-shown:text-gray-600
+         
           peer-not-placeholder-shown:bg-white
           peer-not-placeholder-shown:px-1
         `}

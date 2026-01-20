@@ -53,11 +53,11 @@ export default function SyllabusTable({ data = [], setData }) {
               "Group",
               "Section",
               "Session",
-              "Subject",
-              "Full marks",
-              "Pass marks",
-              "Chapters",
-              "Topics",
+              "Subject name",
+              "Exam name",
+              "Start page",
+              "End page",
+             
             ].map((h) => (
               <th
                 key={h}
@@ -102,9 +102,7 @@ export default function SyllabusTable({ data = [], setData }) {
                 <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.fullMarks ?? "-"}</td>
                 <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.passMarks ?? "-"}</td>
                 <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.chapters.length}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {s.chapters.reduce((acc, ch) => acc + ch.topics.length, 0)}
-                </td>
+                
 
                 {showAction && (
                   <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>

@@ -143,7 +143,7 @@ export default function TeacherList() {
     >
       {/* Header */}
       <div
-        className={`space-y-4  p-3 ${darkMode ? "bg-gray-900" : "bg-white"}`}
+        className={`space-y-3  p-3 ${darkMode ? "bg-gray-900" : "bg-white"}`}
       >
         {/* Title + Desktop Buttons */}
         <div className="md:flex md:items-center md:justify-between">
@@ -219,24 +219,38 @@ export default function TeacherList() {
 
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={() => {
-              setTeachers(teacherData); // reset teacher list
-              setFilterValues({ designation: "" }); // reset applied filter
-              setTempFilterValues({ designation: "" }); // reset modal temp
-              setDesignationFilter("");
-              setAttendanceFilter(""); // reset attendance filter
-              setSearch(""); // optional: reset search too
-              setCurrentPage(1); // optional: go back to first page
-            }}
-            className={`w-full flex items-center gap-2  border ${
-              darkMode
-                ? "bg-gray-700 border-gray-500"
-                : "bg-white border-gray-200"
-            }   px-3 h-8 text-xs`}
-          >
-            Refresh
-          </button>
+          <div className="relative flex-1 md:flex-none" ref={filterRef}>
+              <button
+                ref={filterButtonRef}
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                    : "bg-white border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter Teacher"
+                fields={[
+                  {
+                    key: "designation", // state key
+                    label: "Designation", // optional, just for clarity
+                    options: designationOptions, // ["Math Teacher", "Science Teacher", ...]
+                    placeholder: "All Designations",
+                  },
+                ]}
+                selected={{ designation: designationFilter }} // pass as object
+                setSelected={(value) => setDesignationFilter(value.designation)} // update parent
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                buttonRef={filterButtonRef}
+                onClose={() => setFilterOpen(false)}
+                onApply={(value) => console.log("Applied:", value.designation)}
+              />
+            </div>
 
           <div className="relative w-full" ref={exportRef}>
             <button
@@ -279,175 +293,7 @@ export default function TeacherList() {
 
         {/* Controls: Attendance Dropdown, Filter, Sort + Search */}
         <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2 ">
-          <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
-            {/* Attendance Dropdown */}
-            <div className="relative flex-1 md:flex-none" ref={attendanceRef}>
-              <button
-                onClick={() => handleDropdownClick("attendance")}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
-                    : "bg-white border-gray-300 hover:bg-gray-100"
-                }`}
-              >
-                {attendanceFilter || "Attendance"}{" "}
-              </button>
-
-              {attendanceOpen && (
-                <div
-                  className={`absolute left-0 mt-2 w-full  z-40 overflow-hidden flex flex-col ${
-                    darkMode
-                      ? "bg-gray-800 text-gray-100 border border-gray-700"
-                      : "bg-white text-gray-900 border border-gray-200"
-                  }`}
-                >
-                  {attendanceOptions.map((opt) => (
-                    <div
-                      key={opt}
-                      onClick={() => {
-                        setAttendanceFilter(opt);
-                        setAttendanceOpen(false);
-                      }}
-                      className="w-full cursor-pointer px-3 h-8 text-xs flex items-center hover:bg-gray-100 transition"
-                    >
-                      <span>{opt}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Filter */}
-            <div className="relative flex-1 md:flex-none" ref={filterRef}>
-              <button
-                ref={filterButtonRef}
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
-                    : "bg-white border-gray-300 hover:bg-gray-100"
-                }`}
-              >
-                Filter
-              </button>
-
-              <FilterDropdown
-                title="Filter Teacher"
-                fields={[
-                  {
-                    key: "designation", // state key
-                    label: "Designation", // optional, just for clarity
-                    options: designationOptions, // ["Math Teacher", "Science Teacher", ...]
-                    placeholder: "All Designations",
-                  },
-                ]}
-                selected={{ designation: designationFilter }} // pass as object
-                setSelected={(value) => setDesignationFilter(value.designation)} // update parent
-                darkMode={darkMode}
-                isOpen={filterOpen}
-                buttonRef={filterButtonRef}
-                onClose={() => setFilterOpen(false)}
-                onApply={(value) => console.log("Applied:", value.designation)}
-              />
-            </div>
-
-            {/* {filterOpen && (
-                <div
-                  className={`absolute top-full z-50 mt-2 w-56 rounded border
-    left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0
-    max-h-60 overflow-y-auto shadow-md p-3 space-y-2
-    ${darkMode ? "bg-gray-800 border-gray-600" : "bg-white border-gray-200"}`}
-                >
-                 
-                  <div className="relative">
-                    <button
-                      onClick={() => setDesignationOpen((prev) => !prev)}
-                      className={`w-full border px-2 py-1 text-xs rounded flex justify-between items-center
-        ${
-          darkMode
-            ? "bg-gray-700 border-gray-600 text-gray-100"
-            : "bg-white border-gray-200"
-        }`}
-                    >
-                      {designationFilter || "All Designations"}{" "}
-                      <BiChevronDown />
-                    </button>
-
-                    {designationOpen &&
-                      designationOptions.map((d) => (
-                        <button
-                          key={d}
-                          onClick={() => {
-                            setDesignationFilter(d);
-                            setDesignationOpen(false);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-2 py-1 text-xs hover:bg-blue-50 hover:text-blue-600
-            ${
-              designationFilter === d
-                ? "bg-blue-100 text-blue-700 font-medium"
-                : darkMode
-                ? "text-gray-200"
-                : "text-gray-700"
-            }`}
-                        >
-                          {d}
-                        </button>
-                      ))}
-                  </div>
-
-                 
-                  <button
-                    onClick={() => setFilterOpen(false)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 rounded"
-                  >
-                    Apply
-                  </button>
-                </div>
-              )} */}
-
-            {/* Sort */}
-            <div className="relative flex-1 md:flex-none" ref={sortRef}>
-              <button
-                onClick={() => handleDropdownClick("sort")}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
-                    : "bg-white border-gray-300 hover:bg-gray-100"
-                }`}
-              >
-                Sort By
-              </button>
-              {sortOpen && (
-                <div
-                  className={`absolute left-0 mt-2  md:w-36 z-40 w-full border ${
-                    darkMode
-                      ? "bg-gray-800 text-gray-100 border-gray-700"
-                      : "bg-white text-gray-900 border-gray-200"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setSortOpen(false);
-                      setSortOrder("newest");
-                    }}
-                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
-                  >
-                    First
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOpen(false);
-                      setSortOrder("oldest");
-                    }}
-                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
-                  >
-                    Last
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          
 
           {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 md:mt-0">

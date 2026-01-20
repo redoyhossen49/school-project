@@ -161,13 +161,13 @@ doc.save("ClassPermissions.pdf");
     <div
       className={`${
         darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-700"
-      } p-3 min-h-screen space-y-4`}
+      } p-3 min-h-screen space-y-3`}
     >
       {/* ========== HEADER ========== */}
       <div
         className={`${
           darkMode ? "bg-gray-800" : "bg-white"
-        } p-3 space-y-4`}
+        } p-3 space-y-3`}
       >
         <div className="md:flex md:items-center md:justify-between gap-2">
           <div>
@@ -186,129 +186,6 @@ doc.save("ClassPermissions.pdf");
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2 w-full md:w-auto">
-            <button onClick={handleRefresh} className={buttonClass}>
-              Refresh
-            </button>
-
-            <div className="relative w-28" ref={exportRef}>
-              <button
-              onClick={() => setExportOpen((p) => !p)} 
-                className={buttonClass}
-              >
-                Export 
-              </button>
-              {exportOpen && (
-                <div
-                  className={`${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-28  border `}
-                >
-                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
-                    PDF
-                  </button>
-                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
-                    Excel
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {canEdit && (
-              <button
-                onClick={() => navigate("/school/dashboard/addclasspermission")}
-                className="flex items-center justify-center  w-28  px-3 h-8 text-xs  bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Permission
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Buttons */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button onClick={handleRefresh} className={buttonClass + " w-full"}>
-            Refresh
-          </button>
-          <div className="relative" ref={exportRef}>
-            <button
-              onClick={() => setExportOpen((p) => !p)} 
-              className={buttonClass + " w-full"}
-            >
-              Export
-            </button>
-            {exportOpen && (
-              <div
-                className={`${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-gray-100"
-                    : "bg-white border-gray-200 text-gray-900"
-                } absolute top-full left-0 mt-1 z-50 w-full  border `}
-              >
-                <button onClick={handleExportPDF} className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
-                  PDF
-                </button>
-                <button onClick={handleExportExcel} className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
-                  Excel
-                </button>
-              </div>
-            )}
-          </div>
-          {canEdit && (
-            <button
-              onClick={() => navigate("/school/dashboard/addclasspermission")}
-              className="flex items-center justify-center gap-1 w-full  px-3 h-8 text-xs bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Permission
-            </button>
-          )}
-        </div>
-
-        {/* ========== CONTROLS: Section, Sort, Filter, Search + Pagination ========== */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
-          <div className="flex gap-2 md:gap-2 w-full md:w-auto">
-            {/* Section Dropdown */}
-            <div className="relative flex-1 md:flex-none" ref={sectionRef}>
-              <button
-                onClick={() => setSectionOpen((p) => !p)}
-                className={`w-full md:w-28 flex items-center justify-between  border px-3 h-8 text-xs  ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
-                    : "bg-white border-gray-300 hover:bg-gray-100"
-                }`}
-              >
-                {filterValues.section || "Section"}
-              </button>
-              {sectionOpen && (
-                <div
-                  className={`${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  } absolute mt-2 w-full text-xs z-40  border `}
-                >
-                  {sectionOptions.map((opt) => (
-                    <div
-                      key={opt}
-                      onClick={() => {
-                        const selected = opt?.toString().trim().toLowerCase(); // normalize
-                        setFilterValues((prev) => ({
-                          ...prev,
-                          section: selected,
-                        }));
-                        setSectionOpen(false);
-                        setCurrentPage(1);
-                      }}
-                      className="px-3 h-8 text-xs flex items-center cursor-pointer hover:bg-blue-50 justify-between"
-                    >
-                      {opt} 
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
             <div className="relative flex-1" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((p) => !p)}
@@ -356,48 +233,129 @@ doc.save("ClassPermissions.pdf");
               />
             </div>
 
-            {/* Sort Dropdown */}
-            <div className="relative flex-1 md:flex-none" ref={sortRef}>
+
+            <div className="relative w-28" ref={exportRef}>
               <button
-                onClick={() => setSortOpen((p) => !p)}
+              onClick={() => setExportOpen((p) => !p)} 
+                className={buttonClass}
+              >
+                Export 
+              </button>
+              {exportOpen && (
+                <div
+                  className={`${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  } absolute top-full left-0 mt-1 w-28  border `}
+                >
+                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
+                    PDF
+                  </button>
+                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
+                    Excel
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {canEdit && (
+              <button
+                onClick={() => navigate("/school/dashboard/addclasspermission")}
+                className="flex items-center justify-center  w-28  px-3 h-8 text-xs  bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Permission
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Buttons */}
+        <div className="grid grid-cols-3 gap-2 md:hidden">
+           <div className="relative flex-1" ref={filterRef}>
+              <button
+                onClick={() => setFilterOpen((p) => !p)}
                 className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
                     : "bg-white border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                Sort By
+                Filter
               </button>
-              {sortOpen && (
-                <div
-                  className={`${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-full z-40  border `}
-                >
-                  <button
-                    onClick={() => {
-                      setSortOrder("desc");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
-                  >
-                    First
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOrder("desc");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
-                  >
-                    Last
-                  </button>
-                </div>
-              )}
+
+              <FilterDropdown
+                title="Filter class permission"
+                fields={[
+                  {
+                    key: "class",
+                    label: "Class",
+                    options: classOptions,
+                    placeholder: "All Classes",
+                  },
+                  {
+                    key: "group",
+                    label: "Group",
+                    options: groupOptions,
+                    placeholder: "All Groups",
+                  },
+                  {
+                    key: "section",
+                    label: "Section",
+                    options: sectionOptions,
+                    placeholder: "All Sections",
+                  },
+                ]}
+                selected={filterValues}
+                setSelected={setFilterValues}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setFilterValues(values);
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+              />
             </div>
+
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setExportOpen((p) => !p)} 
+              className={buttonClass + " w-full"}
+            >
+              Export
+            </button>
+            {exportOpen && (
+              <div
+                className={`${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-gray-100"
+                    : "bg-white border-gray-200 text-gray-900"
+                } absolute top-full left-0 mt-1 z-50 w-full  border `}
+              >
+                <button onClick={handleExportPDF} className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
+                  PDF
+                </button>
+                <button onClick={handleExportExcel} className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50">
+                  Excel
+                </button>
+              </div>
+            )}
           </div>
+          {canEdit && (
+            <button
+              onClick={() => navigate("/school/dashboard/addclasspermission")}
+              className="flex items-center justify-center gap-1 w-full  px-3 h-8 text-xs bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Permission
+            </button>
+          )}
+        </div>
+
+        {/* ========== CONTROLS: Section, Sort, Filter, Search + Pagination ========== */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+         
 
           {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:w-auto w-full">

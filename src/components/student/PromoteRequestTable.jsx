@@ -7,17 +7,18 @@ import ReusableActions from "../common/ReusableActions";
 
 const headers = [
   { label: "Sl", key: "sl" },
-  { label: "Student Name", key: "studentName" },
-  { label: "Father's Name", key: "fatherName" },
-  { label: "Id Number", key: "idNumber" },
-  { label: "From Class", key: "fromClass" },
-  { label: "From Group", key: "fromGroup" },
-  { label: "From Section", key: "fromSection" },
-  { label: "From Session", key: "fromSession" },
-  { label: "To Class", key: "toClass" },
-  { label: "To Group", key: "toGroup" },
-  { label: "To Section", key: "toSection" },
-  { label: "To Session", key: "toSession" },
+    { label: "Id number", key: "idNumber" },
+  { label: "Student name", key: "studentName" },
+  { label: "Father's name", key: "fatherName" },
+
+  { label: "From class", key: "fromClass" },
+  { label: "From group", key: "fromGroup" },
+  { label: "From section", key: "fromSection" },
+  { label: "From session", key: "fromSession" },
+  { label: "To class", key: "toClass" },
+  { label: "To group", key: "toGroup" },
+  { label: "To section", key: "toSection" },
+  { label: "To session", key: "toSession" },
   { label: "Payment", key: "payment" },
   { label: "Status", key: "status" },
 ];
@@ -50,7 +51,7 @@ export default function PromoteRequestTable({ data = promoteRequestData, setData
 
   return (
     <div
-      className={`border rounded overflow-x-auto ${
+      className={`border  overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"

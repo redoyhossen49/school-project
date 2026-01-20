@@ -2,10 +2,12 @@ import { useTheme } from "../../context/ThemeContext";
 import StudentActions from "./StudentActions";
 
 const headers = [
-  "Admission No",
-  "Student ID",
+  "Sl No",
   "Roll No",
+  "Student ID",
+   "Password",
   "Name",
+   "Gender",
   "Father name",
   "Mother name",
   "Class",
@@ -13,9 +15,9 @@ const headers = [
   "Section",
   "Session",
   "Phone",
-  "Password",
+ 
   "Fees due",
-  "Gender",
+ 
   "Status",
   "Join date",
   "Date of birth",
@@ -167,11 +169,11 @@ const formatDateShort = (dateStr) => {
                   className={`inline-flex items-center h-4 px-2 text-[10px] font-semibold ${
                     s.status === "Active"
                       ? darkMode
-                        ? "bg-green-900/40 text-green-300"
-                        : "bg-green-100 text-green-700"
+                        ? " text-green-500"
+                        : " text-green-700"
                       : darkMode
-                      ? "bg-red-900/40 text-red-300"
-                      : "bg-red-100 text-red-700"
+                      ? "b text-red-600"
+                      : " text-red-700"
                   }`}
                 >
                   ● {s.status}
