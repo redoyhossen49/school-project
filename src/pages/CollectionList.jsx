@@ -574,20 +574,20 @@ export default function CollectionList() {
       const uniqueFeesTypesFromFeeTypes = [...new Set(allFeeTypeData.map(fee => fee.fees_type).filter(Boolean))];
       
       // Also get fees from localStorage "fees" (created fees)
-      const loadFees = () => {
-        const storedData = localStorage.getItem("fees");
-        if (storedData) {
-          try {
-            return JSON.parse(storedData);
-          } catch (e) {
-            return [];
-          }
+    const loadFees = () => {
+      const storedData = localStorage.getItem("fees");
+      if (storedData) {
+        try {
+          return JSON.parse(storedData);
+        } catch (e) {
+          return [];
         }
-        return [];
-      };
-      
-      const createdFees = loadFees();
-      const createdFeesNames = createdFees.map(fee => fee.name).filter(Boolean);
+      }
+      return [];
+    };
+    
+    const createdFees = loadFees();
+    const createdFeesNames = createdFees.map(fee => fee.name).filter(Boolean);
       
       // Combine all fees types: from feeTypes, feesTypeData, and created fees
       const allFeesTypes = [...new Set([...uniqueFeesTypesFromFeeTypes, ...feesTypeData, ...createdFeesNames])];

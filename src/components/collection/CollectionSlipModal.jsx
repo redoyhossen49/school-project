@@ -270,11 +270,8 @@ export default function CollectionSlipModal({ open, onClose, collection, darkMod
 
           /* Student Info Grid */
           .student-summary {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
+            padding: 0.75rem 0;
             margin-bottom: 1rem;
-            background-color: #f9fafb;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 0.5rem;
@@ -294,7 +291,7 @@ export default function CollectionSlipModal({ open, onClose, collection, darkMod
           table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875rem;
+            font-size: 12px;
             page-break-inside: avoid;
             border-spacing: 0;
           }
@@ -425,7 +422,7 @@ export default function CollectionSlipModal({ open, onClose, collection, darkMod
           </table>
         </div>
 
-        <h2 style="font-size: 1.1rem; color: #1d4ed8; margin-bottom: 0.5rem;">Payment History</h2>
+        <h2 style="font-size: 14px; font-weight: normal; color: black; margin-bottom: 0.5rem;">Payment History</h2>
         <div class="table-container">
           <table style="border-collapse: collapse; border-spacing: 0;">
             <thead class="bg-dark">
@@ -605,11 +602,8 @@ export default function CollectionSlipModal({ open, onClose, collection, darkMod
 
               {/* Student Summary */}
               <div style={{
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                padding: '0.75rem',
+                padding: '0.75rem 0',
                 marginBottom: '1rem',
-                backgroundColor: '#f9fafb',
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '0.5rem',
@@ -629,7 +623,7 @@ export default function CollectionSlipModal({ open, onClose, collection, darkMod
                 <table style={{
                   width: '100%',
                   borderCollapse: 'collapse',
-                  fontSize: '0.875rem'
+                  fontSize: '12px'
                 }}>
                   <thead style={{ backgroundColor: '#2563eb', color: 'white' }}>
                     <tr>
@@ -657,13 +651,13 @@ export default function CollectionSlipModal({ open, onClose, collection, darkMod
               </div>
 
               {/* Payment History */}
-              <h2 style={{ fontSize: '1.1rem', color: '#1d4ed8', marginBottom: '0.5rem', flexShrink: 0 }}>Payment History</h2>
+              <h2 style={{ fontSize: '14px',  marginBottom: '0.5rem', flexShrink: 0 }}>Payment History</h2>
               <div style={{ overflowX: 'auto', marginBottom: '1rem', flexShrink: 0 }}>
                 <table style={{
                   width: '100%',
                   borderCollapse: 'collapse',
                   borderSpacing: 0,
-                  fontSize: '0.875rem'
+                  fontSize: '12px'
                 }}>
                   <thead style={{ backgroundColor: '#1f2937', color: 'white' }}>
                     <tr>
