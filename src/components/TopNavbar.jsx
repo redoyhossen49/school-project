@@ -335,7 +335,7 @@ export default function TopNavbar() {
                 darkMode
                   ? "bg-gray-900 border border-gray-700 text-white shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
                   : "bg-white border border-gray-300 text-gray-800 shadow-[0_8px_24px_rgba(0,0,0,0.1)]"
-              } px-6 py-6 w-72 z-50 rounded-xl transition-all duration-300`}
+              } px-6 py-6 w-72 z-50  transition-all duration-300`}
             >
               {/* Profile Section */}
               <div className="flex flex-col items-center mb-6">

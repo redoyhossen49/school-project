@@ -91,14 +91,14 @@ export default function FormModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-30 flex items-center justify-center px-4">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/20" onClick={onClose}></div>
 
       {/* Modal */}
       <div
         ref={containerRef}
-        className={`relative w-64 max-h-[70vh] overflow-y-auto p-6 text-xs border
+        className={`relative w-64 max-h-[70vh] overflow-y-auto p-6 text-xs border rounded
           ${darkMode
             ? "bg-gray-800 border-gray-600 text-gray-100"
             : "bg-white border-gray-200 text-gray-900"
@@ -121,7 +121,7 @@ export default function FormModal({
                   className={`w-full h-8 px-3 flex justify-between items-center border text-left
           ${darkMode
             ? "bg-gray-700 border-gray-600 text-gray-100"
-            : "bg-white border-gray-300 text-gray-900"
+            : "bg-white border-gray-300 text-gray-400"
           }`}
                 >
                   {formData[field.key] || field.placeholder}
@@ -143,10 +143,10 @@ export default function FormModal({
             ${field.readOnly
               ? darkMode
                 ? "bg-gray-700 text-gray-100"
-                : "bg-gray-100 text-gray-700"
+                : "bg-gray-100 text-gray-400"
               : darkMode
                 ? "bg-gray-700 border-gray-600 text-gray-100"
-                : "bg-white border-gray-300 text-gray-900"
+                : "bg-white border-gray-300 text-gray-400"
             }`}
                   />
                   <label
@@ -184,7 +184,7 @@ export default function FormModal({
 
         {/* Actions */}
         <div className="flex gap-2 mt-5">
-          <button onClick={onClose} className="w-1/2 h-8 border text-xs">
+          <button onClick={onClose} className="w-1/2 h-8 border border-gray-300 text-xs">
             Cancel
           </button>
           <button
@@ -200,7 +200,7 @@ export default function FormModal({
       {activeField && (
         <div style={dropdownStyle}>
           <div
-            className={`max-h-60 overflow-y-auto border text-xs
+            className={`max-h-30 overflow-y-auto border text-xs z-50 rounded-md
               ${
                 darkMode
                   ? "bg-gray-800 border-gray-600 text-gray-100"

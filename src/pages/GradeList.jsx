@@ -278,21 +278,25 @@ export default function GradeList() {
     {
       key: "letterGrade",
       type: "text",
+      label:"Grade name",
       placeholder: " Grade name",
     },
     {
       key: "maxNumber",
       type: "number",
+      label:"Max mark",
       placeholder: "Max mark",
     },
     {
       key: "minNumber",
       type: "number",
+      label:"Min mark",
       placeholder: "Min mark",
     },
     {
       key: "gradePoint",
       type: "number",
+      label:"Point no",
       placeholder: " Point no",
     },
   ];

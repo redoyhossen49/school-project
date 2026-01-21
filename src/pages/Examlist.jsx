@@ -305,7 +305,8 @@ const addExamFields = [
   {
     key: "examName",
     type: "text",
-    placeholder: "Enter Exam Name",
+    label:"Exam name",
+    placeholder: " Exam Name",
   },
 ];
 
