@@ -1744,8 +1744,38 @@ const [sortOrder, setSortOrder] = useState("desc");
       </div>
 
       {/* TABLE */}
-      <div className={` p-3 overflow-x-auto ${cardBg}`}>
-        <div className="border overflow-x-auto">
+      <div className={`${darkMode ? "bg-gray-900" : "bg-white"} p-2 overflow-x-auto hide-scrollbar`}>
+        {/* Download Button - Always Visible */}
+        <div className="mb-3 flex items-center gap-2">
+          <button
+            onClick={handleDownloadSelected}
+            disabled={selectedAdmitCards.size === 0}
+            className={`px-4 h-8 text-[12px] font-medium rounded transition-colors ${
+              selectedAdmitCards.size > 0
+                ? darkMode
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+                : darkMode
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            Download {selectedAdmitCards.size > 0 ? `(${selectedAdmitCards.size})` : ''}
+          </button>
+          {selectedAdmitCards.size > 0 && (
+            <button
+              onClick={() => setSelectedAdmitCards(new Set())}
+              className={`px-3 py-2 text-xs rounded ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+              } transition-colors`}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <div className={`border overflow-x-auto ${darkMode ? "bg-gray-800 text-gray-100 border-gray-700" : "bg-white text-gray-900 border-gray-200"}`}>
           <table className="w-full table-auto border-collapse text-xs">
             {/* HEADER */}
             <thead
@@ -1755,31 +1785,9 @@ const [sortOrder, setSortOrder] = useState("desc");
                   : "bg-gray-100 border-b border-gray-300"
               }
             >
-              {/* Download Button Row */}
-              <tr>
-                <td
-                  colSpan={columns.length + 2}
-                  className={`h-10 px-3 border-b ${borderClr}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <button
-                      onClick={handleDownloadSelected}
-                      disabled={selectedAdmitCards.size === 0}
-                      className={`text-xs px-3 h-7 rounded transition font-semibold ${selectedAdmitCards.size === 0
-                        ? darkMode
-                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                        }`}
-                    >
-                      Download ({selectedAdmitCards.size})
-                    </button>
-                  </div>
-                </td>
-              </tr>
               {/* Column Headers Row */}
               <tr>
-                <th className={`h-8 px-3 text-left font-semibold border-r ${borderClr} whitespace-nowrap`}>
+                <th className={`px-3 h-8 text-left font-semibold border-r ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}>
                   <input
                     type="checkbox"
                     checked={currentData.length > 0 && currentData.every((row) => {
@@ -1787,18 +1795,18 @@ const [sortOrder, setSortOrder] = useState("desc");
                       return selectedAdmitCards.has(rowId);
                     })}
                     onChange={handleSelectAll}
-                    className="cursor-pointer w-4 h-4"
+                    className="cursor-pointer"
                   />
                 </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={`h-8 px-3 text-left font-semibold border-r ${borderClr} whitespace-nowrap`}
+                    className={`px-3 h-8 text-left font-semibold border-r ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}
                   >
                     {col.label}
                   </th>
                 ))}
-                <th className="h-8 px-3 text-left font-semibold whitespace-nowrap">
+                <th className={`px-3 h-8 text-left font-semibold ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}>
                   Action
                 </th>
               </tr>
@@ -1831,7 +1839,7 @@ const [sortOrder, setSortOrder] = useState("desc");
                           checked={isSelected}
                           onChange={(e) => handleSelectAdmitCard(e, row.IDNumber)}
                           onClick={(e) => e.stopPropagation()}
-                          className="cursor-pointer w-4 h-4"
+                          className="cursor-pointer"
                         />
                       </td>
                       {columns.map((col) => (
