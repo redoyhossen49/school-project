@@ -14,6 +14,7 @@ import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import FormModal from "../components/FormModal.jsx";
 import AdmitCardModal from "../components/admitCard/AdmitCardModal.jsx";
 import ViewAdmitCardModal from "../components/admitCard/ViewAdmitCardModal.jsx";
+import EditAdmitCardModal from "../components/admitCard/EditAdmitCardModal.jsx";
 import AdmitCardActions from "../components/admitCard/AdmitCardActions.jsx";
 import { generateAdmitCardHTML, getStudentSubjects, getStudentPhoto, getStudentSubjectDetails, formatDate } from "../components/admitCard/admitCardUtils.js";
 import classTeacherSignature from "../assets/images/class-teacher.png";
@@ -64,6 +65,8 @@ const [sortOrder, setSortOrder] = useState("desc");
   const [admitCardModalOpen, setAdmitCardModalOpen] = useState(false);
   const [viewAdmitCardModalOpen, setViewAdmitCardModalOpen] = useState(false);
   const [viewingAdmitCard, setViewingAdmitCard] = useState(null);
+  const [editingAdmitCard, setEditingAdmitCard] = useState(null);
+  const [editAdmitCardModalOpen, setEditAdmitCardModalOpen] = useState(false);
   const [classFilter, setClassFilter] = useState("");
   const [groupFilter, setGroupFilter] = useState("");
 
@@ -896,10 +899,17 @@ const [sortOrder, setSortOrder] = useState("desc");
       return;
     }
 
-    const selectedRows = currentData.filter((row) => {
+    // Filter selected rows and remove duplicates based on SL number
+    const selectedRowsMap = new Map();
+    currentData.forEach((row) => {
       const rowId = row.IDNumber || row.idNumber || row.sl;
-      return selectedAdmitCards.has(rowId);
+      const uniqueKey = row.SL || row.sl || `${row.IDNumber}_${row.Class}_${row.Section || ""}_${row.Session}_${row.ExamName}`;
+      
+      if (selectedAdmitCards.has(rowId) && !selectedRowsMap.has(uniqueKey)) {
+        selectedRowsMap.set(uniqueKey, row);
+      }
     });
+    const selectedRows = Array.from(selectedRowsMap.values());
 
     // Helper to generate HTML with absolute image URLs using generateAdmitCardHTML
     const generateCardHTMLWithUrls = (row) => {
@@ -1337,12 +1347,9 @@ const [sortOrder, setSortOrder] = useState("desc");
       // Add first card
       printContent += generateCardHTMLWithUrls(selectedRows[i]);
       
-      // Add second card if exists, otherwise duplicate the first card to fill the page
+      // Add second card if exists (don't duplicate if odd number)
       if (i + 1 < selectedRows.length) {
         printContent += generateCardHTMLWithUrls(selectedRows[i + 1]);
-      } else {
-        // If odd number, duplicate the last card to ensure 2 cards per page
-        printContent += generateCardHTMLWithUrls(selectedRows[i]);
       }
       
       // Close page container
@@ -1860,8 +1867,8 @@ const [sortOrder, setSortOrder] = useState("desc");
                             setViewAdmitCardModalOpen(true);
                           }}
                           onEdit={(r) => {
-                            // Handle edit if needed
-                            alert(`Edit ${r.StudentName}`);
+                            setEditingAdmitCard(r);
+                            setEditAdmitCardModalOpen(true);
                           }}
                           onDelete={(r) => {
                             if (confirm("Are you sure you want to delete this admit card?")) {
@@ -1919,6 +1926,25 @@ const [sortOrder, setSortOrder] = useState("desc");
           }}
           row={viewingAdmitCard}
           darkMode={darkMode}
+        />
+      )}
+
+      {/* Edit Admit Card Modal */}
+      {editAdmitCardModalOpen && editingAdmitCard && (
+        <EditAdmitCardModal
+          open={editAdmitCardModalOpen}
+          onClose={() => {
+            setEditAdmitCardModalOpen(false);
+            setEditingAdmitCard(null);
+          }}
+          row={editingAdmitCard}
+          darkMode={darkMode}
+          generatedAdmitCards={generatedAdmitCards}
+          setGeneratedAdmitCards={setGeneratedAdmitCards}
+          classOptions={classOptions}
+          sectionOptions={filteredSectionOptions}
+          sessionOptions={sessionOptions}
+          examOptions={examOptions}
         />
       )}
     </div>
