@@ -14,6 +14,7 @@ import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import FormModal from "../components/FormModal.jsx";
 import AdmitCardModal from "../components/admitCard/AdmitCardModal.jsx";
 import ViewAdmitCardModal from "../components/admitCard/ViewAdmitCardModal.jsx";
+import EditAdmitCardModal from "../components/admitCard/EditAdmitCardModal.jsx";
 import AdmitCardActions from "../components/admitCard/AdmitCardActions.jsx";
 import {
   generateAdmitCardHTML,
@@ -59,7 +60,7 @@ export default function AdmitCardPage() {
   const [sessionOpen, setSessionOpen] = useState(false);
   const [examOpen, setExamOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState("desc");
+const [sortOrder, setSortOrder] = useState("desc");
   const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -70,6 +71,8 @@ export default function AdmitCardPage() {
   const [admitCardModalOpen, setAdmitCardModalOpen] = useState(false);
   const [viewAdmitCardModalOpen, setViewAdmitCardModalOpen] = useState(false);
   const [viewingAdmitCard, setViewingAdmitCard] = useState(null);
+  const [editingAdmitCard, setEditingAdmitCard] = useState(null);
+  const [editAdmitCardModalOpen, setEditAdmitCardModalOpen] = useState(false);
   const [classFilter, setClassFilter] = useState("");
   const [groupFilter, setGroupFilter] = useState("");
 
@@ -285,11 +288,11 @@ export default function AdmitCardPage() {
   };
 
   // -------------------- Filtered + Sorted Data --------------------
-  const filteredData = useMemo(() => {
-    const source = data.length ? data : studentExamData;
+ const filteredData = useMemo(() => {
+  const source = data.length ? data : studentExamData;
 
-    return source
-      .filter((d) => {
+  return source
+    .filter((d) => {
         // Only show students who have generated admit card numbers
         const admitCardKey = `${d.IDNumber}_${d.Class}_${d.Section || ""}_${d.Session}_${d.ExamName}`;
         const hasAdmitCard = generatedAdmitCards[admitCardKey];
@@ -321,14 +324,14 @@ export default function AdmitCardPage() {
           SL: d.SL || d.sl || index + 1, // Add SL field (serial number)
         };
       })
-      .sort((a, b) => {
-        // Sorting by IDNumber (or SL if exists)
-        if (sortOrder === "asc") {
+    .sort((a, b) => {
+      // Sorting by IDNumber (or SL if exists)
+      if (sortOrder === "asc") {
           return a.IDNumber.localeCompare(b.IDNumber); // oldest first
-        } else {
+      } else {
           return b.IDNumber.localeCompare(a.IDNumber); // newest first
-        }
-      });
+      }
+    });
   }, [data, appliedFilters, search, sortOrder, generatedAdmitCards]);
 
   // -------------------- Pagination --------------------
@@ -979,10 +982,17 @@ export default function AdmitCardPage() {
       return;
     }
 
-    const selectedRows = currentData.filter((row) => {
+    // Filter selected rows and remove duplicates based on SL number
+    const selectedRowsMap = new Map();
+    currentData.forEach((row) => {
       const rowId = row.IDNumber || row.idNumber || row.sl;
-      return selectedAdmitCards.has(rowId);
+      const uniqueKey = row.SL || row.sl || `${row.IDNumber}_${row.Class}_${row.Section || ""}_${row.Session}_${row.ExamName}`;
+      
+      if (selectedAdmitCards.has(rowId) && !selectedRowsMap.has(uniqueKey)) {
+        selectedRowsMap.set(uniqueKey, row);
+      }
     });
+    const selectedRows = Array.from(selectedRowsMap.values());
 
     // Helper to generate HTML with absolute image URLs using generateAdmitCardHTML
     const generateCardHTMLWithUrls = (row) => {
@@ -1437,9 +1447,6 @@ export default function AdmitCardPage() {
       // Add second card if exists, otherwise duplicate the first card to fill the page
       if (i + 1 < selectedRows.length) {
         printContent += generateCardHTMLWithUrls(selectedRows[i + 1]);
-      } else {
-        // If odd number, duplicate the last card to ensure 2 cards per page
-        printContent += generateCardHTMLWithUrls(selectedRows[i]);
       }
 
       // Close page container
@@ -1884,18 +1891,18 @@ export default function AdmitCardPage() {
                       })
                     }
                     onChange={handleSelectAll}
-                    className="cursor-pointer w-4 h-4"
+                    className="cursor-pointer"
                   />
                 </th>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={`h-8 px-3 text-left font-semibold border-r ${borderClr} whitespace-nowrap`}
+                    className={`px-3 h-8 text-left font-semibold border-r ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}
                   >
                     {col.label}
                   </th>
                 ))}
-                <th className="h-8 px-3 text-left font-semibold whitespace-nowrap">
+                <th className={`px-3 h-8 text-left font-semibold ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}>
                   Action
                 </th>
               </tr>
@@ -1932,7 +1939,7 @@ export default function AdmitCardPage() {
                             handleSelectAdmitCard(e, row.IDNumber)
                           }
                           onClick={(e) => e.stopPropagation()}
-                          className="cursor-pointer w-4 h-4"
+                          className="cursor-pointer"
                         />
                       </td>
                       {columns.map((col) => (
@@ -1953,8 +1960,8 @@ export default function AdmitCardPage() {
                             setViewAdmitCardModalOpen(true);
                           }}
                           onEdit={(r) => {
-                            // Handle edit if needed
-                            alert(`Edit ${r.StudentName}`);
+                            setEditingAdmitCard(r);
+                            setEditAdmitCardModalOpen(true);
                           }}
                           onDelete={(r) => {
                             if (
@@ -1969,7 +1976,7 @@ export default function AdmitCardPage() {
                           onPrint={handlePrint}
                           darkMode={darkMode}
                           canEdit={canEdit}
-                        />
+        />
                       </td>
                     </tr>
                   );
@@ -1977,7 +1984,7 @@ export default function AdmitCardPage() {
               )}
             </tbody>
           </table>
-        </div>
+      </div>
       </div>
 
       {/* Admit Card Modal */}
@@ -2018,6 +2025,25 @@ export default function AdmitCardPage() {
           }}
           row={viewingAdmitCard}
           darkMode={darkMode}
+        />
+      )}
+
+      {/* Edit Admit Card Modal */}
+      {editAdmitCardModalOpen && editingAdmitCard && (
+        <EditAdmitCardModal
+          open={editAdmitCardModalOpen}
+          onClose={() => {
+            setEditAdmitCardModalOpen(false);
+            setEditingAdmitCard(null);
+          }}
+          row={editingAdmitCard}
+          darkMode={darkMode}
+          generatedAdmitCards={generatedAdmitCards}
+          setGeneratedAdmitCards={setGeneratedAdmitCards}
+          classOptions={classOptions}
+          sectionOptions={filteredSectionOptions}
+          sessionOptions={sessionOptions}
+          examOptions={examOptions}
         />
       )}
     </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { collectionData } from "../data/collectionData.js";
 import CollectiontTable from "../components/collection/CollectiontTable.jsx";
+import CollectionSlipModal from "../components/collection/CollectionSlipModal.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext.jsx";
@@ -23,6 +24,7 @@ import { studentData } from "../data/studentData";
 import { feeTypeData } from "../data/feeTypeData";
 import { feesTypeData } from "../data/feesTypeData";
 import { discountData } from "../data/discountData";
+import schoolLogo from "../assets/images/sidebar-logo.avif";
 
 export default function CollectionList() {
   const navigate = useNavigate();
@@ -85,6 +87,9 @@ export default function CollectionList() {
   const [showFindModal, setShowFindModal] = useState(false);
   const [findFilterType, setFindFilterType] = useState(""); // "Paid" or "Due" - for modal selection
   const [appliedFindFilterType, setAppliedFindFilterType] = useState(""); // Applied filter after clicking Finding button
+  const [viewCollectionSlipModal, setViewCollectionSlipModal] = useState(false);
+  const [viewingCollection, setViewingCollection] = useState(null);
+  const [selectedCollections, setSelectedCollections] = useState([]);
 
   const exportRef = useRef(null);
   const sortRef = useRef(null);
@@ -145,23 +150,21 @@ export default function CollectionList() {
     if (!data.length) return;
 
     const sheetData = data.map((c, i) => {
-      const student = studentData.find(
-        (s) => s.studentId?.toUpperCase() === c.student_id?.toUpperCase()
-      );
-      const studentName = c.student_name || student?.student_name || "N/A";
-      
       return {
-        Sl: i + 1,
-        "Collection Date": c.pay_date || "",
-        "Student ID": c.student_id,
-        "Student Name": studentName,
+        Sl: c.sl || i + 1,
+        "Student id": c.student_id,
         Class: c.class,
         Group: c.group,
         Section: c.section,
         Session: c.session,
         "Fees Type": c.fees_type,
-        "Paid Amount": c.paid_amount || c.type_amount || 0,
-        "Total Due": c.total_due || 0,
+        "Total payable": c.total_payable || 0,
+        "Payable due": c.payable_due || 0,
+        "Pay type": c.pay_type || "N/A",
+        "Type amount": c.type_amount || 0,
+        "Total due": c.total_due || 0,
+        "Pay Date": c.pay_date || "",
+        "Pay Method": c.payment_method || "N/A",
       };
     });
 
@@ -179,36 +182,37 @@ export default function CollectionList() {
 
     const columns = [
       "Sl",
-      "Collection Date",
-      "Student ID",
-      "Student Name",
+      "Student id",
       "Class",
       "Group",
       "Section",
       "Session",
       "Fees Type",
-      "Paid Amount",
-      "Total Due",
+      "Total payable",
+      "Payable due",
+      "Pay type",
+      "Type amount",
+      "Total due",
+      "Pay Date",
+      "Pay Method",
     ];
 
     const rows = data.map((c, i) => {
-      const student = studentData.find(
-        (s) => s.studentId?.toUpperCase() === c.student_id?.toUpperCase()
-      );
-      const studentName = c.student_name || student?.student_name || "N/A";
-      
       return [
-        i + 1,
-        c.pay_date || "",
+        c.sl || i + 1,
         c.student_id,
-        studentName,
         c.class,
         c.group,
         c.section,
         c.session,
         c.fees_type,
-        c.paid_amount || c.type_amount || 0,
+        c.total_payable || 0,
+        c.payable_due || 0,
+        c.pay_type || "N/A",
+        c.type_amount || 0,
         c.total_due || 0,
+        c.pay_date || "",
+        c.payment_method || "N/A",
       ];
     });
 
@@ -221,6 +225,480 @@ export default function CollectionList() {
     });
 
     doc.save("Collections_List.pdf");
+  };
+
+  // ===== DOWNLOAD MULTIPLE PAYMENT SLIPS =====
+  const handleDownloadMultipleSlips = async () => {
+    // Filter selectedCollections to only include items from currentCollections (table data)
+    const validSelectedCollections = selectedCollections.filter(selected => 
+      currentCollections.some(current => current.sl === selected.sl)
+    );
+
+    if (validSelectedCollections.length === 0) {
+      alert("Please select at least one collection to download");
+      return;
+    }
+
+    // Helper function to convert image path to absolute URL
+    const getImageUrl = (imagePath) => {
+      if (!imagePath) return "";
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+      }
+      if (imagePath.startsWith('/')) {
+        return window.location.origin + imagePath;
+      }
+      // For Vite imported assets, try to get the actual URL
+      try {
+        return new URL(imagePath, window.location.origin).href;
+      } catch {
+        return window.location.origin + '/' + imagePath;
+      }
+    };
+
+    // Load school info
+    const school = JSON.parse(localStorage.getItem("schoolInfo") || "{}");
+    const schoolName = school.schoolName || "Mohakhali Model High School";
+    const schoolAddress = school.address || "Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212";
+    const schoolLogoUrl = school?.logo ? getImageUrl(school.logo) : getImageUrl(schoolLogo);
+    const schoolPhone = school?.phone || school?.mobile || "01XXXXXXXXX";
+
+    // Load all students
+    const storedStudents = localStorage.getItem("students");
+    const dynamicStudents = storedStudents ? JSON.parse(storedStudents) : [];
+    const combinedStudents = [...studentData, ...dynamicStudents];
+
+    const formatDate = (dateString) => {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    };
+
+    const getPrintDate = () => {
+      const date = new Date();
+      return date.toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+    };
+
+    // Generate HTML for all payment slips
+    const slipsHTML = validSelectedCollections.map((collection, index) => {
+      // Find student
+      const student = combinedStudents.find(
+        (s) => {
+          const sId = (s.studentId || s.student_id || "").toUpperCase();
+          const cId = (collection.student_id || "").toUpperCase();
+          return sId === cId && sId !== "";
+        }
+      );
+
+      const studentPhoto = student?.photo || "https://via.placeholder.com/100";
+      const studentPhotoUrl = studentPhoto.startsWith('http') ? studentPhoto : getImageUrl(studentPhoto);
+
+      const studentInfo = {
+        name: student?.student_name || collection.student_name || "N/A",
+        id: collection.student_id || student?.studentId || student?.student_id || "N/A",
+        class: student?.className || student?.class || collection.class || "N/A",
+        group: student?.group || collection.group || "N/A",
+        section: student?.section || collection.section || "N/A",
+        session: student?.session || collection.session || "N/A",
+        photo: studentPhotoUrl,
+      };
+
+      // Service Summary
+      const feesTypes = collection.fees_type?.split(", ") || [collection.fees_type || ""];
+      const serviceSummary = feesTypes
+        .filter((ft) => ft)
+        .map((ft) => ({
+          fees_type: ft,
+          total_payable: collection.total_payable || 0,
+          total_due: collection.total_due || 0,
+        }));
+
+      const serviceSummaryHTML = serviceSummary.length > 0
+        ? serviceSummary
+            .map(
+              (service) => `
+                <tr>
+                  <td>${(service.fees_type || "N/A").replace(/"/g, "&quot;")}</td>
+                  <td>${service.total_payable || 0}</td>
+                  <td>${service.total_due || 0}</td>
+                </tr>
+              `
+            )
+            .join("")
+        : `<tr><td colspan="3" style="text-align: center;">No service data available</td></tr>`;
+
+      // Payment History
+      const paymentHistory = [{
+        sl: 1,
+        fees_type: collection.fees_type || "N/A",
+        type_amount: collection.type_amount || 0,
+        total_due: collection.total_due || 0,
+        payment_method: collection.payment_method || "N/A",
+        pay_date: collection.pay_date || collection.payDate || "",
+      }];
+
+      const paymentHistoryHTML = paymentHistory.length > 0
+        ? paymentHistory
+            .map(
+              (payment, idx) => `
+                <tr>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${payment.sl}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${(payment.fees_type || "N/A").replace(/"/g, "&quot;")}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${payment.type_amount || 0}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${payment.total_due || 0}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${(payment.payment_method || "N/A").replace(/"/g, "&quot;")}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${formatDate(payment.pay_date)}</td>
+                </tr>
+              `
+            )
+            .join("")
+        : `<tr><td colspan="6" style="border: 1px solid #e5e7eb; text-align: center;">No payment history available</td></tr>`;
+
+      return `
+        <div class="container" style="page-break-after: ${index < validSelectedCollections.length - 1 ? 'always' : 'avoid'};">
+          <div class="header">
+            <img src="${schoolLogoUrl}" class="logo" onerror="this.src='https://via.placeholder.com/90'">
+
+            <div class="header-text">
+              <h1>${schoolName}</h1>
+              <p>${schoolAddress}</p>
+              <p>Mobile: ${schoolPhone}</p>
+              <p style="margin-top: 4px; font-weight: 600;">
+                Report Type: <span class="text-blue-600">Payment</span>
+              </p>
+              <p style="font-size: 0.8125rem;">
+                Print Date: <span class="print-date">${getPrintDate()}</span>
+              </p>
+            </div>
+
+            <img src="${studentInfo.photo || 'https://via.placeholder.com/100'}" class="logo" onerror="this.src='https://via.placeholder.com/100'">
+          </div>
+
+          <div class="student-summary">
+            <div><span class="font-semibold">Student Name:</span> ${studentInfo.name}</div>
+            <div><span class="font-semibold">ID Number:</span> ${studentInfo.id}</div>
+            <div><span class="font-semibold">Class:</span> ${studentInfo.class}</div>
+            <div><span class="font-semibold">Group:</span> ${studentInfo.group}</div>
+            <div><span class="font-semibold">Section:</span> ${studentInfo.section}</div>
+            <div><span class="font-semibold">Session:</span> ${studentInfo.session}</div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead class="bg-blue">
+                <tr>
+                  <th>Service Type</th>
+                  <th>Payable</th>
+                  <th>Available Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${serviceSummaryHTML}
+              </tbody>
+            </table>
+          </div>
+
+          <h2 style="font-size: 14px; font-weight: normal; color: black; margin-bottom: 0.5rem;">Payment History</h2>
+          <div class="table-container">
+            <table style="border-collapse: collapse; border-spacing: 0;">
+              <thead class="bg-dark">
+                <tr>
+                  <th style="border: 1px solid #e5e7eb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">SL</th>
+                  <th style="border: 1px solid #e5e7eb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">Service Name</th>
+                  <th style="border: 1px solid #e5e7eb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">Paid Amount</th>
+                  <th style="border: 1px solid #e5e7eb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">Available Due</th>
+                  <th style="border: 1px solid #e5e7eb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">Pay Method</th>
+                  <th style="border: 1px solid #e5e7eb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">Pay Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${paymentHistoryHTML}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="footer">
+            <div>
+              <div class="signature-line"></div>
+              <p style="margin-top: 5px; text-align: center;">Authority Signature</p>
+            </div>
+            <div style="text-align: right;">
+              <p>©${new Date().getFullYear()} Astha Academic </p>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Create blob URL for PDF generation
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Payment Slips - Multiple</title>
+        <style>
+          /* General Reset */
+          * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+          }
+
+          body {
+            background-color: #e5e7eb;
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 0;
+          }
+
+          @page {
+            size: A4;
+            margin: 0.5in;
+          }
+
+          /* Container - A4 */
+          .container {
+            background-color: #ffffff;
+            width: 210mm;
+            height: 297mm;
+            padding: 1.5rem;
+            color: #374151;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            page-break-after: always;
+            page-break-inside: avoid;
+            overflow: hidden;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
+          }
+
+          .container:last-child {
+            page-break-after: avoid;
+            margin-bottom: 0;
+          }
+
+          /* Header */
+          .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            page-break-inside: avoid;
+            flex-shrink: 0;
+          }
+
+          .logo {
+            width: 6rem;
+            height: 6rem;
+            border-radius: 9999px;
+            border: 1px solid #e5e7eb;
+          }
+
+          .header-text {
+            flex: 1;
+            text-align: center;
+          }
+
+          .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1d4ed8;
+            margin-bottom: 2px;
+          }
+
+          .header-text p {
+            font-size: 0.875rem;
+            color: #4b5563;
+          }
+
+          .text-blue-600 { color: #2563eb; }
+          .font-semibold { font-weight: 600; }
+
+          /* Student Info Grid */
+          .student-summary {
+            padding: 0.75rem 0;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            page-break-inside: avoid;
+            flex-shrink: 0;
+          }
+
+          /* Table Styles */
+          .table-container {
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            page-break-inside: avoid;
+            flex-shrink: 0;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            page-break-inside: avoid;
+            border-spacing: 0;
+          }
+
+          th, td {
+            border: 1px solid #e5e7eb;
+            padding: 0.4rem;
+            text-align: center;
+            border-collapse: collapse;
+          }
+          
+          th {
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          
+          td {
+            border-top: none;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          
+          tr:last-child td {
+            border-bottom: 1px solid #e5e7eb;
+          }
+
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+
+          .bg-blue { background-color: #2563eb; color: white; }
+          .bg-dark { background-color: #1f2937; color: white; }
+
+          /* Footer */
+          .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 1rem;
+            font-size: 0.875rem;
+            page-break-inside: avoid;
+            flex-shrink: 0;
+          }
+
+          @media print {
+            body {
+              margin: 0;
+              padding: 0;
+              background-color: white;
+            }
+            
+            .container {
+              page-break-after: always;
+              page-break-inside: avoid;
+              height: 297mm;
+              overflow: hidden;
+              margin-bottom: 0;
+              box-shadow: none;
+            }
+            
+            .container:last-child {
+              page-break-after: avoid;
+            }
+            
+            .header,
+            .student-summary,
+            .table-container,
+            .footer {
+              page-break-inside: avoid;
+            }
+            
+            table {
+              page-break-inside: avoid;
+            }
+            
+            tr {
+              page-break-inside: avoid;
+            }
+            
+            h2 {
+              page-break-after: avoid;
+              margin-bottom: 0.5rem;
+            }
+          }
+
+          .signature-line {
+            border-top: 1px solid #374151;
+            width: 160px;
+          }
+        </style>
+      </head>
+      <body>
+        ${slipsHTML}
+      </body>
+      </html>
+    `;
+
+    // Create blob URL for the HTML content
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    // Open _blank window for PDF generation and printing
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow popups to generate and print payment slips");
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // Write HTML content to the new window
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+
+    // Wait for window to load, then trigger print dialog
+    printWindow.onload = function() {
+      setTimeout(() => {
+        // Focus the window and trigger print dialog
+        printWindow.focus();
+        printWindow.print();
+        // Clean up URL after print dialog opens
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
+      }, 1000);
+    };
+
+    // Fallback if onload doesn't fire - check document ready state
+    const checkReady = setInterval(() => {
+      if (printWindow && !printWindow.closed && printWindow.document.readyState === 'complete') {
+        clearInterval(checkReady);
+        setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+          setTimeout(() => {
+            URL.revokeObjectURL(url);
+          }, 1000);
+        }, 1000);
+      }
+    }, 100);
+
+    // Clear interval after 5 seconds
+    setTimeout(() => {
+      clearInterval(checkReady);
+    }, 5000);
+
+    // Clear selection after download
+    setSelectedCollections([]);
   };
 
   const handleRefresh = async () => {
@@ -368,17 +846,18 @@ export default function CollectionList() {
         return sum + (collection.total_due || 0);
       }, 0);
 
-      const paidAmount = parseFloat(formData.paid_amount) || 0;
-      const payableDue = Math.max(0, totalPayable - paidAmount);
+      const typeAmount = parseFloat(formData.type_amount) || 0;
+      const payableDue = Math.max(0, totalPayable - typeAmount);
       const calculatedTotalDue = totalPayable + studentFeesDue;
-      const totalDue = paidAmount >= calculatedTotalDue ? 0 : calculatedTotalDue - paidAmount;
+      const totalDue = typeAmount >= calculatedTotalDue ? 0 : calculatedTotalDue - typeAmount;
+      const total = totalPayable + overdueAmount + studentFeesDue;
 
-      // If paid amount covers all existing due, update previous collections' total_due to 0
+      // If type amount covers all existing due, update previous collections' total_due to 0
       const totalExistingDue = existingCollections.reduce((sum, collection) => {
         return sum + (collection.total_due || 0);
       }, 0);
 
-      if (paidAmount >= totalExistingDue && totalExistingDue > 0) {
+      if (typeAmount >= totalExistingDue && totalExistingDue > 0) {
         for (const collection of existingCollections) {
           if (collection.total_due > 0) {
             await updateCollectionAPI(collection.sl, {
@@ -400,13 +879,14 @@ export default function CollectionList() {
         fees_type: formData.fees_type.join(", "),
         total_payable: totalPayable,
         payable_due: payableDue,
-        type_amount: paidAmount,
-        paid_amount: paidAmount,
-        total: totalPayable + overdueAmount + studentFeesDue,
+        pay_type: formData.pay_type,
+        type_amount: typeAmount,
+        paid_amount: typeAmount,
+        total: total,
         total_due: totalDue,
         overdue_amount: overdueAmount,
         pay_date: formData.pay_date,
-        payment_method: "Cash", // Default payment method
+        payment_method: formData.payment_method || "Cash",
       };
 
       await saveCollectionAPI(collectionDataToSave);
@@ -557,7 +1037,19 @@ export default function CollectionList() {
       }
     }, [open]);
 
-    // Get fees types from localStorage if available
+    // Get all fees types from feeTypes localStorage and feesTypeData
+    const getAllFeeTypes = () => {
+      const getAllFeeTypeData = () => {
+        const storedData = localStorage.getItem("feeTypes");
+        const storedItems = storedData ? JSON.parse(storedData) : [];
+        return [...feeTypeData, ...storedItems];
+      };
+      
+      const allFeeTypeData = getAllFeeTypeData();
+      // Get unique fees_type values from feeTypeData
+      const uniqueFeesTypesFromFeeTypes = [...new Set(allFeeTypeData.map(fee => fee.fees_type).filter(Boolean))];
+      
+      // Also get fees from localStorage "fees" (created fees)
     const loadFees = () => {
       const storedData = localStorage.getItem("fees");
       if (storedData) {
@@ -572,7 +1064,13 @@ export default function CollectionList() {
     
     const createdFees = loadFees();
     const createdFeesNames = createdFees.map(fee => fee.name).filter(Boolean);
-    const feesTypeOptions = [...new Set([...feesTypeData, ...createdFeesNames, "Session"])];
+      
+      // Combine all fees types: from feeTypes, feesTypeData, and created fees
+      const allFeesTypes = [...new Set([...uniqueFeesTypesFromFeeTypes, ...feesTypeData, ...createdFeesNames])];
+      return allFeesTypes;
+    };
+    
+    const feesTypeOptions = getAllFeeTypes();
 
     const [formData, setFormData] = useState({
       student_id: "",
@@ -586,11 +1084,11 @@ export default function CollectionList() {
       fees_amounts: {},
       total_payable: 0,
       payable_due: 0,
-      total_fees: 0,
+      pay_type: "",
+      total: 0,
       total_due: 0,
-      in_total: 0,
       overdue_amount: 0,
-      paid_amount: "0.00",
+      type_amount: "0.00",
       pay_date: today,
       payment_method: "",
     });
@@ -626,11 +1124,11 @@ export default function CollectionList() {
           fees_amounts: {},
           total_payable: 0,
           payable_due: 0,
-          total_fees: 0,
+          pay_type: "",
+          total: 0,
           total_due: 0,
-          in_total: 0,
           overdue_amount: 0,
-          paid_amount: "0.00",
+          type_amount: "0.00",
           pay_date: today,
           payment_method: "",
         });
@@ -787,27 +1285,26 @@ export default function CollectionList() {
       }
     }, [formData.student_id, formData.class, formData.group, formData.section, formData.session]);
 
-    // Calculate totals when paid amount changes
+    // Calculate totals when type amount changes
     useEffect(() => {
-      const paidAmount = parseFloat(formData.paid_amount) || 0;
+      const typeAmount = parseFloat(formData.type_amount) || 0;
       const totalPayable = formData.total_payable || 0;
       const overdueAmount = formData.overdue_amount || 0;
       const studentFeesDue = formData.student_fees_due || 0;
       
-      const payableDue = Math.max(0, totalPayable - paidAmount);
-      const inTotal = paidAmount;
+      const payableDue = Math.max(0, totalPayable - typeAmount);
+      const total = totalPayable + overdueAmount + studentFeesDue;
       // Total Due includes: new fees (totalPayable) + student existing dues + overdue amounts
       const calculatedTotalDue = totalPayable + studentFeesDue + overdueAmount;
-      const totalDue = paidAmount >= calculatedTotalDue ? 0 : Math.max(0, calculatedTotalDue - paidAmount);
+      const totalDue = typeAmount >= calculatedTotalDue ? 0 : Math.max(0, calculatedTotalDue - typeAmount);
 
       setFormData((prev) => ({
         ...prev,
-        total_fees: totalPayable,
         payable_due: payableDue,
+        total: total,
         total_due: totalDue,
-        in_total: inTotal,
       }));
-    }, [formData.paid_amount, formData.total_payable, formData.overdue_amount, formData.student_fees_due]);
+    }, [formData.type_amount, formData.total_payable, formData.overdue_amount, formData.student_fees_due]);
 
     const handleChange = (e) => {
       const { name, value } = e.target;
@@ -848,9 +1345,22 @@ export default function CollectionList() {
         return;
       }
       
-      if (!formData.paid_amount || parseFloat(formData.paid_amount) <= 0) {
-        alert("Please enter a valid Paid Amount");
+      if (!formData.type_amount || parseFloat(formData.type_amount) <= 0) {
+        alert("Please enter a valid Type Amount");
         return;
+      }
+      
+      if (!formData.pay_type) {
+        alert("Please select Pay Type (Due / Payable / Advance)");
+        return;
+      }
+      
+      // Check if there's remaining balance that must be paid
+      if (formData.total_due > 0) {
+        const confirmPay = confirm(`There is a remaining balance of ৳${formData.total_due}. Do you want to proceed?`);
+        if (!confirmPay) {
+          return;
+        }
       }
       
       // Show payment method modal
@@ -1081,42 +1591,67 @@ export default function CollectionList() {
             </table>
           </div>
 
-          {/* Summary Section - Total Fees, Total Due, In Total */}
+          {/* Summary Section - Total payable, Payable due, Total, Total due */}
           <div className="space-y-2">
             <div className={`flex justify-between items-center border h-8 px-[8px]  ${borderClr} ${
               darkMode ? "bg-gray-700" : "bg-gray-50"
             }`}>
-              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total Fees</span>
-              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.total_payable || 0}</span>
+              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total payable</span>
+              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.total_payable || 0}</span>
+            </div>
+            <div className={`flex justify-between items-center border h-8 px-[8px]  ${borderClr} ${
+              darkMode ? "bg-gray-700" : "bg-gray-50"
+            }`}>
+              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Payable due</span>
+              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.payable_due || 0}</span>
             </div>
             {formData.overdue_amount > 0 && (
               <div className={`flex justify-between items-center h-8 px-[8px] border  ${borderClr} ${
                 darkMode ? "bg-gray-700" : "bg-gray-50"
               }`}>
                 <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Overdue Amount</span>
-                <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.overdue_amount || 0}</span>
+                <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.overdue_amount || 0}</span>
               </div>
             )}
             <div className={`flex justify-between items-center border h-8 px-[8px] ${borderClr} ${
               darkMode ? "bg-gray-700" : "bg-gray-50"
             }`}>
-              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total Due</span>
-              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.total_due || 0}</span>
+              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total</span>
+              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.total || 0}</span>
             </div>
-            <div className={`flex justify-between items-center h-8 px-[8px] border  ${borderClr} ${
+            <div className={`flex justify-between items-center border h-8 px-[8px] ${borderClr} ${
               darkMode ? "bg-gray-700" : "bg-gray-50"
             }`}>
-              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>In Total</span>
-              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>{formData.in_total || 0}</span>
+              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total due</span>
+              <span className={`text-sm pr-3 ${darkMode ? "text-red-400" : "text-red-600"}`}>৳{formData.total_due || 0}</span>
             </div>
           </div>
 
-         <div className="grid grid-cols-2 gap-4 pt-2">
-           {/* Paid Amount */}
+         <div className="space-y-4 pt-2">
+           {/* Pay type */}
+           <div>
+             <label className={`block text-xs mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+               Pay type
+             </label>
+             <select
+               name="pay_type"
+               value={formData.pay_type}
+               onChange={handleChange}
+               className={`w-full h-8 px-3 text-xs border ${borderClr} ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+               required
+             >
+               <option value="">Select Pay Type</option>
+               <option value="Due">Due</option>
+               <option value="Payable">Payable</option>
+               <option value="Advance">Advance</option>
+             </select>
+           </div>
+
+           {/* Type amount */}
            <Input
-             label="Paid Amount"
-             name="paid_amount"
-             value={formData.paid_amount}
+             label="Type amount"
+             name="type_amount"
+             value={formData.type_amount}
              onChange={handleChange}
              type="number"
              step="0.02"
@@ -1534,10 +2069,50 @@ export default function CollectionList() {
           darkMode ? "bg-gray-900" : "bg-white"
         } p-2 overflow-x-auto hide-scrollbar`}
       >
+        {/* Download Button - Always Visible */}
+        <div className="mb-3 flex items-center gap-2">
+          <button
+            onClick={handleDownloadMultipleSlips}
+            disabled={selectedCollections.length === 0}
+            className={`px-4 h-8 text-[12px] font-medium rounded transition-colors ${
+              selectedCollections.length > 0
+                ? darkMode
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+                : darkMode
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            Download {selectedCollections.filter(selected => 
+              currentCollections.some(current => current.sl === selected.sl)
+            ).length > 0 ? `(${selectedCollections.filter(selected => 
+              currentCollections.some(current => current.sl === selected.sl)
+            ).length})` : ''}
+          </button>
+          {selectedCollections.length > 0 && (
+            <button
+              onClick={() => setSelectedCollections([])}
+              className={`px-3 py-2 text-xs rounded ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+              } transition-colors`}
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <CollectiontTable
           data={currentCollections}
           setData={setCollections}
+          selectedCollections={selectedCollections}
+          onSelectionChange={setSelectedCollections}
           onEdit={(collection) => setEditingCollection(collection)}
+          onView={(collection) => {
+            setViewingCollection(collection);
+            setViewCollectionSlipModal(true);
+          }}
           onDelete={async () => {
             // Reload collections after delete
             try {
@@ -1586,6 +2161,18 @@ export default function CollectionList() {
           setCurrentPage(1);
         }}
       />
+
+      {/* Collection Slip Modal */}
+      <CollectionSlipModal
+        open={viewCollectionSlipModal}
+        onClose={() => {
+          setViewCollectionSlipModal(false);
+          setViewingCollection(null);
+        }}
+        collection={viewingCollection}
+        darkMode={darkMode}
+      />
+
     </div>
   );
 }

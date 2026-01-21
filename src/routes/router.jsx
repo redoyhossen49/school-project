@@ -94,6 +94,10 @@ export const router = createBrowserRouter([
       // fee management routes
       { path: "feegrouplist", element: <FeeGroupList /> },
       { path: "addfeegroup", element: <AddFeeGroupPage /> },
+      { path: "fee/list", element: <FeeTypeList /> },
+      { path: "fee/payment", element: <CollectionList /> },
+      { path: "exam/admit", element: <AddmitCardPage /> },
+      { path: "exam/sitnumber", element: <SitNumberPage /> },
     ],
   },
   {

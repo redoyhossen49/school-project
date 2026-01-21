@@ -118,12 +118,12 @@ export default function FeeTypeTable({ data, setData, onEdit }) {
                 <td
                   className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                 >
-                  ৳{fee.fees_amount}
+                  {fee.fees_amount}
                 </td>
                 <td
                   className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
                 >
-                  ৳{fee.total_payable || fee.fees_amount}
+                  {fee.total_payable || fee.fees_amount}
                 </td>
                 <td
                   className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
@@ -132,7 +132,7 @@ export default function FeeTypeTable({ data, setData, onEdit }) {
                     <span className="text-green-600 font-semibold">Paid</span>
                   ) : (
                     <span className="text-red-600 font-semibold">
-                      ৳{fee.payable_due !== undefined ? fee.payable_due : (fee.total_payable || fee.fees_amount)}
+                      {fee.payable_due !== undefined ? fee.payable_due : (fee.total_payable || fee.fees_amount)}
                     </span>
                   )}
                 </td>
