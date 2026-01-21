@@ -58,14 +58,14 @@ export default function SitNumberPage() {
   // -------------------- Outside Click --------------------
   useEffect(() => {
     const handler = (e) => {
-      if (classRef.current && !classRef.current.contains(e.target))
-        setClassOpen(false);
-      if (groupRef.current && !groupRef.current.contains(e.target))
-        setGroupOpen(false);
-      if (!filterRef.current?.contains(e.target)) {
+      if (statusRef.current && !statusRef.current.contains(e.target))
+        setStatusOpen(false);
+      if (exportRef.current && !exportRef.current.contains(e.target))
+        setExportOpen(false);
+      if (sortRef.current && !sortRef.current.contains(e.target))
+        setSortOpen(false);
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
         setFilterOpen(false);
-        setClassOpen(false);
-        setGroupOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);

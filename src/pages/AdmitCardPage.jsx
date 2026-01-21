@@ -53,7 +53,7 @@ export default function AdmitCardPage() {
   const [sessionOpen, setSessionOpen] = useState(false);
   const [examOpen, setExamOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState("desc");
+const [sortOrder, setSortOrder] = useState("desc");
   const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -271,26 +271,26 @@ export default function AdmitCardPage() {
   };
 
   // -------------------- Filtered + Sorted Data --------------------
-  const filteredData = useMemo(() => {
-    const source = data.length ? data : studentExamData;
+ const filteredData = useMemo(() => {
+  const source = data.length ? data : studentExamData;
 
-    return source
-      .filter((d) => {
+  return source
+    .filter((d) => {
         // Only show students who have generated admit card numbers
         const admitCardKey = `${d.IDNumber}_${d.Class}_${d.Section || ""}_${d.Session}_${d.ExamName}`;
         const hasAdmitCard = generatedAdmitCards[admitCardKey];
 
         if (!hasAdmitCard) return false; // Hide if no admit card generated
 
-        return (
-          (appliedFilters.class ? d.Class === appliedFilters.class : true) &&
-          (appliedFilters.group ? d.Group === appliedFilters.group : true) &&
-          (appliedFilters.section ? d.Section === appliedFilters.section : true) &&
-          (appliedFilters.session ? d.Session === appliedFilters.session : true) &&
-          (appliedFilters.exam ? d.ExamName === appliedFilters.exam : true) &&
-          (search ? d.StudentName.toLowerCase().includes(search.toLowerCase()) : true)
-        );
-      })
+      return (
+        (appliedFilters.class ? d.Class === appliedFilters.class : true) &&
+        (appliedFilters.group ? d.Group === appliedFilters.group : true) &&
+        (appliedFilters.section ? d.Section === appliedFilters.section : true) &&
+        (appliedFilters.session ? d.Session === appliedFilters.session : true) &&
+        (appliedFilters.exam ? d.ExamName === appliedFilters.exam : true) &&
+        (search ? d.StudentName.toLowerCase().includes(search.toLowerCase()) : true)
+      );
+    })
       .map((d, index) => {
         // Add generated admit card number to the data
         const admitCardKey = `${d.IDNumber}_${d.Class}_${d.Section || ""}_${d.Session}_${d.ExamName}`;
@@ -301,14 +301,14 @@ export default function AdmitCardPage() {
           SL: d.SL || d.sl || index + 1, // Add SL field (serial number)
         };
       })
-      .sort((a, b) => {
-        // Sorting by IDNumber (or SL if exists)
-        if (sortOrder === "asc") {
+    .sort((a, b) => {
+      // Sorting by IDNumber (or SL if exists)
+      if (sortOrder === "asc") {
           return a.IDNumber.localeCompare(b.IDNumber); // oldest first
-        } else {
+      } else {
           return b.IDNumber.localeCompare(a.IDNumber); // newest first
-        }
-      });
+      }
+    });
   }, [data, appliedFilters, search, sortOrder, generatedAdmitCards]);
 
 
@@ -1637,11 +1637,11 @@ export default function AdmitCardPage() {
                           setStatusOpen(false); // close dropdown
                         }}
                         className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${classFilter === cls
-                          ? "bg-blue-100 text-blue-700 font-medium"
-                          : darkMode
-                            ? "text-gray-200"
-                            : "text-gray-700"
-                          }`}
+                            ? "bg-blue-100 text-blue-700 font-medium"
+                            : darkMode
+                              ? "text-gray-200"
+                              : "text-gray-700"
+                        }`}
                       >
                         {cls}
                       </button>
@@ -1687,18 +1687,18 @@ export default function AdmitCardPage() {
               <button
                 onClick={() => setSortOpen(!sortOpen)}
                 className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${darkMode
-                  ? "border-gray-500 bg-gray-700 text-gray-100"
-                  : "border-gray-200 bg-white text-gray-800"
-                  }`}
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
               >
                 Sort By
               </button>
               {sortOpen && (
                 <div
                   className={`absolute mt-2 w-full z-40 border  ${darkMode
-                    ? "bg-gray-800 border-gray-700 text-gray-100"
-                    : "bg-white border-gray-200 text-gray-900"
-                    }  left-0`}
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }  left-0`}
                 >
                   <button
                     onClick={() => {
@@ -1864,7 +1864,7 @@ export default function AdmitCardPage() {
                           onPrint={handlePrint}
                           darkMode={darkMode}
                           canEdit={canEdit}
-                        />
+        />
                       </td>
                     </tr>
                   );
@@ -1872,7 +1872,7 @@ export default function AdmitCardPage() {
               )}
             </tbody>
           </table>
-        </div>
+      </div>
       </div>
 
       {/* Admit Card Modal */}
