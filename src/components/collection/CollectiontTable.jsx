@@ -22,7 +22,7 @@ const headers = [
   "Pay Method",
 ];
 
-export default function CollectiontTable({ data, setData, onEdit, onDelete, onView }) {
+export default function CollectiontTable({ data, setData, onEdit, onDelete, onView, selectedCollections = [], onSelectionChange }) {
   const { darkMode } = useTheme();
   const borderCol = darkMode ? "border-gray-700" : "border-gray-200";
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
@@ -382,6 +382,33 @@ export default function CollectiontTable({ data, setData, onEdit, onDelete, onVi
     setOpenDropdown(openDropdown === sl ? null : sl);
   };
 
+  const handleCheckboxChange = (collection, checked) => {
+    if (!onSelectionChange) return;
+    
+    if (checked) {
+      onSelectionChange([...(selectedCollections || []), collection]);
+    } else {
+      onSelectionChange((selectedCollections || []).filter(c => c.sl !== collection.sl));
+    }
+  };
+
+  const handleSelectAll = (checked) => {
+    if (!onSelectionChange) return;
+    
+    if (checked) {
+      onSelectionChange([...data]);
+    } else {
+      onSelectionChange([]);
+    }
+  };
+
+  const isSelected = (collection) => {
+    if (!selectedCollections) return false;
+    return selectedCollections.some(c => c.sl === collection.sl);
+  };
+
+  const isAllSelected = data.length > 0 && selectedCollections && selectedCollections.length === data.length;
+
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -410,6 +437,16 @@ export default function CollectiontTable({ data, setData, onEdit, onDelete, onVi
           }`}
         >
           <tr>
+            {onSelectionChange && selectedCollections !== undefined && (
+              <th className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}>
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className={`cursor-pointer ${darkMode ? "accent-blue-500" : "accent-blue-600"}`}
+                />
+              </th>
+            )}
             {headers.map((h) => (
               <th
                 key={h}
@@ -429,7 +466,7 @@ export default function CollectiontTable({ data, setData, onEdit, onDelete, onVi
         <tbody>
           {data.length === 0 ? (
             <tr>
-              <td colSpan={showAction ? 15 : 14} className="text-center py-4">
+              <td colSpan={showAction ? (onSelectionChange ? 16 : 15) : (onSelectionChange ? 15 : 14)} className="text-center py-4">
                 No Data Found
               </td>
             </tr>
@@ -437,6 +474,16 @@ export default function CollectiontTable({ data, setData, onEdit, onDelete, onVi
             data.map((collection) => {
               return (
                 <tr key={collection.sl} className={`border-b ${borderCol} ${hoverRow}`}>
+                  {onSelectionChange && selectedCollections !== undefined && (
+                    <td className={`px-3 h-8 border-r ${borderCol}`}>
+                      <input
+                        type="checkbox"
+                        checked={isSelected(collection)}
+                        onChange={(e) => handleCheckboxChange(collection, e.target.checked)}
+                        className={`cursor-pointer ${darkMode ? "accent-blue-500" : "accent-blue-600"}`}
+                      />
+                    </td>
+                  )}
                   {/* Sl */}
                   <td className={`px-3 h-8 border-r ${borderCol}`}>
                     {collection.sl}
