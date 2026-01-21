@@ -3,7 +3,7 @@ import { BiChevronDown } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import Pagination from "../components/Pagination.jsx";
 import FormModal from "../components/FormModal.jsx";
-import ReusableTable from "../components/common/ReusableTable.jsx";
+
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -12,6 +12,7 @@ import { seatNumberData } from "../data/seatNumberData.js";
 import { Link } from "react-router-dom";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import SeatPlanModal from "../components/seatPlan/SeatPlanModal.jsx";
+import SitNumberTable from "../components/exam/SitNumberTable.jsx";
 
 export default function SitNumberPage() {
   const { darkMode } = useTheme();
@@ -232,17 +233,17 @@ export default function SitNumberPage() {
 
   // -------------------- Columns --------------------
   const columns = [
-    { key: "SL", label: "SL" },
+    { key: "SL", label: "Sl" },
     { key: "className", label: "Class" },
     { key: "group", label: "Group" },
     { key: "session", label: "Session" },
-    { key: "examName", label: "Exam Name" },
-    { key: "examYear", label: "Exam Year" },
-    { key: "studentName", label: "Student Name" },
-    { key: "idNumber", label: "ID Number" },
-    { key: "rollNo", label: "Roll No" },
-    { key: "fathersName", label: "Father's Name" },
-    { key: "seatNumber", label: "Seat Number" },
+    { key: "examName", label: "Exam name" },
+    { key: "examYear", label: "Exam year" },
+    { key: "studentName", label: "Student name" },
+    { key: "idNumber", label: "ID number" },
+    { key: "rollNo", label: "Roll no" },
+    { key: "fathersName", label: "Father's name" },
+    { key: "seatNumber", label: "Seat number" },
   ];
 
   const addSeatNumberFields = [
@@ -298,10 +299,10 @@ export default function SitNumberPage() {
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={` p-3 space-y-4 ${cardBg}`}>
+      <div className={` p-3 space-y-3 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Seat number List</h2>
+            <h2 className="text-base font-semibold">Seat number list</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-600">
                 Dashboard
@@ -312,12 +313,42 @@ export default function SitNumberPage() {
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            <button
+            {/*  <button
               onClick={handleRefresh}
               className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
             >
               Refresh
-            </button>
+            </button>*/}
+            {/* Filter Dropdown */}
+            <div ref={filterRef} className="relative flex-1">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter seat number"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+                  setSectionFilter(values.section || "");
+                  setSessionFilter(values.session || "");
+                  setExamFilter(values.exam || "");
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -350,9 +381,9 @@ export default function SitNumberPage() {
               <>
                 <button
                   onClick={() => setSeatPlanModalOpen(true)}
-                  className="w-full flex items-center  bg-green-600 text-white px-3 h-8 text-xs"
+                  className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
                 >
-                   Seat Plan
+                  Seat plan
                 </button>
               </>
             )}
@@ -408,9 +439,9 @@ export default function SitNumberPage() {
         />
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
-          <div className="flex gap-2 md:gap-2 w-full md:w-auto">
-            <div ref={statusRef} className="relative flex-1">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+          {/*<div className="flex gap-2 md:gap-2 w-full md:w-auto">
+           <div ref={statusRef} className="relative flex-1">
               <button
                 onClick={() => setStatusOpen((prev) => !prev)}
                 className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
@@ -439,45 +470,16 @@ export default function SitNumberPage() {
                             : "text-gray-700"
                       }`}
                     >
-                      {c} {/* ✅ c is a string */}
+                      {c} 
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Filter Dropdown */}
-            <div ref={filterRef} className="relative flex-1">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
+          
 
-              <FilterDropdown
-                title="Filter seat number"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-                  setSectionFilter(values.section || "");
-                  setSessionFilter(values.session || "");
-                  setExamFilter(values.exam || "");
-
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort Button */}
+           
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -518,7 +520,7 @@ export default function SitNumberPage() {
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* Search + Pagination */}
           <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">
@@ -541,15 +543,14 @@ export default function SitNumberPage() {
       </div>
 
       {/* TABLE */}
-      <div className={` p-3 overflow-x-auto ${cardBg}`}>
-        <ReusableTable
+      <div className={` overflow-x-auto ${cardBg}`}>
+        <SitNumberTable
           columns={columns}
           data={currentData.map((item, idx) => ({
             ...item,
-            id: (currentPage - 1) * perPage + idx + 1,
             SL: (currentPage - 1) * perPage + idx + 1,
           }))}
-          showActionKey={canEdit}
+          canEdit={canEdit}
         />
       </div>
     </div>
