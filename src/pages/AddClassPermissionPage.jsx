@@ -39,7 +39,7 @@ export default function AddClassPermissionPage() {
           darkMode ? "bg-gray-700 text-gray-200" : "bg-white text-gray-700"
         } p-6 `}
       >
-        <h1 className="text-base font-semibold">Add Class Permission</h1>
+        <h1 className="text-base font-semibold">Class Permission</h1>
         <p
           className={`text-xs mt-1 ${
             darkMode ? "text-gray-200" : "text-gray-400"
@@ -50,7 +50,7 @@ export default function AddClassPermissionPage() {
           </Link>
           <span className="mx-1">/</span>
           <Link to="/school/dashboard/permissionlist" className="hover:text-indigo-600">
-            Class Permission
+            Teacher
           </Link>
           <span className="mx-1">/</span>Add Permission
         </p>
@@ -63,10 +63,19 @@ export default function AddClassPermissionPage() {
           darkMode ? "bg-gray-700 text-white" : "bg-white"
         }`}
       >
-        <h2 className="text-center font-semibold">Class Permission Information</h2>
+        <h2 className="text-center font-semibold">Class Permission </h2>
 
         {/* ===== Grid ===== */}
         <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-4">
+
+           <Input
+            type="select"
+            label="Select teacher"
+            name="teacherName"
+            value={formData.teacherName}
+            onChange={handleChange}
+            options={["Redoy", "Sagor", "Rahim", "Karim", "Nasim"]}
+          />
           {/* Class */}
           <Input
             type="select"
@@ -108,14 +117,7 @@ export default function AddClassPermissionPage() {
               showDropdownTop={true}
           />
 
-           <Input
-            type="select"
-            label="Select teacher"
-            name="teacherName"
-            value={formData.teacherName}
-            onChange={handleChange}
-            options={["Redoy", "Sagor", "Rahim", "Karim", "Nasim"]}
-          />
+          
 
         </div>
 

@@ -206,10 +206,69 @@ export default function SectionListPage() {
   writeFile(wb, "SectionList.xlsx");
 };
 
-const exportPDF = (data) => {
+const exportPDF = (data, filters = {}) => {
   if (!data.length) return alert("No data to export");
 
-  const doc = new jsPDF("landscape", "pt", "a4");
+  const doc = new jsPDF("portrait", "pt", "a4");
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // ---------------- SCHOOL INFO ----------------
+  const schoolName = "ABC High School";
+  const schoolAddress = "Dhaka, Bangladesh";
+  const reportTitle = "Section List Report";
+
+  const schoolLogo = "/logo.png";
+  const watermarkLogo = "/logo.png";
+  const signatureImg = "/sign.png";
+
+  const themeColor = [38, 166, 154]; // same as admit badge
+
+  // ---------------- PAGE BORDER (ADMIT STYLE) ----------------
+  doc.setDrawColor(...themeColor);
+  doc.setLineWidth(1.5);
+  doc.roundedRect(20, 20, pageWidth - 40, pageHeight - 40, 10, 10);
+
+  // ---------------- WATERMARK ----------------
+  doc.setGState(new doc.GState({ opacity: 0.06 }));
+  doc.addImage(
+    watermarkLogo,
+    "PNG",
+    pageWidth / 2 - 150,
+    pageHeight / 2 - 150,
+    300,
+    300
+  );
+  doc.setGState(new doc.GState({ opacity: 1 }));
+
+  // ---------------- HEADER ----------------
+  doc.addImage(schoolLogo, "PNG", 35, 35, 60, 60);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text(schoolName, pageWidth / 2, 50, { align: "center" });
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(schoolAddress, pageWidth / 2, 65, { align: "center" });
+
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text(reportTitle, pageWidth / 2, 90, { align: "center" });
+
+  // ---------------- FILTER INFO ----------------
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+
+  const filterText = `
+Class: ${filters.class || "All"}    Group: ${filters.group || "All"}    Section: ${filters.section || "All"}
+Generated Date: ${new Date().toLocaleDateString()}
+`;
+
+  doc.text(filterText.trim(), 40, 115);
+
+  // ---------------- TABLE ----------------
   const tableColumn = [
     "SL",
     "Class",
@@ -219,6 +278,7 @@ const exportPDF = (data) => {
     "Total Payable",
     "Payable Due",
   ];
+
   const tableRows = data.map((item) => [
     item.sl,
     item.class,
@@ -232,11 +292,50 @@ const exportPDF = (data) => {
   autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
-    startY: 20,
-    theme: "striped",
-    styles: { fontSize: 8 },
+    startY: 150,
+    theme: "grid",
+    styles: {
+      fontSize: 9,
+      cellPadding: 6,
+      halign: "center",
+    },
+    headStyles: {
+      fillColor: themeColor,
+      textColor: 255,
+      fontStyle: "bold",
+    },
+    alternateRowStyles: {
+      fillColor: [245, 245, 245],
+    },
+    margin: { left: 40, right: 40 },
   });
-  doc.save("SectionList.pdf");
+
+  // ---------------- SIGNATURE FOOTER ----------------
+  const finalY = doc.lastAutoTable.finalY + 40;
+
+  if (finalY < pageHeight - 100) {
+    doc.addImage(signatureImg, "PNG", pageWidth - 180, finalY, 120, 40);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("Authorized Signature", pageWidth - 120, finalY + 55, {
+      align: "center",
+    });
+  }
+
+  // ---------------- FOOTER PAGE NUMBER ----------------
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.text(
+      `Page ${i} of ${pageCount}`,
+      pageWidth / 2,
+      pageHeight - 25,
+      { align: "center" }
+    );
+  }
+
+  doc.save("Section_List_A4.pdf");
 };
 
 
@@ -355,6 +454,7 @@ const exportPDF = (data) => {
                 },
                 {
                   key: "section",
+                  label:"Type section",
                   placeholder: "Section Name",
                   type: "text",
                 },

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import Input from "../components/Input";
+import ProfessionalPaymentModal from "../components/ProfessionalPaymentModal";
 
 export default function AddPromoteRequestPage() {
   const { darkMode } = useTheme();
@@ -16,14 +17,84 @@ export default function AddPromoteRequestPage() {
     toGroup: "",
     toSection: "",
     toSession: "",
-    payment: false, // Payment checkbox
+    payment: false, // existing
+    paymentMethod: "", // selected payment method
+    paymentStatus: "", // new field: initiated / processing / pending / success / failed
+    transactionId: "", // new field for online payments
   });
+
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const payerType =
+    formData.fromGroup === "Teacher" || formData.fromGroup === "Student"
+      ? "teacher"
+      : "school";
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  // Dummy backend simulation
+  const createPaymentSession = async ({ amount, method, referenceId }) => {
+    return new Promise((resolve) =>
+      setTimeout(
+        () =>
+          resolve({
+            sessionId: "sess_" + Date.now(),
+            amount,
+            method,
+            referenceId,
+          }),
+        800,
+      ),
+    );
+  };
+
+  const simulatePaymentGateway = async (session) => {
+    return new Promise((resolve) =>
+      setTimeout(
+        () =>
+          resolve({
+            status: "success", // success / failed
+            transactionId: "TXN" + Date.now(),
+          }),
+        1500,
+      ),
+    );
+  };
+
+  const handlePayment = async (method) => {
+    // Cash check
+    if (method === "cash") {
+      setFormData((prev) => ({
+        ...prev,
+        paymentMethod: "Cash",
+        paymentStatus: "pending",
+      }));
+      return;
+    }
+
+    // Online payment
+    setFormData((prev) => ({
+      ...prev,
+      paymentMethod: method,
+      paymentStatus: "processing",
+    }));
+
+    const session = await createPaymentSession({
+      amount: 500,
+      method,
+      referenceId: "PROMOTE_" + Date.now(),
+    });
+    const result = await simulatePaymentGateway(session);
+
+    setFormData((prev) => ({
+      ...prev,
+      paymentStatus: result.status,
+      transactionId: result.transactionId,
     }));
   };
 
@@ -77,7 +148,7 @@ export default function AddPromoteRequestPage() {
         }`}
       >
         <h2 className="text-center font-semibold text-lg mb-4">
-          Promote Request 
+          Promote Request
         </h2>
 
         {/* ===== From Class Grid ===== */}
@@ -172,6 +243,16 @@ export default function AddPromoteRequestPage() {
             Payment Required for Promote Request
           </label>
         </div>
+        {formData.paymentMethod && (
+          <p className="text-xs mt-1">
+            Payment Method: <b>{formData.paymentMethod}</b> <br />
+            Status: {formData.paymentStatus === "initiated" && "Initiated ⏳"}
+            {formData.paymentStatus === "processing" && "Processing ⏳"}
+            {formData.paymentStatus === "pending" && "Pending (Cash) 🕒"}
+            {formData.paymentStatus === "success" && "Success ✅"}
+            {formData.paymentStatus === "failed" && "Failed ❌"}
+          </p>
+        )}
 
         {/* ===== Action Buttons ===== */}
         <div className="flex w-full gap-4 md:justify-end mt-4">
@@ -184,13 +265,21 @@ export default function AddPromoteRequestPage() {
           </button>
 
           <button
-            type="submit"
+            type="button"
+            onClick={() => setIsPaymentModalOpen(true)}
             className="px-6 h-8 w-full md:w-auto bg-green-600 text-white shdaow-sm hover:bg-green-700 transition"
           >
             Payment
           </button>
         </div>
       </form>
+      <ProfessionalPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        payerType={payerType} // school / teacher / student
+        darkMode={darkMode}
+        onSelect={handlePayment} // <- Step 1 er function
+      />
     </div>
   );
 }

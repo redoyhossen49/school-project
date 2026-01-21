@@ -16,7 +16,13 @@ import AdmitCardModal from "../components/admitCard/AdmitCardModal.jsx";
 import ViewAdmitCardModal from "../components/admitCard/ViewAdmitCardModal.jsx";
 import EditAdmitCardModal from "../components/admitCard/EditAdmitCardModal.jsx";
 import AdmitCardActions from "../components/admitCard/AdmitCardActions.jsx";
-import { generateAdmitCardHTML, getStudentSubjects, getStudentPhoto, getStudentSubjectDetails, formatDate } from "../components/admitCard/admitCardUtils.js";
+import {
+  generateAdmitCardHTML,
+  getStudentSubjects,
+  getStudentPhoto,
+  getStudentSubjectDetails,
+  formatDate,
+} from "../components/admitCard/admitCardUtils.js";
 import classTeacherSignature from "../assets/images/class-teacher.png";
 import headteacherSignature from "../assets/images/signature-headteacher.png";
 import schoolLogo from "../assets/images/sidebar-logo.avif";
@@ -90,7 +96,10 @@ const [sortOrder, setSortOrder] = useState("desc");
 
   // Update localStorage when generatedAdmitCards changes
   useEffect(() => {
-    localStorage.setItem("generatedAdmitCards", JSON.stringify(generatedAdmitCards));
+    localStorage.setItem(
+      "generatedAdmitCards",
+      JSON.stringify(generatedAdmitCards),
+    );
   }, [generatedAdmitCards]);
 
   // Temporary (UI selection only)
@@ -134,24 +143,29 @@ const [sortOrder, setSortOrder] = useState("desc");
         studentExamData
           .filter((d) => d.Class === admitCardSelections.class)
           .map((d) => d.Section || "")
-          .filter(Boolean)
-      )
+          .filter(Boolean),
+      ),
     );
   }, [admitCardSelections.class]);
 
   // Filtered students based on selections
   const filteredStudentsForAdmitCard = useMemo(() => {
-    if (!admitCardSelections.class || !admitCardSelections.section ||
-      !admitCardSelections.session || !admitCardSelections.exam) {
+    if (
+      !admitCardSelections.class ||
+      !admitCardSelections.section ||
+      !admitCardSelections.session ||
+      !admitCardSelections.exam
+    ) {
       return [];
     }
 
     // Map "Mid" to "Mid Term" and "Final" to "Final" for matching
     const examNameMap = {
-      "Mid": "Mid Term",
-      "Final": "Final"
+      Mid: "Mid Term",
+      Final: "Final",
     };
-    const examNameToMatch = examNameMap[admitCardSelections.exam] || admitCardSelections.exam;
+    const examNameToMatch =
+      examNameMap[admitCardSelections.exam] || admitCardSelections.exam;
 
     return studentExamData.filter((d) => {
       return (
@@ -285,15 +299,21 @@ const [sortOrder, setSortOrder] = useState("desc");
 
         if (!hasAdmitCard) return false; // Hide if no admit card generated
 
-      return (
-        (appliedFilters.class ? d.Class === appliedFilters.class : true) &&
-        (appliedFilters.group ? d.Group === appliedFilters.group : true) &&
-        (appliedFilters.section ? d.Section === appliedFilters.section : true) &&
-        (appliedFilters.session ? d.Session === appliedFilters.session : true) &&
-        (appliedFilters.exam ? d.ExamName === appliedFilters.exam : true) &&
-        (search ? d.StudentName.toLowerCase().includes(search.toLowerCase()) : true)
-      );
-    })
+        return (
+          (appliedFilters.class ? d.Class === appliedFilters.class : true) &&
+          (appliedFilters.group ? d.Group === appliedFilters.group : true) &&
+          (appliedFilters.section
+            ? d.Section === appliedFilters.section
+            : true) &&
+          (appliedFilters.session
+            ? d.Session === appliedFilters.session
+            : true) &&
+          (appliedFilters.exam ? d.ExamName === appliedFilters.exam : true) &&
+          (search
+            ? d.StudentName.toLowerCase().includes(search.toLowerCase())
+            : true)
+        );
+      })
       .map((d, index) => {
         // Add generated admit card number to the data
         const admitCardKey = `${d.IDNumber}_${d.Class}_${d.Section || ""}_${d.Session}_${d.ExamName}`;
@@ -314,8 +334,6 @@ const [sortOrder, setSortOrder] = useState("desc");
     });
   }, [data, appliedFilters, search, sortOrder, generatedAdmitCards]);
 
-
-
   // -------------------- Pagination --------------------
   const perPage = 20;
   const totalPages = Math.max(1, Math.ceil(filteredData.length / perPage));
@@ -327,21 +345,18 @@ const [sortOrder, setSortOrder] = useState("desc");
 
   // -------------------- Columns --------------------
   const columns = [
-    { key: "SL", label: "SL" },
+    { key: "SL", label: "Sl" },
     { key: "Class", label: "Class" },
     { key: "Group", label: "Group" },
+    { key: "Section", label: "Section" },
     { key: "Session", label: "Session" },
-    { key: "ExamName", label: "Exam Name" },
-    { key: "ExamYear", label: "Exam Year" },
-    { key: "StudentName", label: "Student Name" },
-    { key: "IDNumber", label: "ID Number" },
-    { key: "RollNo", label: "Roll No" },
-    { key: "FathersName", label: "Father's Name" },
-    { key: "AdmitCardNo", label: "Admit Card No" },
-    { key: "SubjectName", label: "Subject Name" },
-    { key: "ExamStartDate", label: "Exam Start Date" },
-    { key: "StartTime", label: "Start Time" },
-    { key: "EndTime", label: "End Time" },
+    { key: "ExamName", label: "Exam name" },
+    { key: "ExamYear", label: "Exam year" },
+    { key: "StudentName", label: "Student name" },
+    { key: "IDNumber", label: "ID number" },
+    { key: "RollNo", label: "Roll no" },
+    { key: "FathersName", label: "Father's name" },
+    { key: "AdmitCardNo", label: "Admit card no" },
   ];
 
   // Don't reset selected cards automatically - let user control it
@@ -350,7 +365,6 @@ const [sortOrder, setSortOrder] = useState("desc");
     // Only reset if filters change, not on page change
     // This allows selection to persist across pages
   }, [appliedFilters]);
-
 
   // -------------------- Handlers --------------------
   const handlePrint = (row) => {
@@ -716,8 +730,8 @@ const [sortOrder, setSortOrder] = useState("desc");
   const generateAdmitCardPDF = (doc, row, x, y, width, height) => {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const cardWidth = width || (pageWidth - 60);
-    const cardHeight = height || (pageHeight / 2 - 45);
+    const cardWidth = width || pageWidth - 60;
+    const cardHeight = height || pageHeight / 2 - 45;
 
     // Decorative border (using regular rect if roundedRect not supported)
     doc.setDrawColor(139, 115, 85); // Brown color
@@ -742,13 +756,19 @@ const [sortOrder, setSortOrder] = useState("desc");
     // School Header
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text("Mohakhali Model High School", x + cardWidth / 2, currentY, { align: "center" });
+    doc.text("Mohakhali Model High School", x + cardWidth / 2, currentY, {
+      align: "center",
+    });
     currentY += 10;
 
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text("Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212",
-      x + cardWidth / 2, currentY, { align: "center" });
+    doc.text(
+      "Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212",
+      x + cardWidth / 2,
+      currentY,
+      { align: "center" },
+    );
     currentY += 15;
 
     // Admit Card Title
@@ -766,10 +786,16 @@ const [sortOrder, setSortOrder] = useState("desc");
     currentY += 20;
 
     // Exam Info
-    const examYear = row.ExamYear || row.Session?.split("-")[0] || new Date().getFullYear();
+    const examYear =
+      row.ExamYear || row.Session?.split("-")[0] || new Date().getFullYear();
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text(`Exam: ${row.ExamName} - ${examYear}`, x + cardWidth / 2, currentY, { align: "center" });
+    doc.text(
+      `Exam: ${row.ExamName} - ${examYear}`,
+      x + cardWidth / 2,
+      currentY,
+      { align: "center" },
+    );
     currentY += 20;
 
     // Student Photo
@@ -786,15 +812,34 @@ const [sortOrder, setSortOrder] = useState("desc");
     try {
       const studentPhoto = getStudentPhoto(row.IDNumber);
       if (studentPhoto && studentPhoto !== "https://via.placeholder.com/100") {
-        doc.addImage(studentPhoto, "JPEG", photoX, photoY, photoSize, photoSize * 1.2, undefined, "FAST");
+        doc.addImage(
+          studentPhoto,
+          "JPEG",
+          photoX,
+          photoY,
+          photoSize,
+          photoSize * 1.2,
+          undefined,
+          "FAST",
+        );
       } else {
         doc.setFontSize(8);
-        doc.text("Photo", photoX + photoSize / 2, photoY + (photoSize * 1.2) / 2, { align: "center" });
+        doc.text(
+          "Photo",
+          photoX + photoSize / 2,
+          photoY + (photoSize * 1.2) / 2,
+          { align: "center" },
+        );
       }
     } catch (e) {
       // If image fails, show placeholder text
       doc.setFontSize(8);
-      doc.text("Photo", photoX + photoSize / 2, photoY + (photoSize * 1.2) / 2, { align: "center" });
+      doc.text(
+        "Photo",
+        photoX + photoSize / 2,
+        photoY + (photoSize * 1.2) / 2,
+        { align: "center" },
+      );
     }
 
     // Student Details (Left Side)
@@ -845,7 +890,7 @@ const [sortOrder, setSortOrder] = useState("desc");
       const col = idx < subjectsPerColumn ? 0 : 1;
       const rowIdx = idx < subjectsPerColumn ? idx : idx - subjectsPerColumn;
       const subjectX = col === 0 ? x + 20 : x + cardWidth / 2 + 10;
-      doc.text(subject, subjectX, currentY + (rowIdx * 10));
+      doc.text(subject, subjectX, currentY + rowIdx * 10);
     });
 
     // Signatures
@@ -860,35 +905,73 @@ const [sortOrder, setSortOrder] = useState("desc");
     const signatureHeight = 30;
     const signatureWidth = 100;
     try {
-      doc.addImage(classTeacherSignature, "PNG", x + 40, currentY, signatureWidth, signatureHeight, undefined, "FAST");
+      doc.addImage(
+        classTeacherSignature,
+        "PNG",
+        x + 40,
+        currentY,
+        signatureWidth,
+        signatureHeight,
+        undefined,
+        "FAST",
+      );
     } catch (e) {
-      doc.line(x + 40, currentY + signatureHeight / 2, x + 140, currentY + signatureHeight / 2);
+      doc.line(
+        x + 40,
+        currentY + signatureHeight / 2,
+        x + 140,
+        currentY + signatureHeight / 2,
+      );
     }
-    doc.text("Class Teacher's Signature", x + 90, currentY + signatureHeight + 8, { align: "center" });
+    doc.text(
+      "Class Teacher's Signature",
+      x + 90,
+      currentY + signatureHeight + 8,
+      { align: "center" },
+    );
 
     // Headteacher Signature Image
     try {
-      doc.addImage(headteacherSignature, "PNG", x + cardWidth - 140, currentY, signatureWidth, signatureHeight, undefined, "FAST");
+      doc.addImage(
+        headteacherSignature,
+        "PNG",
+        x + cardWidth - 140,
+        currentY,
+        signatureWidth,
+        signatureHeight,
+        undefined,
+        "FAST",
+      );
     } catch (e) {
-      doc.line(x + cardWidth - 140, currentY + signatureHeight / 2, x + cardWidth - 40, currentY + signatureHeight / 2);
+      doc.line(
+        x + cardWidth - 140,
+        currentY + signatureHeight / 2,
+        x + cardWidth - 40,
+        currentY + signatureHeight / 2,
+      );
     }
-    doc.text("Headmaster's (In Charge) Signature", x + cardWidth - 90, currentY + signatureHeight + 8, { align: "center" });
+    doc.text(
+      "Headmaster's (In Charge) Signature",
+      x + cardWidth - 90,
+      currentY + signatureHeight + 8,
+      { align: "center" },
+    );
   };
 
   // Helper function to convert image path to absolute URL
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
       return imagePath;
     }
-    if (imagePath.startsWith('/')) {
+    if (imagePath.startsWith("/")) {
       return window.location.origin + imagePath;
     }
     // For Vite imported assets, try to get the actual URL
     try {
       return new URL(imagePath, window.location.origin).href;
     } catch {
-      return window.location.origin + '/' + imagePath;
+      return window.location.origin + "/" + imagePath;
     }
   };
 
@@ -915,19 +998,30 @@ const [sortOrder, setSortOrder] = useState("desc");
     const generateCardHTMLWithUrls = (row) => {
       // Generate HTML using the same function as ViewAdmitCardModal
       let html = generateAdmitCardHTML(row);
-      
+
       // Replace image URLs with absolute URLs
       const logoUrl = getImageUrl(schoolLogo);
       const watermarkUrl = getImageUrl(schoolWatermark);
       const signatureUrl = getImageUrl(headteacherSignature);
       const studentPhoto = getStudentPhoto(row.IDNumber);
-      const photoUrl = studentPhoto.startsWith('http') ? studentPhoto : getImageUrl(studentPhoto);
+      const photoUrl = studentPhoto.startsWith("http")
+        ? studentPhoto
+        : getImageUrl(studentPhoto);
 
       // Replace image sources with absolute URLs
       html = html.replace(/src="[^"]*sidebar-logo[^"]*"/g, `src="${logoUrl}"`);
-      html = html.replace(/src="[^"]*school\.webp[^"]*"/g, `src="${watermarkUrl}"`);
-      html = html.replace(/src="[^"]*signature-headteacher[^"]*"/g, `src="${signatureUrl}"`);
-      html = html.replace(/(<div class="student-photo">[\s\S]*?<img[^>]*src=")[^"]*("[^>]*>)/g, `$1${photoUrl}$2`);
+      html = html.replace(
+        /src="[^"]*school\.webp[^"]*"/g,
+        `src="${watermarkUrl}"`,
+      );
+      html = html.replace(
+        /src="[^"]*signature-headteacher[^"]*"/g,
+        `src="${signatureUrl}"`,
+      );
+      html = html.replace(
+        /(<div class="student-photo">[\s\S]*?<img[^>]*src=")[^"]*("[^>]*>)/g,
+        `$1${photoUrl}$2`,
+      );
 
       return html;
     };
@@ -938,7 +1032,7 @@ const [sortOrder, setSortOrder] = useState("desc");
       alert("Please allow popups to print admit cards");
       return;
     }
-    
+
     // Generate HTML for all selected cards (2 cards per page, portrait mode)
     let printContent = `
       <!DOCTYPE html>
@@ -966,6 +1060,8 @@ const [sortOrder, setSortOrder] = useState("desc");
               display: flex;
               flex-direction: column;
               justify-content: flex-start;
+               
+               margin-top:4px;
             }
             .admit-card {
               width: 100%;
@@ -977,11 +1073,12 @@ const [sortOrder, setSortOrder] = useState("desc");
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
               overflow: hidden;
-              flex: 0 0 50vh;
-              height: 50vh;
+              height: calc(50vh - 10px);
+  flex: 0 0 calc(50vh - 10px);
+  margin-bottom: 10px;
               min-height: 50vh;
               max-height: 50vh;
-              margin: 0;
+            
               display: flex;
               flex-direction: column;
               justify-content: space-between;
@@ -1343,17 +1440,17 @@ const [sortOrder, setSortOrder] = useState("desc");
     for (let i = 0; i < selectedRows.length; i += 2) {
       // Start new page container for every pair
       printContent += '<div class="page-container">';
-      
+
       // Add first card
       printContent += generateCardHTMLWithUrls(selectedRows[i]);
-      
-      // Add second card if exists (don't duplicate if odd number)
+
+      // Add second card if exists, otherwise duplicate the first card to fill the page
       if (i + 1 < selectedRows.length) {
         printContent += generateCardHTMLWithUrls(selectedRows[i + 1]);
       }
-      
+
       // Close page container
-      printContent += '</div>';
+      printContent += "</div>";
     }
 
     printContent += `
@@ -1532,7 +1629,7 @@ const [sortOrder, setSortOrder] = useState("desc");
   return (
     <div className="p-3 space-y-4">
       {/* HEADER */}
-      <div className={` p-3 space-y-4 ${cardBg}`}>
+      <div className={` p-3 space-y-3 ${cardBg}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Admit Card</h2>
@@ -1546,12 +1643,35 @@ const [sortOrder, setSortOrder] = useState("desc");
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
-            >
-              Refresh
-            </button>
+            <div ref={filterRef} className="relative flex-1">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter exam routine"
+                fields={filterFields}
+                selected={filters}
+                setSelected={setFilters}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={(values) => {
+                  setClassFilter(values.class || "");
+                  setGroupFilter(values.group || "");
+
+                  setSessionFilter(values.session || "");
+                  setExamFilter(values.exam || "");
+
+                  setCurrentPage(1);
+                  setFilterOpen(false);
+                }}
+                darkMode={darkMode}
+                buttonRef={filterRef}
+              />
+            </div>
 
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
@@ -1618,8 +1738,8 @@ const [sortOrder, setSortOrder] = useState("desc");
         </div>
 
         {/* / Filter / Sort */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-2 md:gap-0">
-          <div className="flex gap-2 md:gap-2 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+          {/* <div className="flex gap-2 md:gap-2 w-full md:w-auto">
             <div ref={statusRef} className="relative flex-1">
               <button
                 onClick={() => setStatusOpen((prev) => !prev)}
@@ -1643,7 +1763,8 @@ const [sortOrder, setSortOrder] = useState("desc");
                           setCurrentPage(1); // reset pagination
                           setStatusOpen(false); // close dropdown
                         }}
-                        className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${classFilter === cls
+                        className={`block w-full px-3 h-8 text-left text-xs hover:bg-blue-50 hover:text-blue-600 ${
+                          classFilter === cls
                             ? "bg-blue-100 text-blue-700 font-medium"
                             : darkMode
                               ? "text-gray-200"
@@ -1657,43 +1778,12 @@ const [sortOrder, setSortOrder] = useState("desc");
                 )}
             </div>
 
-            {/* Filter Dropdown */}
-            {/* Filter Dropdown */}
-            <div ref={filterRef} className="relative flex-1">
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
-
-              <FilterDropdown
-                title="Filter exam routine"
-                fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-
-                  setSessionFilter(values.session || "");
-                  setExamFilter(values.exam || "");
-
-                  setCurrentPage(1);
-                  setFilterOpen(false);
-                }}
-                darkMode={darkMode}
-                buttonRef={filterRef}
-              />
-            </div>
-
-            {/* Sort Button */}
+         
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
-                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${darkMode
+                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                  darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
                     : "border-gray-200 bg-white text-gray-800"
                 }`}
@@ -1702,7 +1792,8 @@ const [sortOrder, setSortOrder] = useState("desc");
               </button>
               {sortOpen && (
                 <div
-                  className={`absolute mt-2 w-full z-40 border  ${darkMode
+                  className={`absolute mt-2 w-full z-40 border  ${
+                    darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
                   }  left-0`}
@@ -1728,7 +1819,7 @@ const [sortOrder, setSortOrder] = useState("desc");
                 </div>
               )}
             </div>
-          </div>
+          </div>*/}
 
           {/* Search + Pagination */}
           <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">
@@ -1751,38 +1842,8 @@ const [sortOrder, setSortOrder] = useState("desc");
       </div>
 
       {/* TABLE */}
-      <div className={`${darkMode ? "bg-gray-900" : "bg-white"} p-2 overflow-x-auto hide-scrollbar`}>
-        {/* Download Button - Always Visible */}
-        <div className="mb-3 flex items-center gap-2">
-          <button
-            onClick={handleDownloadSelected}
-            disabled={selectedAdmitCards.size === 0}
-            className={`px-4 h-8 text-[12px] font-medium rounded transition-colors ${
-              selectedAdmitCards.size > 0
-                ? darkMode
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-                : darkMode
-                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            Download {selectedAdmitCards.size > 0 ? `(${selectedAdmitCards.size})` : ''}
-          </button>
-          {selectedAdmitCards.size > 0 && (
-            <button
-              onClick={() => setSelectedAdmitCards(new Set())}
-              className={`px-3 py-2 text-xs rounded ${
-                darkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-              } transition-colors`}
-            >
-              Clear
-            </button>
-          )}
-        </div>
-        <div className={`border overflow-x-auto ${darkMode ? "bg-gray-800 text-gray-100 border-gray-700" : "bg-white text-gray-900 border-gray-200"}`}>
+      <div className={` p-3 overflow-x-auto ${cardBg}`}>
+        <div className="border border-gray-300 overflow-x-auto">
           <table className="w-full table-auto border-collapse text-xs">
             {/* HEADER */}
             <thead
@@ -1792,15 +1853,43 @@ const [sortOrder, setSortOrder] = useState("desc");
                   : "bg-gray-100 border-b border-gray-300"
               }
             >
+              {/* Download Button Row */}
+              <tr>
+                <td
+                  colSpan={columns.length + 2}
+                  className={`h-10 px-3 border-b ${borderClr}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={handleDownloadSelected}
+                      disabled={selectedAdmitCards.size === 0}
+                      className={`text-xs px-2 h-7 transition font-semibold ${
+                        selectedAdmitCards.size === 0
+                          ? darkMode
+                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-blue-600 text-white hover:bg-blue-700"
+                      }`}
+                    >
+                      Download ({selectedAdmitCards.size})
+                    </button>
+                  </div>
+                </td>
+              </tr>
               {/* Column Headers Row */}
               <tr>
-                <th className={`px-3 h-8 text-left font-semibold border-r ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}>
+                <th
+                  className={`h-8 px-3 text-left font-semibold border-r ${borderClr} whitespace-nowrap`}
+                >
                   <input
                     type="checkbox"
-                    checked={currentData.length > 0 && currentData.every((row) => {
-                      const rowId = row.IDNumber || row.idNumber || row.sl;
-                      return selectedAdmitCards.has(rowId);
-                    })}
+                    checked={
+                      currentData.length > 0 &&
+                      currentData.every((row) => {
+                        const rowId = row.IDNumber || row.idNumber || row.sl;
+                        return selectedAdmitCards.has(rowId);
+                      })
+                    }
                     onChange={handleSelectAll}
                     className="cursor-pointer"
                   />
@@ -1823,10 +1912,7 @@ const [sortOrder, setSortOrder] = useState("desc");
             <tbody>
               {currentData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={columns.length + 2}
-                    className="h-10 text-center"
-                  >
+                  <td colSpan={columns.length + 2} className="h-10 text-center">
                     No Data Found
                   </td>
                 </tr>
@@ -1836,15 +1922,22 @@ const [sortOrder, setSortOrder] = useState("desc");
                   return (
                     <tr
                       key={row.sl || index}
-                      className={`border-b ${borderClr} ${darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50"
-                        } ${isSelected ? darkMode ? "bg-gray-800/50" : "bg-blue-50" : ""}`}
+                      className={`border-b ${borderClr} ${
+                        darkMode
+                          ? "bg-gray-700 hover:bg-gray-800"
+                          : "bg-white hover:bg-gray-50"
+                      } ${isSelected ? (darkMode ? "bg-gray-800/50" : "bg-blue-50") : ""}`}
                     >
                       {/* Checkbox Column */}
-                      <td className={`h-8 px-3 border-r ${borderClr} whitespace-nowrap`}>
+                      <td
+                        className={`h-8 px-3 border-r ${borderClr} whitespace-nowrap`}
+                      >
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={(e) => handleSelectAdmitCard(e, row.IDNumber)}
+                          onChange={(e) =>
+                            handleSelectAdmitCard(e, row.IDNumber)
+                          }
                           onClick={(e) => e.stopPropagation()}
                           className="cursor-pointer"
                         />
@@ -1871,7 +1964,11 @@ const [sortOrder, setSortOrder] = useState("desc");
                             setEditAdmitCardModalOpen(true);
                           }}
                           onDelete={(r) => {
-                            if (confirm("Are you sure you want to delete this admit card?")) {
+                            if (
+                              confirm(
+                                "Are you sure you want to delete this admit card?",
+                              )
+                            ) {
                               // Handle delete
                               alert("Deleted successfully");
                             }
@@ -1898,6 +1995,7 @@ const [sortOrder, setSortOrder] = useState("desc");
             setAdmitCardModalOpen(false);
             setAdmitCardSelections({
               class: "",
+              group: "",
               section: "",
               session: "",
               exam: "",
@@ -1906,6 +2004,7 @@ const [sortOrder, setSortOrder] = useState("desc");
           selections={admitCardSelections}
           setSelections={setAdmitCardSelections}
           classOptions={classOptions}
+          groupOptions={groupOptions}
           sectionOptions={filteredSectionOptions}
           sessionOptions={sessionOptions}
           examOptions={examOptions}
