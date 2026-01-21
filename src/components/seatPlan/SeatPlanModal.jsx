@@ -5,6 +5,7 @@ import { studentExamData } from "../../data/studentExamData.js";
 import { seatNumberData } from "../../data/seatNumberData.js";
 import schoolLogo from "../../assets/images/sidebar-logo.avif";
 import schoolWatermark from "../../assets/images/school.webp";
+import Input from "../Input.jsx";
 
 export default function SeatPlanModal({ open, onClose }) {
   const { darkMode } = useTheme();
@@ -14,13 +15,13 @@ export default function SeatPlanModal({ open, onClose }) {
   const modalRef = useRef(null);
 
   // Step 1 states
-  const [classType, setClassType] = useState("All");
+  const [classType, setClassType] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedClasses, setSelectedClasses] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState("");
   const [sessionYear, setSessionYear] = useState("");
   const [selectedExam, setSelectedExam] = useState("");
-
+  const [dropdownOpen, setDropdownOpen] = useState("");
   // Step 2 states
   const [totalStudents, setTotalStudents] = useState(0);
   const [seatNumberStart, setSeatNumberStart] = useState(1);
@@ -30,10 +31,18 @@ export default function SeatPlanModal({ open, onClose }) {
   const [seatPlans, setSeatPlans] = useState([]);
 
   // Get unique options from exam data
-  const classOptions = Array.from(new Set(studentExamData.map((s) => s.Class))).sort();
-  const groupOptions = Array.from(new Set(studentExamData.map((s) => s.Group).filter(Boolean))).sort();
-  const sessionOptions = Array.from(new Set(studentExamData.map((s) => s.Session))).sort();
-  const examOptions = Array.from(new Set(studentExamData.map((s) => s.ExamName))).sort();
+  const classOptions = Array.from(
+    new Set(studentExamData.map((s) => s.Class)),
+  ).sort();
+  const groupOptions = Array.from(
+    new Set(studentExamData.map((s) => s.Group).filter(Boolean)),
+  ).sort();
+  const sessionOptions = Array.from(
+    new Set(studentExamData.map((s) => s.Session)),
+  ).sort();
+  const examOptions = Array.from(
+    new Set(studentExamData.map((s) => s.ExamName)),
+  ).sort();
 
   useEffect(() => {
     if (open) {
@@ -96,7 +105,7 @@ export default function SeatPlanModal({ open, onClose }) {
     // Get unique students (by IDNumber) to avoid duplicates
     const uniqueStudents = [];
     const seenIds = new Set();
-    
+
     filtered.forEach((examRecord) => {
       if (!seenIds.has(examRecord.IDNumber)) {
         seenIds.add(examRecord.IDNumber);
@@ -111,7 +120,9 @@ export default function SeatPlanModal({ open, onClose }) {
           session: examRecord.Session,
           fatherName: examRecord.FathersName,
           // Get photo from studentData if available
-          photo: studentData.find((s) => s.studentId === examRecord.IDNumber)?.photo || "https://via.placeholder.com/90x110",
+          photo:
+            studentData.find((s) => s.studentId === examRecord.IDNumber)
+              ?.photo || "https://via.placeholder.com/90x110",
         });
       }
     });
@@ -155,7 +166,9 @@ export default function SeatPlanModal({ open, onClose }) {
     const seatCount = seatNumberEnd - seatNumberStart + 1;
 
     if (students.length !== seatCount) {
-      alert(`Seat count (${seatCount}) must match total students (${students.length})`);
+      alert(
+        `Seat count (${seatCount}) must match total students (${students.length})`,
+      );
       return;
     }
 
@@ -173,14 +186,18 @@ export default function SeatPlanModal({ open, onClose }) {
   const generateSeatPlanCardHTML = (student, seatNumber, logoUrl) => {
     const schoolInfo = JSON.parse(localStorage.getItem("schoolInfo") || "{}");
     const schoolName = schoolInfo.schoolName || "Mohakhali Model High School";
-    const schoolAddress = schoolInfo.address || "Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212";
+    const schoolAddress =
+      schoolInfo.address ||
+      "Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212";
 
     // Get watermark URL
-    const watermarkUrl = schoolWatermark.startsWith('http://') || schoolWatermark.startsWith('https://') 
-      ? schoolWatermark 
-      : schoolWatermark.startsWith('/') 
-        ? window.location.origin + schoolWatermark 
-        : window.location.origin + '/' + schoolWatermark;
+    const watermarkUrl =
+      schoolWatermark.startsWith("http://") ||
+      schoolWatermark.startsWith("https://")
+        ? schoolWatermark
+        : schoolWatermark.startsWith("/")
+          ? window.location.origin + schoolWatermark
+          : window.location.origin + "/" + schoolWatermark;
 
     return `
       <div class="card">
@@ -242,31 +259,36 @@ export default function SeatPlanModal({ open, onClose }) {
   const getLogoUrl = () => {
     // Vite imports return a string path like "/assets/sidebar-logo-xxx.avif"
     // Convert to absolute URL
-    if (typeof schoolLogo === 'string') {
-      if (schoolLogo.startsWith('http://') || schoolLogo.startsWith('https://')) {
+    if (typeof schoolLogo === "string") {
+      if (
+        schoolLogo.startsWith("http://") ||
+        schoolLogo.startsWith("https://")
+      ) {
         return schoolLogo;
       }
       // If it starts with /, it's already an absolute path from root
-      if (schoolLogo.startsWith('/')) {
+      if (schoolLogo.startsWith("/")) {
         return window.location.origin + schoolLogo;
       }
       // Otherwise, prepend /
-      return window.location.origin + '/' + schoolLogo;
+      return window.location.origin + "/" + schoolLogo;
     }
     // Fallback
-    return window.location.origin + '/src/assets/images/sidebar-logo.avif';
+    return window.location.origin + "/src/assets/images/sidebar-logo.avif";
   };
 
   // Handle print
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
     const logoUrl = getLogoUrl();
-    const watermarkUrl = schoolWatermark.startsWith('http://') || schoolWatermark.startsWith('https://') 
-      ? schoolWatermark 
-      : schoolWatermark.startsWith('/') 
-        ? window.location.origin + schoolWatermark 
-        : window.location.origin + '/' + schoolWatermark;
-    
+    const watermarkUrl =
+      schoolWatermark.startsWith("http://") ||
+      schoolWatermark.startsWith("https://")
+        ? schoolWatermark
+        : schoolWatermark.startsWith("/")
+          ? window.location.origin + schoolWatermark
+          : window.location.origin + "/" + schoolWatermark;
+
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -480,30 +502,39 @@ export default function SeatPlanModal({ open, onClose }) {
           </style>
         </head>
         <body>
-          ${seatPlans.map((student, index) => {
-            const cardHTML = generateSeatPlanCardHTML(student, student.seatNumber, logoUrl);
-            if (index % 10 === 0) {
-              return '<div class="page-container">' + cardHTML;
-            } else if ((index + 1) % 10 === 0 || index === seatPlans.length - 1) {
-              return cardHTML + '</div>';
-            } else {
-              return cardHTML;
-            }
-          }).join('')}
+          ${seatPlans
+            .map((student, index) => {
+              const cardHTML = generateSeatPlanCardHTML(
+                student,
+                student.seatNumber,
+                logoUrl,
+              );
+              if (index % 10 === 0) {
+                return '<div class="page-container">' + cardHTML;
+              } else if (
+                (index + 1) % 10 === 0 ||
+                index === seatPlans.length - 1
+              ) {
+                return cardHTML + "</div>";
+              } else {
+                return cardHTML;
+              }
+            })
+            .join("")}
         </body>
       </html>
     `;
 
     printWindow.document.write(printContent);
     printWindow.document.close();
-    
+
     // Wait for images to load before printing
     printWindow.onload = () => {
       // Wait for all images to load
-      const images = printWindow.document.querySelectorAll('img');
+      const images = printWindow.document.querySelectorAll("img");
       let loadedCount = 0;
       const totalImages = images.length;
-      
+
       if (totalImages === 0) {
         setTimeout(() => {
           printWindow.focus();
@@ -512,7 +543,7 @@ export default function SeatPlanModal({ open, onClose }) {
         }, 500);
         return;
       }
-      
+
       images.forEach((img) => {
         if (img.complete) {
           loadedCount++;
@@ -554,7 +585,9 @@ export default function SeatPlanModal({ open, onClose }) {
   const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
   const cardBg = darkMode ? "bg-gray-800" : "bg-white";
   const textColor = darkMode ? "text-gray-100" : "text-gray-900";
-  const inputBg = darkMode ? "bg-gray-700 text-gray-100" : "bg-white text-gray-700";
+  const inputBg = darkMode
+    ? "bg-gray-700 text-gray-100"
+    : "bg-white text-gray-700";
 
   return (
     <div
@@ -566,24 +599,18 @@ export default function SeatPlanModal({ open, onClose }) {
     >
       <div
         ref={modalRef}
-        className={`${cardBg} ${textColor} max-w-[500px] w-full  mx-4 max-h-[90vh] overflow-hidden flex flex-col ${
-          isModalOpening ? "animate-scaleIn" : isModalClosing ? "animate-scaleOut" : ""
+        className={`${cardBg} ${textColor} max-w-[500px] w-64  mx-4 max-h-[90vh] overflow-hidden flex flex-col ${
+          isModalOpening
+            ? "animate-scaleIn"
+            : isModalClosing
+              ? "animate-scaleOut"
+              : ""
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between p-4 border-b ${borderClr}`}>
-          <h2 className="text-lg font-semibold">Seat Plan</h2>
-          <button
-            onClick={handleClose}
-            className={`px-3 py-1 text-sm border ${borderClr} ${
-              darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-            } transition`}
-          >
-            Close
-          </button>
+        <div className={`flex items-center justify-center p-4 b ${borderClr}`}>
+          <h2 className="text-base  font-semibold">Create seat number</h2>
         </div>
 
         {/* Content */}
@@ -591,21 +618,21 @@ export default function SeatPlanModal({ open, onClose }) {
           {/* Step Indicator */}
           <div className="mb-6 flex items-center justify-center ">
             {[1, 2, 3].map((s) => (
-              <div key={s} className="flex items-center">
+              <div key={s} className="flex items-center ">
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                     step === s
                       ? "bg-blue-600 text-white"
                       : step > s
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-300 text-gray-600"
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-300 text-gray-600"
                   }`}
                 >
                   {step > s ? "✓" : s}
                 </div>
                 {s < 3 && (
                   <div
-                    className={`w-16 h-1 ${
+                    className={`w-11 h-1 ${
                       step > s ? "bg-green-500" : "bg-gray-300"
                     }`}
                   />
@@ -617,131 +644,163 @@ export default function SeatPlanModal({ open, onClose }) {
           {/* Step 1: Select Filters */}
           {step === 1 && (
             <div className="space-y-4">
+              <Input
+                label="Class type"
+                type="select"
+                name="classType"
+                value={classType}
+                onChange={(e) => {
+                  setClassType(e.target.value);
+                  setSelectedClass("");
+                  setSelectedClasses([]);
+                }}
+                options={["Single Class", "Multi Class"]}
+              />
 
-              <div>
-                <label className="block text-[12px] font-medium mb-2">Class Type</label>
-                <select
-                  value={classType}
-                  onChange={(e) => {
-                    setClassType(e.target.value);
-                    setSelectedClass("");
-                    setSelectedClasses([]);
-                  }}
-                  className={`w-full border px-3 h-8 text-[12px]  ${borderClr} ${inputBg}`}
-                >
-                  <option value="All">All</option>
-                  <option value="Single Class">Single Class</option>
-                  <option value="Multi Class">Multi Class</option>
-                </select>
-              </div>
-
+              {/* Single Class */}
               {classType === "Single Class" && (
-                <div>
-                  <label className="block text-[12px] font-medium mb-2">Select Class</label>
-                  <select
-                    value={selectedClass}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                    className={`w-full border px-3 py-2 text-sm  ${borderClr} ${inputBg}`}
-                  >
-                    <option value="">Choose a class</option>
-                    {classOptions.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Input
+                  label="Select class"
+                  type="select"
+                  name="selectedClass"
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  options={classOptions}
+                />
               )}
 
+              {/* Multi Class */}
               {classType === "Multi Class" && (
-                <div>
-                  <label className="block text-[12px] font-medium mb-2">Select Classes</label>
-                  <div className="flex flex-wrap gap-3 border px-3 h-8">
-                    {classOptions.map((cls) => (
-                      <label key={cls} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedClasses.includes(cls)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedClasses([...selectedClasses, cls]);
-                            } else {
-                              setSelectedClasses(selectedClasses.filter((c) => c !== cls));
+                <div className="relative w-full">
+                  {/* Input-like Dropdown */}
+                  <div
+                    onClick={() => setDropdownOpen((prev) => !prev)}
+                    className="peer border border-gray-300 px-2 h-8 flex items-center gap-1 flex-wrap cursor-pointer text-[12px]"
+                  >
+                    {selectedClasses.length === 0 ? (
+                      <span className="text-transparent">placeholder</span>
+                    ) : (
+                      selectedClasses.map((cls) => (
+                        <span
+                          key={cls}
+                          onClick={(e) => e.stopPropagation()}
+                          className=" text-[11px] flex items-center gap-1"
+                        >
+                          {cls}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedClasses(
+                                selectedClasses.filter((c) => c !== cls),
+                              )
                             }
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-[12px]">{cls}</span>
-                      </label>
-                    ))}
+                            className="font-bold"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))
+                    )}
+
+                    <svg
+                      className={`ml-auto w-4 h-4 transition-transform ${
+                        dropdownOpen ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
                   </div>
+
+                  {/* Floating Label */}
+                  <label
+                    className={`absolute left-2 transition-all duration-200 text-[12px] pointer-events-none
+        ${
+          selectedClasses.length > 0 || dropdownOpen
+            ? "-top-3 text-blue-600 bg-white px-1"
+            : "top-1/2 -translate-y-1/2 text-gray-400"
+        }
+      `}
+                  >
+                    Select Classes
+                  </label>
+
+                  {/* Dropdown Options */}
+                  {dropdownOpen && (
+                    <div className="absolute z-20 mt-1 w-full border bg-white shadow max-h-48 overflow-auto">
+                      {classOptions.map((cls) => (
+                        <div
+                          key={cls}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!selectedClasses.includes(cls)) {
+                              setSelectedClasses([...selectedClasses, cls]);
+                            }
+                            setDropdownOpen(false);
+                          }}
+                          className="px-3 py-2 text-[12px] cursor-pointer hover:bg-blue-50"
+                        >
+                          {cls}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
-              <div>
-                <label className="block text-[12px] font-medium mb-2">Select Group</label>
-                <select
-                  value={selectedGroup}
-                  onChange={(e) => setSelectedGroup(e.target.value)}
-                  className={`w-full border px-3 h-8 text-[12px]  ${borderClr} ${inputBg}`}
-                >
-                  <option value="">All Groups</option>
-                  {groupOptions.map((group) => (
-                    <option key={group} value={group}>
-                      {group}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Select Group */}
+              <Input
+                label="Select group"
+                type="select"
+                name="selectedGroup"
+                value={selectedGroup}
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                options={["All Groups", ...groupOptions]}
+              />
 
-              <div>
-                <label className="block text-[12px] font-medium mb-2">Session Year</label>
-                <select
-                  value={sessionYear}
-                  onChange={(e) => setSessionYear(e.target.value)}
-                  className={`w-full border px-3 h-8 text-[12px]  ${borderClr} ${inputBg}`}
-                  required
-                >
-                  <option value="">Choose Session Year</option>
-                  {sessionOptions.map((session) => (
-                    <option key={session} value={session}>
-                      {session}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Session Year */}
+              <Input
+                label="Session year"
+                type="select"
+                name="sessionYear"
+                value={sessionYear}
+                onChange={(e) => setSessionYear(e.target.value)}
+                options={sessionOptions}
+              />
 
-              <div>
-                <label className="block text-[12px] font-medium mb-2">Select Exam</label>
-                <select
-                  value={selectedExam}
-                  onChange={(e) => setSelectedExam(e.target.value)}
-                  className={`w-full border px-3 h-8 text-[12px]  ${borderClr} ${inputBg}`}
-                  required
-                >
-                  <option value="">Choose Exam</option>
-                  {examOptions.map((exam) => (
-                    <option key={exam} value={exam}>
-                      {exam.charAt(0).toUpperCase() + exam.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Select Exam */}
+              <Input
+                label="Select exam"
+                type="select"
+                name="selectedExam"
+                value={selectedExam}
+                onChange={(e) => setSelectedExam(e.target.value)}
+                options={examOptions.map(
+                  (exam) => exam.charAt(0).toUpperCase() + exam.slice(1),
+                )}
+              />
 
-              <div className="flex justify-end gap-2 mt-6">
+              <div className="flex w-full gap-2 mt-6">
                 <button
                   onClick={handleClose}
-                  className={`px-4 h-8 text-[12px] border ${borderClr} ${
+                  className={`px-4 h-8 w-1/2 text-[12px] border ${borderClr} ${
                     darkMode
                       ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                      : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                      : "bg-white hover:bg-gray-100 text-gray-700"
                   } transition`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleStep1Next}
-                  className="px-4 h-8 text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition"
+                  className="px-4 h-8 w-1/2 text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition"
                 >
                   Next
                 </button>
@@ -751,59 +810,67 @@ export default function SeatPlanModal({ open, onClose }) {
 
           {/* Step 2: Set Seat Numbers */}
           {step === 2 && (
-            <div className="space-y-2">
-              <h3 className="text-[12px] font-semibold mb-2">Set Seat Numbers</h3>
+            <div className="space-y-4">
+              <h3 className="text-[12px] font-semibold mb-6">
+                Set Seat Numbers
+              </h3>
 
-              <div className={`px-3 h-8 flex items-center justify-center border ${borderClr} ${cardBg}`}>
-                <div className="text-center flex items-center justify-center gap-2">
-                  <p className="text-[12px] text-gray-500 mb-1">Total Students</p>
-                  <p className="text-[12px] font-bold text-blue-600">{totalStudents}</p>
-                </div>
-              </div>
+              {/* Total Students */}
+              <Input
+                label="Total students"
+                type="number"
+                name="totalStudents"
+                value={totalStudents}
+                disabled
+              />
 
-              <div>
-                <label className="block text-[12px] font-medium mb-2">Seat Number Start</label>
-                <input
-                  type="number"
-                  value={seatNumberStart}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 1;
-                    setSeatNumberStart(val);
-                    setSeatNumberEnd(val + totalStudents - 1);
-                  }}
-                  min="1"
-                  className={`w-full border px-3 h-8 text-[12px] rounded ${borderClr} ${inputBg}`}
-                />
-              </div>
+              {/* Seat Number Start */}
+              <Input
+                label=" Start no"
+                type="number"
+                name="seatNumberStart"
+                value={seatNumberStart}
+                min={1}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 1;
+                  setSeatNumberStart(val);
+                  setSeatNumberEnd(val + totalStudents - 1);
+                }}
+              />
 
-              <div>
-                <label className="block text-[12px] font-medium mb-2">Seat Number End</label>
-                <input
-                  type="number"
-                  value={seatNumberEnd}
-                  onChange={(e) => setSeatNumberEnd(parseInt(e.target.value) || 1)}
-                  min={seatNumberStart}
-                  className={`w-full border px-3 h-8 text-[12px] rounded ${borderClr} ${inputBg}`}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Seat count: {seatNumberEnd - seatNumberStart + 1} (must match total students)
-                </p>
-              </div>
+              {/* Seat Number End */}
+              <Input
+                label=" End no"
+                type="number"
+                name="seatNumberEnd"
+                value={seatNumberEnd}
+                min={seatNumberStart}
+                onChange={(e) =>
+                  setSeatNumberEnd(parseInt(e.target.value) || 1)
+                }
+              />
 
-              <div className="flex justify-end gap-2 mt-6">
+              <p className="text-xs text-gray-500">
+                 Count: {seatNumberEnd - seatNumberStart + 1} (must match
+                total students)
+              </p>
+
+              {/* Actions */}
+              <div className="flex w-full gap-2 mt-6">
                 <button
                   onClick={() => setStep(1)}
-                  className={`px-4 h-8 text-[12px] border ${borderClr} ${
+                  className={`px-4 w-1/2 h-8 text-[12px] border ${borderClr} ${
                     darkMode
                       ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                      : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                      : "bg-white hover:bg-gray-100 text-gray-700"
                   } transition`}
                 >
                   Back
                 </button>
+
                 <button
                   onClick={handleStep2Next}
-                  className="px-4 h-8 text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition"
+                  className="px-4 h-8 w-1/2 text-[12px] bg-blue-600 text-white hover:bg-blue-700 transition"
                 >
                   Next
                 </button>
@@ -814,31 +881,37 @@ export default function SeatPlanModal({ open, onClose }) {
           {/* Step 3: Preview & Print */}
           {step === 3 && (
             <div className="space-y-4">
-              <h3 className="text-[12px] font-semibold mb-4">Preview & Print</h3>
-              
-              <div className={`px-3 h-8 gap-2 flex items-center justify-center border ${borderClr} ${cardBg} mb-4`}>
+              <h3 className="text-[12px] font-semibold mb-4">
+                Preview & Print
+              </h3>
+
+              <div
+                className={`px-3 h-8 gap-2 flex items-center justify-center border ${borderClr} ${cardBg} mb-4`}
+              >
                 <p className="text-[12px] flex items-center justify-center gap-2">
-                  <span className="font-semibold">Total Cards:</span> {seatPlans.length}
+                  <span className="font-semibold">Total Cards:</span>{" "}
+                  {seatPlans.length}
                 </p>
                 <p className="text-[12px] flex items-center justify-center gap-2">
-                  <span className="font-semibold">Pages:</span> {Math.ceil(seatPlans.length / 10)}
+                  <span className="font-semibold">Pages:</span>{" "}
+                  {Math.ceil(seatPlans.length / 10)}
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex w-full gap-2">
                 <button
                   onClick={() => setStep(2)}
-                  className={`px-4 h-8 text-[12px] border ${borderClr} ${
+                  className={`px-4  w-1/2 h-8 text-[12px] border ${borderClr} ${
                     darkMode
                       ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                      : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                      : "bg-white hover:bg-gray-100 text-gray-700"
                   } transition`}
                 >
                   Back
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="px-4 h-8 text-[12px] bg-green-600 text-white hover:bg-green-700 transition"
+                  className="px-4 w-1/2 h-8 text-[12px] bg-green-600 text-white hover:bg-green-700 transition"
                 >
                   Print
                 </button>
