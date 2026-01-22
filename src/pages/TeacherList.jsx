@@ -296,13 +296,13 @@ export default function TeacherList() {
           
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 md:mt-0">
+          <div className="flex items-center md:justify-between gap-2 w-full md:mt-0">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name..."
-              className={`w-full px-3 h-8 text-xs  border  ${
+              className={`w-full px-3 h-8 text-xs md:w-56  border  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"

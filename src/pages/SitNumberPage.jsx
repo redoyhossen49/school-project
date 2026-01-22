@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { BiChevronDown } from "react-icons/bi";
+
 import { useTheme } from "../context/ThemeContext.jsx";
 import Pagination from "../components/Pagination.jsx";
 import FormModal from "../components/FormModal.jsx";
@@ -28,7 +28,7 @@ export default function SitNumberPage() {
 
   const [addClassOpen, setAddClassOpen] = useState(false);
   const [seatPlanModalOpen, setSeatPlanModalOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState(false);
+
   const [filters, setFilters] = useState({
     class: "",
     group: "",
@@ -236,13 +236,14 @@ export default function SitNumberPage() {
     { key: "SL", label: "Sl" },
     { key: "className", label: "Class" },
     { key: "group", label: "Group" },
+    { key: "section", label: "Section" },
     { key: "session", label: "Session" },
     { key: "examName", label: "Exam name" },
     { key: "examYear", label: "Exam year" },
     { key: "studentName", label: "Student name" },
     { key: "idNumber", label: "ID number" },
     { key: "rollNo", label: "Roll no" },
-    { key: "fathersName", label: "Father's name" },
+  
     { key: "seatNumber", label: "Seat number" },
   ];
 

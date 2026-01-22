@@ -339,15 +339,18 @@ export default function SeatPlanModal({ open, onClose }) {
             }
             .watermark {
               position: absolute;
-              top: 50%;
+              bottom: 10px;
               left: 50%;
-              transform: translate(-50%, -50%) rotate(-45deg);
-              opacity: 0.08;
+              transform: translateX(-50%);
+              opacity: 0.1;
               z-index: 0;
               pointer-events: none;
+              display: flex;
+              justify-content: center;
+              align-items: center;
             }
             .watermark img {
-              width: 200px;
+              width: 80px;
               height: auto;
               object-fit: contain;
             }
@@ -361,7 +364,7 @@ export default function SeatPlanModal({ open, onClose }) {
             }
             .school-logo {
               width: 50px;
-              height: 50px;
+              height: 40px;
               border-radius: 300%;
               overflow: hidden;
               padding: 2px;
@@ -372,6 +375,13 @@ export default function SeatPlanModal({ open, onClose }) {
               height: 100%;
               object-fit: cover;
               border-radius: 300%;
+              image-rendering: -webkit-optimize-contrast;
+              image-rendering: auto;
+              -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+              transform: translateZ(0);
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
             }
             .school-info {
               text-align: center;
@@ -389,8 +399,8 @@ export default function SeatPlanModal({ open, onClose }) {
               line-height: 1.3;
             }
             .student-photo {
-              width: 60px;
-              height: 60px;
+              width: 50px;
+              height: 40px;
               border-radius: 300%;
               overflow: hidden;
               padding: 2px;
@@ -401,6 +411,13 @@ export default function SeatPlanModal({ open, onClose }) {
               height: 100%;
               object-fit: cover;
               border-radius: 300%;
+              image-rendering: -webkit-optimize-contrast;
+              image-rendering: auto;
+              -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+              transform: translateZ(0);
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
             }
             .banner-container {
               display: flex;
@@ -480,15 +497,18 @@ export default function SeatPlanModal({ open, onClose }) {
               }
               .watermark {
                 position: absolute !important;
-                top: 50% !important;
+                bottom: 10px !important;
                 left: 50% !important;
-                transform: translate(-50%, -50%) rotate(-45deg) !important;
-                opacity: 0.08 !important;
+                transform: translateX(-50%) !important;
+                opacity: 0.1 !important;
                 z-index: 0 !important;
                 pointer-events: none !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
               }
               .watermark img {
-                width: 200px !important;
+                width: 80px !important;
                 height: auto !important;
                 object-fit: contain !important;
               }
@@ -851,8 +871,8 @@ export default function SeatPlanModal({ open, onClose }) {
               />
 
               <p className="text-xs text-gray-500">
-                 Count: {seatNumberEnd - seatNumberStart + 1} (must match
-                total students)
+                Count: {seatNumberEnd - seatNumberStart + 1} (must match total
+                students)
               </p>
 
               {/* Actions */}

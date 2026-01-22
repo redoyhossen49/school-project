@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import SitNumberActions from "./SitNumberActions";
+import schoolLogo from "../../assets/images/sidebar-logo.avif";
+import schoolWatermark from "../../assets/images/school.webp";
 
 export default function SitNumberTable({
   columns,
@@ -46,8 +48,125 @@ export default function SitNumberTable({
     handlePrint(selectedRows); // Pass selected rows
   };
 
-  // Dummy print function (replace with your full seat plan print logic)
-  const handlePrint = () => {
+  // Convert image to absolute URL for printing
+  const getLogoUrl = () => {
+    // Vite imports return a string path like "/assets/sidebar-logo-xxx.avif"
+    // Convert to absolute URL
+    if (typeof schoolLogo === "string") {
+      if (
+        schoolLogo.startsWith("http://") ||
+        schoolLogo.startsWith("https://")
+      ) {
+        return schoolLogo;
+      }
+      // If it starts with /, it's already an absolute path from root
+      if (schoolLogo.startsWith("/")) {
+        return window.location.origin + schoolLogo;
+      }
+      // Otherwise, prepend /
+      return window.location.origin + "/" + schoolLogo;
+    }
+    // Fallback
+    return window.location.origin + "/src/assets/images/sidebar-logo.avif";
+  };
+
+  // Generate seat plan card HTML
+  const generateSeatPlanCardHTML = (student, seatNumber, logoUrl) => {
+    const schoolInfo = JSON.parse(localStorage.getItem("schoolInfo") || "{}");
+    const schoolName = schoolInfo.schoolName || "Mohakhali Model High School";
+    const schoolAddress =
+      schoolInfo.address ||
+      "Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212";
+
+    // Get watermark URL
+    const watermarkUrl =
+      schoolWatermark.startsWith("http://") ||
+      schoolWatermark.startsWith("https://")
+        ? schoolWatermark
+        : schoolWatermark.startsWith("/")
+          ? window.location.origin + schoolWatermark
+          : window.location.origin + "/" + schoolWatermark;
+
+    return `
+      <div class="card">
+        <div class="header">
+          <div class="school-logo">
+            <img src="${logoUrl}" alt="Logo" onerror="this.src='https://via.placeholder.com/50'">
+          </div>
+          
+          <div class="school-info">
+            <h1>${schoolName}</h1>
+            <p>${schoolAddress}</p>
+          </div>
+
+          <div class="student-photo">
+            <img src="${student.photo || "https://via.placeholder.com/90x110"}" alt="${student.student_name || student.StudentName || ""}">
+          </div>
+        </div>
+
+        <div class="banner-container">
+          <div class="banner">Seat Plan</div>
+        </div>
+
+        <hr>
+
+        <div class="details-grid">
+          <div class="left-column">
+            <div class="detail-item">
+              <span class="label">Class</span>
+              <span class="value">: ${student.className || student.Class || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Group</span>
+              <span class="value">: ${student.group || student.Group || "---"}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Section</span>
+              <span class="value">: ${student.section || student.Section || "N/A"}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Session</span>
+              <span class="value">: ${student.session || student.Session || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Exam Name</span>
+              <span class="value">: ${student.examName || student.ExamName || ""}</span>
+            </div>
+          </div>
+          <div class="right-column">
+            <div class="detail-item">
+              <span class="label">Exam Year</span>
+              <span class="value">: ${student.examYear || student.ExamYear || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Student Name</span>
+              <span class="value">: ${student.studentName || student.student_name || student.StudentName || student.name || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">ID Number</span>
+              <span class="value">: ${student.idNumber || student.IDNumber || student.studentId || student.student_id || student.ID || student.id || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Roll Number</span>
+              <span class="value">: ${student.rollNo || student.RollNo || student.roll_no || student.roll || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Seat Number</span>
+              <span class="value">: ${student.seatNumber || student.SeatNumber || student.seat_number || seatNumber || ""}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="watermark">
+          <img src="${watermarkUrl}" alt="Watermark" />
+        </div>
+      </div>
+    `;
+  };
+
+  // Print function
+  const handlePrint = (rowsToPrint = []) => {
+    const seatPlans = rowsToPrint.length > 0 ? rowsToPrint : data;
     const printWindow = window.open("", "_blank");
     const logoUrl = getLogoUrl();
     const watermarkUrl =
@@ -87,7 +206,7 @@ export default function SitNumberTable({
                gap: 0;
                page-break-after: always;
                margin: 0;
-               padding: 0;
+               padding: 10px;
                width: 210mm;
                height: 297mm;
                border-collapse: collapse;
@@ -96,21 +215,22 @@ export default function SitNumberTable({
                width: 100%;
                background-color: white;
                border: 1px solid #ddd;
-               padding: 12px;
+               padding: 15px 12px 50px 12px;
                box-shadow: none;
                position: relative;
                page-break-inside: avoid;
-               height: 100%;
+               min-height: 100%;
                display: flex;
                flex-direction: column;
-               overflow: hidden;
-               margin: -1px 0 0 -1px;
+               overflow: visible;
+               margin: 5px;
+               border-radius: 8px;
              }
              .watermark {
                position: absolute;
-               top: 50%;
+               bottom: 5px;
                left: 50%;
-               transform: translate(-50%, -50%) rotate(-45deg);
+               transform: translateX(-50%);
                opacity: 0.08;
                z-index: 0;
                pointer-events: none;
@@ -119,6 +239,11 @@ export default function SitNumberTable({
                width: 200px;
                height: auto;
                object-fit: contain;
+               image-rendering: -webkit-optimize-contrast;
+               image-rendering: crisp-edges;
+               image-rendering: high-quality;
+               -webkit-backface-visibility: hidden;
+               backface-visibility: hidden;
              }
              .header {
                display: flex;
@@ -127,11 +252,12 @@ export default function SitNumberTable({
                margin-bottom: 5px;
                position: relative;
                z-index: 1;
+               flex-shrink: 0;
              }
              .school-logo {
                width: 50px;
-               height: 50px;
-               border-radius: 300%;
+               height: 40px;
+               border-radius: 50%;
                overflow: hidden;
                padding: 2px;
                border: 1px solid #ccc;
@@ -140,7 +266,14 @@ export default function SitNumberTable({
                width: 100%;
                height: 100%;
                object-fit: cover;
-               border-radius: 300%;
+               border-radius: 50%;
+               image-rendering: -webkit-optimize-contrast;
+               image-rendering: auto;
+               -webkit-backface-visibility: hidden;
+               backface-visibility: hidden;
+               transform: translateZ(0);
+               -webkit-font-smoothing: antialiased;
+               -moz-osx-font-smoothing: grayscale;
              }
              .school-info {
                text-align: center;
@@ -148,19 +281,19 @@ export default function SitNumberTable({
                padding: 0 10px;
              }
              .school-info h1 {
-               font-size: 16px;
+               font-size: 14px;
                margin: 0;
                font-weight: bold;
              }
              .school-info p {
-               font-size: 10px;
+               font-size: 9px;
                margin: 2px 0;
                line-height: 1.3;
              }
              .student-photo {
-               width: 60px;
-               height: 60px;
-               border-radius: 300%;
+               width: 50px;
+               height: 40px;
+               border-radius: 50%;
                overflow: hidden;
                padding: 2px;
                border: 1px solid #ccc;
@@ -169,18 +302,26 @@ export default function SitNumberTable({
                width: 100%;
                height: 100%;
                object-fit: cover;
-               border-radius: 300%;
+               border-radius: 50%;
+               image-rendering: -webkit-optimize-contrast;
+               image-rendering: auto;
+               -webkit-backface-visibility: hidden;
+               backface-visibility: hidden;
+               transform: translateZ(0);
+               -webkit-font-smoothing: antialiased;
+               -moz-osx-font-smoothing: grayscale;
              }
              .banner-container {
                display: flex;
                justify-content: center;
-              
+               flex-shrink: 0;
+               margin: 5px 0;
              }
              .banner {
                background-color: #6c7a89;
                color: white;
                padding: 4px 30px;
-               font-size: 14px;
+               font-size: 12px;
                font-weight: bold;
                clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
                text-align: center;
@@ -188,22 +329,31 @@ export default function SitNumberTable({
              hr {
                border: 0;
                border-top: 1px solid #ccc;
-               margin: 10px 0;
+               margin: 8px 0;
+               flex-shrink: 0;
              }
              .details-grid {
                display: grid;
                grid-template-columns: 1fr 1fr;
-               gap: 15px 50px;
+               gap: 12px 50px;
                position: relative;
                z-index: 1;
+               margin-bottom: 10px;
+               flex-grow: 1;
+             }
+             .left-column, .right-column {
+               display: flex;
+               flex-direction: column;
+               gap: 0;
              }
              .detail-item {
-               font-size: 12px;
+               font-size: 10px;
                display: flex;
              }
              .label {
                font-weight: bold;
-               width: 65px;
+               width: 90px;
+               flex-shrink: 0;
              }
              .value {
                flex-grow: 1;
@@ -226,7 +376,7 @@ export default function SitNumberTable({
                }
                .page-container {
                  margin: 0 !important;
-                 padding: 0 !important;
+                 padding: 10px !important;
                  height: 100vh;
                  display: grid !important;
                  grid-template-columns: repeat(2, 1fr) !important;
@@ -238,20 +388,22 @@ export default function SitNumberTable({
                  print-color-adjust: exact;
                }
                .card {
-                 height: 100% !important;
-                 overflow: hidden !important;
+                 min-height: 100% !important;
+                 overflow: visible !important;
                  page-break-inside: avoid;
                  box-shadow: none !important;
-                 margin: -1px 0 0 -1px !important;
+                 margin: 5px !important;
                  border: 1px solid #ddd !important;
+                 padding: 15px 12px 50px 12px !important;
+                 border-radius: 8px !important;
                  -webkit-print-color-adjust: exact;
                  print-color-adjust: exact;
                }
                .watermark {
                  position: absolute !important;
-                 top: 50% !important;
+                 bottom: 10px !important;
                  left: 50% !important;
-                 transform: translate(-50%, -50%) rotate(-45deg) !important;
+                 transform: translateX(-50%) !important;
                  opacity: 0.08 !important;
                  z-index: 0 !important;
                  pointer-events: none !important;
@@ -377,7 +529,7 @@ export default function SitNumberTable({
               >
                 <div className="flex items-center justify-between">
                   <button
-                    onClick={handlePrint}
+                    onClick={handleDownloadSelected}
                     disabled={selectedSitNumbers.size === 0}
                     className={`text-xs px-2 h-7 transition font-semibold ${
                       selectedSitNumbers.size === 0
