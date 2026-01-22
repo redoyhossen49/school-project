@@ -10,6 +10,8 @@ export default function ReusableEditModal({
   onSubmit,
   fields = [],
   getInitialValues = null, // Optional function to transform item data
+  submitLabel = "Update",
+  closeLabel = "Close",
 }) {
   const { darkMode } = useTheme();
   const [formData, setFormData] = useState({});
@@ -189,14 +191,14 @@ export default function ReusableEditModal({
                   : "bg-gray-50 hover:bg-gray-100 text-gray-700"
               } transition `}
             >
-              Close
+              {closeLabel}
             </button>
 
             <button
               type="submit"
               className="flex-1 text-sm h-8 bg-green-600 text-white hover:bg-green-700 transition "
             >
-              Update
+              {submitLabel}
             </button>
           </div>
         </form>

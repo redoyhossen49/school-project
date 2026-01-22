@@ -2,10 +2,20 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import Input from "../components/Input";
+import { classTimeData } from "../data/classTimeData";
 
-export default function AddClassTimePage() {
+export default function AddClassTimePage({ modal = false, onClose, onSave }) {
   const { darkMode } = useTheme();
   const navigate = useNavigate();
+
+  // Generate dynamic options from classTimeData
+  const getUniqueOptions = (data, key) => {
+    return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
+  };
+
+  const classOptions = getUniqueOptions(classTimeData, "className");
+  const groupOptions = getUniqueOptions(classTimeData, "group");
+  const sectionOptions = getUniqueOptions(classTimeData, "section");
 
   const [formData, setFormData] = useState({
     className: "",
@@ -25,10 +35,19 @@ export default function AddClassTimePage() {
     e.preventDefault();
     console.log("CLASS TIME DATA 👉", formData);
     alert("Class Time Added Successfully ✅");
+    if (modal && onSave) {
+      onSave(formData);
+      onClose?.();
+      return;
+    }
     navigate("/school/dashboard/classtimelist");
   };
 
   const handleCancel = () => {
+    if (modal) {
+      onClose?.();
+      return;
+    }
     navigate("/school/dashboard/classtimelist");
   };
 
@@ -88,7 +107,7 @@ export default function AddClassTimePage() {
             name="className"
             value={formData.className}
             onChange={handleChange}
-            options={["1", "2", "3", "4", "5"]} // তুমি চাইলে real options দিতে পারো
+            options={classOptions}
           />
 
           <Input
@@ -97,7 +116,7 @@ export default function AddClassTimePage() {
             name="group"
             value={formData.group}
             onChange={handleChange}
-            options={["Science", "Arts", "Commerce"]}
+            options={groupOptions}
           />
 
           <Input
@@ -106,7 +125,7 @@ export default function AddClassTimePage() {
             name="section"
             value={formData.section}
             onChange={handleChange}
-            options={["A", "B", "C"]}
+            options={sectionOptions}
           />
 
           {/* Start Time */}

@@ -10,10 +10,13 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import PageModal from "../components/common/PageModal.jsx";
+import AddGuardianPage from "./AddGuardianPage.jsx";
 
 export default function GuardianList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
+  const [addGuardianOpen, setAddGuardianOpen] = useState(false);
 
   const [appliedFilters, setAppliedFilters] = useState({
     className: "",
@@ -59,7 +62,7 @@ export default function GuardianList() {
       ...new Set(
         data
           .map((item) => path.split(".").reduce((acc, key) => acc?.[key], item))
-          .filter(Boolean)
+          .filter(Boolean),
       ),
     ];
   };
@@ -71,11 +74,11 @@ export default function GuardianList() {
   // guardian based
   const guardianDivisionOptions = getUniqueValues(
     studentData,
-    "guardian.division"
+    "guardian.division",
   );
   const guardianDistrictOptions = getUniqueValues(
     studentData,
-    "guardian.district"
+    "guardian.district",
   );
 
   // Close dropdowns on outside click
@@ -102,7 +105,7 @@ export default function GuardianList() {
   // Filtering and sorting guardians
   const filteredGuardians = guardians
     .filter((g) =>
-      g.guardian?.name.toLowerCase().includes(search.toLowerCase())
+      g.guardian?.name.toLowerCase().includes(search.toLowerCase()),
     )
     .filter((g) => {
       if (!g.joinDate) return true;
@@ -136,7 +139,7 @@ export default function GuardianList() {
   const indexOfFirstGuardian = indexOfLastGuardian - guardiansPerPage;
   const currentGuardians = filteredGuardians.slice(
     indexOfFirstGuardian,
-    indexOfLastGuardian
+    indexOfLastGuardian,
   );
 
   const filterFields = [
@@ -244,7 +247,7 @@ export default function GuardianList() {
         <div className="md:flex md:items-center md:justify-between gap-3">
           {/* Title + Breadcrumb */}
           <div className="md:mb-3">
-            <h1 className="text-base font-semibold ">Guardians List</h1>
+            <h1 className="text-base font-semibold ">Guardians list</h1>
             <nav className="text-sm w-full text-gray-400 truncate">
               <Link
                 to="/school/dashboard"
@@ -290,7 +293,7 @@ export default function GuardianList() {
                 onClick={() => setExportOpen((prev) => !prev)}
                 className={buttonClass}
               >
-                Export <BiChevronDown />
+                Export 
               </button>
               {exportOpen && (
                 <div
@@ -318,8 +321,8 @@ export default function GuardianList() {
 
             {canEdit && (
               <button
-                onClick={() => navigate("/school/dashboard/addguardian")}
-                className="flex items-center justify-center  w-28  bg-blue-600 px-3 h-8 text-xs text-white shadow-sm hover:bg-blue-700"
+                onClick={() => setAddGuardianOpen(true)}
+                className="flex items-center  w-28  bg-blue-600 px-3 h-8 text-xs text-white  hover:bg-blue-700"
               >
                 Guardian
               </button>
@@ -330,31 +333,31 @@ export default function GuardianList() {
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
           <div className="relative " ref={filterRef}>
-              <button
-                onClick={() => setFilterOpen(!filterOpen)}
-                className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
-                  darkMode
-                    ? "border-gray-500 bg-gray-700 text-gray-100"
-                    : "border-gray-200 bg-white text-gray-800"
-                }`}
-              >
-                Filter
-              </button>
+            <button
+              onClick={() => setFilterOpen(!filterOpen)}
+              className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                darkMode
+                  ? "border-gray-500 bg-gray-700 text-gray-100"
+                  : "border-gray-200 bg-white text-gray-800"
+              }`}
+            >
+              Filter
+            </button>
 
-              <FilterDropdown
-                title="Filter Guardians"
-                fields={filterFields}
-                selected={appliedFilters}
-                setSelected={setAppliedFilters}
-                darkMode={darkMode}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={(values) => {
-                  setAppliedFilters(values);
-                }}
-                buttonRef={filterRef}
-              />
-            </div>
+            <FilterDropdown
+              title="Filter Guardians"
+              fields={filterFields}
+              selected={appliedFilters}
+              setSelected={setAppliedFilters}
+              darkMode={darkMode}
+              isOpen={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              onApply={(values) => {
+                setAppliedFilters(values);
+              }}
+              buttonRef={filterRef}
+            />
+          </div>
 
           <div className="relative w-full" ref={exportRef}>
             <button
@@ -393,7 +396,7 @@ export default function GuardianList() {
 
           {canEdit && (
             <button
-              onClick={() => navigate("/school/dashboard/addguardian")}
+              onClick={() => setAddGuardianOpen(true)}
               className="flex items-center  w-full bg-blue-600 px-3 h-8 text-xs text-white "
             >
               Guardian
@@ -403,28 +406,26 @@ export default function GuardianList() {
 
         {/* Controls: Date, Filter, Sort + Search */}
         <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          
-
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
+          <div className="flex items-center gap-2 w-full md:justify-between  md:mt-0">
             <input
               type="text"
               placeholder="Search by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`h-8 px-3 w-full text-xs  border  ${
+              className={`h-8 px-3 w-full md:w-64 text-xs  border  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
               } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
-            <div className="flex items-center flex-1">
+           
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
               />
-            </div>
+            
           </div>
         </div>
       </div>
@@ -433,6 +434,21 @@ export default function GuardianList() {
       <div className={`p-3 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
         <GuardianTable data={currentGuardians} setData={setGuardians} />
       </div>
+
+      {/* ===== ADD MODAL ===== */}
+      {canEdit && (
+        <PageModal open={addGuardianOpen} onClose={() => setAddGuardianOpen(false)}>
+          <AddGuardianPage
+            modal
+            onClose={() => setAddGuardianOpen(false)}
+            onSave={(values) => {
+              // Handle save logic here if needed
+              console.log("Guardian saved:", values);
+              setAddGuardianOpen(false);
+            }}
+          />
+        </PageModal>
+      )}
     </div>
   );
 }

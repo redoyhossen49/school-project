@@ -98,7 +98,7 @@ export default function FormModal({
       {/* Modal */}
       <div
         ref={containerRef}
-        className={`relative w-64 max-h-[70vh] overflow-y-auto p-6 text-xs border rounded
+        className={`relative w-72 max-h-[70vh] overflow-y-auto p-6 text-xs border rounded
           ${darkMode
             ? "bg-gray-800 border-gray-600 text-gray-100"
             : "bg-white border-gray-200 text-gray-900"

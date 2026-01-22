@@ -4,7 +4,7 @@ import { useTheme } from "../context/ThemeContext";
 import Input from "../components/Input"; // your custom Input component
 import { TfiGallery } from "react-icons/tfi";
 
-export default function AddGuardianPage() {
+export default function AddGuardianPage({ modal = false, onClose, onSave }) {
   const { darkMode } = useTheme();
   const navigate = useNavigate();
 
@@ -40,51 +40,43 @@ export default function AddGuardianPage() {
     e.preventDefault();
     console.log("GUARDIAN DATA 👉", formData);
     alert("Guardian Added Successfully ✅");
-    // API call can go here, then redirect
+    if (modal && onSave) {
+      onSave(formData);
+      onClose?.();
+      return;
+    }
     navigate("/dashboard/school/guardianlist");
   };
 
   const handleCancel = () => {
+    if (modal) {
+      onClose?.();
+      return;
+    }
     navigate("guardianlist");
   };
 
   return (
     <div
-      className={`py-3 px-2  min-h-screen ${
-        darkMode ? "bg-gray-800" : "bg-gray-50"
+      className={` rounded ${
+        modal ? "w-72 p-6" : "py-3 px-2 min-h-screen"
+      } flex flex-col items-center space-y-4 ${
+        darkMode ? "bg-gray-800" : "bg-white"
       }`}
     >
-      {/* Header */}
-      <div
-        className={`mb-3 p-6  ${
-          darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
-        }`}
-      >
-        <h1 className="text-base font-semibold">Add Guardian</h1>
-        <p className="text-xs text-gray-500 mt-1">
-          <Link to="/dashboard" className="hover:text-indigo-600">
-            Dashboard
-          </Link>
-          <span className="mx-1">/</span>
-          <Link  to="/school/dashboard/guardianlist" className="hover:text-indigo-600">
-            Guardian
-          </Link>
-          <span className="mx-1">/</span>
-          <span className="text-gray-400">Add Guardian</span>
-        </p>
-      </div>
-
       {/* Form */}
       <form
         onSubmit={handleSave}
-        className={`p-6  space-y-4 overflow-y-auto ${
+        className={`${
+          modal ? "w-full" : "p-6"
+        } space-y-4 overflow-y-auto ${
           darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-700"
         }`}
       >
         <h2 className="font-semibold text-center">Guardian Information</h2>
 
         {/* Grid layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className={`grid ${modal ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"} gap-4`}>
           <Input
             label="Name"
             name="name"

@@ -17,6 +17,8 @@ export default function Input({
   const { darkMode } = useTheme();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const [dropdownStyle, setDropdownStyle] = useState({});
+  const selectRef = useRef(null);
 
   /* close select dropdown */
   useEffect(() => {
@@ -31,10 +33,53 @@ export default function Input({
 
   /* ================= SELECT ================= */
   if (type === "select") {
+
+    const updateDropdownPosition = () => {
+      if (!selectRef.current) return;
+      const rect = selectRef.current.getBoundingClientRect();
+      const dropdownHeight = 192; // max-h-48 = 12rem = 192px
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      const style = {
+        position: "fixed",
+        left: rect.left,
+        width: rect.width,
+        zIndex: 50,
+      };
+
+      if (spaceBelow < dropdownHeight && spaceAbove > rect.height) {
+        // open above input
+        style.bottom = window.innerHeight - rect.top + 4;
+      } else {
+        // open below input
+        style.top = rect.bottom + 4;
+      }
+
+      setDropdownStyle(style);
+    };
+
+    useEffect(() => {
+      if (open) {
+        updateDropdownPosition();
+        window.addEventListener("scroll", updateDropdownPosition);
+        window.addEventListener("resize", updateDropdownPosition);
+        return () => {
+          window.removeEventListener("scroll", updateDropdownPosition);
+          window.removeEventListener("resize", updateDropdownPosition);
+        };
+      }
+    }, [open]);
+
     return (
       <div className="relative w-full" ref={wrapperRef}>
         <div
-          onClick={() => !disabled && setOpen(!open)}
+          ref={selectRef}
+          onClick={() => {
+            if (!disabled) {
+              setOpen(!open);
+            }
+          }}
           className={`
             h-8 px-2 text-[12px] flex items-center justify-between border
             ${darkMode
@@ -53,8 +98,9 @@ export default function Input({
 
         {open && !disabled && (
           <ul
+            style={dropdownStyle}
             className={`
-              absolute z-50 mt-1 w-full max-h-48 overflow-y-auto border
+              w-full max-h-48 overflow-y-auto border
               ${darkMode
                 ? "bg-gray-700 border-gray-600"
                 : "bg-white border-gray-300"}

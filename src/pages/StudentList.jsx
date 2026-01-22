@@ -13,6 +13,8 @@ import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import { getCollectionsFromStorage } from "../utils/collectionUtils";
 import { collectionData } from "../data/collectionData";
+import PageModal from "../components/common/PageModal.jsx";
+import AddStudentPage from "./AddStudentPage.jsx";
 
 export default function StudentsList() {
   const navigate = useNavigate();
@@ -40,7 +42,11 @@ export default function StudentsList() {
     return studentList.map((student) => {
       // Find all collections for this student
       const studentCollections = allCollections.filter(
-        (collection) => collection.student_id?.toUpperCase() === student.studentId?.toUpperCase()
+        (collection) => {
+          const collectionId = collection.student_id ? String(collection.student_id).toUpperCase() : "";
+          const studentId = student.studentId ? String(student.studentId).toUpperCase() : "";
+          return collectionId === studentId && collectionId !== "";
+        }
       );
       
       // Calculate total due from all collections
@@ -82,6 +88,9 @@ export default function StudentsList() {
   });
   const [tempFilters, setTempFilters] = useState(filters);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const DEFAULT_STUDENT_PHOTO =
+    "https://ui-avatars.com/api/?name=Student&background=0D8ABC&color=fff";
 
   const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
@@ -256,6 +265,11 @@ export default function StudentsList() {
     setSelectedDate("Monthly");
     setCurrentPage(1);
   };
+
+  const saveStudentsToStorage = (nextStudents) => {
+    localStorage.setItem("students", JSON.stringify(nextStudents));
+    window.dispatchEvent(new Event("studentsUpdated"));
+  };
   // Generate dynamic options from studentData
   const getUniqueOptions = (data, key) => {
     return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
@@ -357,7 +371,7 @@ export default function StudentsList() {
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  ${
+                  className={`absolute top-full left-0 mt-1 w-full z-40 border  ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -365,15 +379,15 @@ export default function StudentsList() {
                 >
                   <button
                     onClick={() => exportPDF(filteredStudents)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    Export PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredStudents)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    Export Excel
+                   Excel
                   </button>
                 </div>
               )}
@@ -381,7 +395,7 @@ export default function StudentsList() {
 
             {canEdit && (
               <button
-                onClick={() => navigate("/school/dashboard/addstudent")}
+                onClick={() => setAddStudentOpen(true)}
                 className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
               >
                 Student
@@ -470,7 +484,7 @@ export default function StudentsList() {
 
           {canEdit && (
             <button
-              onClick={() => navigate("/school/dashboard/addstudent")}
+              onClick={() => setAddStudentOpen(true)}
               className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Student
@@ -483,7 +497,7 @@ export default function StudentsList() {
          
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:w-auto">
+          <div className="flex items-center gap-2 md:justify-between w-full">
             <input
               type="text"
               value={search}
@@ -527,6 +541,48 @@ export default function StudentsList() {
             setEditingStudent(null);
           }}
         />
+      )}
+
+      {/* ===== ADD MODAL ===== */}
+      {canEdit && (
+        <PageModal open={addStudentOpen} onClose={() => setAddStudentOpen(false)}>
+          <AddStudentPage
+            modal
+            onClose={() => setAddStudentOpen(false)}
+            onSave={(values) => {
+              // Keep existing list/storage behavior; only map 4-step form values to table shape.
+              const base = loadStudents(); // stored raw list (without feesDue)
+              const newStudent = {
+                id: "stu_" + Date.now(),
+                feesDue: 0,
+                admissionNo: values?.idNumber || "",
+                studentId: values?.idNumber || "",
+                rollNo: values?.idNumber || "",
+                password: values?.password || "",
+                student_name: values?.studentname || "",
+                fatherName: values?.father || "",
+                motherName: values?.mother || "",
+                className: values?.className || "",
+                group: values?.groupName || "",
+                section: values?.sectionName || "",
+                session: values?.sessionYear || "",
+                phone: values?.mobileNumber || values?.mobile || "",
+                gender: values?.gender || "",
+                status: values?.status || "Active",
+                joinDate:
+                  values?.admissionDate ||
+                  new Date().toISOString().slice(0, 10),
+                photo: DEFAULT_STUDENT_PHOTO,
+              };
+
+              const nextRaw = [newStudent, ...base];
+              saveStudentsToStorage(nextRaw);
+              // refresh in-memory list with recalculated fees
+              setStudents(calculateStudentFeesDue(nextRaw));
+              setAddStudentOpen(false);
+            }}
+          />
+        </PageModal>
       )}
     </div>
   );

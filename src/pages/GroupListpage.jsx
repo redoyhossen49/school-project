@@ -261,12 +261,12 @@ export default function GroupListPage() {
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold">Group List</h2>
+            <h2 className="text-base font-semibold">Group list</h2>
             <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-700">
                 Dashboard
               </Link>
-              / Group List
+              / Group list
             </p>
           </div>
 
@@ -415,7 +415,7 @@ export default function GroupListPage() {
           </div> */}
 
           {/* Right: Search + Pagination */}
-          <div className="flex items-center gap-2 md:mt-0 w-full md:w-auto">
+          <div className="flex items-center gap-2 md:mt-0 w-full md:justify-between">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}

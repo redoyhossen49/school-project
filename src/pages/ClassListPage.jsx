@@ -255,10 +255,10 @@ const handleAddClass = (data) => {
               />
             </div>
 
-            <div ref={exportRef} className="relative w-full md:w-28">
+            <div ref={exportRef} className="relative w-full flex-1">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center   border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center   border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
                 Export
               </button>
@@ -285,7 +285,7 @@ const handleAddClass = (data) => {
             {canEdit && (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Add Class
               </button>
@@ -350,7 +350,7 @@ const handleAddClass = (data) => {
           </div> */}
 
           {/* Search + Pagination */}
-          <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">
+          <div className="flex items-center md:justify-between gap-2 w-full ">
             <input
               value={search}
               onChange={(e) => {

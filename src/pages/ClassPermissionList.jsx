@@ -7,6 +7,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import AddClassPermissionPage from "./AddClassPermissionPage.jsx";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -15,6 +16,7 @@ import autoTable from "jspdf-autotable";
 export default function ClassPermissionList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
+  const [addPermissionOpen, setAddPermissionOpen] = useState(false);
 
   const [filterValues, setFilterValues] = useState({
     class: "",
@@ -112,6 +114,26 @@ export default function ClassPermissionList() {
     setFilterValues({ class: "", group: "", section: "" });
   };
 
+  const handleCreatePermission = (data) => {
+    const maxSl = permissions.reduce((m, r) => Math.max(m, r.sl || 0), 0);
+    const nextSl = maxSl + 1;
+    const idNumber = data?.idNumber?.trim() || `CP${String(1000 + nextSl).padStart(4, "0")}`;
+
+    setPermissions((prev) => [
+      ...prev,
+      {
+        sl: nextSl,
+        teacherName: data.teacherName || "",
+        idNumber,
+        class: data.class || "",
+        group: data.group || "",
+        section: data.section || "",
+        subject: data.subject || "",
+      },
+    ]);
+    setAddPermissionOpen(false);
+  };
+
 
   // EXPORT EXCEL
   const handleExportExcel = () => {
@@ -171,7 +193,7 @@ doc.save("ClassPermissions.pdf");
       >
         <div className="md:flex md:items-center md:justify-between gap-2">
           <div>
-            <h2 className="text-base font-semibold">Class Permission</h2>
+            <h2 className="text-base font-semibold">Class permission</h2>
             <p
               className={`${
                 darkMode ? "text-gray-400" : "text-gray-500"
@@ -180,7 +202,7 @@ doc.save("ClassPermissions.pdf");
               <Link to="/school/dashboard" className="hover:text-indigo-600">
                 Dashboard
               </Link>{" "}
-              / Class Permission 
+              / Class permission 
             </p>
           </div>
 
@@ -247,7 +269,7 @@ doc.save("ClassPermissions.pdf");
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-28  border `}
+                  } absolute top-full left-0 mt-1 w-28  border md:z-50 `}
                 >
                   <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
                     PDF
@@ -261,8 +283,8 @@ doc.save("ClassPermissions.pdf");
 
             {canEdit && (
               <button
-                onClick={() => navigate("/school/dashboard/addclasspermission")}
-                className="flex items-center justify-center  w-28  px-3 h-8 text-xs  bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => setAddPermissionOpen(true)}
+                className="flex items-center  w-28  px-3 h-8 text-xs  bg-blue-600 text-white hover:bg-blue-700"
               >
                 Permission
               </button>
@@ -345,7 +367,7 @@ doc.save("ClassPermissions.pdf");
           </div>
           {canEdit && (
             <button
-              onClick={() => navigate("/school/dashboard/addclasspermission")}
+              onClick={() => setAddPermissionOpen(true)}
               className="flex items-center justify-center gap-1 w-full  px-3 h-8 text-xs bg-blue-600 text-white hover:bg-blue-700"
             >
               Permission
@@ -358,7 +380,7 @@ doc.save("ClassPermissions.pdf");
          
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:w-auto w-full">
+          <div className="flex items-center gap-2  md:justify-between  w-full">
             <input
               type="text"
               value={search}
@@ -391,6 +413,13 @@ doc.save("ClassPermissions.pdf");
           darkMode={darkMode}
         />
       </div>
+
+      {/* ========== ADD PERMISSION MODAL ========== */}
+      <AddClassPermissionPage
+        open={addPermissionOpen}
+        onClose={() => setAddPermissionOpen(false)}
+        onSubmit={handleCreatePermission}
+      />
     </div>
   );
 }

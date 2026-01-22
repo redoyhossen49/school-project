@@ -8,6 +8,7 @@ import { BiChevronDown, BiChevronRight } from "react-icons/bi";
 import { useTheme } from "../context/ThemeContext.jsx";
 import ClassPaymentTable from "../components/academic/ClassPaymentTable.jsx";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import AddTeacherModal from "../components/teacher/AddTeacherModal.jsx";
 
 export default function TeacherList() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function TeacherList() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const teachersPerPage = 20;
+  const [isAddTeacherModalOpen, setIsAddTeacherModalOpen] = useState(false);
 
   // User Role
   const userRole = localStorage.getItem("role");
@@ -208,7 +210,7 @@ export default function TeacherList() {
 
             {canEdit && (
               <button
-                onClick={() => navigate("/school/dashboard/addteacher")}
+                onClick={() => setIsAddTeacherModalOpen(true)}
                 className="w-28 flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
               >
                 Add Teacher
@@ -283,7 +285,7 @@ export default function TeacherList() {
 
           {canEdit && (
             <button
-              onClick={() => navigate("/school/dashboard/addteacher")}
+              onClick={() => setIsAddTeacherModalOpen(true)}
               className="w-full flex items-center   bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Teacher
@@ -325,6 +327,24 @@ export default function TeacherList() {
           canEdit={canEdit}
         />
       </div>
+
+      {/* Add Teacher Modal */}
+      <AddTeacherModal
+        open={isAddTeacherModalOpen}
+        onClose={() => setIsAddTeacherModalOpen(false)}
+        onAdd={(teacherData) => {
+          // Add the new teacher to the list
+          const newTeacher = {
+            id: teachers.length > 0 ? Math.max(...teachers.map(t => t.id)) + 1 : 1,
+            ...teacherData,
+            present: 0,
+            absence: 0,
+            late: 0,
+            leave: 0,
+          };
+          setTeachers([...teachers, newTeacher]);
+        }}
+      />
     </div>
   );
 }

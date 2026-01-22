@@ -12,6 +12,8 @@ import autoTable from "jspdf-autotable";
 import FormModal from "../components/FormModal.jsx";
 import PromoteFormModal from "../components/PromoteFormModal.jsx";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import PageModal from "../components/common/PageModal.jsx";
+import AddPromoteRequestPage from "./AddPromoteRequestPage.jsx";
 
 export default function PromoteRequestList() {
   const navigate = useNavigate();
@@ -23,7 +25,19 @@ export default function PromoteRequestList() {
     session: "",
   });
 
-  const [requests, setRequests] = useState(promoteRequestData);
+  const loadRequests = () => {
+    const stored = localStorage.getItem("promoteRequests");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return promoteRequestData;
+      }
+    }
+    return promoteRequestData;
+  };
+
+  const [requests, setRequests] = useState(() => loadRequests());
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const requestsPerPage = 20;
@@ -101,7 +115,7 @@ export default function PromoteRequestList() {
   const filteredRequests = requests
     .filter((r) => r.studentName.toLowerCase().includes(search.toLowerCase()))
     .filter((r) =>
-      selectedSection === "All" ? true : r.fromSection === selectedSection
+      selectedSection === "All" ? true : r.fromSection === selectedSection,
     )
 
     .filter((r) => (appliedClass ? r.fromClass === appliedClass : true))
@@ -116,7 +130,7 @@ export default function PromoteRequestList() {
   const totalPages = Math.ceil(filteredRequests.length / requestsPerPage);
   const currentData = filteredRequests.slice(
     (currentPage - 1) * requestsPerPage,
-    currentPage * requestsPerPage
+    currentPage * requestsPerPage,
   );
   const promoteFormFields = [
     // From
@@ -234,6 +248,10 @@ export default function PromoteRequestList() {
       : "border bg-white border-gray-200 text-gray-800"
   }`;
 
+  const saveRequestsToStorage = (next) => {
+    localStorage.setItem("promoteRequests", JSON.stringify(next));
+  };
+
   return (
     <div className="p-3 space-y-4 min-h-screen">
       {/* Header */}
@@ -245,7 +263,7 @@ export default function PromoteRequestList() {
         <div className="md:flex md:items-center md:justify-between gap-3">
           <div className="md:mb-3">
             <h1 className="text-base font-semibold">Promote Request </h1>
-            <nav className="text-xs w-full truncate">
+            <nav className="text-xs w-full truncate text-gray-400">
               <Link
                 to="/school/dashboard"
                 className="hover:text-indigo-600 transition"
@@ -258,52 +276,7 @@ export default function PromoteRequestList() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2 w-full md:w-auto">
-            
-            <div className="relative w-28" ref={exportRef}>
-              <button
-                onClick={() => setExportOpen(!exportOpen)}
-                className={buttonClass}
-              >
-                Export
-              </button>
-              {exportOpen && (
-                <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full  border ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-500"
-                      : "bg-white border-gray-200"
-                  }`}
-                >
-                  <button
-                    onClick={() => exportPDF(filteredRequests)}
-                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
-                  > h-6
-                    PDF
-                  </button>
-                  <button
-                    onClick={() => exportExcel(filteredRequests)}
-                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
-                  >
-                     Excel
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {canEdit && (
-              <button
-                onClick={() => setPromoteModalOpen(true)}
-                className="flex items-center w-28 bg-blue-600 px-3 h-8 text-xs text-white  hover:bg-blue-700"
-              >
-                Promote
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Buttons */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
-          <div className="relative" ref={filterRef}>
+            <div className="relative" ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
                 className={buttonClass + " w-full md:w-28 justify-between"}
@@ -331,6 +304,78 @@ export default function PromoteRequestList() {
               />
             </div>
 
+            <div className="relative w-28" ref={exportRef}>
+              <button
+                onClick={() => setExportOpen(!exportOpen)}
+                className={buttonClass}
+              >
+                Export
+              </button>
+              {exportOpen && (
+                <div
+                  className={`absolute left-0 top-full z-50 mt-1 w-full  border ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-500"
+                      : "bg-white border-gray-200"
+                  }`}
+                >
+                  <button
+                    onClick={() => exportPDF(filteredRequests)}
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
+                  >
+                    PDF
+                  </button>
+                  <button
+                    onClick={() => exportExcel(filteredRequests)}
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
+                  >
+                    Excel
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {canEdit && (
+              <button
+                onClick={() => setPromoteModalOpen(true)}
+                className="flex items-center w-28 bg-blue-600 px-3 h-8 text-xs text-white  hover:bg-blue-700"
+              >
+                Promote
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Buttons */}
+        <div className="grid grid-cols-3 gap-2 md:hidden">
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => setFilterOpen((prev) => !prev)}
+              className={buttonClass + " w-full md:w-28 justify-between"}
+            >
+              Filter
+            </button>
+
+            <FilterDropdown
+              isOpen={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              darkMode={darkMode}
+              fields={filterFields}
+              selected={selectedFilters}
+              setSelected={setSelectedFilters}
+              onApply={(values) => {
+                // IMPORTANT: Use the correct keys from your data
+                setAppliedClass(values.class); // values.class corresponds to fromClass
+                setAppliedGroup(values.group); // values.group -> fromGroup
+                setAppliedSection(values.section); // values.section -> fromSection
+                setAppliedSession(values.session); // values.session -> fromSession
+                setCurrentPage(1);
+              }}
+              buttonRef={filterRef}
+              title="Filter Options"
+            />
+          </div>
+
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setExportOpen(!exportOpen)}
@@ -354,13 +399,13 @@ export default function PromoteRequestList() {
                   onClick={() => exportPDF(filteredRequests)}
                   className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                 >
-                   PDF
+                  PDF
                 </button>
                 <button
                   onClick={() => exportExcel(filteredRequests)}
                   className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100"
                 >
-                 Excel
+                  Excel
                 </button>
               </div>
             )}
@@ -368,27 +413,24 @@ export default function PromoteRequestList() {
 
           {canEdit && (
             <button
-             onClick={() => navigate("/school/dashboard/addpromoterequest")}
+              onClick={() => setPromoteModalOpen(true)}
               className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white "
             >
               Promote
             </button>
           )}
-         
         </div>
 
         {/* Controls */}
         <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-         
-
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:justify-between md:mt-0">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search student..."
-              className={`h-8 px-3 w-full text-xs  border  ${
+              className={`h-8 px-3 w-full md:w-64 text-xs  border  ${
                 darkMode
                   ? "bg-gray-700 border-gray-500 text-gray-100 placeholder:text-gray-400"
                   : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
@@ -407,6 +449,33 @@ export default function PromoteRequestList() {
       <div className={`p-3  ${darkMode ? "bg-gray-900" : "bg-white"}`}>
         <PromoteRequestTable data={currentData} setData={setRequests} />
       </div>
+
+      {/* ===== ADD MODAL ===== */}
+      {canEdit && (
+        <PageModal open={promoteModalOpen} onClose={() => setPromoteModalOpen(false)}>
+          <AddPromoteRequestPage
+            modal
+            onClose={() => setPromoteModalOpen(false)}
+            onSave={(values) => {
+              const base = loadRequests();
+              const maxSl = base.reduce((m, r) => Math.max(m, Number(r.sl) || 0), 0);
+              const newRow = {
+                sl: maxSl + 1,
+                idNumber: "ID" + Date.now(),
+                studentName: "New Student",
+                fatherName: "-",
+                payment: values.payment ? "Yes" : "No",
+                status: "Pending",
+                ...values,
+              };
+              const next = [newRow, ...base];
+              setRequests(next);
+              saveRequestsToStorage(next);
+              setPromoteModalOpen(false);
+            }}
+          />
+        </PageModal>
+      )}
 
       {/*
 

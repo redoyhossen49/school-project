@@ -43,7 +43,8 @@ export default function FilterDropdown({
 
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const direction = spaceBelow < 200 && spaceAbove > spaceBelow ? "up" : "down";
+    const direction =
+      spaceBelow < 200 && spaceAbove > spaceBelow ? "up" : "down";
 
     setDropdownRect({
       top: rect.top,
@@ -61,18 +62,21 @@ export default function FilterDropdown({
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-30 bg-black/30" />
+      <div className="fixed inset-0  " />
 
       {/* Centered modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-2">
+      <div
+        className="fixed 
+      inset-0 z-50  flex items-center justify-center px-2"
+      >
         <div
           ref={containerRef}
           onMouseDown={(e) => e.stopPropagation()}
-          className={`relative w-64 max-w-md border shadow-lg p-5
+          className={`relative w-64 max-w-md rounded border  p-5
             ${
               darkMode
                 ? "bg-gray-800 text-gray-100 border-gray-600"
-                : "bg-white text-gray-900 border-gray-200"
+                : "bg-white text-gray-900 border-gray-100"
             }`}
         >
           {/* Title */}
@@ -88,7 +92,10 @@ export default function FilterDropdown({
                     placeholder={field.placeholder}
                     value={tempValues[field.key] || ""}
                     onChange={(e) =>
-                      setTempValues((p) => ({ ...p, [field.key]: e.target.value }))
+                      setTempValues((p) => ({
+                        ...p,
+                        [field.key]: e.target.value,
+                      }))
                     }
                     className={`w-full px-3 h-8 text-xs border 
                       ${
@@ -202,7 +209,10 @@ export default function FilterDropdown({
                         <button
                           type="button"
                           onClick={() => {
-                            setTempValues((p) => ({ ...p, [activeField]: opt }));
+                            setTempValues((p) => ({
+                              ...p,
+                              [activeField]: opt,
+                            }));
                             setActiveField(null);
                           }}
                           className={`w-full text-left px-3 py-1 transition-colors
@@ -214,7 +224,7 @@ export default function FilterDropdown({
                     ))}
                 </ul>
               </div>,
-              document.body
+              document.body,
             )}
         </div>
       </div>

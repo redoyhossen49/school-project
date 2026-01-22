@@ -10,12 +10,25 @@ import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
+import AddClassTimeModal from "../components/student/AddClassTimeModal.jsx";
 
 export default function ClassTimeList() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [classTimes, setClassTimes] = useState(classTimeData);
+  const loadClassTimes = () => {
+    const stored = localStorage.getItem("classTimes");
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return classTimeData;
+      }
+    }
+    return classTimeData;
+  };
+
+  const [classTimes, setClassTimes] = useState(() => loadClassTimes());
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const classTimesPerPage = 20;
@@ -29,6 +42,7 @@ export default function ClassTimeList() {
   const [sortOpen, setSortOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("asc");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [filters, setFilters] = useState({
     className: "",
     group: "",
@@ -125,6 +139,10 @@ export default function ClassTimeList() {
       headStyles: { fillColor: [30, 144, 255] },
     });
     doc.save("ClassTimes.pdf");
+  };
+
+  const saveClassTimesToStorage = (next) => {
+    localStorage.setItem("classTimes", JSON.stringify(next));
   };
 
   // Generate dynamic options from studentData
@@ -241,8 +259,8 @@ export default function ClassTimeList() {
 
             {canEdit && (
               <button
-                onClick={() => navigate("/school/dashboard/addclasstime")}
-                className="flex items-center   w-28  bg-blue-600 px-3 py-2 text-xs text-whitehover:bg-blue-700"
+                onClick={() => setAddOpen(true)}
+                className="flex items-center text-white   w-28  bg-blue-600 px-3 h-8 text-xs text-whitehover:bg-blue-700"
               >
                 Class Time
               </button>
@@ -332,7 +350,7 @@ export default function ClassTimeList() {
 
           {canEdit && (
             <button
-              onClick={() => navigate("/school/dashboard/addclasstime")}
+              onClick={() => setAddOpen(true)}
               className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white "
             >
               Class Time
@@ -345,13 +363,13 @@ export default function ClassTimeList() {
           
           
                 {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96  md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:justify-between md:mt-0">
             <input
               type="text"
               placeholder="Search by class..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`h-8 px-3  w-full text-xs  border  ${
+              className={`h-8 px-3  w-full md:w-64 text-xs  border  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
@@ -370,6 +388,22 @@ export default function ClassTimeList() {
       <div className={`p-3 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
         <ClassTimeTable data={currentClassTimes} setData={setClassTimes} />
       </div>
+
+      {canEdit && (
+        <AddClassTimeModal
+          open={addOpen}
+          onClose={() => setAddOpen(false)}
+          onSave={(values) => {
+            const base = loadClassTimes();
+            const maxSl = base.reduce((m, r) => Math.max(m, Number(r.sl) || 0), 0);
+            const newRow = { sl: maxSl + 1, ...values };
+            const next = [newRow, ...base];
+            setClassTimes(next);
+            saveClassTimesToStorage(next);
+            setAddOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
