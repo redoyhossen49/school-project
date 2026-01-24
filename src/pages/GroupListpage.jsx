@@ -70,26 +70,36 @@ export default function GroupListPage() {
   }, []);
 
   // New group form state (optional if you want to prefill)
- const groupFormFields = [
-  {
-    key: "class",
-    label: "Class",
-    type: "select",
-    options: ["Class 1", "Class 2"],
-    placeholder: "Select Class",
-    required: true,
-  },
-  {
-    key: "groupName",
-    label: "Group Name",
-    type: "text",
-    placeholder: "Enter Group Name",
-    required: true,
-  },
-];
+  const classOptions = [...new Set(data.map((item) => item.class))].filter(
+    Boolean,
+  );
+
+  const groupFormFields = [
+    {
+      key: "selectedClass", // ✅ use key
+      label: "Class",
+      type: "select",
+      options: classOptions, // no need for fallback here
+      placeholder: "Select Class",
+      required: true,
+    },
+    {
+      key: "groupName", // ✅ use key
+      label: "Group Name",
+      type: "text",
+      placeholder: "Enter Group Name",
+      required: true,
+    },
+  ];
 
   const handleAddGroup = (formData) => {
-    const { class: selectedClass, groupName } = formData;
+    const selectedClass = formData.selectedClass;
+    const groupName = formData.groupName;
+
+    if (!selectedClass || !groupName) {
+      alert("Please fill all required fields");
+      return;
+    }
 
     // যদি class আগের data তে না থাকে, নতুন class create করে add করা
     const classExists = data.some((cls) => cls.class === selectedClass);
@@ -104,8 +114,10 @@ export default function GroupListPage() {
                 ...cls.groups,
                 {
                   name: groupName,
+                  section: "", // you can set empty or default
                   subjects: "",
                   totalStudents: 0,
+                  totalPayable: 0,
                   monthly: [],
                 },
               ],
@@ -119,12 +131,14 @@ export default function GroupListPage() {
         ...prevData,
         {
           sl: prevData.length + 1,
-          class: selectedClass,
+          class: selectedClass, // 👍 Use `class`
           groups: [
             {
               name: groupName,
+              section: "",
               subjects: "",
               totalStudents: 0,
+              totalPayable: 0,
               monthly: [],
             },
           ],
@@ -134,6 +148,7 @@ export default function GroupListPage() {
 
     setIsAddGroupModalOpen(false); // modal close
     setCurrentPage(1); // pagination reset
+    alert("Group added successfully ✅");
   };
 
   // Refresh
@@ -271,7 +286,7 @@ export default function GroupListPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-           <div className="relative  flex-1 w-full md:w-28" ref={buttonRef}>
+            <div className="relative  flex-1 w-full md:w-28" ref={buttonRef}>
               <button
                 ref={buttonRef}
                 onClick={() => setIsOpen((p) => !p)}
@@ -346,20 +361,53 @@ export default function GroupListPage() {
               )}
             </div>
 
-            {/* Add Class */}
-            {canEdit && (
+            {/* Add Class / Sort By */}
+            {canEdit ? (
               <button
                 onClick={() => setIsAddGroupModalOpen(true)}
-                className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Add Group
               </button>
+            ) : (
+              <div className="relative flex-1 w-full md:w-28" ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center md:w-28 w-full border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
+                >
+                  Sort By
+                </button>
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("asc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("desc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
             <FormModal
               open={isAddGroupModalOpen}
               title="Add New Group"
               fields={groupFormFields}
-              initialValues={{ class: "", groupName: "" }}
+              initialValues={{ selectedClass: "", groupName: "" }}
               onClose={() => setIsAddGroupModalOpen(false)}
               onSubmit={handleAddGroup}
             />
@@ -368,10 +416,7 @@ export default function GroupListPage() {
 
         {/* FILTER / SORT / MONTH */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 ">
-        
-           
-
-            {/* Sort 
+          {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}

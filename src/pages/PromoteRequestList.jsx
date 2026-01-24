@@ -50,9 +50,9 @@ export default function PromoteRequestList() {
   const [sectionFilter, setSectionFilter] = useState(""); // All Sections by default
 
   /* Dropdown open states */
-  const [classOpen, setClassOpen] = useState(false);
-  const [groupOpen, setGroupOpen] = useState(false);
-  const [sectionOpen, setSectionOpen] = useState(false);
+  const [sortOpenDesktop, setSortOpenDesktop] = useState(false);
+  const [sortOpenMobile, setSortOpenMobile] = useState(false);
+
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
 
   const [filterOpen, setFilterOpen] = useState(false);
@@ -62,7 +62,8 @@ export default function PromoteRequestList() {
   const sectionRef = useRef(null);
   const filterRef = useRef(null);
   const exportRef = useRef(null);
-  const sortRef = useRef(null);
+  const sortRefDesktop = useRef(null);
+  const sortRefMobile = useRef(null);
 
   // Filter states
 
@@ -74,7 +75,7 @@ export default function PromoteRequestList() {
   // Section + sort
 
   const [selectedSection, setSelectedSection] = useState("All");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState("newest");
 
   // Get unique values from data
   const getUniqueValues = (data, key) => {
@@ -104,8 +105,15 @@ export default function PromoteRequestList() {
         setFilterOpen(false);
       if (exportRef.current && !exportRef.current.contains(e.target))
         setExportOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
+      if (
+        sortRefDesktop.current &&
+        !sortRefDesktop.current.contains(e.target)
+      ) {
+        setSortOpenDesktop(false);
+      }
+      if (sortRefMobile.current && !sortRefMobile.current.contains(e.target)) {
+        setSortOpenMobile(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -123,8 +131,9 @@ export default function PromoteRequestList() {
     .filter((r) => (appliedSection ? r.fromSection === appliedSection : true))
     .filter((r) => (appliedSession ? r.fromSession === appliedSession : true))
     .sort((a, b) => {
-      if (sortOrder === "asc") return a.sl - b.sl;
-      else return b.sl - a.sl;
+      if (sortOrder === "newest") return b.sl - a.sl; // latest first
+      if (sortOrder === "oldest") return a.sl - b.sl; // oldest first
+      return 0;
     });
 
   const totalPages = Math.ceil(filteredRequests.length / requestsPerPage);
@@ -335,13 +344,46 @@ export default function PromoteRequestList() {
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setPromoteModalOpen(true)}
-                className="flex items-center w-28 bg-blue-600 px-3 h-8 text-xs text-white  hover:bg-blue-700"
+                className="flex items-center w-28 bg-blue-600 px-3 h-8 text-xs text-white hover:bg-blue-700"
               >
                 Promote
               </button>
+            ) : (
+              <div className="relative w-28" ref={sortRefDesktop}>
+                <button
+                  onClick={() => setSortOpenDesktop((prev) => !prev)}
+                  className={`flex items-center w-28 border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
+                >
+                  Sort By
+                </button>
+                {sortOpenDesktop && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("oldest");
+                        setSortOpenDesktop(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("newest");
+                        setSortOpenDesktop(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -411,13 +453,46 @@ export default function PromoteRequestList() {
             )}
           </div>
 
-          {canEdit && (
+          {canEdit ? (
             <button
               onClick={() => setPromoteModalOpen(true)}
-              className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white "
+              className="flex items-center w-full bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Promote
             </button>
+          ) : (
+            <div className="relative w-full" ref={sortRefMobile}>
+              <button
+                onClick={() => setSortOpenMobile((prev) => !prev)}
+                className={`flex items-center w-full border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
+              >
+                Sort By
+              </button>
+              {sortOpenMobile && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("oldest");
+                      setSortOpenMobile(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("newest");
+                      setSortOpenMobile(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -452,13 +527,19 @@ export default function PromoteRequestList() {
 
       {/* ===== ADD MODAL ===== */}
       {canEdit && (
-        <PageModal open={promoteModalOpen} onClose={() => setPromoteModalOpen(false)}>
+        <PageModal
+          open={promoteModalOpen}
+          onClose={() => setPromoteModalOpen(false)}
+        >
           <AddPromoteRequestPage
             modal
             onClose={() => setPromoteModalOpen(false)}
             onSave={(values) => {
               const base = loadRequests();
-              const maxSl = base.reduce((m, r) => Math.max(m, Number(r.sl) || 0), 0);
+              const maxSl = base.reduce(
+                (m, r) => Math.max(m, Number(r.sl) || 0),
+                0,
+              );
               const newRow = {
                 sl: maxSl + 1,
                 idNumber: "ID" + Date.now(),

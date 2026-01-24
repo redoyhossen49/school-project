@@ -142,18 +142,18 @@ export default function AddGuardianPage({ modal = false, onClose, onSave }) {
       
 
         {/* Action Buttons */}
-        <div className="flex w-full gap-4 md:justify-end mt-4">
+        <div className="flex w-full gap-4  mt-4">
           <button
             type="button"
             onClick={handleCancel}
-             className="px-6 h-8 border border-gray-300 w-full md:w-auto  hover:bg-gray-100 transition"
+             className="px-6 h-8 border border-gray-300 w-full  hover:bg-gray-100 transition"
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            className="px-6 h-8 w-full md:w-auto bg-green-600 text-white  hover:bg-green-700 transition"
+            className="px-6 h-8 w-full bg-green-600 text-white  hover:bg-green-700 transition"
           >
             Save
           </button>

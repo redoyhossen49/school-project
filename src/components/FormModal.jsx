@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export default function FormModal({
   open,
@@ -13,12 +13,13 @@ export default function FormModal({
   const [activeField, setActiveField] = useState(null);
   const [dropdownStyle, setDropdownStyle] = useState({});
   const containerRef = useRef(null);
+  const dropdownRef = useRef(null);
   const fieldRefs = useRef({});
 
   /* Reset form when opened */
   useEffect(() => {
     if (open) {
-      setFormData(initialValues);
+      setFormData({ ...initialValues });
       setActiveField(null);
     }
   }, [open, initialValues]);
@@ -26,7 +27,13 @@ export default function FormModal({
   /* Outside click close */
   useEffect(() => {
     const handler = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      // Close dropdown if clicking outside both container and dropdown
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
         setActiveField(null);
       }
     };
@@ -56,8 +63,6 @@ export default function FormModal({
 
       return updated;
     });
-
-    setActiveField(null);
   };
 
   const openDropdown = (key) => {
@@ -99,9 +104,10 @@ export default function FormModal({
       <div
         ref={containerRef}
         className={`relative w-72 max-h-[70vh] overflow-y-auto p-6 text-xs border rounded
-          ${darkMode
-            ? "bg-gray-800 border-gray-600 text-gray-100"
-            : "bg-white border-gray-200 text-gray-900"
+          ${
+            darkMode
+              ? "bg-gray-800 border-gray-600 text-gray-100"
+              : "bg-white border-gray-200 text-gray-900"
           }`}
       >
         <h3 className="text-sm font-semibold text-center mb-4">{title}</h3>
@@ -112,19 +118,17 @@ export default function FormModal({
               {/* Select field */}
               {field.type === "select" ? (
                 <button
+                  key={`btn-${field.key}-${formData[field.key]}`}
                   ref={(el) => (fieldRefs.current[field.key] = el)}
-                  onClick={() =>
-                    activeField === field.key
-                      ? setActiveField(null)
-                      : openDropdown(field.key)
-                  }
+                  onClick={() => openDropdown(field.key)}
                   className={`w-full h-8 px-3 flex justify-between items-center border text-left
-          ${darkMode
-            ? "bg-gray-700 border-gray-600 text-gray-100"
-            : "bg-white border-gray-300 text-gray-400"
+          ${
+            darkMode
+              ? "bg-gray-700 border-gray-600 text-gray-100"
+              : "bg-white border-gray-300 text-gray-400"
           }`}
                 >
-                  {formData[field.key] || field.placeholder}
+                  <span>{formData[field.key] || field.placeholder}</span>
                   <span>▾</span>
                 </button>
               ) : (
@@ -140,13 +144,14 @@ export default function FormModal({
                     placeholder=" "
                     readOnly={field.readOnly || false}
                     className={`peer w-full h-8 px-3 border
-            ${field.readOnly
-              ? darkMode
-                ? "bg-gray-700 text-gray-100"
-                : "bg-gray-100 text-gray-400"
-              : darkMode
-                ? "bg-gray-700 border-gray-600 text-gray-100"
-                : "bg-white border-gray-300 text-gray-400"
+            ${
+              field.readOnly
+                ? darkMode
+                  ? "bg-gray-700 text-gray-100"
+                  : "bg-gray-100 text-gray-400"
+                : darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-100"
+                  : "bg-white border-gray-300 text-gray-400"
             }`}
                   />
                   <label
@@ -184,7 +189,10 @@ export default function FormModal({
 
         {/* Actions */}
         <div className="flex gap-2 mt-5">
-          <button onClick={onClose} className="w-1/2 h-8 border border-gray-300 text-xs">
+          <button
+            onClick={onClose}
+            className="w-1/2 h-8 border border-gray-300 text-xs"
+          >
             Cancel
           </button>
           <button
@@ -198,7 +206,7 @@ export default function FormModal({
 
       {/* Select dropdown */}
       {activeField && (
-        <div style={dropdownStyle}>
+        <div ref={dropdownRef} style={dropdownStyle}>
           <div
             className={`max-h-30 overflow-y-auto border text-xs z-50 rounded-md
               ${
@@ -209,8 +217,13 @@ export default function FormModal({
           >
             <ul>
               <li
-                className="px-3 h-8 flex items-center cursor-pointer hover:bg-blue-50"
-                onClick={() => handleFieldChange(activeField, "")}
+                className="px-3 h-8 flex items-center cursor-pointer hover:bg-blue-50 active:bg-blue-100"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleFieldChange(activeField, "");
+                  setActiveField(null);
+                }}
               >
                 {fields.find((f) => f.key === activeField)?.placeholder}
               </li>
@@ -220,8 +233,13 @@ export default function FormModal({
                 ?.options?.map((opt) => (
                   <li
                     key={opt}
-                    className="px-3 h-8 flex items-center cursor-pointer hover:bg-blue-50"
-                    onClick={() => handleFieldChange(activeField, opt)}
+                    className="px-3 h-8 flex items-center cursor-pointer hover:bg-blue-50 active:bg-blue-100"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setFormData((prev) => ({ ...prev, [activeField]: opt }));
+                      setActiveField(null);
+                    }}
                   >
                     {opt}
                   </li>

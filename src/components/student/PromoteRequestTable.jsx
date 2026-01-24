@@ -1,25 +1,29 @@
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-
 import ReusableEditModal from "../common/ReusableEditModal";
-import { promoteRequestData } from "../../data/promoteRequestData";
 import ReusableActions from "../common/ReusableActions";
+import { promoteRequestData } from "../../data/promoteRequestData";
 
 const headers = [
   { label: "Sl", key: "sl" },
-  { label: "Id number", key: "idNumber" },
-  { label: "Student name", key: "studentName" },
-  { label: "Father's name", key: "fatherName" },
+  { label: "ID Number", key: "idNumber" },
+  { label: "Student Name", key: "studentName" },
+  { label: "Father's Name", key: "fatherName" },
 
-  { label: "From class", key: "fromClass" },
-  { label: "From group", key: "fromGroup" },
-  { label: "From section", key: "fromSection" },
-  { label: "From session", key: "fromSession" },
-  { label: "To class", key: "toClass" },
-  { label: "To group", key: "toGroup" },
-  { label: "To section", key: "toSection" },
-  { label: "To session", key: "toSession" },
-  { label: "Payment", key: "payment" },
+  { label: "From Class", key: "fromClass" },
+  { label: "From Group", key: "fromGroup" },
+  { label: "From Section", key: "fromSection" },
+  { label: "From Session", key: "fromSession" },
+
+  { label: "To Class", key: "toClass" },
+  { label: "To Group", key: "toGroup" },
+  { label: "To Section", key: "toSection" },
+  { label: "To Session", key: "toSession" },
+
+  { label: "Promote Fee", key: "promoteFee" },
+  { label: "Promote Date", key: "promoteDate" },
+  { label: "Payment Type", key: "paymentType" },
+
   { label: "Status", key: "status" },
 ];
 
@@ -34,13 +38,18 @@ export default function PromoteRequestTable({
   const borderCol = darkMode ? "border-gray-700" : "border-gray-200";
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
 
-  // -------------------- Edit Modal --------------------
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handleEditSubmit = (updatedData) => {
+    const fixedData = {
+      ...updatedData,
+      promoteFee: Number(updatedData.promoteFee),
+      promoteDate: updatedData.promoteDate,
+      paymentType: updatedData.paymentType,
+    };
     setData((prev) =>
-      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...updatedData } : r)),
+      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...fixedData } : r)),
     );
     setEditModalOpen(false);
   };
@@ -52,16 +61,53 @@ export default function PromoteRequestTable({
     }
   };
 
+  const handleAccept = (row) => {
+    setData((prev) =>
+      prev.map((r) => (r.sl === row.sl ? { ...r, status: "Approved" } : r)),
+    );
+    alert(`✅ Promote request for ${row.studentName} has been Approved`);
+  };
+
+  const handleReject = (row) => {
+    setData((prev) =>
+      prev.map((r) => (r.sl === row.sl ? { ...r, status: "Rejected" } : r)),
+    );
+    alert(`❌ Promote request for ${row.studentName} has been Rejected`);
+  };
+
+  const renderCell = (row, key) => {
+    if (key === "promoteDate") {
+      const dateString = row[key];
+
+      // safe parse
+      const parsed = Date.parse(dateString);
+      if (!isNaN(parsed)) {
+        return new Date(parsed).toLocaleDateString();
+      }
+      return "-";
+    }
+
+    if (key === "promoteFee") {
+      // if value is number or string number
+      return row[key] !== undefined && row[key] !== null ? row[key] : "-";
+    }
+
+    if (key === "paymentType") {
+      return row[key] ? row[key] : "-";
+    }
+
+    return row[key] ? row[key] : "-";
+  };
+
   return (
     <div
-      className={`border  overflow-x-auto ${
+      className={`border overflow-x-auto ${
         darkMode
           ? "bg-gray-900 text-gray-200 border-gray-700"
           : "bg-white text-gray-900 border-gray-200"
       }`}
     >
       <table className="w-full table-auto border-collapse text-xs md:text-sm">
-        {/* ===== HEADER ===== */}
         <thead
           className={`${
             darkMode
@@ -78,7 +124,6 @@ export default function PromoteRequestTable({
                 {h.label}
               </th>
             ))}
-
             {showAction && (
               <th className="px-3 py-2 text-left font-semibold whitespace-nowrap">
                 Action
@@ -87,7 +132,6 @@ export default function PromoteRequestTable({
           </tr>
         </thead>
 
-        {/* ===== BODY ===== */}
         <tbody>
           {data.length === 0 && (
             <tr>
@@ -100,37 +144,39 @@ export default function PromoteRequestTable({
             </tr>
           )}
 
-          {data.map((row) => (
-            <tr key={row.sl} className={`border-b ${borderCol} ${hoverRow}`}>
-              {headers.map((h) => (
-                <td
-                  key={h.key}
-                  className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
-                >
-                  {row[h.key]}
-                </td>
-              ))}
+          {data.map((row) => {
+            console.log("Row data:", row);
 
-              {showAction && (
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <ReusableActions
-                    item={row}
-                    onEdit={(r) => {
-                      setSelectedRow(r);
-                      setEditModalOpen(true);
-                    }}
-                    onDelete={(r) => handleDelete(r)}
-                    onAccept={(r) => alert(`Accepted ${r.studentName}`)}
-                    onReject={(r) => alert(`Rejected ${r.studentName}`)}
-                  />
-                </td>
-              )}
-            </tr>
-          ))}
+            return (
+              <tr key={row.sl} className={`border-b ${borderCol} ${hoverRow}`}>
+                {headers.map((h) => (
+                  <td
+                    key={h.key}
+                    className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                  >
+                    {renderCell(row, h.key)}
+                  </td>
+                ))}
+                {showAction && (
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <ReusableActions
+                      item={row}
+                      onEdit={(r) => {
+                        setSelectedRow(r);
+                        setEditModalOpen(true);
+                      }}
+                      onDelete={handleDelete}
+                      onAccept={handleAccept}
+                      onReject={handleReject}
+                    />
+                  </td>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
-      {/* ===== Edit Modal ===== */}
       {selectedRow && (
         <ReusableEditModal
           open={editModalOpen}
@@ -139,23 +185,29 @@ export default function PromoteRequestTable({
           onClose={() => setEditModalOpen(false)}
           onSubmit={handleEditSubmit}
           fields={[
-            {
-              name: "studentName",
-              label: "Student Name",
-              type: "text",
-              required: true,
-            },
+            { name: "studentName", label: "Student Name", type: "text" },
             { name: "fatherName", label: "Father's Name", type: "text" },
             { name: "idNumber", label: "ID Number", type: "text" },
+
             { name: "fromClass", label: "From Class", type: "text" },
             { name: "fromGroup", label: "From Group", type: "text" },
             { name: "fromSection", label: "From Section", type: "text" },
             { name: "fromSession", label: "From Session", type: "text" },
+
             { name: "toClass", label: "To Class", type: "text" },
             { name: "toGroup", label: "To Group", type: "text" },
             { name: "toSection", label: "To Section", type: "text" },
             { name: "toSession", label: "To Session", type: "text" },
-            { name: "payment", label: "Payment", type: "number" },
+
+            { name: "promoteFee", label: "Promote Fee", type: "number" },
+            { name: "promoteDate", label: "Promote Date", type: "date" },
+            {
+              name: "paymentType",
+              label: "Payment Type",
+              type: "select",
+              options: ["Cash", "Bank"],
+            },
+
             { name: "status", label: "Status", type: "text" },
           ]}
         />

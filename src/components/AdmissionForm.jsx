@@ -50,10 +50,12 @@ export default function AdmissionForm() {
     currentDivision: "",
     currentDistrict: "",
     currentUpazila: "",
+    currentVillage: "",
 
     permanentDivision: "",
     permanentDistrict: "",
     permanentUpazila: "",
+    permanentVillage: "",
 
     idNumber: "",
     mobileNumber: "",
@@ -195,7 +197,7 @@ export default function AdmissionForm() {
       <Stepper activeStep={step}></Stepper>
 
       {/* STEP CONTENT */}
-      <div className="mt-6 transition-all duration-500">
+      <div className="mt-2 transition-all duration-500">
         {step === 0 && (
           <Step1 formData={formData} handleChange={handleChange} />
         )}
@@ -238,12 +240,11 @@ export default function AdmissionForm() {
         {/* STEP 1 & 2 */}
         {(step === 1 || step === 2) && (
           <>
-          
-             <Button onClick={back} className="w-1/2">
+            <Button onClick={back} className="w-1/2">
               Back
             </Button>
 
-             <Button onClick={next} className="w-1/2">
+            <Button onClick={next} className="w-1/2">
               Next
             </Button>
           </>
@@ -256,7 +257,7 @@ export default function AdmissionForm() {
               Back
             </Button>
 
-             <Button onClick={handleAdmission} className="w-1/2">
+            <Button onClick={handleAdmission} className="w-1/2">
               Admission
             </Button>
           </>

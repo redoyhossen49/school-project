@@ -32,7 +32,7 @@ export default function AdmitCardPage() {
   const canEdit = localStorage.getItem("role") === "school";
   const { darkMode } = useTheme();
   // -------------------- State --------------------
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(studentExamData);
   const [classData, setClassData] = useState(studentExamData);
 
   const [sectionFilter, setSectionFilter] = useState("");
@@ -60,13 +60,13 @@ export default function AdmitCardPage() {
   const [sessionOpen, setSessionOpen] = useState(false);
   const [examOpen, setExamOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusOpen, setStatusOpen] = useState(false);
 
-  // -------------------- Filters ------------  const [data, setData] = useState(gradeData);
+  // -------------------- Filters --------------------
   const [addClassOpen, setAddClassOpen] = useState(false);
   const [admitCardModalOpen, setAdmitCardModalOpen] = useState(false);
   const [viewAdmitCardModalOpen, setViewAdmitCardModalOpen] = useState(false);
@@ -88,8 +88,49 @@ const [sortOrder, setSortOrder] = useState("desc");
   const [generatedAdmitCards, setGeneratedAdmitCards] = useState(() => {
     // Load from localStorage if available
     const stored = localStorage.getItem("generatedAdmitCards");
-    return stored ? JSON.parse(stored) : {};
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return generateDefaultAdmitCards();
+      }
+    }
+    // Generate some default admit cards for demo
+    return generateDefaultAdmitCards();
   });
+
+  // Helper function to generate default admit cards
+  function generateDefaultAdmitCards() {
+    const cards = {};
+    // Generate admit card numbers for first 5 students in each class/exam combination
+    studentExamData.slice(0, 20).forEach((student) => {
+      const key = `${student.IDNumber}_${student.Class}_${student.Section || ""}_${student.Session}_${student.ExamName}`;
+
+      // Format session code
+      let sessionCode = student.Session || "2025-26";
+      sessionCode = sessionCode.replace(/-/g, "");
+      if (sessionCode.length > 4) sessionCode = sessionCode.substring(0, 4);
+
+      // Class code
+      const classCode = student.Class || "1";
+
+      // Student ID cleanup
+      let studentId = student.IDNumber.toString();
+      studentId = studentId.replace(/^STU[-_]?/i, "");
+      studentId = studentId.replace(/^ST[-_]?/i, "");
+      studentId = studentId.replace(/[^0-9]/g, "");
+
+      // 8-digit admit card number (last 8 digits)
+      const baseNumber = `${sessionCode}${classCode}${studentId}`;
+      const admitCardNo =
+        baseNumber.length > 8
+          ? baseNumber.slice(-8)
+          : baseNumber.padStart(8, "0");
+
+      cards[key] = admitCardNo;
+    });
+    return cards;
+  }
 
   // Selected admit cards for download
   const [selectedAdmitCards, setSelectedAdmitCards] = useState(new Set());
@@ -288,16 +329,13 @@ const [sortOrder, setSortOrder] = useState("desc");
   };
 
   // -------------------- Filtered + Sorted Data --------------------
- const filteredData = useMemo(() => {
-  const source = data.length ? data : studentExamData;
+  const filteredData = useMemo(() => {
+    const source = data.length ? data : studentExamData;
 
-  return source
-    .filter((d) => {
-        // Only show students who have generated admit card numbers
-        const admitCardKey = `${d.IDNumber}_${d.Class}_${d.Section || ""}_${d.Session}_${d.ExamName}`;
-        const hasAdmitCard = generatedAdmitCards[admitCardKey];
-
-        if (!hasAdmitCard) return false; // Hide if no admit card generated
+    return source
+      .filter((d) => {
+        // Show all students regardless of admit card generation status
+        // This allows users to see all students and generate admit cards for them
 
         return (
           (appliedFilters.class ? d.Class === appliedFilters.class : true) &&
@@ -324,14 +362,14 @@ const [sortOrder, setSortOrder] = useState("desc");
           SL: d.SL || d.sl || index + 1, // Add SL field (serial number)
         };
       })
-    .sort((a, b) => {
-      // Sorting by IDNumber (or SL if exists)
-      if (sortOrder === "asc") {
+      .sort((a, b) => {
+        // Sorting by IDNumber (or SL if exists)
+        if (sortOrder === "asc") {
           return a.IDNumber.localeCompare(b.IDNumber); // oldest first
-      } else {
+        } else {
           return b.IDNumber.localeCompare(a.IDNumber); // newest first
-      }
-    });
+        }
+      });
   }, [data, appliedFilters, search, sortOrder, generatedAdmitCards]);
 
   // -------------------- Pagination --------------------
@@ -986,8 +1024,11 @@ const [sortOrder, setSortOrder] = useState("desc");
     const selectedRowsMap = new Map();
     currentData.forEach((row) => {
       const rowId = row.IDNumber || row.idNumber || row.sl;
-      const uniqueKey = row.SL || row.sl || `${row.IDNumber}_${row.Class}_${row.Section || ""}_${row.Session}_${row.ExamName}`;
-      
+      const uniqueKey =
+        row.SL ||
+        row.sl ||
+        `${row.IDNumber}_${row.Class}_${row.Section || ""}_${row.Session}_${row.ExamName}`;
+
       if (selectedAdmitCards.has(rowId) && !selectedRowsMap.has(uniqueKey)) {
         selectedRowsMap.set(uniqueKey, row);
       }
@@ -1654,17 +1695,12 @@ const [sortOrder, setSortOrder] = useState("desc");
               <FilterDropdown
                 title="Filter exam routine"
                 fields={filterFields}
-                selected={filters}
-                setSelected={setFilters}
+                selected={filterSelections}
+                setSelected={setFilterSelections}
                 isOpen={filterOpen}
                 onClose={() => setFilterOpen(false)}
                 onApply={(values) => {
-                  setClassFilter(values.class || "");
-                  setGroupFilter(values.group || "");
-
-                  setSessionFilter(values.session || "");
-                  setExamFilter(values.exam || "");
-
+                  setAppliedFilters(values);
                   setCurrentPage(1);
                   setFilterOpen(false);
                 }}
@@ -1902,7 +1938,9 @@ const [sortOrder, setSortOrder] = useState("desc");
                     {col.label}
                   </th>
                 ))}
-                <th className={`px-3 h-8 text-left font-semibold ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}>
+                <th
+                  className={`px-3 h-8 text-left font-semibold ${darkMode ? "border-gray-700" : "border-gray-200"} whitespace-nowrap`}
+                >
                   Action
                 </th>
               </tr>
@@ -1976,7 +2014,7 @@ const [sortOrder, setSortOrder] = useState("desc");
                           onPrint={handlePrint}
                           darkMode={darkMode}
                           canEdit={canEdit}
-        />
+                        />
                       </td>
                     </tr>
                   );
@@ -1984,7 +2022,7 @@ const [sortOrder, setSortOrder] = useState("desc");
               )}
             </tbody>
           </table>
-      </div>
+        </div>
       </div>
 
       {/* Admit Card Modal */}

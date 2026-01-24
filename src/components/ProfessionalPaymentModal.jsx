@@ -1,72 +1,77 @@
+import { useTheme } from "../context/ThemeContext";
 
-import { useState, useRef, useEffect, useMemo } from "react";
-import { FaMoneyBillWave, FaUniversity, FaCreditCard, FaMobileAlt } from "react-icons/fa";
-export default function ProfessionalPaymentModal({ isOpen, onClose, payerType, darkMode = false, onSelect }) {
-  const modalRef = useRef(null);
-  const [selectedMethod, setSelectedMethod] = useState("");
+export default function ProfessionalPaymentModal({
+  open,
+  onClose,
+  payerType,
+  onSelect,
+}) {
+  const { darkMode } = useTheme();
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) {
-        onClose();
-        setSelectedMethod("");
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [onClose]);
+  if (!open) return null;
 
-  if (!isOpen) return null;
-
-  const allMethods = [
-    { key: "cash", label: "Cash", icon: <FaMoneyBillWave />, availableFor: ["school"] },
-    { key: "bank", label: "Bank", icon: <FaUniversity />, availableFor: ["school", "teacher", "student"] },
-    { key: "card", label: "Card", icon: <FaCreditCard />, availableFor: ["school"] },
-    { key: "mobile", label: "Mobile", icon: <FaMobileAlt />, availableFor: ["school"] },
-  ];
-
-  const paymentMethods = allMethods.filter((m) => m.availableFor.includes(payerType));
-
-  const handleSelect = (method) => {
-  setSelectedMethod(method);
-  if (onSelect) onSelect(method); // Call parent handler (handlePayment)
-};
-
+  // 🔹 Role based payment methods
+  const paymentMethods =
+    payerType === "school"
+      ? [
+          { key: "cash", label: "Cash", color: "bg-indigo-600 hover:bg-indigo-700" },
+          { key: "bank", label: "Bank", color: "bg-green-600 hover:bg-green-700" },
+        ]
+      : [
+          { key: "bank", label: "Bank", color: "bg-green-600 hover:bg-green-700" },
+        ];
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/40 z-40"></div>
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <div ref={modalRef} className={`bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md`}>
-          <h2 className="text-xl font-semibold mb-5 text-center dark:text-gray-100">Select Payment Method</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/30" onClick={onClose}></div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {paymentMethods.map((method) => (
-              <button
-                key={method.key}
-                onClick={() => handleSelect(method.key)}
-                className={`flex flex-col items-center justify-center p-4 rounded-lg border transition-all text-sm
-                  ${selectedMethod === method.key ? "bg-blue-600 text-white border-blue-600 shadow-lg"
-                    : darkMode ? "bg-gray-700 text-gray-100 border-gray-600 hover:bg-gray-600"
-                    : "bg-white text-gray-900 border-gray-300 hover:bg-blue-50"
-                  }`}
-              >
-                <span className="text-2xl mb-2">{method.icon}</span>
-                {method.label}
-              </button>
-            ))}
-          </div>
+      {/* Modal */}
+      <div
+        className={`relative w-72 rounded-lg shadow-2xl p-8 z-50 ${
+          darkMode ? "bg-gray-800" : "bg-white"
+        }`}
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className={`absolute top-2 left-1/2 -translate-x-1/2 text-sm ${
+            darkMode
+              ? "text-gray-400 hover:text-gray-300"
+              : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          ✕
+        </button>
 
-          <div className="flex justify-end gap-3 mt-6">
+        <h2
+          className={`text-lg font-semibold text-center mb-6 ${
+            darkMode ? "text-gray-100" : "text-gray-900"
+          }`}
+        >
+          Payment Receive
+        </h2>
+
+        {/* Buttons */}
+        <div
+          className={`grid gap-3 ${
+            paymentMethods.length === 1 ? "grid-cols-1" : "grid-cols-2"
+          }`}
+        >
+          {paymentMethods.map((method) => (
             <button
-              onClick={() => { onClose(); setSelectedMethod(""); }}
-              className={`px-4 py-2 rounded border ${darkMode ? "border-gray-600 text-gray-100 hover:bg-gray-700" : "border-gray-300 text-gray-900 hover:bg-gray-100"}`}
+              key={method.key}
+              onClick={() => {
+                onSelect(method.key);
+                onClose();
+              }}
+              className={`h-9 text-sm font-medium text-white rounded transition ${method.color}`}
             >
-              Cancel
+              {method.label}
             </button>
-          </div>
+          ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

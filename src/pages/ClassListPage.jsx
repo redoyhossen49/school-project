@@ -21,7 +21,6 @@ export default function ClassListPage() {
   const [filters, setFilters] = useState({
     class: "",
   });
-  
 
   const [classData, setClassData] = useState(classPaymentData);
   const [addClassOpen, setAddClassOpen] = useState(false);
@@ -91,11 +90,11 @@ export default function ClassListPage() {
     if (classFilter) data = data.filter((item) => item.class === classFilter);
     if (search)
       data = data.filter((item) =>
-        item.class.toLowerCase().includes(search.toLowerCase())
+        item.class.toLowerCase().includes(search.toLowerCase()),
       );
 
     data = data.sort((a, b) =>
-      sortOrder === "newest" ? a.sl - b.sl : b.sl - a.sl
+      sortOrder === "newest" ? a.sl - b.sl : b.sl - a.sl,
     );
 
     // Month filter
@@ -123,9 +122,9 @@ export default function ClassListPage() {
 
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage
+    currentPage * perPage,
   );
-const filterFields = [
+  const filterFields = [
     {
       key: "class",
       placeholder: "All Classes",
@@ -141,7 +140,7 @@ const filterFields = [
         Class: item.class,
         Month: m.month,
         Amount: m.amount || "",
-      }))
+      })),
     );
     const ws = utils.json_to_sheet(wsData);
     const wb = utils.book_new();
@@ -180,28 +179,30 @@ const filterFields = [
       required: true,
     },
   ];
-const handleAddClass = (data) => {
-  const exists = classData.some(
-    (c) => c.class.toLowerCase() === data.class.toLowerCase()
-  );
+  const handleAddClass = (data) => {
+    const exists = classData.some(
+      (c) =>
+        c.class.toLowerCase() === (data.className || data.class).toLowerCase(),
+    );
 
-  if (exists) {
-    alert("Class already exists");
-    return;
-  }
+    if (exists) {
+      alert("Class already exists");
+      return;
+    }
 
-  setClassData((prev) => [
-    ...prev,
-    {
-      sl: prev.length + 1,
-      class: data.class,
-      monthly: [],
-    },
-  ]);
+    setClassData((prev) => [
+      ...prev,
+      {
+        sl: prev.length + 1,
+        class: data.className || data.class,
+        monthly: [],
+      },
+    ]);
 
-  setCurrentPage(1);
-};
-
+    setCurrentPage(1);
+    setAddClassOpen(false);
+    alert("Class added successfully ✅");
+  };
 
   // -------------------- Styles --------------------
   const cardBg = darkMode
@@ -282,13 +283,46 @@ const handleAddClass = (data) => {
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Add Class
               </button>
+            ) : (
+              <div className="relative flex-1 w-full md:w-28" ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center md:w-28 w-full border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
+                >
+                  Sort By
+                </button>
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("newest");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("oldest");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             <FormModal
@@ -304,9 +338,7 @@ const handleAddClass = (data) => {
 
         {/* Month / Filter / Sort */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between  gap-2 md:gap-0">
-          
-            
-            {/* Sort Button 
+          {/* Sort Button 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}

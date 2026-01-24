@@ -8,7 +8,11 @@ import { feeTypeData } from "../data/feeTypeData";
 import { feesTypeData } from "../data/feesTypeData";
 import { studentData } from "../data/studentData";
 import { discountData } from "../data/discountData";
-import { saveCollectionAPI, getCollectionsFromStorage, updateCollectionAPI } from "../utils/collectionUtils";
+import {
+  saveCollectionAPI,
+  getCollectionsFromStorage,
+  updateCollectionAPI,
+} from "../utils/collectionUtils";
 
 export default function AddCollectionPage() {
   const { darkMode } = useTheme();
@@ -18,7 +22,7 @@ export default function AddCollectionPage() {
   const getUniqueOptions = (data, key) => {
     return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
   };
-  
+
   // Get fees types from feesTypeData.js and merge with localStorage created fees
   const loadFees = () => {
     const storedData = localStorage.getItem("fees");
@@ -32,14 +36,13 @@ export default function AddCollectionPage() {
     }
     return [];
   };
-  
+
   const createdFees = loadFees();
-  const createdFeesNames = createdFees.map(fee => fee.name).filter(Boolean);
+  const createdFeesNames = createdFees.map((fee) => fee.name).filter(Boolean);
   const feesTypeOptions = [...new Set([...feesTypeData, ...createdFeesNames])];
 
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
-
 
   const [formData, setFormData] = useState({
     student_id: "",
@@ -70,7 +73,7 @@ export default function AddCollectionPage() {
     if (formData.student_id) {
       // Find the student by studentId (from studentData)
       const student = studentData.find(
-        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase(),
       );
 
       if (student) {
@@ -88,14 +91,18 @@ export default function AddCollectionPage() {
         // Check if there's existing collection data for this student (using student_id from collectionData)
         // Relation: studentData.studentId === collectionData.student_id
         const existingCollections = collectionData.filter(
-          (collection) => collection.student_id?.toUpperCase() === formData.student_id.toUpperCase()
+          (collection) =>
+            collection.student_id?.toUpperCase() ===
+            formData.student_id.toUpperCase(),
         );
 
         // If there are existing collections, you can use them to pre-populate or show history
         // For now, we just ensure the relation is established
         if (existingCollections.length > 0) {
           // Collections exist for this student - relation is established
-          console.log(`Found ${existingCollections.length} collection(s) for student ${formData.student_id}`);
+          console.log(
+            `Found ${existingCollections.length} collection(s) for student ${formData.student_id}`,
+          );
         }
       } else {
         // Clear fields if student not found
@@ -125,16 +132,23 @@ export default function AddCollectionPage() {
 
   // Calculate fees amounts based on selected fees types using collectionData or feeTypeData
   useEffect(() => {
-    if (formData.fees_type.length > 0 && formData.class && formData.group && formData.section && formData.session) {
+    if (
+      formData.fees_type.length > 0 &&
+      formData.class &&
+      formData.group &&
+      formData.section &&
+      formData.session
+    ) {
       // First, check if there's existing collection data for this student and fees types
       // Relation: studentData.studentId === collectionData.student_id (case-insensitive)
       const matchingCollections = collectionData.filter(
         (collection) =>
-          collection.student_id?.toUpperCase() === formData.student_id.toUpperCase() &&
+          collection.student_id?.toUpperCase() ===
+            formData.student_id.toUpperCase() &&
           collection.class === formData.class &&
           collection.group === formData.group &&
           collection.section === formData.section &&
-          collection.session === formData.session
+          collection.session === formData.session,
       );
 
       // Check if any collection has matching fees_type
@@ -145,7 +159,9 @@ export default function AddCollectionPage() {
 
       // If we have matching collection data, use it
       const matchedCollection = matchingCollections.find(
-        (collection) => collection.fees_type === feesTypeString || formData.fees_type.includes(collection.fees_type)
+        (collection) =>
+          collection.fees_type === feesTypeString ||
+          formData.fees_type.includes(collection.fees_type),
       );
 
       if (matchedCollection) {
@@ -159,9 +175,9 @@ export default function AddCollectionPage() {
           const storedItems = storedData ? JSON.parse(storedData) : [];
           return [...feeTypeData, ...storedItems];
         };
-        
+
         const allFeeTypeData = getAllFeeTypeData();
-        
+
         // Calculate from feeTypeData (static + localStorage)
         // Match: Fees Type, Class, Group, Section, Session
         const matchingFees = allFeeTypeData.filter(
@@ -170,25 +186,27 @@ export default function AddCollectionPage() {
             fee.group === formData.group &&
             fee.section === formData.section &&
             fee.session === formData.session &&
-            formData.fees_type.includes(fee.fees_type)
+            formData.fees_type.includes(fee.fees_type),
         );
 
         // Store fees amounts and calculate total payable from matching fees with discount applied
         feesAmountsObj = {};
-        
+
         totalPayable = matchingFees.reduce((sum, fee) => {
           let feeAmount = fee.fees_amount || 0;
-          
+
           // Store the original fee amount for this fees_type
           feesAmountsObj[fee.fees_type] = feeAmount;
-          
+
           // Check if there's a discount for this student and fees_type
           if (formData.student_id) {
             // Find student name from studentData
             const student = studentData.find(
-              (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+              (s) =>
+                s.studentId?.toUpperCase() ===
+                formData.student_id.toUpperCase(),
             );
-            
+
             if (student) {
               // Find matching discount for this fees_type
               const matchingDiscount = discountData.find(
@@ -198,28 +216,32 @@ export default function AddCollectionPage() {
                   discount.group === formData.group &&
                   discount.section === formData.section &&
                   discount.session === formData.session &&
-                  discount.fees_type === fee.fees_type
+                  discount.fees_type === fee.fees_type,
               );
-              
+
               if (matchingDiscount) {
                 // Check if discount is valid for current date
                 const today = new Date().toISOString().split("T")[0];
                 const startDate = matchingDiscount.start_date;
                 const endDate = matchingDiscount.end_date;
-                
+
                 if (today >= startDate && today <= endDate) {
                   // Apply discount: regular amount - discount amount
-                  feeAmount = Math.max(0, (matchingDiscount.regular || feeAmount) - (matchingDiscount.discount_amount || 0));
+                  feeAmount = Math.max(
+                    0,
+                    (matchingDiscount.regular || feeAmount) -
+                      (matchingDiscount.discount_amount || 0),
+                  );
                   // Update stored amount with discounted amount
                   feesAmountsObj[fee.fees_type] = feeAmount;
                 }
               }
             }
           }
-          
+
           return sum + feeAmount;
         }, 0);
-        
+
         payableDue = totalPayable; // Initially payable_due equals total_payable
       }
 
@@ -230,12 +252,16 @@ export default function AddCollectionPage() {
           total_payable: totalPayable,
           payable_due: payableDue,
         };
-        
+
         // Only update fees_amounts if we calculated them (when not using existing collection data)
-        if (!matchedCollection && totalPayable > 0 && Object.keys(feesAmountsObj).length > 0) {
+        if (
+          !matchedCollection &&
+          totalPayable > 0 &&
+          Object.keys(feesAmountsObj).length > 0
+        ) {
           updated.fees_amounts = feesAmountsObj;
         }
-        
+
         return updated;
       });
     } else {
@@ -246,26 +272,41 @@ export default function AddCollectionPage() {
         payable_due: 0,
       }));
     }
-  }, [formData.fees_type, formData.student_id, formData.class, formData.group, formData.section, formData.session]);
+  }, [
+    formData.fees_type,
+    formData.student_id,
+    formData.class,
+    formData.group,
+    formData.section,
+    formData.session,
+  ]);
 
   // Calculate overdue amount from existing collections (from localStorage)
   // Only consider collections with remaining dues (total_due > 0)
   useEffect(() => {
-    if (formData.student_id && formData.class && formData.group && formData.section && formData.session) {
+    if (
+      formData.student_id &&
+      formData.class &&
+      formData.group &&
+      formData.section &&
+      formData.session
+    ) {
       // Get collections from localStorage (with fallback to collectionData)
       const storedCollections = getCollectionsFromStorage();
-      const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
-      
+      const allCollections =
+        storedCollections.length > 0 ? storedCollections : collectionData;
+
       // Find all existing collections for this student with remaining dues
       // Only count collections where total_due > 0 (already paid ones won't affect overdue)
       const existingCollections = allCollections.filter(
         (collection) =>
-          collection.student_id?.toUpperCase() === formData.student_id.toUpperCase() &&
+          collection.student_id?.toUpperCase() ===
+            formData.student_id.toUpperCase() &&
           collection.class === formData.class &&
           collection.group === formData.group &&
           collection.section === formData.section &&
           collection.session === formData.session &&
-          collection.total_due > 0
+          collection.total_due > 0,
       );
 
       // Calculate total overdue amount (only from unpaid collections)
@@ -283,7 +324,13 @@ export default function AddCollectionPage() {
         overdue_amount: 0,
       }));
     }
-  }, [formData.student_id, formData.class, formData.group, formData.section, formData.session]);
+  }, [
+    formData.student_id,
+    formData.class,
+    formData.group,
+    formData.section,
+    formData.session,
+  ]);
 
   // Calculate payable_due, total, total_due, and in_total based on paid_amount and total_payable
   // This will update immediately when fees_type is selected (via total_payable change)
@@ -293,21 +340,21 @@ export default function AddCollectionPage() {
     const totalPayable = formData.total_payable || 0; // Total Fees
     const overdueAmount = formData.overdue_amount || 0;
     const studentFeesDue = formData.student_fees_due || 0; // Student's base fees due
-    
+
     // Payable due = Total payable - Paid amount
     // Initially, if no amount is entered, payable_due equals total_payable
     const payableDue = Math.max(0, totalPayable - paidAmount);
-    
+
     // In Total = Paid Amount (based on what user enters)
     const inTotal = paidAmount;
-    
+
     // Total = Total payable + Overdue amount + Student fees due
     const total = totalPayable + overdueAmount + studentFeesDue;
-    
+
     // Total Due = Total Fees (total_payable) + Student Fees Due (student_fees_due)
     // This is the sum of current fees and student's existing dues
     const calculatedTotalDue = totalPayable + studentFeesDue;
-    
+
     // If paid amount is greater than or equal to calculated total due, set total_due to 0
     // Otherwise, use the calculated total_due
     // Even when total_due is 0, user can add new fees types and they will be calculated
@@ -320,7 +367,12 @@ export default function AddCollectionPage() {
       total: total,
       total_due: totalDue,
     }));
-  }, [formData.paid_amount, formData.total_payable, formData.overdue_amount, formData.student_fees_due]);
+  }, [
+    formData.paid_amount,
+    formData.total_payable,
+    formData.overdue_amount,
+    formData.student_fees_due,
+  ]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -332,7 +384,7 @@ export default function AddCollectionPage() {
     setFormData((prev) => {
       const currentTypes = prev.fees_type || [];
       const isSelected = currentTypes.includes(feesType);
-      
+
       if (isSelected) {
         // Remove if already selected
         return {
@@ -443,11 +495,12 @@ export default function AddCollectionPage() {
     // Only show confirmation if there's remaining balance
     const paidAmount = parseFloat(formData.paid_amount) || 0;
     // Total Due = Total Fees + Student Fees Due
-    const calculatedTotalDue = formData.total_payable + formData.student_fees_due;
-    
+    const calculatedTotalDue =
+      formData.total_payable + formData.student_fees_due;
+
     if (calculatedTotalDue > 0 && paidAmount < calculatedTotalDue) {
       const shouldContinue = confirm(
-        `There is a remaining balance of ৳${calculatedTotalDue} (Total Fees: ৳${formData.total_payable} + Student Fees Due: ৳${formData.student_fees_due}). Do you want to continue without paying the full amount?`
+        `There is a remaining balance of ৳${calculatedTotalDue} (Total Fees: ৳${formData.total_payable} + Student Fees Due: ৳${formData.student_fees_due}). Do you want to continue without paying the full amount?`,
       );
       if (!shouldContinue) {
         return;
@@ -476,18 +529,24 @@ export default function AddCollectionPage() {
     try {
       // Get existing collections before saving new one
       const storedCollections = getCollectionsFromStorage();
-      const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
-      
+      const allCollections =
+        storedCollections.length > 0 ? storedCollections : collectionData;
+
       // Find all existing collections for this student (excluding the one we're about to save)
       const existingStudentCollections = allCollections.filter(
-        (collection) => collection.student_id?.toUpperCase() === formData.student_id.toUpperCase()
+        (collection) =>
+          collection.student_id?.toUpperCase() ===
+          formData.student_id.toUpperCase(),
       );
-      
+
       // Calculate total existing due from previous collections
-      const totalExistingDue = existingStudentCollections.reduce((sum, collection) => {
-        return sum + (collection.total_due || 0);
-      }, 0);
-      
+      const totalExistingDue = existingStudentCollections.reduce(
+        (sum, collection) => {
+          return sum + (collection.total_due || 0);
+        },
+        0,
+      );
+
       // If paid amount covers all existing due, update previous collections' total_due to 0
       if (paidAmount >= totalExistingDue && totalExistingDue > 0) {
         // Update all previous collections for this student
@@ -501,55 +560,62 @@ export default function AddCollectionPage() {
           }
         }
       }
-      
+
       // Save new collection to localStorage (ready for API integration)
       await saveCollectionAPI(collectionDataToSave);
-      
+
       // Update student's feesDue based on all collections
       const updateStudentFeesDue = () => {
         const updatedCollections = getCollectionsFromStorage();
-        const finalCollections = updatedCollections.length > 0 ? updatedCollections : collectionData;
-        
+        const finalCollections =
+          updatedCollections.length > 0 ? updatedCollections : collectionData;
+
         // Find all collections for this student
         const studentCollections = finalCollections.filter(
-          (collection) => collection.student_id?.toUpperCase() === formData.student_id.toUpperCase()
+          (collection) =>
+            collection.student_id?.toUpperCase() ===
+            formData.student_id.toUpperCase(),
         );
-        
+
         // Calculate total due from all collections
         const totalDue = studentCollections.reduce((sum, collection) => {
           return sum + (collection.total_due || 0);
         }, 0);
-        
+
         // Update student data in localStorage
         const storedStudents = localStorage.getItem("students");
-        let students = storedStudents ? JSON.parse(storedStudents) : [...studentData];
-        
+        let students = storedStudents
+          ? JSON.parse(storedStudents)
+          : [...studentData];
+
         // Find and update the student
         const studentIndex = students.findIndex(
-          (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+          (s) =>
+            s.studentId?.toUpperCase() === formData.student_id.toUpperCase(),
         );
-        
+
         if (studentIndex !== -1) {
           students[studentIndex] = {
             ...students[studentIndex],
             feesDue: totalDue, // Update feesDue based on total_due from collections
           };
           localStorage.setItem("students", JSON.stringify(students));
-          
+
           // Dispatch event to notify StudentList to refresh
-          window.dispatchEvent(new Event('studentsUpdated'));
+          window.dispatchEvent(new Event("studentsUpdated"));
         }
       };
-      
+
       // Update student feesDue
       updateStudentFeesDue();
-      
+
       console.log("COLLECTION DATA SAVED 👉", collectionDataToSave);
       alert("Collection Added Successfully ✅");
-      
+
       // Redirect to collection list
       const userRole = localStorage.getItem("role");
-      const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
+      const basePath =
+        userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
       navigate(`${basePath}/fee/collection`);
     } catch (error) {
       console.error("Error saving collection:", error);
@@ -559,7 +625,8 @@ export default function AddCollectionPage() {
 
   const handleCancel = () => {
     const userRole = localStorage.getItem("role");
-    const basePath = userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
+    const basePath =
+      userRole === "school" ? "/school/dashboard" : "/teacher/dashboard";
     navigate(`${basePath}/fee/collection`);
   };
 
@@ -568,8 +635,12 @@ export default function AddCollectionPage() {
   const basePath = canEdit ? "/school/dashboard" : "/teacher/dashboard";
 
   const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
-  const inputBg = darkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800";
-  const readOnlyBg = darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
+  const inputBg = darkMode
+    ? "bg-gray-700 text-white"
+    : "bg-white text-gray-800";
+  const readOnlyBg = darkMode
+    ? "bg-gray-800 text-gray-300"
+    : "bg-gray-100 text-gray-600";
 
   return (
     <div classNamelist="py-4 px-2 md:mx-0 min-h-screen">
@@ -580,7 +651,9 @@ export default function AddCollectionPage() {
         } p-6`}
       >
         <h1 className="text-base font-semibold">Fees Collection</h1>
-        <p className={`text-xs mt-1 ${darkMode ? "text-gray-200" : "text-gray-400"}`}>
+        <p
+          className={`text-xs mt-1 ${darkMode ? "text-gray-200" : "text-gray-400"}`}
+        >
           <Link to={basePath} className="hover:text-indigo-600 transition">
             Dashboard
           </Link>
@@ -618,7 +691,9 @@ export default function AddCollectionPage() {
 
           {/* Student Name - Read-only */}
           <div className="relative w-full">
-            <label className="block text-sm font-medium mb-1">Student Name</label>
+            <label className="block text-sm font-medium mb-1">
+              Student Name
+            </label>
             <input
               type="text"
               value={formData.student_name}
@@ -651,7 +726,9 @@ export default function AddCollectionPage() {
 
           {/* Show Section - Read-only */}
           <div className="relative w-full">
-            <label className="block text-sm font-medium mb-1">Show Section</label>
+            <label className="block text-sm font-medium mb-1">
+              Show Section
+            </label>
             <input
               type="text"
               value={formData.section}
@@ -662,7 +739,9 @@ export default function AddCollectionPage() {
 
           {/* Show Session - Read-only */}
           <div className="relative w-full">
-            <label className="block text-sm font-medium mb-1">Show Session</label>
+            <label className="block text-sm font-medium mb-1">
+              Show Session
+            </label>
             <input
               type="text"
               value={formData.session}
@@ -696,9 +775,11 @@ export default function AddCollectionPage() {
                     >
                       {feesType}
                       {formData.fees_amounts[feesType] && (
-                        <span className={`ml-2 font-medium ${
-                          darkMode ? "text-blue-400" : "text-blue-600"
-                        }`}>
+                        <span
+                          className={`ml-2 font-medium ${
+                            darkMode ? "text-blue-400" : "text-blue-600"
+                          }`}
+                        >
                           - ৳{formData.fees_amounts[feesType]}
                         </span>
                       )}
@@ -711,8 +792,8 @@ export default function AddCollectionPage() {
                         isSelected
                           ? "bg-blue-600 border-blue-600"
                           : darkMode
-                          ? "border-gray-500 bg-transparent"
-                          : "border-gray-400 bg-white"
+                            ? "border-gray-500 bg-transparent"
+                            : "border-gray-400 bg-white"
                       } focus:ring-2 focus:ring-blue-500 focus:ring-offset-0`}
                     />
                   </div>
@@ -727,7 +808,8 @@ export default function AddCollectionPage() {
               Total Fees
               {formData.fees_type.length > 0 && (
                 <span className="text-xs text-gray-500 ml-1">
-                  ({formData.fees_type.length} fee type{formData.fees_type.length > 1 ? "s" : ""} selected)
+                  ({formData.fees_type.length} fee type
+                  {formData.fees_type.length > 1 ? "s" : ""} selected)
                 </span>
               )}
             </label>
@@ -742,7 +824,9 @@ export default function AddCollectionPage() {
           {/* Show Student Fees Due - Read-only */}
           {formData.student_fees_due > 0 && (
             <div className="relative w-full">
-              <label className="block text-sm font-medium mb-1">Student Fees Due</label>
+              <label className="block text-sm font-medium mb-1">
+                Student Fees Due
+              </label>
               <input
                 type="number"
                 value={formData.student_fees_due}
@@ -758,7 +842,8 @@ export default function AddCollectionPage() {
               Total Due
               {formData.total_payable > 0 || formData.student_fees_due > 0 ? (
                 <span className="text-xs text-gray-500 ml-1">
-                  (Total Fees: ৳{formData.total_payable} + Student Fees Due: ৳{formData.student_fees_due})
+                  (Total Fees: ৳{formData.total_payable} + Student Fees Due: ৳
+                  {formData.student_fees_due})
                 </span>
               ) : null}
             </label>
@@ -783,7 +868,9 @@ export default function AddCollectionPage() {
 
           {/* Paid Amount */}
           <div className="relative w-full">
-            <label className="block text-sm font-medium mb-1">Paid Amount</label>
+            <label className="block text-sm font-medium mb-1">
+              Paid Amount
+            </label>
             <input
               type="number"
               name="paid_amount"
@@ -812,11 +899,15 @@ export default function AddCollectionPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
             </div>
           </div>
-
         </div>
 
         {/* Action Buttons */}
@@ -850,30 +941,42 @@ export default function AddCollectionPage() {
         onSave={handlePaymentSave}
         saveText="Collectin"
         width="w-96"
-
       >
         <div className="space-y-4">
-          
           {/* Payment Summary */}
-          <div className={`p-3 rounded border ${darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}>
+          <div
+            className={`p-3 rounded border ${darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
+          >
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <span className={darkMode ? "text-gray-300" : "text-gray-600"}>Total Payable:</span>
+                <span className={darkMode ? "text-gray-300" : "text-gray-600"}>
+                  Total Payable:
+                </span>
                 <span className="font-semibold">৳{formData.total_payable}</span>
               </div>
               {formData.overdue_amount > 0 && (
                 <div className="flex justify-between text-red-500">
                   <span>Overdue Amount:</span>
-                  <span className="font-semibold">৳{formData.overdue_amount}</span>
+                  <span className="font-semibold">
+                    ৳{formData.overdue_amount}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className={darkMode ? "text-gray-300" : "text-gray-600"}>Amount Paying:</span>
-                <span className="font-semibold">৳{formData.paid_amount || 0}</span>
+                <span className={darkMode ? "text-gray-300" : "text-gray-600"}>
+                  Amount Paying:
+                </span>
+                <span className="font-semibold">
+                  ৳{formData.paid_amount || 0}
+                </span>
               </div>
               <div className="flex justify-between border-t pt-1 mt-1">
-                <span className={darkMode ? "text-gray-300" : "text-gray-600"}>Total Due:</span>
-                <span className={`font-semibold ${formData.total_due > 0 ? "text-red-500" : ""}`}>
+                <span className={darkMode ? "text-gray-300" : "text-gray-600"}>
+                  Total Due:
+                </span>
+                <span
+                  className={`font-semibold ${formData.total_due > 0 ? "text-red-500" : ""}`}
+                >
                   ৳{formData.total_due}
                 </span>
               </div>
@@ -882,35 +985,41 @@ export default function AddCollectionPage() {
 
           {/* Payment Method Selection */}
           <div className="space-y-2">
-            <label className={`block text-sm font-medium mb-2 ${darkMode ? "text-gray-200" : "text-gray-700"}`}>
+            <label
+              className={`block text-sm font-medium mb-2 ${darkMode ? "text-gray-200" : "text-gray-700"}`}
+            >
               Payment Method *
             </label>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => handlePaymentMethodSelect("Cash")}
-                className={`flex-1 p-4 border-2 rounded transition ${
-                  formData.payment_method === "Cash"
-                    ? "border-blue-600 bg-blue-50 text-blue-700"
-                    : darkMode
-                    ? "border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500"
-                    : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
-                }`}
-              >
-                <div className="text-center">
-                  <div className="text-2xl mb-2">💵</div>
-                  <div className="font-semibold">Cash</div>
-                </div>
-              </button>
+            <div
+              className={`flex gap-4 ${localStorage.getItem("role") === "school" ? "" : "max-w-xs"}`}
+            >
+              {localStorage.getItem("role") === "school" && (
+                <button
+                  type="button"
+                  onClick={() => handlePaymentMethodSelect("Cash")}
+                  className={`flex-1 p-4 border-2 rounded transition ${
+                    formData.payment_method === "Cash"
+                      ? "border-blue-600 bg-blue-50 text-blue-700"
+                      : darkMode
+                        ? "border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500"
+                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">💵</div>
+                    <div className="font-semibold">Cash</div>
+                  </div>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => handlePaymentMethodSelect("Bank")}
-                className={`flex-1 p-4 border-2 rounded transition ${
+                className={`${localStorage.getItem("role") === "school" ? "flex-1" : "w-full"} p-4 border-2 rounded transition ${
                   formData.payment_method === "Bank"
                     ? "border-blue-600 bg-blue-50 text-blue-700"
                     : darkMode
-                    ? "border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500"
-                    : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                      ? "border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500"
+                      : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                 }`}
               >
                 <div className="text-center">
@@ -920,7 +1029,9 @@ export default function AddCollectionPage() {
               </button>
             </div>
             {formData.payment_method && (
-              <p className={`text-xs mt-2 ${darkMode ? "text-green-400" : "text-green-600"}`}>
+              <p
+                className={`text-xs mt-2 ${darkMode ? "text-green-400" : "text-green-600"}`}
+              >
                 ✓ Selected: {formData.payment_method}
               </p>
             )}

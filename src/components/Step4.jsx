@@ -34,8 +34,12 @@ export default function Step4({ formData, handleChange }) {
   }, []);
 
   return (
-    <div className={`space-y-4 animate-fadeIn ${darkMode ? "text-gray-200" : "text-gray-700"}`}>
-      <p className={`text-xs text-center ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+    <div
+      className={`space-y-4 animate-fadeIn ${darkMode ? "text-gray-200" : "text-gray-700"}`}
+    >
+      <p
+        className={`text-xs text-center ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+      >
         Please provide the student information.
       </p>
 
@@ -66,9 +70,25 @@ export default function Step4({ formData, handleChange }) {
         handleChange={handleChange}
         title="Current Location"
         fields={[
-          { name: "currentDivision", label: "Division", options: ["Dhaka", "Chattogram"] },
-          { name: "currentDistrict", label: "District", options: ["Gazipur", "Comilla"] },
-          { name: "currentUpazila", label: "Upazila", options: ["Savar", "Sonargaon"] },
+          {
+            name: "currentDivision",
+            label: "Division",
+            type: "select",
+            options: ["Dhaka", "Chattogram"],
+          },
+          {
+            name: "currentDistrict",
+            label: "District",
+            type: "select",
+            options: ["Gazipur", "Comilla"],
+          },
+          {
+            name: "currentUpazila",
+            label: "Upazila",
+            type: "select",
+            options: ["Savar", "Sonargaon"],
+          },
+          { name: "currentVillage", label: "Village", type: "text" },
         ]}
       />
 
@@ -79,9 +99,25 @@ export default function Step4({ formData, handleChange }) {
         handleChange={handleChange}
         title="Permanent Location"
         fields={[
-          { name: "permanentDivision", label: "Division", options: ["Dhaka", "Chattogram"] },
-          { name: "permanentDistrict", label: "District", options: ["Gazipur", "Comilla"] },
-          { name: "permanentUpazila", label: "Upazila", options: ["Savar", "Sonargaon"] },
+          {
+            name: "permanentDivision",
+            label: "Division",
+            type: "select",
+            options: ["Dhaka", "Chattogram"],
+          },
+          {
+            name: "permanentDistrict",
+            label: "District",
+            type: "select",
+            options: ["Gazipur", "Comilla"],
+          },
+          {
+            name: "permanentUpazila",
+            label: "Upazila",
+            type: "select",
+            options: ["Savar", "Sonargaon"],
+          },
+          { name: "permanentVillage", label: "Village", type: "text" },
         ]}
       />
 
@@ -133,10 +169,14 @@ export default function Step4({ formData, handleChange }) {
         {!preview ? (
           <div
             className={`border border-dashed border-gray-300 h-18 flex flex-col items-center justify-center relative cursor-pointer hover:border-indigo-400 transition ${
-              darkMode ? "text-gray-400 border-gray-600" : "text-gray-400 border-gray-300"
+              darkMode
+                ? "text-gray-400 border-gray-600"
+                : "text-gray-400 border-gray-300"
             }`}
           >
-            <span className="flex items-center gap-2 text-sm"><TfiGallery /> Upload Photo</span>
+            <span className="flex items-center gap-2 text-sm">
+              <TfiGallery /> Upload Photo
+            </span>
             <input
               type="file"
               accept="image/*"
@@ -147,10 +187,14 @@ export default function Step4({ formData, handleChange }) {
           </div>
         ) : (
           <div className="relative h-12 w-full flex justify-center items-center border rounded-lg overflow-hidden">
-            <img src={preview} alt="Preview"  className="w-20 h-20 object-cover rounded-md shadow" />
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-20 h-20 object-cover rounded-md shadow"
+            />
             <button
               onClick={removeImage}
-               className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition"
+              className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition"
             >
               ✕
             </button>
@@ -165,18 +209,20 @@ export default function Step4({ formData, handleChange }) {
 function LocationSelect({ darkMode, title, formData, handleChange, fields }) {
   return (
     <div className="space-y-4 mb-6">
-      <h2 className={`text-center font-semibold text-base md:text-lg ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+      <h2
+        className={`text-center font-semibold text-base md:text-lg ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+      >
         {title}
       </h2>
-      {fields.map(({ name, label, options }) => (
+      {fields.map(({ name, label, type = "select", options }) => (
         <Input
           key={name}
-          type="select"
+          type={type}
           label={label}
           name={name}
           value={formData[name] || ""}
           onChange={handleChange}
-          options={options}
+          options={type === "select" ? options : undefined}
           inputClassName={`py-1 ${
             darkMode
               ? "bg-gray-700 border-gray-600 text-white"

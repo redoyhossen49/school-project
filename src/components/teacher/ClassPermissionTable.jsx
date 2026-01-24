@@ -14,7 +14,10 @@ const headers = [
   { label: "Subject", key: "subject" },
 ];
 
-export default function ClassPermissionTable({ data = classPermissionData, setData }) {
+export default function ClassPermissionTable({
+  data = classPermissionData,
+  setData,
+}) {
   const { darkMode } = useTheme();
   const userRole = localStorage.getItem("role"); // "school"
   const showAction = userRole === "school";
@@ -28,7 +31,7 @@ export default function ClassPermissionTable({ data = classPermissionData, setDa
 
   const handleEditSubmit = (updatedData) => {
     setData((prev) =>
-      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...updatedData } : r))
+      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...updatedData } : r)),
     );
     setEditModalOpen(false);
   };
@@ -99,7 +102,7 @@ export default function ClassPermissionTable({ data = classPermissionData, setDa
               ))}
 
               {showAction && (
-                <td className="px-3 h-8 whitespace-nowrap">
+                <td className="px-3 h-8 whitespace-nowrap md:w-18">
                   <ReusableActions
                     item={row}
                     onEdit={(r) => {
@@ -126,8 +129,18 @@ export default function ClassPermissionTable({ data = classPermissionData, setDa
           onClose={() => setEditModalOpen(false)}
           onSubmit={handleEditSubmit}
           fields={[
-            { name: "teacherName", label: "Teacher Name", type: "text", required: true },
-            { name: "idNumber", label: "ID Number", type: "text", required: true },
+            {
+              name: "teacherName",
+              label: "Teacher Name",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "idNumber",
+              label: "ID Number",
+              type: "text",
+              required: true,
+            },
             { name: "class", label: "Class", type: "text" },
             { name: "group", label: "Group", type: "text" },
             { name: "section", label: "Section", type: "text" },

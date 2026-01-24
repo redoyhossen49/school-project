@@ -115,7 +115,7 @@ export default function AddTeacherModal({ open, onClose, onAdd }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Grid layout for text inputs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1  gap-4">
             <Input
               label="Teacher name"
               name="teacherName"
@@ -180,7 +180,7 @@ export default function AddTeacherModal({ open, onClose, onAdd }) {
           </div>
 
           {/* Upload Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+          <div className="grid grid-cols-1  gap-4 my-4">
             {/* Photo Upload */}
             <div>
               {!photoPreview ? (

@@ -11,11 +11,11 @@ export default function Step2({ formData, handleChange }) {
       }`}
     >
       <p
-        className={`text-xs text-center py-4 ${
+        className={`text-xs text-center py-2 mb-3 ${
           darkMode ? "text-gray-400" : "text-gray-500"
         }`}
       >
-        Please provide the details of the previous school.
+        Provide the details of the previous school.
       </p>
 
       {[
@@ -30,7 +30,6 @@ export default function Step2({ formData, handleChange }) {
           key={field.name}
           label={field.label}
           name={field.name}
-         
           value={formData[field.name]}
           onChange={handleChange}
           inputClassName={`py-1 ${
@@ -38,7 +37,6 @@ export default function Step2({ formData, handleChange }) {
               ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               : "bg-white border-gray-300 text-gray-700 placeholder-gray-400"
           }`}
-          
         />
       ))}
     </div>

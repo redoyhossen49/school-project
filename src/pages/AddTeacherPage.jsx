@@ -117,7 +117,7 @@ const removeImage = (type) => {
       >
         <h2 className="text-center">Teacher Information</h2>
         {/* Grid layout for text inputs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1  gap-4">
           <Input
             label="Teacher name"
             name="teacherName"
@@ -191,7 +191,7 @@ const removeImage = (type) => {
 
         {/* Upload Section */}
         {/* Upload Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+        <div className="grid grid-cols-1 gap-4 my-4">
           {/* Photo Upload */}
           <div>
            

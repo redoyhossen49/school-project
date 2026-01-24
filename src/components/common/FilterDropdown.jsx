@@ -62,7 +62,7 @@ export default function FilterDropdown({
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0  " />
+      <div className="fixed inset-0 bg-black/20  " />
 
       {/* Centered modal */}
       <div

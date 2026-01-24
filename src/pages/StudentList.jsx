@@ -37,23 +37,26 @@ export default function StudentsList() {
   // Calculate feesDue for each student based on collections
   const calculateStudentFeesDue = (studentList) => {
     const storedCollections = getCollectionsFromStorage();
-    const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
-    
+    const allCollections =
+      storedCollections.length > 0 ? storedCollections : collectionData;
+
     return studentList.map((student) => {
       // Find all collections for this student
-      const studentCollections = allCollections.filter(
-        (collection) => {
-          const collectionId = collection.student_id ? String(collection.student_id).toUpperCase() : "";
-          const studentId = student.studentId ? String(student.studentId).toUpperCase() : "";
-          return collectionId === studentId && collectionId !== "";
-        }
-      );
-      
+      const studentCollections = allCollections.filter((collection) => {
+        const collectionId = collection.student_id
+          ? String(collection.student_id).toUpperCase()
+          : "";
+        const studentId = student.studentId
+          ? String(student.studentId).toUpperCase()
+          : "";
+        return collectionId === studentId && collectionId !== "";
+      });
+
       // Calculate total due from all collections
       const totalDue = studentCollections.reduce((sum, collection) => {
         return sum + (collection.total_due || 0);
       }, 0);
-      
+
       return {
         ...student,
         feesDue: totalDue, // Update feesDue based on collections
@@ -76,7 +79,9 @@ export default function StudentsList() {
   const [dateOpen, setDateOpen] = useState(false);
   const [showSession, setShowSession] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
+  const [sortOpenDesktop, setSortOpenDesktop] = useState(false);
+  const [sortOpenMobile, setSortOpenMobile] = useState(false);
+
   const [sortOrder, setSortOrder] = useState("newest");
   const [view, setView] = useState("table");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -94,7 +99,9 @@ export default function StudentsList() {
 
   const dateDropdownRef = useRef(null);
   const exportRef = useRef(null);
-  const sortRef = useRef(null);
+  const sortRefDesktop = useRef(null);
+  const sortRefMobile = useRef(null);
+
   const filterRef = useRef(null);
 
   const dateOptions = [
@@ -117,8 +124,15 @@ export default function StudentsList() {
       }
       if (exportRef.current && !exportRef.current.contains(e.target))
         setExportOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
+      if (
+        sortRefDesktop.current &&
+        !sortRefDesktop.current.contains(e.target)
+      ) {
         setSortOpen(false);
+      }
+      if (sortRefMobile.current && !sortRefMobile.current.contains(e.target)) {
+        setSortOpen(false);
+      }
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
     };
@@ -139,14 +153,14 @@ export default function StudentsList() {
       setStudents(calculateStudentFeesDue(loadedStudents));
     };
 
-    window.addEventListener('studentsUpdated', handleStudentsUpdate);
-    window.addEventListener('collectionsUpdated', handleCollectionsUpdate);
-    window.addEventListener('feeTypesUpdated', handleCollectionsUpdate);
+    window.addEventListener("studentsUpdated", handleStudentsUpdate);
+    window.addEventListener("collectionsUpdated", handleCollectionsUpdate);
+    window.addEventListener("feeTypesUpdated", handleCollectionsUpdate);
 
     return () => {
-      window.removeEventListener('studentsUpdated', handleStudentsUpdate);
-      window.removeEventListener('collectionsUpdated', handleCollectionsUpdate);
-      window.removeEventListener('feeTypesUpdated', handleCollectionsUpdate);
+      window.removeEventListener("studentsUpdated", handleStudentsUpdate);
+      window.removeEventListener("collectionsUpdated", handleCollectionsUpdate);
+      window.removeEventListener("feeTypesUpdated", handleCollectionsUpdate);
     };
   }, []);
 
@@ -193,7 +207,7 @@ export default function StudentsList() {
   const totalPages = Math.ceil(totalStudents / studentsPerPage);
   const currentStudents = filteredStudents.slice(
     (currentPage - 1) * studentsPerPage,
-    currentPage * studentsPerPage
+    currentPage * studentsPerPage,
   );
   // ===== EXPORT EXCEL =====
   const exportExcel = (data) => {
@@ -317,10 +331,10 @@ export default function StudentsList() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2">
-           <div className="relative " ref={filterRef}>
+            <div className="relative " ref={filterRef}>
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+                className={`w-full  flex items-center  md:px-3 md:w-28 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
               >
                 Filter
               </button>
@@ -365,9 +379,9 @@ export default function StudentsList() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between  px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
+                className={`flex items-center justify-between  px-3 h-8 text-xs w-28 border ${borderClr} ${inputBg}`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -387,69 +401,110 @@ export default function StudentsList() {
                     onClick={() => exportExcel(filteredStudents)}
                     className="w-full px-3 py-1 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                   Excel
+                    Excel
                   </button>
                 </div>
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddStudentOpen(true)}
                 className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
               >
                 Student
               </button>
+            ) : (
+              <div className="relative flex-1" ref={sortRefDesktop}>
+                <button
+                  onClick={() => setSortOpenDesktop((prev) => !prev)}
+                  className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700 text-gray-100"
+                      : "border-gray-200 bg-white text-gray-800"
+                  }`}
+                >
+                  Sort By
+                </button>
+                {sortOpenDesktop && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border  ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "bg-white border-gray-200 text-gray-900"
+                    }  left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("newest");
+                        setSortOpenDesktop(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("oldest");
+                        setSortOpenDesktop(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
 
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
-         <div className="relative " ref={filterRef}>
-              <button
-                onClick={() => setFilterOpen((prev) => !prev)}
-                className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
-              >
-                Filter
-              </button>
+          <div className="relative " ref={filterRef}>
+            <button
+              onClick={() => setFilterOpen((prev) => !prev)}
+              className={`w-full  flex items-center  md:px-3 md:w-24 px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
+            >
+              Filter
+            </button>
 
-              <FilterDropdown
-                title="Filter Students"
-                fields={[
-                  {
-                    key: "className",
-                    label: "Class",
-                    options: classOptions,
-                    placeholder: "All Classes",
-                  },
-                  {
-                    key: "group",
-                    label: "Group",
-                    options: groupOptions,
-                    placeholder: "All Groups",
-                  },
-                  {
-                    key: "section",
-                    label: "Section",
-                    options: sectionOptions,
-                    placeholder: "All Sections",
-                  },
-                  {
-                    key: "session",
-                    label: "Session",
-                    options: sessionOptions,
-                    placeholder: "All Sessions",
-                  },
-                ]}
-                selected={filters}
-                setSelected={setFilters}
-                darkMode={darkMode}
-                isOpen={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                onApply={() => setCurrentPage(1)}
-              />
-            </div>
+            <FilterDropdown
+              title="Filter Students"
+              fields={[
+                {
+                  key: "className",
+                  label: "Class",
+                  options: classOptions,
+                  placeholder: "All Classes",
+                },
+                {
+                  key: "group",
+                  label: "Group",
+                  options: groupOptions,
+                  placeholder: "All Groups",
+                },
+                {
+                  key: "section",
+                  label: "Section",
+                  options: sectionOptions,
+                  placeholder: "All Sections",
+                },
+                {
+                  key: "session",
+                  label: "Session",
+                  options: sessionOptions,
+                  placeholder: "All Sessions",
+                },
+              ]}
+              selected={filters}
+              setSelected={setFilters}
+              darkMode={darkMode}
+              isOpen={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              onApply={() => setCurrentPage(1)}
+            />
+          </div>
 
           <div className="relative w-full " ref={exportRef}>
             <button
@@ -482,20 +537,59 @@ export default function StudentsList() {
             )}
           </div>
 
-          {canEdit && (
+          {canEdit ? (
             <button
               onClick={() => setAddStudentOpen(true)}
               className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Student
             </button>
+          ) : (
+            <div className="relative w-full" ref={sortRefMobile}>
+              <button
+                onClick={() => setSortOpenMobile((prev) => !prev)}
+                className={`w-full flex items-center border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+              {sortOpenMobile && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  } left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("newest");
+                      setSortOpenMobile(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("oldest");
+                      setSortOpenMobile(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
         {/* Filters + Search */}
         <div className=" md:flex md:items-center md:justify-between md:gap-4">
-         
-
           {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:justify-between w-full">
             <input
@@ -536,7 +630,7 @@ export default function StudentsList() {
           onClose={() => setEditingStudent(null)}
           onSave={(updated) => {
             setStudents(
-              students.map((s) => (s.id === updated.id ? updated : s))
+              students.map((s) => (s.id === updated.id ? updated : s)),
             );
             setEditingStudent(null);
           }}
@@ -545,7 +639,10 @@ export default function StudentsList() {
 
       {/* ===== ADD MODAL ===== */}
       {canEdit && (
-        <PageModal open={addStudentOpen} onClose={() => setAddStudentOpen(false)}>
+        <PageModal
+          open={addStudentOpen}
+          onClose={() => setAddStudentOpen(false)}
+        >
           <AddStudentPage
             modal
             onClose={() => setAddStudentOpen(false)}

@@ -11,11 +11,11 @@ export default function Step3({ formData, handleChange }) {
       }`}
     >
       <p
-        className={`text-xs text-center py-4 ${
+        className={`text-xs text-center mb-3 ${
           darkMode ? "text-gray-400" : "text-gray-500"
         }`}
       >
-        Please provide the details of the guardian.
+        Provide the details of the guardian.
       </p>
 
       {/* Guardian Inputs */}
@@ -28,7 +28,6 @@ export default function Step3({ formData, handleChange }) {
           key={field.name}
           label={field.label}
           name={field.name}
-       
           value={formData[field.name]}
           onChange={handleChange}
           inputClassName={` ${

@@ -7,12 +7,15 @@ import Step1 from "../components/Step1";
 import Step2 from "../components/Step2";
 import Step3 from "../components/Step3";
 import Step4 from "../components/Step4";
+import PaymentMethodModal from "../components/PaymentMethodModal";
 
 export default function AddStudentPage({ modal = false, onClose, onSave }) {
   const { darkMode } = useTheme();
   const [activeStep, setActiveStep] = useState(0);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(null);
   const steps = ["Register", "School", "Guardian", "Student"];
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     division: "",
@@ -42,9 +45,11 @@ export default function AddStudentPage({ modal = false, onClose, onSave }) {
     currentDivision: "",
     currentDistrict: "",
     currentUpazila: "",
+    currentVillage: "",
     permanentDivision: "",
     permanentDistrict: "",
     permanentUpazila: "",
+    permanentVillage: "",
     idNumber: "",
     mobileNumber: "",
     password: "",
@@ -69,20 +74,35 @@ export default function AddStudentPage({ modal = false, onClose, onSave }) {
 
   const handleSubmit = () => {
     console.log("STUDENT DATA 👉", formData);
+    console.log("PAYMENT METHOD 👉", paymentMethod);
     alert("Student Added Successfully ✅");
     if (modal && onSave) {
-      onSave(formData);
+      onSave({ ...formData, paymentMethod });
       onClose?.();
     }
   };
-const cardBg = darkMode
-  ? "bg-gray-700 border border-gray-600 text-gray-100"
-  : "bg-white border border-gray-200 text-gray-800";
 
-const breadcrumbText = darkMode ? "text-gray-300" : "text-gray-500";
+  const handlePaymentSelect = (method) => {
+    setPaymentMethod(method);
+    console.log("Payment method selected:", method);
+    // Here you can integrate with payment gateway if needed
+    if (method === "bank") {
+      // Integrate bank gateway system
+      alert("Redirecting to Bank Gateway System...");
+    } else {
+      // Handle cash payment
+      alert("Payment method: Cash");
+    }
+    handleSubmit();
+  };
+  const cardBg = darkMode
+    ? "bg-gray-700 border border-gray-600 text-gray-100"
+    : "bg-white border border-gray-200 text-gray-800";
 
-const baseBtn =
-  "px-3 md:px-4 py-1 md:py-2 w-full md:w-1/2 text-sm  transition";
+  const breadcrumbText = darkMode ? "text-gray-300" : "text-gray-500";
+
+  const baseBtn =
+    "px-3 md:px-4 py-1 md:py-2 w-full md:w-1/2 text-sm  transition";
 
   return (
     <div
@@ -93,7 +113,9 @@ const baseBtn =
       }`}
     >
       {/* Header */}
-      <div className={`${modal ? "w-full space-y-3" : "w-full px-6 py-4 space-y-4"}`}>
+      <div
+        className={`${modal ? "w-full space-y-3" : "w-full px-6 py-4 space-y-4"}`}
+      >
         <div>
           <h1
             className={`text-base md:text-lg font-semibold text-center ${
@@ -102,21 +124,6 @@ const baseBtn =
           >
             Add Student
           </h1>
-
-          <p className={`text-xs md:text-sm mt-1 text-center ${breadcrumbText}`}>
-            <Link to="/dashboard" className="hover:text-indigo-600">
-              Dashboard
-            </Link>
-            <span className="mx-1">/</span>
-            <button
-              onClick={() => (modal ? onClose?.() : navigate("/school/dashboard/studentlist"))}
-              className="hover:text-indigo-600"
-            >
-              Student
-            </button>
-            <span className="mx-1">/</span>
-            <span className="">Add Student</span>
-          </p>
         </div>
 
         {/* Stepper */}
@@ -131,12 +138,13 @@ const baseBtn =
 
       {/* Step Content */}
       <div className={`${modal ? "w-full" : "w-full max-w-2xl p-5"}`}>
-
         {activeStep === 0 && (
           <Step1
             formData={formData}
             handleChange={handleChange}
             darkMode={darkMode}
+            hideLocationSection={true}
+            hideSchoolAndTitle={true}
           />
         )}
         {activeStep === 1 && (
@@ -163,35 +171,61 @@ const baseBtn =
 
         {/* Navigation */}
         <div className="flex mt-6 w-full gap-2 md:gap-3">
-          <button
-            onClick={prevStep}
-            disabled={activeStep === 0}
-            className={`px-3 md:px-4 h-8 w-full md:w-1/2 text-xs  border border-gray-300 ${
-              activeStep === 0
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Previous
-          </button>
-
-          {activeStep < steps.length - 1 ? (
-            <button
-              onClick={nextStep}
-              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs bg-indigo-600 text-white  hover:bg-indigo-700"
-            >
-              Next
-            </button>
+          {modal && activeStep === 0 ? (
+            <>
+              <button
+                onClick={onClose}
+                className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs border border-gray-300 hover:bg-gray-100"
+              >
+                Close
+              </button>
+              <button
+                onClick={nextStep}
+                className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs bg-indigo-600 text-white hover:bg-indigo-700"
+              >
+                Next
+              </button>
+            </>
           ) : (
-            <button
-              onClick={handleSubmit}
-              className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs bg-green-600 text-white hover:bg-green-700"
-            >
-              Submit
-            </button>
+            <>
+              <button
+                onClick={prevStep}
+                disabled={activeStep === 0}
+                className={`px-3 md:px-4 h-8 w-full md:w-1/2 text-xs  border border-gray-300 ${
+                  activeStep === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                Back
+              </button>
+
+              {activeStep < steps.length - 1 ? (
+                <button
+                  onClick={nextStep}
+                  className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs bg-indigo-600 text-white  hover:bg-indigo-700"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  onClick={() => setPaymentOpen(true)}
+                  className="px-3 md:px-4 h-8 w-full md:w-1/2 text-xs bg-green-600 text-white hover:bg-green-700"
+                >
+                  Payment
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
+
+      {/* Payment Method Modal */}
+      <PaymentMethodModal
+        open={paymentOpen}
+        onClose={() => setPaymentOpen(false)}
+        onSelect={handlePaymentSelect}
+      />
     </div>
   );
 }

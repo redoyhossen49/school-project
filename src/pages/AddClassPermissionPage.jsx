@@ -32,7 +32,7 @@ export default function AddClassPermissionPage({
       darkMode={darkMode}
       initialValues={{
         teacherName: "",
-        idNumber: "",
+
         class: "",
         group: "",
         section: "",
@@ -48,11 +48,7 @@ export default function AddClassPermissionPage({
           placeholder: "Select teacher",
           options: ["Redoy", "Sagor", "Rahim", "Karim", "Nasim"],
         },
-        {
-          key: "idNumber",
-          type: "text",
-          label: "Id number",
-        },
+
         {
           key: "class",
           type: "select",

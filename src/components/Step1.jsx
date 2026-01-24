@@ -22,7 +22,12 @@ const mockDB = {
   },
 };
 
-export default function Step1({ formData, handleChange }) {
+export default function Step1({
+  formData,
+  handleChange,
+  hideLocationSection = false,
+  hideSchoolAndTitle = false,
+}) {
   const { darkMode } = useTheme();
   const [availableSchools, setAvailableSchools] = useState([]);
 
@@ -60,64 +65,78 @@ export default function Step1({ formData, handleChange }) {
   return (
     <div>
       {/* Title */}
-      <h2
-        className={`text-center font-semibold text-base md:text-lg mb-4 ${titleClass}`}
-      >
-        Find Your Location
-      </h2>
+      {!hideLocationSection && (
+        <>
+          <h2
+            className={`text-center font-semibold text-base md:text-lg mb-4 ${titleClass}`}
+          >
+            Find Your Location
+          </h2>
 
-      {/* Location selects */}
-      <div className="space-y-4">
-        <Input
-          type="select"
-          label="Division"
-          name="division"
-          value={formData.division || ""}
-          onChange={handleChange}
-          options={Object.keys(mockDB)}
-        />
-        <Input
-          type="select"
-          label="District"
-          name="district"
-          value={formData.district || ""}
-          onChange={handleChange}
-          options={
-            formData.division
-              ? Object.keys(mockDB[formData.division] || {})
-              : []
-          }
-        />
-        <Input
-          type="select"
-          label="Upazila"
-          name="upazila"
-          value={formData.upazila || ""}
-          onChange={handleChange}
-          options={
-            formData.division && formData.district
-              ? Object.keys(mockDB[formData.division][formData.district] || {})
-              : []
-          }
-        />
-      </div>
+          {/* Location selects */}
+          <div className="space-y-4">
+            <Input
+              type="select"
+              label="Division"
+              name="division"
+              value={formData.division || ""}
+              onChange={handleChange}
+              options={Object.keys(mockDB)}
+            />
+            <Input
+              type="select"
+              label="District"
+              name="district"
+              value={formData.district || ""}
+              onChange={handleChange}
+              options={
+                formData.division
+                  ? Object.keys(mockDB[formData.division] || {})
+                  : []
+              }
+            />
+            <Input
+              type="select"
+              label="Upazila"
+              name="upazila"
+              value={formData.upazila || ""}
+              onChange={handleChange}
+              options={
+                formData.division && formData.district
+                  ? Object.keys(
+                      mockDB[formData.division][formData.district] || {},
+                    )
+                  : []
+              }
+            />
+          </div>
+        </>
+      )}
 
       {/* School Info */}
-      <h2
-        className={`text-center font-semibold text-base md:text-lg my-4 ${titleClass}`}
-      >
-        New School Information
-      </h2>
+      {!hideSchoolAndTitle && (
+        <h2
+          className={`text-center font-semibold text-base md:text-lg ${hideLocationSection ? "mb-4" : "my-4"} ${titleClass}`}
+        >
+          New School Information
+        </h2>
+      )}
 
       <div className="space-y-4 ">
-        <Input
-          type="select"
-          label=" School"
-          name="school"
-          value={formData.school || ""}
-          onChange={handleChange}
-          options={availableSchools.map((s) => s.name)}
-        />
+        {!hideSchoolAndTitle && (
+          <Input
+            type="select"
+            label=" School"
+            name="school"
+            value={formData.school || ""}
+            onChange={handleChange}
+            options={
+              hideLocationSection
+                ? ["Select School", "School A", "School B", "School C"]
+                : availableSchools.map((s) => s.name)
+            }
+          />
+        )}
 
         <Input
           type="select"
@@ -137,6 +156,17 @@ export default function Step1({ formData, handleChange }) {
           options={["Science", "Arts", "Commerce"]}
         />
 
+        {hideSchoolAndTitle && (
+          <Input
+            type="select"
+            label=" Section"
+            name="sectionName"
+            value={formData.sectionName || ""}
+            onChange={handleChange}
+            options={["Morning", "Day", "Evening"]}
+          />
+        )}
+
         <Input
           type="select"
           label=" Session"
@@ -151,7 +181,6 @@ export default function Step1({ formData, handleChange }) {
           label="Admission fee"
           name="admissionFee"
           value={formData.admissionFee || ""}
-         
           error={false}
           readOnly
         />
@@ -162,7 +191,7 @@ export default function Step1({ formData, handleChange }) {
           name="admissionDate"
           value={formData.admissionDate || ""}
           onChange={handleChange}
-           showDropdownTop={true}
+          showDropdownTop={true}
         />
       </div>
     </div>

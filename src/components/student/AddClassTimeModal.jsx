@@ -15,12 +15,45 @@ export default function AddClassTimeModal({ open, onClose, onSave }) {
   const sectionOptions = getUniqueOptions(classTimeData, "section");
 
   const fields = [
-    { key: "className", label: "Class", type: "select", placeholder: "Select Class", options: classOptions },
-    { key: "group", label: "Group", type: "select", placeholder: "Select Group", options: groupOptions },
-    { key: "section", label: "Section", type: "select", placeholder: "Select Section", options: sectionOptions },
-    { key: "startTime", label: "Start Time", type: "time", placeholder: "Start Time" },
-    { key: "lastTime", label: "Late Time", type: "time", placeholder: "Late Time" },
-    { key: "endTime", label: "Close Time", type: "time", placeholder: "Close Time" },
+    {
+      key: "className",
+      type: "select",
+      label: "Class",
+      placeholder: "Select Class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      type: "select",
+      label: "Group",
+      placeholder: "Select Group",
+      options: groupOptions,
+    },
+    {
+      key: "section",
+      type: "select",
+      label: "Section",
+      placeholder: "Select Section",
+      options: sectionOptions,
+    },
+    {
+      key: "startTime",
+      type: "time",
+      label: "Start Time",
+      placeholder: "Start Time",
+    },
+    {
+      key: "lastTime",
+      type: "time",
+      label: "Late Time",
+      placeholder: "Late Time",
+    },
+    {
+      key: "endTime",
+      type: "time",
+      label: "Close Time",
+      placeholder: "Close Time",
+    },
   ];
 
   const initialValues = {
@@ -54,4 +87,3 @@ export default function AddClassTimeModal({ open, onClose, onSave }) {
     />
   );
 }
-

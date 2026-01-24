@@ -1,5 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { FiMoreHorizontal, FiEdit, FiTrash2, FiCheck, FiX } from "react-icons/fi";
+import {
+  FiMoreHorizontal,
+  FiEdit,
+  FiTrash2,
+  FiCheck,
+  FiX,
+} from "react-icons/fi";
 import { useTheme } from "../../context/ThemeContext";
 import { useLocation } from "react-router-dom"; // ✅ For detecting current route
 
@@ -29,13 +35,13 @@ export default function ReusableActions({
 
   const toggleDropdown = () => {
     if (ref.current) {
-      const tableRow = ref.current.closest('tr');
+      const tableRow = ref.current.closest("tr");
       let isLastRow = false;
 
       if (tableRow) {
-        const tbody = tableRow.closest('tbody');
+        const tbody = tableRow.closest("tbody");
         if (tbody) {
-          const rows = tbody.querySelectorAll('tr');
+          const rows = tbody.querySelectorAll("tr");
           isLastRow = tableRow === rows[rows.length - 1];
         }
       }
@@ -55,7 +61,9 @@ export default function ReusableActions({
       <button
         onClick={toggleDropdown}
         className={`h-6 w-6 p-0 flex items-center justify-center transition-colors ${
-          darkMode ? "hover:bg-gray-700 text-gray-300" : "hover:bg-gray-100 text-gray-600"
+          darkMode
+            ? "hover:bg-gray-700 text-gray-300"
+            : "hover:bg-gray-100 text-gray-600"
         }`}
       >
         <FiMoreHorizontal className="w-4 h-4" />
@@ -69,22 +77,34 @@ export default function ReusableActions({
         >
           {/* Edit */}
           <button
-            onClick={() => onEdit(item)}
+            onClick={() => {
+              onEdit(item);
+              setOpen(false);
+            }}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
-              darkMode ? "hover:bg-gray-700 text-gray-100" : "hover:bg-gray-100 text-gray-900"
+              darkMode
+                ? "hover:bg-gray-700 text-gray-100"
+                : "hover:bg-gray-100 text-gray-900"
             }`}
           >
-            <FiEdit className={`w-3 h-3 ${darkMode ? "text-blue-400" : "text-blue-600"}`} />
+            <FiEdit
+              className={`w-3 h-3 ${darkMode ? "text-blue-400" : "text-blue-600"}`}
+            />
             Edit
           </button>
 
           {/* Delete */}
           <button
             onClick={() => {
-              if (confirm(deleteMessage)) onDelete(item);
+              if (confirm(deleteMessage)) {
+                onDelete(item);
+                setOpen(false);
+              }
             }}
             className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
-              darkMode ? "text-red-400 hover:bg-gray-700" : "text-red-600 hover:bg-red-50"
+              darkMode
+                ? "text-red-400 hover:bg-gray-700"
+                : "text-red-600 hover:bg-red-50"
             }`}
           >
             <FiTrash2 className="w-3 h-3" />
@@ -95,9 +115,14 @@ export default function ReusableActions({
           {isPromoteRequestPage && (
             <>
               <button
-                onClick={() => onAccept(item)}
+                onClick={() => {
+                  onAccept(item);
+                  setOpen(false);
+                }}
                 className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
-                  darkMode ? "text-green-400 hover:bg-gray-700" : "text-green-600 hover:bg-green-50"
+                  darkMode
+                    ? "text-green-400 hover:bg-gray-700"
+                    : "text-green-600 hover:bg-green-50"
                 }`}
               >
                 <FiCheck className="w-3 h-3" />
@@ -105,9 +130,14 @@ export default function ReusableActions({
               </button>
 
               <button
-                onClick={() => onReject(item)}
+                onClick={() => {
+                  onReject(item);
+                  setOpen(false);
+                }}
                 className={`w-full flex items-center gap-2 px-3 py-1 text-xs ${
-                  darkMode ? "text-yellow-400 hover:bg-gray-700" : "text-yellow-600 hover:bg-yellow-50"
+                  darkMode
+                    ? "text-yellow-400 hover:bg-gray-700"
+                    : "text-yellow-600 hover:bg-yellow-50"
                 }`}
               >
                 <FiX className="w-3 h-3" />

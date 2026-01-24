@@ -62,10 +62,10 @@ export default function CollectionList() {
       }
     };
 
-    window.addEventListener('collectionsUpdated', handleCollectionsUpdate);
+    window.addEventListener("collectionsUpdated", handleCollectionsUpdate);
 
     return () => {
-      window.removeEventListener('collectionsUpdated', handleCollectionsUpdate);
+      window.removeEventListener("collectionsUpdated", handleCollectionsUpdate);
     };
   }, []);
 
@@ -111,11 +111,12 @@ export default function CollectionList() {
 
   // ===== Filter + Sort Logic =====
   const filteredCollections = collections
-    .filter((c) =>
-      c.student_id?.toLowerCase().includes(search.toLowerCase()) ||
-      c.class?.toLowerCase().includes(search.toLowerCase()) ||
-      c.group?.toLowerCase().includes(search.toLowerCase()) ||
-      c.fees_type?.toLowerCase().includes(search.toLowerCase())
+    .filter(
+      (c) =>
+        c.student_id?.toLowerCase().includes(search.toLowerCase()) ||
+        c.class?.toLowerCase().includes(search.toLowerCase()) ||
+        c.group?.toLowerCase().includes(search.toLowerCase()) ||
+        c.fees_type?.toLowerCase().includes(search.toLowerCase()),
     )
     .filter((c) => {
       // Regular filters
@@ -131,7 +132,6 @@ export default function CollectionList() {
         if ((c.total_due || 0) === 0) return false;
       }
 
-
       return true;
     })
     .sort((a, b) => {
@@ -142,7 +142,7 @@ export default function CollectionList() {
   const totalPages = Math.ceil(totalCollections / collectionsPerPage);
   const currentCollections = filteredCollections.slice(
     (currentPage - 1) * collectionsPerPage,
-    currentPage * collectionsPerPage
+    currentPage * collectionsPerPage,
   );
 
   // ===== EXPORT EXCEL =====
@@ -230,8 +230,8 @@ export default function CollectionList() {
   // ===== DOWNLOAD MULTIPLE PAYMENT SLIPS =====
   const handleDownloadMultipleSlips = async () => {
     // Filter selectedCollections to only include items from currentCollections (table data)
-    const validSelectedCollections = selectedCollections.filter(selected => 
-      currentCollections.some(current => current.sl === selected.sl)
+    const validSelectedCollections = selectedCollections.filter((selected) =>
+      currentCollections.some((current) => current.sl === selected.sl),
     );
 
     if (validSelectedCollections.length === 0) {
@@ -242,25 +242,29 @@ export default function CollectionList() {
     // Helper function to convert image path to absolute URL
     const getImageUrl = (imagePath) => {
       if (!imagePath) return "";
-      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
         return imagePath;
       }
-      if (imagePath.startsWith('/')) {
+      if (imagePath.startsWith("/")) {
         return window.location.origin + imagePath;
       }
       // For Vite imported assets, try to get the actual URL
       try {
         return new URL(imagePath, window.location.origin).href;
       } catch {
-        return window.location.origin + '/' + imagePath;
+        return window.location.origin + "/" + imagePath;
       }
     };
 
     // Load school info
     const school = JSON.parse(localStorage.getItem("schoolInfo") || "{}");
     const schoolName = school.schoolName || "Mohakhali Model High School";
-    const schoolAddress = school.address || "Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212";
-    const schoolLogoUrl = school?.logo ? getImageUrl(school.logo) : getImageUrl(schoolLogo);
+    const schoolAddress =
+      school.address ||
+      "Mohakhali School Road, Wireless Gate, Mohakhali, Gulshan, Banani, Dhaka-1212";
+    const schoolLogoUrl = school?.logo
+      ? getImageUrl(school.logo)
+      : getImageUrl(schoolLogo);
     const schoolPhone = school?.phone || school?.mobile || "01XXXXXXXXX";
 
     // Load all students
@@ -288,82 +292,95 @@ export default function CollectionList() {
     };
 
     // Generate HTML for all payment slips
-    const slipsHTML = validSelectedCollections.map((collection, index) => {
-      // Find student
-      const student = combinedStudents.find(
-        (s) => {
+    const slipsHTML = validSelectedCollections
+      .map((collection, index) => {
+        // Find student
+        const student = combinedStudents.find((s) => {
           const sId = (s.studentId || s.student_id || "").toUpperCase();
           const cId = (collection.student_id || "").toUpperCase();
           return sId === cId && sId !== "";
-        }
-      );
+        });
 
-      const studentPhoto = student?.photo || "https://via.placeholder.com/100";
-      const studentPhotoUrl = studentPhoto.startsWith('http') ? studentPhoto : getImageUrl(studentPhoto);
+        const studentPhoto =
+          student?.photo || "https://via.placeholder.com/100";
+        const studentPhotoUrl = studentPhoto.startsWith("http")
+          ? studentPhoto
+          : getImageUrl(studentPhoto);
 
-      const studentInfo = {
-        name: student?.student_name || collection.student_name || "N/A",
-        id: collection.student_id || student?.studentId || student?.student_id || "N/A",
-        class: student?.className || student?.class || collection.class || "N/A",
-        group: student?.group || collection.group || "N/A",
-        section: student?.section || collection.section || "N/A",
-        session: student?.session || collection.session || "N/A",
-        photo: studentPhotoUrl,
-      };
+        const studentInfo = {
+          name: student?.student_name || collection.student_name || "N/A",
+          id:
+            collection.student_id ||
+            student?.studentId ||
+            student?.student_id ||
+            "N/A",
+          class:
+            student?.className || student?.class || collection.class || "N/A",
+          group: student?.group || collection.group || "N/A",
+          section: student?.section || collection.section || "N/A",
+          session: student?.session || collection.session || "N/A",
+          photo: studentPhotoUrl,
+        };
 
-      // Service Summary
-      const feesTypes = collection.fees_type?.split(", ") || [collection.fees_type || ""];
-      const serviceSummary = feesTypes
-        .filter((ft) => ft)
-        .map((ft) => ({
-          fees_type: ft,
-          total_payable: collection.total_payable || 0,
-          total_due: collection.total_due || 0,
-        }));
+        // Service Summary
+        const feesTypes = collection.fees_type?.split(", ") || [
+          collection.fees_type || "",
+        ];
+        const serviceSummary = feesTypes
+          .filter((ft) => ft)
+          .map((ft) => ({
+            fees_type: ft,
+            total_payable: collection.total_payable || 0,
+            total_due: collection.total_due || 0,
+          }));
 
-      const serviceSummaryHTML = serviceSummary.length > 0
-        ? serviceSummary
-            .map(
-              (service) => `
+        const serviceSummaryHTML =
+          serviceSummary.length > 0
+            ? serviceSummary
+                .map(
+                  (service) => `
                 <tr>
                   <td>${(service.fees_type || "N/A").replace(/"/g, "&quot;")}</td>
                   <td>${service.total_payable || 0}</td>
                   <td>${service.total_due || 0}</td>
                 </tr>
-              `
-            )
-            .join("")
-        : `<tr><td colspan="3" style="text-align: center;">No service data available</td></tr>`;
+              `,
+                )
+                .join("")
+            : `<tr><td colspan="3" style="text-align: center;">No service data available</td></tr>`;
 
-      // Payment History
-      const paymentHistory = [{
-        sl: 1,
-        fees_type: collection.fees_type || "N/A",
-        type_amount: collection.type_amount || 0,
-        total_due: collection.total_due || 0,
-        payment_method: collection.payment_method || "N/A",
-        pay_date: collection.pay_date || collection.payDate || "",
-      }];
+        // Payment History
+        const paymentHistory = [
+          {
+            sl: 1,
+            fees_type: collection.fees_type || "N/A",
+            type_amount: collection.type_amount || 0,
+            total_due: collection.total_due || 0,
+            payment_method: collection.payment_method || "N/A",
+            pay_date: collection.pay_date || collection.payDate || "",
+          },
+        ];
 
-      const paymentHistoryHTML = paymentHistory.length > 0
-        ? paymentHistory
-            .map(
-              (payment, idx) => `
+        const paymentHistoryHTML =
+          paymentHistory.length > 0
+            ? paymentHistory
+                .map(
+                  (payment, idx) => `
                 <tr>
-                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${payment.sl}</td>
-                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${(payment.fees_type || "N/A").replace(/"/g, "&quot;")}</td>
-                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${payment.type_amount || 0}</td>
-                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${payment.total_due || 0}</td>
-                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${(payment.payment_method || "N/A").replace(/"/g, "&quot;")}</td>
-                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? '1px solid #e5e7eb' : '1px solid #e5e7eb'}; border-top: none;">${formatDate(payment.pay_date)}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? "1px solid #e5e7eb" : "1px solid #e5e7eb"}; border-top: none;">${payment.sl}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? "1px solid #e5e7eb" : "1px solid #e5e7eb"}; border-top: none;">${(payment.fees_type || "N/A").replace(/"/g, "&quot;")}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? "1px solid #e5e7eb" : "1px solid #e5e7eb"}; border-top: none;">${payment.type_amount || 0}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? "1px solid #e5e7eb" : "1px solid #e5e7eb"}; border-top: none;">${payment.total_due || 0}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? "1px solid #e5e7eb" : "1px solid #e5e7eb"}; border-top: none;">${(payment.payment_method || "N/A").replace(/"/g, "&quot;")}</td>
+                  <td style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: ${idx === paymentHistory.length - 1 ? "1px solid #e5e7eb" : "1px solid #e5e7eb"}; border-top: none;">${formatDate(payment.pay_date)}</td>
                 </tr>
-              `
-            )
-            .join("")
-        : `<tr><td colspan="6" style="border: 1px solid #e5e7eb; text-align: center;">No payment history available</td></tr>`;
+              `,
+                )
+                .join("")
+            : `<tr><td colspan="6" style="border: 1px solid #e5e7eb; text-align: center;">No payment history available</td></tr>`;
 
-      return `
-        <div class="container" style="page-break-after: ${index < validSelectedCollections.length - 1 ? 'always' : 'avoid'};">
+        return `
+        <div class="container" style="page-break-after: ${index < validSelectedCollections.length - 1 ? "always" : "avoid"};">
           <div class="header">
             <img src="${schoolLogoUrl}" class="logo" onerror="this.src='https://via.placeholder.com/90'">
 
@@ -379,7 +396,7 @@ export default function CollectionList() {
               </p>
             </div>
 
-            <img src="${studentInfo.photo || 'https://via.placeholder.com/100'}" class="logo" onerror="this.src='https://via.placeholder.com/100'">
+            <img src="${studentInfo.photo || "https://via.placeholder.com/100"}" class="logo" onerror="this.src='https://via.placeholder.com/100'">
           </div>
 
           <div class="student-summary">
@@ -436,7 +453,8 @@ export default function CollectionList() {
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join("");
 
     // Create blob URL for PDF generation
     const htmlContent = `
@@ -650,9 +668,9 @@ export default function CollectionList() {
     `;
 
     // Create blob URL for the HTML content
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const blob = new Blob([htmlContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
-    
+
     // Open _blank window for PDF generation and printing
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
@@ -666,7 +684,7 @@ export default function CollectionList() {
     printWindow.document.close();
 
     // Wait for window to load, then trigger print dialog
-    printWindow.onload = function() {
+    printWindow.onload = function () {
       setTimeout(() => {
         // Focus the window and trigger print dialog
         printWindow.focus();
@@ -680,7 +698,11 @@ export default function CollectionList() {
 
     // Fallback if onload doesn't fire - check document ready state
     const checkReady = setInterval(() => {
-      if (printWindow && !printWindow.closed && printWindow.document.readyState === 'complete') {
+      if (
+        printWindow &&
+        !printWindow.closed &&
+        printWindow.document.readyState === "complete"
+      ) {
         clearInterval(checkReady);
         setTimeout(() => {
           printWindow.focus();
@@ -723,11 +745,26 @@ export default function CollectionList() {
   };
 
   // Generate options from current collections (from localStorage)
-  const classOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "class");
-  const groupOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "group");
-  const sectionOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "section");
-  const sessionOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "session");
-  const feesTypeOptions = getUniqueOptions(collections.length > 0 ? collections : collectionData, "fees_type");
+  const classOptions = getUniqueOptions(
+    collections.length > 0 ? collections : collectionData,
+    "class",
+  );
+  const groupOptions = getUniqueOptions(
+    collections.length > 0 ? collections : collectionData,
+    "group",
+  );
+  const sectionOptions = getUniqueOptions(
+    collections.length > 0 ? collections : collectionData,
+    "section",
+  );
+  const sessionOptions = getUniqueOptions(
+    collections.length > 0 ? collections : collectionData,
+    "session",
+  );
+  const feesTypeOptions = getUniqueOptions(
+    collections.length > 0 ? collections : collectionData,
+    "fees_type",
+  );
 
   // Handle collection form submit (edit only)
   const handleCollectionFormSubmit = async (formData) => {
@@ -748,7 +785,7 @@ export default function CollectionList() {
           total_due: parseFloat(formData.total_due) || 0,
           pay_date: formData.pay_date || new Date().toISOString().split("T")[0],
         };
-        
+
         // Update in localStorage (ready for API)
         await updateCollectionAPI(editingCollection.sl, updatedData);
 
@@ -771,9 +808,9 @@ export default function CollectionList() {
         const storedItems = storedData ? JSON.parse(storedData) : [];
         return [...feeTypeData, ...storedItems];
       };
-      
+
       const allFeeTypeData = getAllFeeTypeData();
-      
+
       // Calculate fees amounts based on selected fees types
       const matchingFees = allFeeTypeData.filter(
         (fee) =>
@@ -781,18 +818,19 @@ export default function CollectionList() {
           fee.group === formData.group &&
           fee.section === formData.section &&
           fee.session === formData.session &&
-          formData.fees_type.includes(fee.fees_type)
+          formData.fees_type.includes(fee.fees_type),
       );
 
       let totalPayable = matchingFees.reduce((sum, fee) => {
         let feeAmount = fee.fees_amount || 0;
-        
+
         // Check if there's a discount for this student and fees_type
         if (formData.student_id) {
           const student = studentData.find(
-            (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+            (s) =>
+              s.studentId?.toUpperCase() === formData.student_id.toUpperCase(),
           );
-          
+
           if (student) {
             const matchingDiscount = discountData.find(
               (discount) =>
@@ -801,27 +839,31 @@ export default function CollectionList() {
                 discount.group === formData.group &&
                 discount.section === formData.section &&
                 discount.session === formData.session &&
-                discount.fees_type === fee.fees_type
+                discount.fees_type === fee.fees_type,
             );
-            
+
             if (matchingDiscount) {
               const today = new Date().toISOString().split("T")[0];
               const startDate = matchingDiscount.start_date;
               const endDate = matchingDiscount.end_date;
-              
+
               if (today >= startDate && today <= endDate) {
-                feeAmount = Math.max(0, (matchingDiscount.regular || feeAmount) - (matchingDiscount.discount_amount || 0));
+                feeAmount = Math.max(
+                  0,
+                  (matchingDiscount.regular || feeAmount) -
+                    (matchingDiscount.discount_amount || 0),
+                );
               }
             }
           }
         }
-        
+
         return sum + feeAmount;
       }, 0);
 
       // Get student fees due
       const student = studentData.find(
-        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase(),
       );
       const studentFeesDue = student?.feesDue || 0;
 
@@ -829,17 +871,19 @@ export default function CollectionList() {
       // TODO: Replace with API call when backend is ready
       // Example: const allCollections = await getCollectionsAPI();
       const storedCollections = await getCollectionsAPI();
-      const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
-      
+      const allCollections =
+        storedCollections.length > 0 ? storedCollections : collectionData;
+
       // Find existing collections for this student with remaining dues
       const existingCollections = allCollections.filter(
         (collection) =>
-          collection.student_id?.toUpperCase() === formData.student_id.toUpperCase() &&
+          collection.student_id?.toUpperCase() ===
+            formData.student_id.toUpperCase() &&
           collection.class === formData.class &&
           collection.group === formData.group &&
           collection.section === formData.section &&
           collection.session === formData.session &&
-          collection.total_due > 0
+          collection.total_due > 0,
       );
 
       const overdueAmount = existingCollections.reduce((sum, collection) => {
@@ -849,7 +893,8 @@ export default function CollectionList() {
       const typeAmount = parseFloat(formData.type_amount) || 0;
       const payableDue = Math.max(0, totalPayable - typeAmount);
       const calculatedTotalDue = totalPayable + studentFeesDue;
-      const totalDue = typeAmount >= calculatedTotalDue ? 0 : calculatedTotalDue - typeAmount;
+      const totalDue =
+        typeAmount >= calculatedTotalDue ? 0 : calculatedTotalDue - typeAmount;
       const total = totalPayable + overdueAmount + studentFeesDue;
 
       // If type amount covers all existing due, update previous collections' total_due to 0
@@ -895,36 +940,41 @@ export default function CollectionList() {
       // TODO: Replace with API call when backend is ready
       // Example: await updateStudentFeesDueAPI(formData.student_id);
       const updatedCollections = await getCollectionsAPI();
-      const finalCollections = updatedCollections.length > 0 ? updatedCollections : collectionData;
-      
+      const finalCollections =
+        updatedCollections.length > 0 ? updatedCollections : collectionData;
+
       const studentCollections = finalCollections.filter(
-        (collection) => collection.student_id?.toUpperCase() === formData.student_id.toUpperCase()
+        (collection) =>
+          collection.student_id?.toUpperCase() ===
+          formData.student_id.toUpperCase(),
       );
-      
+
       const totalDueFromAll = studentCollections.reduce((sum, collection) => {
         return sum + (collection.total_due || 0);
       }, 0);
-      
+
       // TODO: Replace with API call when backend is ready
       // Example: await updateStudentAPI(formData.student_id, { feesDue: totalDueFromAll });
       const storedStudents = localStorage.getItem("students");
-      let students = storedStudents ? JSON.parse(storedStudents) : [...studentData];
-      
+      let students = storedStudents
+        ? JSON.parse(storedStudents)
+        : [...studentData];
+
       const studentIndex = students.findIndex(
-        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+        (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase(),
       );
-      
+
       if (studentIndex !== -1) {
         students[studentIndex] = {
           ...students[studentIndex],
           feesDue: totalDueFromAll,
         };
         localStorage.setItem("students", JSON.stringify(students));
-        window.dispatchEvent(new Event('studentsUpdated'));
+        window.dispatchEvent(new Event("studentsUpdated"));
       }
 
       // Collections will reload automatically via collectionsUpdated event listener
-      
+
       alert("Collection Added Successfully ✅");
       setShowCollectionModal(false);
     } catch (error) {
@@ -1013,15 +1063,11 @@ export default function CollectionList() {
     : "bg-white text-gray-800";
 
   // FeesCollectionModal Component (moved from separate file)
-  function FeesCollectionModal({
-    open,
-    onClose,
-    onSubmit,
-  }) {
+  function FeesCollectionModal({ open, onClose, onSubmit }) {
     const { darkMode } = useTheme();
     const [isModalClosing, setIsModalClosing] = useState(false);
     const [isModalOpening, setIsModalOpening] = useState(false);
-    
+
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split("T")[0];
 
@@ -1044,32 +1090,42 @@ export default function CollectionList() {
         const storedItems = storedData ? JSON.parse(storedData) : [];
         return [...feeTypeData, ...storedItems];
       };
-      
+
       const allFeeTypeData = getAllFeeTypeData();
       // Get unique fees_type values from feeTypeData
-      const uniqueFeesTypesFromFeeTypes = [...new Set(allFeeTypeData.map(fee => fee.fees_type).filter(Boolean))];
-      
+      const uniqueFeesTypesFromFeeTypes = [
+        ...new Set(allFeeTypeData.map((fee) => fee.fees_type).filter(Boolean)),
+      ];
+
       // Also get fees from localStorage "fees" (created fees)
-    const loadFees = () => {
-      const storedData = localStorage.getItem("fees");
-      if (storedData) {
-        try {
-          return JSON.parse(storedData);
-        } catch (e) {
-          return [];
+      const loadFees = () => {
+        const storedData = localStorage.getItem("fees");
+        if (storedData) {
+          try {
+            return JSON.parse(storedData);
+          } catch (e) {
+            return [];
+          }
         }
-      }
-      return [];
-    };
-    
-    const createdFees = loadFees();
-    const createdFeesNames = createdFees.map(fee => fee.name).filter(Boolean);
-      
+        return [];
+      };
+
+      const createdFees = loadFees();
+      const createdFeesNames = createdFees
+        .map((fee) => fee.name)
+        .filter(Boolean);
+
       // Combine all fees types: from feeTypes, feesTypeData, and created fees
-      const allFeesTypes = [...new Set([...uniqueFeesTypesFromFeeTypes, ...feesTypeData, ...createdFeesNames])];
+      const allFeesTypes = [
+        ...new Set([
+          ...uniqueFeesTypesFromFeeTypes,
+          ...feesTypeData,
+          ...createdFeesNames,
+        ]),
+      ];
       return allFeesTypes;
     };
-    
+
     const feesTypeOptions = getAllFeeTypes();
 
     const [formData, setFormData] = useState({
@@ -1140,8 +1196,9 @@ export default function CollectionList() {
     useEffect(() => {
       if (formData.student_id) {
         const student = studentData.find(
-          (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase() ||
-                 s.rollNo?.toString() === formData.student_id
+          (s) =>
+            s.studentId?.toUpperCase() === formData.student_id.toUpperCase() ||
+            s.rollNo?.toString() === formData.student_id,
         );
 
         if (student) {
@@ -1180,36 +1237,44 @@ export default function CollectionList() {
 
     // Calculate fees amounts based on selected fees types
     useEffect(() => {
-      if (formData.fees_type.length > 0 && formData.class && formData.group && formData.section && formData.session) {
+      if (
+        formData.fees_type.length > 0 &&
+        formData.class &&
+        formData.group &&
+        formData.section &&
+        formData.session
+      ) {
         const getAllFeeTypeData = () => {
           const storedData = localStorage.getItem("feeTypes");
           const storedItems = storedData ? JSON.parse(storedData) : [];
           return [...feeTypeData, ...storedItems];
         };
-        
+
         const allFeeTypeData = getAllFeeTypeData();
-        
+
         const matchingFees = allFeeTypeData.filter(
           (fee) =>
             fee.class === formData.class &&
             fee.group === formData.group &&
             fee.section === formData.section &&
             fee.session === formData.session &&
-            formData.fees_type.includes(fee.fees_type)
+            formData.fees_type.includes(fee.fees_type),
         );
 
         let feesAmountsObj = {};
-        
+
         const totalPayable = matchingFees.reduce((sum, fee) => {
           let feeAmount = fee.fees_amount || 0;
-          
+
           feesAmountsObj[fee.fees_type] = feeAmount;
-          
+
           if (formData.student_id) {
             const student = studentData.find(
-              (s) => s.studentId?.toUpperCase() === formData.student_id.toUpperCase()
+              (s) =>
+                s.studentId?.toUpperCase() ===
+                formData.student_id.toUpperCase(),
             );
-            
+
             if (student) {
               const matchingDiscount = discountData.find(
                 (discount) =>
@@ -1218,22 +1283,26 @@ export default function CollectionList() {
                   discount.group === formData.group &&
                   discount.section === formData.section &&
                   discount.session === formData.session &&
-                  discount.fees_type === fee.fees_type
+                  discount.fees_type === fee.fees_type,
               );
-              
+
               if (matchingDiscount) {
                 const today = new Date().toISOString().split("T")[0];
                 const startDate = matchingDiscount.start_date;
                 const endDate = matchingDiscount.end_date;
-                
+
                 if (today >= startDate && today <= endDate) {
-                  feeAmount = Math.max(0, (matchingDiscount.regular || feeAmount) - (matchingDiscount.discount_amount || 0));
+                  feeAmount = Math.max(
+                    0,
+                    (matchingDiscount.regular || feeAmount) -
+                      (matchingDiscount.discount_amount || 0),
+                  );
                   feesAmountsObj[fee.fees_type] = feeAmount;
                 }
               }
             }
           }
-          
+
           return sum + feeAmount;
         }, 0);
 
@@ -1251,22 +1320,37 @@ export default function CollectionList() {
           payable_due: 0,
         }));
       }
-    }, [formData.fees_type, formData.student_id, formData.class, formData.group, formData.section, formData.session]);
+    }, [
+      formData.fees_type,
+      formData.student_id,
+      formData.class,
+      formData.group,
+      formData.section,
+      formData.session,
+    ]);
 
     // Calculate overdue amount
     useEffect(() => {
-      if (formData.student_id && formData.class && formData.group && formData.section && formData.session) {
+      if (
+        formData.student_id &&
+        formData.class &&
+        formData.group &&
+        formData.section &&
+        formData.session
+      ) {
         const storedCollections = getCollectionsFromStorage();
-        const allCollections = storedCollections.length > 0 ? storedCollections : collectionData;
-        
+        const allCollections =
+          storedCollections.length > 0 ? storedCollections : collectionData;
+
         const existingCollections = allCollections.filter(
           (collection) =>
-            collection.student_id?.toUpperCase() === formData.student_id.toUpperCase() &&
+            collection.student_id?.toUpperCase() ===
+              formData.student_id.toUpperCase() &&
             collection.class === formData.class &&
             collection.group === formData.group &&
             collection.section === formData.section &&
             collection.session === formData.session &&
-            collection.total_due > 0
+            collection.total_due > 0,
         );
 
         const overdueAmount = existingCollections.reduce((sum, collection) => {
@@ -1283,7 +1367,13 @@ export default function CollectionList() {
           overdue_amount: 0,
         }));
       }
-    }, [formData.student_id, formData.class, formData.group, formData.section, formData.session]);
+    }, [
+      formData.student_id,
+      formData.class,
+      formData.group,
+      formData.section,
+      formData.session,
+    ]);
 
     // Calculate totals when type amount changes
     useEffect(() => {
@@ -1291,12 +1381,15 @@ export default function CollectionList() {
       const totalPayable = formData.total_payable || 0;
       const overdueAmount = formData.overdue_amount || 0;
       const studentFeesDue = formData.student_fees_due || 0;
-      
+
       const payableDue = Math.max(0, totalPayable - typeAmount);
       const total = totalPayable + overdueAmount + studentFeesDue;
       // Total Due includes: new fees (totalPayable) + student existing dues + overdue amounts
       const calculatedTotalDue = totalPayable + studentFeesDue + overdueAmount;
-      const totalDue = typeAmount >= calculatedTotalDue ? 0 : Math.max(0, calculatedTotalDue - typeAmount);
+      const totalDue =
+        typeAmount >= calculatedTotalDue
+          ? 0
+          : Math.max(0, calculatedTotalDue - typeAmount);
 
       setFormData((prev) => ({
         ...prev,
@@ -1304,7 +1397,12 @@ export default function CollectionList() {
         total: total,
         total_due: totalDue,
       }));
-    }, [formData.type_amount, formData.total_payable, formData.overdue_amount, formData.student_fees_due]);
+    }, [
+      formData.type_amount,
+      formData.total_payable,
+      formData.overdue_amount,
+      formData.student_fees_due,
+    ]);
 
     const handleChange = (e) => {
       const { name, value } = e.target;
@@ -1315,7 +1413,7 @@ export default function CollectionList() {
       setFormData((prev) => {
         const currentTypes = prev.fees_type || [];
         const isSelected = currentTypes.includes(feesType);
-        
+
         if (isSelected) {
           return {
             ...prev,
@@ -1335,34 +1433,39 @@ export default function CollectionList() {
         alert("Please enter Student ID");
         return;
       }
-      
+
       // Allow payment if fees type is selected OR if there's a due amount to pay
       const hasSelectedFeesType = formData.fees_type.length > 0;
-      const hasDueAmount = formData.student_fees_due > 0 || formData.overdue_amount > 0;
-      
+      const hasDueAmount =
+        formData.student_fees_due > 0 || formData.overdue_amount > 0;
+
       if (!hasSelectedFeesType && !hasDueAmount) {
-        alert("Please select at least one Fees Type or there should be a due amount to pay");
+        alert(
+          "Please select at least one Fees Type or there should be a due amount to pay",
+        );
         return;
       }
-      
+
       if (!formData.type_amount || parseFloat(formData.type_amount) <= 0) {
         alert("Please enter a valid Type Amount");
         return;
       }
-      
+
       if (!formData.pay_type) {
         alert("Please select Pay Type (Due / Payable / Advance)");
         return;
       }
-      
+
       // Check if there's remaining balance that must be paid
       if (formData.total_due > 0) {
-        const confirmPay = confirm(`There is a remaining balance of ৳${formData.total_due}. Do you want to proceed?`);
+        const confirmPay = confirm(
+          `There is a remaining balance of ৳${formData.total_due}. Do you want to proceed?`,
+        );
         if (!confirmPay) {
           return;
         }
       }
-      
+
       // Show payment method modal
       setShowPaymentModal(true);
     };
@@ -1398,8 +1501,12 @@ export default function CollectionList() {
     };
 
     const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
-    const inputBg = darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800";
-    const readOnlyBg = darkMode ? "bg-gray-800 text-gray-300" : "bg-white text-gray-600";
+    const inputBg = darkMode
+      ? "bg-gray-800 text-white"
+      : "bg-white text-gray-800";
+    const readOnlyBg = darkMode
+      ? "bg-gray-800 text-gray-300"
+      : "bg-white text-gray-600";
     const modalBg = darkMode ? "bg-gray-800" : "bg-white";
     const textColor = darkMode ? "text-gray-100" : "text-gray-800";
 
@@ -1413,259 +1520,341 @@ export default function CollectionList() {
           }`}
           onClick={handleClose}
         >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className={`${modalBg} ${textColor} w-full max-w-[320px] border ${borderClr} p-6 max-h-[550px] overflow-y-auto transition-all duration-300 transform ${
-            isModalOpening && !isModalClosing
-              ? "scale-100 opacity-100 translate-y-0"
-              : "scale-95 opacity-0 translate-y-4"
-          }`}
-        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`${modalBg} ${textColor} w-full max-w-[320px] border ${borderClr} p-6 max-h-[550px] overflow-y-auto transition-all duration-300 transform ${
+              isModalOpening && !isModalClosing
+                ? "scale-100 opacity-100 translate-y-0"
+                : "scale-95 opacity-0 translate-y-4"
+            }`}
+          >
             {/* Title */}
-            <h2 className="text-base font-semibold text-center mb-4">Fees Collection</h2>
-            
+            <h2 className="text-base font-semibold text-center mb-4">
+              Fees Collection
+            </h2>
+
             <div className="space-y-4 py-2">
-            {/* Student ID */}
-           <Input
-             label="Student ID"
-             name="student_id"
-             value={formData.student_id}
-             onChange={handleChange}
-             type="text"
-           />
+              {/* Student ID */}
+              <Input
+                label="Student ID"
+                name="student_id"
+                value={formData.student_id}
+                onChange={handleChange}
+                type="text"
+              />
 
-          {/* Class */}
-           <Input
-             label="Class"
-             name="class"
-                 value={formData.class}
-             onChange={handleChange}
-             type="text"
-                 readOnly
-             inputClassName={`${readOnlyBg} cursor-not-allowed`}
-               />
+              {/* Class */}
+              <Input
+                label="Class"
+                name="class"
+                value={formData.class}
+                onChange={handleChange}
+                type="text"
+                readOnly
+                inputClassName={`${readOnlyBg} cursor-not-allowed`}
+              />
 
-          {/* Group */}
-           <Input
-             label="Group"
-             name="group"
-                 value={formData.group}
-             onChange={handleChange}
-             type="text"
-                 readOnly
-             inputClassName={`${readOnlyBg} cursor-not-allowed`}
-               />
+              {/* Group */}
+              <Input
+                label="Group"
+                name="group"
+                value={formData.group}
+                onChange={handleChange}
+                type="text"
+                readOnly
+                inputClassName={`${readOnlyBg} cursor-not-allowed`}
+              />
 
-           {/* Section */}
-           <Input
-             label="Section"
-             name="section"
-                 value={formData.section}
-             onChange={handleChange}
-             type="text"
-                 readOnly
-             inputClassName={`${readOnlyBg} cursor-not-allowed`}
-               />
+              {/* Section */}
+              <Input
+                label="Section"
+                name="section"
+                value={formData.section}
+                onChange={handleChange}
+                type="text"
+                readOnly
+                inputClassName={`${readOnlyBg} cursor-not-allowed`}
+              />
 
-           {/* Session */}
-           <Input
-             label="Session"
-             name="session"
-                 value={formData.session}
-             onChange={handleChange}
-             type="text"
-                 readOnly
-             inputClassName={`${readOnlyBg} cursor-not-allowed`}
-               />
+              {/* Session */}
+              <Input
+                label="Session"
+                name="session"
+                value={formData.session}
+                onChange={handleChange}
+                type="text"
+                readOnly
+                inputClassName={`${readOnlyBg} cursor-not-allowed`}
+              />
 
-           {/* Student Name */}
-           <Input
-             label="Student Name"
-             name="student_name"
-               value={formData.student_name}
-             onChange={handleChange}
-             type="text"
-               readOnly
-             inputClassName={`${readOnlyBg} cursor-not-allowed`}
-             />
+              {/* Student Name */}
+              <Input
+                label="Student Name"
+                name="student_name"
+                value={formData.student_name}
+                onChange={handleChange}
+                type="text"
+                readOnly
+                inputClassName={`${readOnlyBg} cursor-not-allowed`}
+              />
 
-          {/* SELECT FEES TYPE - Table Format */}
-          <div className="relative w-full">
-            <table className={`w-full border-collapse border ${borderClr}`}>
-              <thead >
-                <tr className={`border-b ${borderClr} ${
-                  darkMode ? "bg-gray-700" : "bg-gray-50"
-                }`}>
-                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                    Fees Type
-                  </th>
-                  <th className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                    Payable
-                  </th>
-                  <th className={`w-1/3 text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                    Due
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {feesTypeOptions.map((feesType) => {
-                  const isSelected = formData.fees_type.includes(feesType);
-                  const payableAmount = formData.fees_amounts[feesType] || 0;
-                  
-                  // Get due amount from studentData
-                  const dueAmount = formData.student_fees_due || 0;
-                  const hasDue = dueAmount > 0;
-                  
-                  return (
+              {/* SELECT FEES TYPE - Table Format */}
+              <div className="relative w-full">
+                <table className={`w-full border-collapse border ${borderClr}`}>
+                  <thead>
                     <tr
-                      key={feesType}
-                      className={`border-b ${borderClr} cursor-pointer transition ${
-                        darkMode
-                          ? "bg-gray-700 hover:bg-gray-600"
-                          : "bg-white hover:bg-gray-100"
+                      className={`border-b ${borderClr} ${
+                        darkMode ? "bg-gray-700" : "bg-gray-50"
                       }`}
-                      onClick={() => handleFeesTypeChange(feesType)}
                     >
-                      {/* Fees Type Column */}
-                      <td className={`border-r ${borderClr} py-2 px-2`}>
-                        <div className="flex items-center gap-2">
-                          <div className="relative shrink-0">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleFeesTypeChange(feesType)}
-                              className="sr-only"
-                            />
-                            <div
-                              className={`w-[15px] h-[15px] border-2 rounded transition-all flex items-center justify-center ${
-                                isSelected
-                                  ? "bg-blue-600 border-blue-600"
-                                  : darkMode
-                                  ? "border-gray-500 bg-transparent"
-                                  : "border-gray-400 bg-white"
-                              }`}
-                            >
-                              {isSelected && (
-                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
+                      <th
+                        className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}
+                      >
+                        Fees Type
+                      </th>
+                      <th
+                        className={`w-1/3 border-r ${borderClr} text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}
+                      >
+                        Payable
+                      </th>
+                      <th
+                        className={`w-1/3 text-xs font-semibold py-2 px-2 text-left ${darkMode ? "text-gray-300" : "text-gray-700"}`}
+                      >
+                        Due
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {feesTypeOptions.map((feesType) => {
+                      const isSelected = formData.fees_type.includes(feesType);
+                      const payableAmount =
+                        formData.fees_amounts[feesType] || 0;
+
+                      // Get due amount from studentData
+                      const dueAmount = formData.student_fees_due || 0;
+                      const hasDue = dueAmount > 0;
+
+                      return (
+                        <tr
+                          key={feesType}
+                          className={`border-b ${borderClr} cursor-pointer transition ${
+                            darkMode
+                              ? "bg-gray-700 hover:bg-gray-600"
+                              : "bg-white hover:bg-gray-100"
+                          }`}
+                          onClick={() => handleFeesTypeChange(feesType)}
+                        >
+                          {/* Fees Type Column */}
+                          <td className={`border-r ${borderClr} py-2 px-2`}>
+                            <div className="flex items-center gap-2">
+                              <div className="relative shrink-0">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() =>
+                                    handleFeesTypeChange(feesType)
+                                  }
+                                  className="sr-only"
+                                />
+                                <div
+                                  className={`w-[15px] h-[15px] border-2 rounded transition-all flex items-center justify-center ${
+                                    isSelected
+                                      ? "bg-blue-600 border-blue-600"
+                                      : darkMode
+                                        ? "border-gray-500 bg-transparent"
+                                        : "border-gray-400 bg-white"
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <svg
+                                      className="w-3 h-3 text-white"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={3}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                              </div>
+                              <label
+                                className={`text-sm cursor-pointer ${
+                                  darkMode ? "text-gray-200" : "text-gray-700"
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleFeesTypeChange(feesType);
+                                }}
+                              >
+                                {feesType}
+                              </label>
                             </div>
-                          </div>
-                          <label
-                            className={`text-sm cursor-pointer ${
+                          </td>
+
+                          {/* Payable Column */}
+                          <td
+                            className={`border-r ${borderClr} text-sm text-right py-2 px-2 ${
                               darkMode ? "text-gray-200" : "text-gray-700"
                             }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleFeesTypeChange(feesType);
-                            }}
                           >
-                            {feesType}
-                          </label>
-                        </div>
-                      </td>
-                      
-                      {/* Payable Column */}
-                      <td className={`border-r ${borderClr} text-sm text-right py-2 px-2 ${
-                        darkMode ? "text-gray-200" : "text-gray-700"
-                      }`}>
-                        {payableAmount.toFixed(0)}
-                      </td>
-                      
-                      {/* Due Column */}
-                      <td className={`text-sm text-right py-2 px-2 ${
-                        hasDue
-                          ? darkMode ? "text-red-400" : "text-red-600"
-                          : darkMode ? "text-gray-400" : "text-gray-500"
-                      }`}>
-                        <div className="flex items-center justify-end gap-1">
-    
-                          <span>{dueAmount.toFixed(0)}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                            {payableAmount.toFixed(0)}
+                          </td>
 
-          {/* Summary Section - Total payable, Payable due, Total, Total due */}
-          <div className="space-y-2">
-            <div className={`flex justify-between items-center border h-8 px-[8px]  ${borderClr} ${
-              darkMode ? "bg-gray-700" : "bg-gray-50"
-            }`}>
-              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total payable</span>
-              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.total_payable || 0}</span>
-            </div>
-            <div className={`flex justify-between items-center border h-8 px-[8px]  ${borderClr} ${
-              darkMode ? "bg-gray-700" : "bg-gray-50"
-            }`}>
-              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Payable due</span>
-              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.payable_due || 0}</span>
-            </div>
-            {formData.overdue_amount > 0 && (
-              <div className={`flex justify-between items-center h-8 px-[8px] border  ${borderClr} ${
-                darkMode ? "bg-gray-700" : "bg-gray-50"
-              }`}>
-                <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Overdue Amount</span>
-                <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.overdue_amount || 0}</span>
+                          {/* Due Column */}
+                          <td
+                            className={`text-sm text-right py-2 px-2 ${
+                              hasDue
+                                ? darkMode
+                                  ? "text-red-400"
+                                  : "text-red-600"
+                                : darkMode
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                            }`}
+                          >
+                            <div className="flex items-center justify-end gap-1">
+                              <span>{dueAmount.toFixed(0)}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            )}
-            <div className={`flex justify-between items-center border h-8 px-[8px] ${borderClr} ${
-              darkMode ? "bg-gray-700" : "bg-gray-50"
-            }`}>
-              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total</span>
-              <span className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}>৳{formData.total || 0}</span>
-            </div>
-            <div className={`flex justify-between items-center border h-8 px-[8px] ${borderClr} ${
-              darkMode ? "bg-gray-700" : "bg-gray-50"
-            }`}>
-              <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Total due</span>
-              <span className={`text-sm pr-3 ${darkMode ? "text-red-400" : "text-red-600"}`}>৳{formData.total_due || 0}</span>
-            </div>
-          </div>
 
-         <div className="space-y-4 pt-2">
-           {/* Pay type */}
-           <div>
-             <label className={`block text-xs mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-               Pay type
-             </label>
-             <select
-               name="pay_type"
-               value={formData.pay_type}
-               onChange={handleChange}
-               className={`w-full h-8 px-3 text-xs border ${borderClr} ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-500`}
-               required
-             >
-               <option value="">Select Pay Type</option>
-               <option value="Due">Due</option>
-               <option value="Payable">Payable</option>
-               <option value="Advance">Advance</option>
-             </select>
-           </div>
+              {/* Summary Section - Total payable, Payable due, Total, Total due */}
+              <div className="space-y-2">
+                <div
+                  className={`flex justify-between items-center border h-8 px-[8px]  ${borderClr} ${
+                    darkMode ? "bg-gray-700" : "bg-gray-50"
+                  }`}
+                >
+                  <span
+                    className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                  >
+                    Total payable
+                  </span>
+                  <span
+                    className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                  >
+                    ৳{formData.total_payable || 0}
+                  </span>
+                </div>
+                <div
+                  className={`flex justify-between items-center border h-8 px-[8px]  ${borderClr} ${
+                    darkMode ? "bg-gray-700" : "bg-gray-50"
+                  }`}
+                >
+                  <span
+                    className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                  >
+                    Payable due
+                  </span>
+                  <span
+                    className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                  >
+                    ৳{formData.payable_due || 0}
+                  </span>
+                </div>
+                {formData.overdue_amount > 0 && (
+                  <div
+                    className={`flex justify-between items-center h-8 px-[8px] border  ${borderClr} ${
+                      darkMode ? "bg-gray-700" : "bg-gray-50"
+                    }`}
+                  >
+                    <span
+                      className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                    >
+                      Overdue Amount
+                    </span>
+                    <span
+                      className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                    >
+                      ৳{formData.overdue_amount || 0}
+                    </span>
+                  </div>
+                )}
+                <div
+                  className={`flex justify-between items-center border h-8 px-[8px] ${borderClr} ${
+                    darkMode ? "bg-gray-700" : "bg-gray-50"
+                  }`}
+                >
+                  <span
+                    className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                  >
+                    Total
+                  </span>
+                  <span
+                    className={`text-sm pr-3 ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                  >
+                    ৳{formData.total || 0}
+                  </span>
+                </div>
+                <div
+                  className={`flex justify-between items-center border h-8 px-[8px] ${borderClr} ${
+                    darkMode ? "bg-gray-700" : "bg-gray-50"
+                  }`}
+                >
+                  <span
+                    className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}
+                  >
+                    Total due
+                  </span>
+                  <span
+                    className={`text-sm pr-3 ${darkMode ? "text-red-400" : "text-red-600"}`}
+                  >
+                    ৳{formData.total_due || 0}
+                  </span>
+                </div>
+              </div>
 
-           {/* Type amount */}
-           <Input
-             label="Type amount"
-             name="type_amount"
-             value={formData.type_amount}
-             onChange={handleChange}
-             type="number"
-             step="0.02"
-           />
+              <div className="space-y-4 pt-2">
+                {/* Pay type */}
+                <div>
+                  <label
+                    className={`block text-xs mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}
+                  >
+                    Pay type
+                  </label>
+                  <select
+                    name="pay_type"
+                    value={formData.pay_type}
+                    onChange={handleChange}
+                    className={`w-full h-8 px-3 text-xs border ${borderClr} ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    required
+                  >
+                    <option value="">Select Pay Type</option>
+                    <option value="Due">Due</option>
+                    <option value="Payable">Payable</option>
+                    <option value="Advance">Advance</option>
+                  </select>
+                </div>
 
-           {/* Pay Date */}
-           <Input
-             label="Pay Date"
-             name="pay_date"
-             value={formData.pay_date}
-             onChange={handleChange}
-             type="date"
-           />
-         </div>
+                {/* Type amount */}
+                <Input
+                  label="Type amount"
+                  name="type_amount"
+                  value={formData.type_amount}
+                  onChange={handleChange}
+                  type="number"
+                  step="0.02"
+                />
+
+                {/* Pay Date */}
+                <Input
+                  label="Pay Date"
+                  name="pay_date"
+                  value={formData.pay_date}
+                  onChange={handleChange}
+                  type="date"
+                />
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -1697,7 +1886,9 @@ export default function CollectionList() {
         {showPaymentModal && (
           <div
             className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
-              isPaymentModalOpening && !isPaymentModalClosing ? "opacity-100" : "opacity-0"
+              isPaymentModalOpening && !isPaymentModalClosing
+                ? "opacity-100"
+                : "opacity-0"
             }`}
             onClick={handlePaymentClose}
           >
@@ -1710,28 +1901,34 @@ export default function CollectionList() {
               }`}
             >
               {/* Title */}
-              <h2 className="text-base font-semibold text-center mb-4">Payment Method</h2>
+              <h2 className="text-base font-semibold text-center mb-4">
+                Payment Method
+              </h2>
 
               <div className="space-y-3">
                 {/* Payment Method Selection */}
                 <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handlePaymentMethodSelect("Cash");
-                    }}
-                    className={`w-full flex items-center justify-left gap-2 py-2 px-3 border transition min-h-[36px] shrink-0 ${
-                      formData.payment_method === "Cash"
-                        ? darkMode
-                          ? "border-green-500 bg-green-900/30 text-green-300"
-                          : "border-green-600 bg-green-50 text-green-600"
-                        : darkMode
-                        ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
-                        : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
-                    }`}
-                  >
-                    <span className="font-semibold text-xs shrink-0">Cash</span>
-                  </button>
+                  {localStorage.getItem("role") === "school" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handlePaymentMethodSelect("Cash");
+                      }}
+                      className={`w-full flex items-center justify-left gap-2 py-2 px-3 border transition min-h-[36px] shrink-0 ${
+                        formData.payment_method === "Cash"
+                          ? darkMode
+                            ? "border-green-500 bg-green-900/30 text-green-300"
+                            : "border-green-600 bg-green-50 text-green-600"
+                          : darkMode
+                            ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
+                            : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
+                      }`}
+                    >
+                      <span className="font-semibold text-xs shrink-0">
+                        Cash
+                      </span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -1743,8 +1940,8 @@ export default function CollectionList() {
                           ? "border-blue-500 bg-blue-900/30 text-blue-300"
                           : "border-blue-600 bg-blue-50 text-blue-600"
                         : darkMode
-                        ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
-                        : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
+                          ? "border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-200"
+                          : "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
                     }`}
                   >
                     <span className="font-semibold text-xs shrink-0">Bank</span>
@@ -1781,8 +1978,8 @@ export default function CollectionList() {
                       formData.payment_method
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : darkMode
-                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}
                   >
                     Pay
@@ -1834,7 +2031,7 @@ export default function CollectionList() {
                     : "bg-white border-gray-200"
                 } px-3 h-8 text-xs`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -1859,7 +2056,6 @@ export default function CollectionList() {
                 </div>
               )}
             </div>
-
 
             {canEdit && (
               <button
@@ -1946,7 +2142,7 @@ export default function CollectionList() {
                 Find
               </button>
             </div>
-            
+
             {/* Filter Button */}
             <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
@@ -2084,11 +2280,18 @@ export default function CollectionList() {
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            Download {selectedCollections.filter(selected => 
-              currentCollections.some(current => current.sl === selected.sl)
-            ).length > 0 ? `(${selectedCollections.filter(selected => 
-              currentCollections.some(current => current.sl === selected.sl)
-            ).length})` : ''}
+            Download{" "}
+            {selectedCollections.filter((selected) =>
+              currentCollections.some((current) => current.sl === selected.sl),
+            ).length > 0
+              ? `(${
+                  selectedCollections.filter((selected) =>
+                    currentCollections.some(
+                      (current) => current.sl === selected.sl,
+                    ),
+                  ).length
+                })`
+              : ""}
           </button>
           {selectedCollections.length > 0 && (
             <button
@@ -2172,7 +2375,6 @@ export default function CollectionList() {
         collection={viewingCollection}
         darkMode={darkMode}
       />
-
     </div>
   );
 }

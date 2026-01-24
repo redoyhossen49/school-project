@@ -293,7 +293,7 @@ export default function GuardianList() {
                 onClick={() => setExportOpen((prev) => !prev)}
                 className={buttonClass}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -319,13 +319,54 @@ export default function GuardianList() {
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddGuardianOpen(true)}
                 className="flex items-center  w-28  bg-blue-600 px-3 h-8 text-xs text-white  hover:bg-blue-700"
               >
                 Guardian
               </button>
+            ) : (
+              <div className="relative flex-1" ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700 text-gray-100"
+                      : "border-gray-200 bg-white text-gray-800"
+                  }`}
+                >
+                  Sort By
+                </button>
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border  ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "bg-white border-gray-200 text-gray-900"
+                    }  left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("oldest");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("newest");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -394,13 +435,54 @@ export default function GuardianList() {
             )}
           </div>
 
-          {canEdit && (
+          {canEdit ? (
             <button
               onClick={() => setAddGuardianOpen(true)}
               className="flex items-center  w-full bg-blue-600 px-3 h-8 text-xs text-white "
             >
               Guardian
             </button>
+          ) : (
+            <div className="relative w-full" ref={sortRef}>
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`w-full flex items-center border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  } left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("oldest");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("newest");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -419,13 +501,12 @@ export default function GuardianList() {
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
               } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
-           
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       </div>
@@ -437,7 +518,10 @@ export default function GuardianList() {
 
       {/* ===== ADD MODAL ===== */}
       {canEdit && (
-        <PageModal open={addGuardianOpen} onClose={() => setAddGuardianOpen(false)}>
+        <PageModal
+          open={addGuardianOpen}
+          onClose={() => setAddGuardianOpen(false)}
+        >
           <AddGuardianPage
             modal
             onClose={() => setAddGuardianOpen(false)}

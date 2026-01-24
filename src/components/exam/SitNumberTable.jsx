@@ -569,13 +569,11 @@ export default function SitNumberTable({
                   {col.label}
                 </th>
               ))}
-              {canEdit && (
-                <th
-                  className={`px-3 h-8 text-left font-semibold whitespace-nowrap`}
-                >
-                  Action
-                </th>
-              )}
+              <th
+                className={`px-3 h-8 text-left font-semibold whitespace-nowrap`}
+              >
+                Action
+              </th>
             </tr>
           </thead>
 
@@ -617,32 +615,32 @@ export default function SitNumberTable({
                     ))}
 
                     {/* Actions */}
-                    {canEdit && (
-                      <td className="h-8 px-3 whitespace-nowrap">
-                        <SitNumberActions
-                          row={row}
-                          onView={(r) => {
-                            setViewingSitNumber(r);
-                            setViewSitNumberModalOpen(true);
-                          }}
-                          onEdit={(r) => {
-                            setEditingSitNumber(r);
-                            setEditSitNumberModalOpen(true);
-                          }}
-                          onDelete={(r) => {
-                            if (
-                              confirm(
-                                "Are you sure you want to delete this sit number?",
-                              )
+                    <td className="h-8 px-3 whitespace-nowrap">
+                      <SitNumberActions
+                        row={row}
+                        onView={(r) => {
+                          setViewingSitNumber(r);
+                          setViewSitNumberModalOpen(true);
+                        }}
+                        onEdit={(r) => {
+                          setEditingSitNumber(r);
+                          setEditSitNumberModalOpen(true);
+                        }}
+                        onDelete={(r) => {
+                          if (
+                            confirm(
+                              "Are you sure you want to delete this sit number?",
                             )
-                              alert("Deleted successfully");
-                          }}
-                          onPrint={() => handlePrint([row])} // print single row
-                          darkMode={darkMode}
-                          canEdit={canEdit}
-                        />
-                      </td>
-                    )}
+                          ) {
+                            // TODO: Implement actual delete
+                            alert("Deleted successfully");
+                          }
+                        }}
+                        onPrint={() => handlePrint([row])} // print single row
+                        darkMode={darkMode}
+                        canEdit={canEdit}
+                      />
+                    </td>
                   </tr>
                 );
               })
@@ -653,34 +651,104 @@ export default function SitNumberTable({
 
       {/* ===== VIEW MODAL ===== */}
       {viewSitNumberModalOpen && viewingSitNumber && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div
-            className={`p-4 rounded ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}
+            className={`p-6 rounded-lg shadow-lg max-w-md w-full ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}
           >
-            <h3>Seat Number: {viewingSitNumber.IDNumber}</h3>
-            <button
-              onClick={() => setViewSitNumberModalOpen(false)}
-              className="mt-2 px-3 py-1 bg-blue-600 text-white rounded"
-            >
-              Close
-            </button>
+            <h3 className="text-lg font-semibold mb-4">Seat Number Details</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="font-medium">Student Name:</span>
+                <span>{viewingSitNumber.studentName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Class:</span>
+                <span>{viewingSitNumber.className}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Group:</span>
+                <span>{viewingSitNumber.group}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Exam:</span>
+                <span>{viewingSitNumber.examName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Seat Number:</span>
+                <span className="font-semibold text-blue-600">
+                  {viewingSitNumber.seatNumber}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Roll No:</span>
+                <span>{viewingSitNumber.rollNo}</span>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setViewSitNumberModalOpen(false)}
+                className="flex-1 px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* ===== EDIT MODAL ===== */}
       {editSitNumberModalOpen && editingSitNumber && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div
-            className={`p-4 rounded ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}
+            className={`p-6 rounded-lg shadow-lg max-w-md w-full ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}
           >
-            <h3>Edit Seat Number: {editingSitNumber.IDNumber}</h3>
-            <button
-              onClick={() => setEditSitNumberModalOpen(false)}
-              className="mt-2 px-3 py-1 bg-blue-600 text-white rounded"
-            >
-              Close
-            </button>
+            <h3 className="text-lg font-semibold mb-4">Edit Seat Number</h3>
+            <div className="space-y-3 text-sm">
+              <div>
+                <label className="font-medium block mb-1">Student Name:</label>
+                <input
+                  type="text"
+                  value={editingSitNumber.studentName}
+                  disabled
+                  className={`w-full px-2 py-1 border ${darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-300"}`}
+                />
+              </div>
+              <div>
+                <label className="font-medium block mb-1">Seat Number:</label>
+                <input
+                  type="text"
+                  defaultValue={editingSitNumber.seatNumber}
+                  placeholder="Enter seat number"
+                  className={`w-full px-2 py-1 border ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                />
+              </div>
+              <div>
+                <label className="font-medium block mb-1">Roll No:</label>
+                <input
+                  type="text"
+                  defaultValue={editingSitNumber.rollNo}
+                  placeholder="Enter roll number"
+                  className={`w-full px-2 py-1 border ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setEditSitNumberModalOpen(false)}
+                className="flex-1 px-3 py-2 bg-gray-500 text-white hover:bg-gray-600 text-sm font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert("Changes saved successfully!");
+                  setEditSitNumberModalOpen(false);
+                }}
+                className="flex-1 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}

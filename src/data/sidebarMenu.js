@@ -370,11 +370,11 @@ export const sidebarMenu = (role) => {
       title: "Teacher",
       icon: LuUsers,
       children: [
-        { title: "Teacher List", path: "/teacher/list" },
+        { title: "Teacher List", path: "teacherlist" },
         { title: "Teacher ID", path: "/teacher/id" },
         {
           title: "Class Permission",
-          path: "/teacher/permission",
+          path: "permissionlist",
         },
         {
           title: "Assignment",
@@ -391,7 +391,7 @@ export const sidebarMenu = (role) => {
   children: [
     { title: "Student List", path: "studentlist" },
     { title: "Student ID", path: "studentid" },
-    { title: "Class Time", path: "studenttime" },
+    { title: "Class Time", path: "classtimelist" },
     { title: "Attendance", path: "studentattendance" },
   ],
 },
@@ -401,7 +401,7 @@ export const sidebarMenu = (role) => {
       title: "Guardian",
       icon: TbUserShield,
       children: [
-        { title: "Guardian List", path: "/guardian/list" },
+        { title: "Guardian List", path: "guardianlist" },
         {
           title: "Complain",
           path: "/guardian/complain",
@@ -413,8 +413,8 @@ export const sidebarMenu = (role) => {
       title: "Academic",
       icon: TbAddressBook,
       children: [
-        { title: "Class", path: "/academic/class" },
-        { title: "Group", path: "/academic/group" },
+        { title: "Class", path: "classlist" },
+        { title: "Group", path: "grouplist" },
         { title: "Section", path: "/academic/section" },
         { title: "Session", path: "/academic/session" },
         { title: "Subject", path: "/academic/subject" },
@@ -521,7 +521,7 @@ export const sidebarMenu = (role) => {
     {
       title: "Teacher",
       icon: UserCog,
-      children: [{ title: "Teacher List", path: "/teacher/list" }],
+      children: [{ title: "Teacher List", path: "teacherlist" }],
     },
 
     {
@@ -530,8 +530,8 @@ export const sidebarMenu = (role) => {
   children: [
     { title: "Student List", path: "studentlist" },
     { title: "Student ID", path: "studentid" },
-    { title: "Class Time", path: "studenttime" },
-    { title: "Class Promote", path: "studentpromote" },
+    { title: "Class Time", path: "classtimelist" },
+    { title: "Class Promote", path: "promoterequest" },
     { title: "Assignment", path: "studentassignment" },
     { title: "Live Class", path: "studentlive" },
   ],
@@ -542,13 +542,13 @@ export const sidebarMenu = (role) => {
       title: "Academic",
       icon: GiBookAura,
       children: [
-        { title: "Class", path: "/academic/class" },
-        { title: "Group", path: "/academic/group" },
-        { title: "Section", path: "/academic/section" },
-        { title: "Session", path: "/academic/session" },
-        { title: "Subject", path: "/academic/subject" },
-        { title: "Syllabus", path: "/academic/syllabus" },
-        { title: "Class Routine", path: "/academic/routine" },
+        { title: "Class", path: "classlist" },
+        { title: "Group", path: "grouplist" },
+        { title: "Section", path: "sectionlist" },
+        { title: "Session", path: "sessionlist" },
+        { title: "Subject", path: "subjectlist" },
+        { title: "Syllabus", path: "syllabus" },
+        { title: "Class Routine", path: "routine" },
       ],
     },
 
@@ -556,8 +556,8 @@ export const sidebarMenu = (role) => {
       title: "Examination",
       icon: BookOpen,
       children: [
-        { title: "Exam Name", path: "/exam/name" },
-        { title: "Exam Routine", path: "/exam/routine" },
+        { title: "Exam Name", path: "examlist" },
+        { title: "Exam Routine", path: "examroutine" },
         { title: "Grade", path: "/exam/grade" },
         { title: "Admit Card", path: "/exam/admit" },
         { title: "Sit Number", path: "/exam/setnumber" },

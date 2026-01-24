@@ -50,7 +50,7 @@ export default function PayrollList() {
 
   // Generate year options
   const yearOptions = Array.from(
-    new Set(payrollData.map((item) => item.pay_year).filter(Boolean))
+    new Set(payrollData.map((item) => item.pay_year).filter(Boolean)),
   ).sort((a, b) => parseInt(b) - parseInt(a)); // Sort descending (newest first)
 
   // ===== Close dropdowns on outside click =====
@@ -69,19 +69,20 @@ export default function PayrollList() {
 
   // ===== Filter + Sort Logic =====
   const filteredPayrolls = payrolls
-    .filter((p) => 
-      p.employee?.toLowerCase().includes(search.toLowerCase()) ||
-      p.employee_type?.toLowerCase().includes(search.toLowerCase()) ||
-      p.pay_type?.toLowerCase().includes(search.toLowerCase())
+    .filter(
+      (p) =>
+        p.employee?.toLowerCase().includes(search.toLowerCase()) ||
+        p.employee_type?.toLowerCase().includes(search.toLowerCase()) ||
+        p.pay_type?.toLowerCase().includes(search.toLowerCase()),
     )
     .filter((p) => {
       // Filter by employee name
       if (filters.employee && p.employee !== filters.employee) return false;
-      
+
       // Filter by month and year
       if (filters.month && p.pay_month !== filters.month) return false;
       if (filters.year && p.pay_year !== filters.year) return false;
-      
+
       return true;
     })
     .sort((a, b) => {
@@ -92,7 +93,7 @@ export default function PayrollList() {
   const totalPages = Math.ceil(totalPayrolls / payrollsPerPage);
   const currentPayrolls = filteredPayrolls.slice(
     (currentPage - 1) * payrollsPerPage,
-    currentPage * payrollsPerPage
+    currentPage * payrollsPerPage,
   );
 
   // ===== EXPORT EXCEL =====
@@ -177,7 +178,7 @@ export default function PayrollList() {
     const sl = editingPayroll?.sl;
     if (sl) {
       setPayrolls((prev) =>
-        prev.map((p) => (p.sl === sl ? { ...p, ...formData } : p))
+        prev.map((p) => (p.sl === sl ? { ...p, ...formData } : p)),
       );
       setEditingPayroll(null);
       alert("Payroll updated successfully ✅");
@@ -294,7 +295,7 @@ export default function PayrollList() {
                 onClick={() => setExportOpen((prev) => !prev)}
                 className={`flex items-center justify-between  px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -320,13 +321,54 @@ export default function PayrollList() {
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => navigate("/school/dashboard/hrm/addpayroll")}
                 className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
               >
                 Payroll
               </button>
+            ) : (
+              <div className="relative flex-1" ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700 text-gray-100"
+                      : "border-gray-200 bg-white text-gray-800"
+                  }`}
+                >
+                  Sort By
+                </button>
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border  ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "bg-white border-gray-200 text-gray-900"
+                    }  left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("oldest");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("newest");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -371,13 +413,54 @@ export default function PayrollList() {
             )}
           </div>
 
-          {canEdit && (
+          {canEdit ? (
             <button
               onClick={() => navigate("/school/dashboard/hrm/addpayroll")}
               className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Payroll
             </button>
+          ) : (
+            <div className="relative w-full" ref={sortRef}>
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`w-full flex items-center border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  } left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("oldest");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("newest");
+                      setSortOpen(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 

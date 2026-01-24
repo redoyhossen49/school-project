@@ -39,8 +39,10 @@ export default function ClassTimeList() {
   const [selectedSection, setSelectedSection] = useState("All");
   const [sectionOpen, setSectionOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOpenDesktop, setSortOpenDesktop] = useState(false);
+  const [sortOpenMobile, setSortOpenMobile] = useState(false);
+
+  const [sortOrder, setSortOrder] = useState("oldest");
   const [filterOpen, setFilterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -52,7 +54,8 @@ export default function ClassTimeList() {
 
   const sectionDropdownRef = useRef(null);
   const exportRef = useRef(null);
-  const sortRef = useRef(null);
+  const sortRefDesktop = useRef(null);
+  const sortRefMobile = useRef(null);
   const filterRef = useRef(null);
 
   // Close dropdowns when clicking outside
@@ -65,8 +68,15 @@ export default function ClassTimeList() {
         setSectionOpen(false);
       if (exportRef.current && !exportRef.current.contains(e.target))
         setExportOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
+      if (
+        sortRefDesktop.current &&
+        !sortRefDesktop.current.contains(e.target)
+      ) {
+        setSortOpenDesktop(false);
+      }
+      if (sortRefMobile.current && !sortRefMobile.current.contains(e.target)) {
+        setSortOpenMobile(false);
+      }
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
     };
@@ -95,7 +105,11 @@ export default function ClassTimeList() {
     // Old section dropdown (optional)
 
     // Sort
-    .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
+    .sort((a, b) => {
+      if (sortOrder === "newest") return b.sl - a.sl; // latest first
+      if (sortOrder === "oldest") return a.sl - b.sl; // oldest first
+      return 0;
+    });
 
   const totalClassTimes = filteredClassTimes.length;
   const totalPages = Math.ceil(totalClassTimes / classTimesPerPage);
@@ -257,13 +271,46 @@ export default function ClassTimeList() {
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddOpen(true)}
-                className="flex items-center text-white   w-28  bg-blue-600 px-3 h-8 text-xs text-whitehover:bg-blue-700"
+                className="flex items-center text-white w-28 bg-blue-600 px-3 h-8 text-xs hover:bg-blue-700"
               >
                 Class Time
               </button>
+            ) : (
+              <div className="relative w-28" ref={sortRefDesktop}>
+                <button
+                  onClick={() => setSortOpenDesktop((prev) => !prev)}
+                  className={`flex items-center w-28 border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
+                >
+                  Sort By
+                </button>
+                {sortOpenDesktop && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("oldest");
+                        setSortOpenDesktop(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("newest");
+                        setSortOpenDesktop(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -348,21 +395,52 @@ export default function ClassTimeList() {
             )}
           </div>
 
-          {canEdit && (
+          {canEdit ? (
             <button
               onClick={() => setAddOpen(true)}
-              className="flex items-center  w-full  bg-blue-600 px-3 h-8 text-xs text-white "
+              className="flex items-center w-full bg-blue-600 px-3 h-8 text-xs text-white"
             >
               Class Time
             </button>
+          ) : (
+            <div className="relative w-full" ref={sortRefMobile}>
+              <button
+                onClick={() => setSortOpenMobile((prev) => !prev)}
+                className={`flex items-center w-full border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
+              >
+                Sort By
+              </button>
+              {sortOpenMobile && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("oldest");
+                      setSortOpenMobile(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortOrder("newest");
+                      setSortOpenMobile(false);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
         {/* Controls */}
         <div className="space-y-2 md:flex md:items-center md:justify-between md:gap-4">
-          
-          
-                {/* Search + Pagination */}
+          {/* Search + Pagination */}
           <div className="flex items-center gap-2 md:gap-3 w-full md:justify-between md:mt-0">
             <input
               type="text"
@@ -395,7 +473,10 @@ export default function ClassTimeList() {
           onClose={() => setAddOpen(false)}
           onSave={(values) => {
             const base = loadClassTimes();
-            const maxSl = base.reduce((m, r) => Math.max(m, Number(r.sl) || 0), 0);
+            const maxSl = base.reduce(
+              (m, r) => Math.max(m, Number(r.sl) || 0),
+              0,
+            );
             const newRow = { sl: maxSl + 1, ...values };
             const next = [newRow, ...base];
             setClassTimes(next);

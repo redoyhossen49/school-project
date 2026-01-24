@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import FilterDropdown from "../components/common/FilterDropdown.jsx";
 import SeatPlanModal from "../components/seatPlan/SeatPlanModal.jsx";
 import SitNumberTable from "../components/exam/SitNumberTable.jsx";
+import schoolLogo from "../assets/images/sidebar-logo.avif";
 
 export default function SitNumberPage() {
   const { darkMode } = useTheme();
@@ -172,10 +173,24 @@ export default function SitNumberPage() {
   // -------------------- Export --------------------
   const exportExcel = (data) => {
     if (!data.length) return;
+
+    const schoolInfo = JSON.parse(localStorage.getItem("schoolInfo") || "{}");
+    const schoolName = schoolInfo.schoolName || "School Name";
+
+    // Create worksheet with title and school info
+    const ws = utils.json_to_sheet([]);
+
+    // Add title rows
+    ws["A1"] = { v: schoolName, t: "s" };
+    ws["A2"] = { v: "Seat Number Data Report", t: "s" };
+    ws["A3"] = { v: "", t: "s" };
+
+    // Add data starting from row 5
     const wsData = data.map((item, idx) => ({
       SL: idx + 1,
       Class: item.className,
       Group: item.group,
+      Session: item.session,
       "Exam Name": item.examName,
       "Exam Year": item.examYear,
       "Student Name": item.studentName,
@@ -184,15 +199,68 @@ export default function SitNumberPage() {
       "Father's Name": item.fathersName,
       "Seat Number": item.seatNumber,
     }));
-    const ws = utils.json_to_sheet(wsData);
+
+    const dataWs = utils.json_to_sheet(wsData);
+
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "SeatNumberData");
+    utils.book_append_sheet(wb, dataWs, "SeatNumberData");
     writeFile(wb, "SeatNumberData.xlsx");
   };
 
   const exportPDF = (data) => {
     if (!data.length) return alert("No data to export");
+
+    const schoolInfo = JSON.parse(localStorage.getItem("schoolInfo") || "{}");
+    const schoolName = schoolInfo.schoolName || "School Name";
+    const schoolAddress = schoolInfo.address || "";
+
     const doc = new jsPDF("landscape", "pt", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPosition = 15;
+
+    // Add school logo (centered)
+    try {
+      const logoUrl =
+        typeof schoolLogo === "string"
+          ? schoolLogo.startsWith("/")
+            ? window.location.origin + schoolLogo
+            : window.location.origin + "/" + schoolLogo
+          : window.location.origin + "/src/assets/images/sidebar-logo.avif";
+
+      const logoSize = 40;
+      const logoX = (pageWidth - logoSize) / 2;
+      doc.addImage(logoUrl, "JPEG", logoX, yPosition, logoSize, logoSize);
+      yPosition += 50;
+    } catch (e) {
+      console.warn("Could not load logo:", e);
+    }
+
+    // Add school name (centered)
+    doc.setFontSize(16);
+    doc.setTextColor(26, 160, 176);
+    const schoolNameWidth = doc.getTextWidth(schoolName);
+    doc.text(schoolName, (pageWidth - schoolNameWidth) / 2, yPosition);
+    doc.setTextColor(0, 0, 0);
+    yPosition += 15;
+
+    // Add address if available (centered)
+    if (schoolAddress) {
+      doc.setFontSize(10);
+      const addressWidth = doc.getTextWidth(schoolAddress);
+      doc.text(schoolAddress, (pageWidth - addressWidth) / 2, yPosition);
+      yPosition += 10;
+    }
+
+    // Add report title (centered)
+    doc.setFontSize(12);
+    doc.setFont(undefined, "bold");
+    const reportTitle = "Seat Number Data Report";
+    const reportWidth = doc.getTextWidth(reportTitle);
+    doc.text(reportTitle, (pageWidth - reportWidth) / 2, yPosition);
+    doc.setFont(undefined, "normal");
+    yPosition += 15;
+
+    // Add table
     const tableColumn = [
       "SL",
       "Class",
@@ -206,6 +274,7 @@ export default function SitNumberPage() {
       "Father's Name",
       "Seat Number",
     ];
+
     const tableRows = data.map((item, idx) => [
       idx + 1,
       item.className,
@@ -223,9 +292,22 @@ export default function SitNumberPage() {
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 20,
+      startY: yPosition,
       theme: "striped",
-      styles: { fontSize: 8 },
+      styles: {
+        fontSize: 8,
+        cellPadding: 4,
+        halign: "center",
+        valign: "middle",
+      },
+      headStyles: {
+        fillColor: [26, 160, 176],
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [240, 248, 255],
+      },
     });
 
     doc.save("SeatNumberData.pdf");
@@ -243,7 +325,7 @@ export default function SitNumberPage() {
     { key: "studentName", label: "Student name" },
     { key: "idNumber", label: "ID number" },
     { key: "rollNo", label: "Roll no" },
-  
+
     { key: "seatNumber", label: "Seat number" },
   ];
 

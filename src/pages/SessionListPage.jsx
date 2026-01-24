@@ -386,13 +386,46 @@ export default function SessionListPage() {
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddSessionModalOpen(true)}
-                className="w-full md:w-28 flex items-center  bg-blue-600 px-2 h-8 text-xs text-white"
+                className="w-full md:w-28 flex items-center bg-blue-600 px-2 h-8 text-xs text-white"
               >
                 Session
               </button>
+            ) : (
+              <div className="relative flex-1 w-full md:w-28" ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center md:w-28 w-full border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
+                >
+                  Sort By
+                </button>
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("asc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("desc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
             <FormModal
               open={addSessionModalOpen}
