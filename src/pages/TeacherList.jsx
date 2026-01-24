@@ -297,7 +297,7 @@ export default function TeacherList() {
                   e.stopPropagation();
                   handleDropdownClick("export");
                 }}
-                className={`w-28 flex items-center   border  ${
+                className={`w-28 flex items-center z-30  border  ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
                     : "bg-white border-gray-200"
