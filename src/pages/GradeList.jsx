@@ -499,7 +499,7 @@ export default function GradeList() {
           </div>*/}
 
           {/* Search + Pagination */}
-          <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">
+          <div className="flex items-center md:justify-between gap-2 w-full ">
             <input
               value={search}
               onChange={(e) => {

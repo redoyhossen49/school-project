@@ -71,7 +71,7 @@ export default function ClasssectionTable({ data = [], setData, month }) {
               )
             )}
             {showAction && (
-              <th className="px-3 py-2 text-left font-semibold whitespace-nowrap">Action</th>
+              <th className="px-3 py-2 text-left font-semibold whitespace-nowrap md:w-18">Action</th>
             )}
           </tr>
         </thead>

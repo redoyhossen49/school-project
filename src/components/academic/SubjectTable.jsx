@@ -68,7 +68,7 @@ export default function SubjectTable({ data = [], setData }) {
               </th>
             ))}
             {showAction && (
-              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap md:w-18">
                 Action
               </th>
             )}
@@ -155,11 +155,9 @@ export default function SubjectTable({ data = [], setData }) {
             { name: "section", label: "Section", type: "text" },
             { name: "subjectName", label: "Subject Name", type: "text", required: true },
             { name: "subjectType", label: "Subject Type", type: "text" },
-            { name: "theoryFullMark", label: "Theory Full Mark", type: "number" },
-            { name: "theoryPassMark", label: "Theory Pass Mark", type: "number" },
-            { name: "theoryFailMark", label: "Theory Fail Mark", type: "number" },
-            { name: "practicalFullMark", label: "Practical Full Mark", type: "number" },
-            { name: "practicalPassMark", label: "Practical Pass Mark", type: "number" },
+            { name: "theoryFullMark", label: " Full Mark", type: "number" },
+            { name: "theoryPassMark", label: " Pass Mark", type: "number" },
+           
           ]}
         />
       )}

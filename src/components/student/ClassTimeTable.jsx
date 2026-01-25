@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import StudentActions from "./StudentActions"; // handles edit/delete
 import ReusableEditModal from "../common/ReusableEditModal";
 import { classTimeData } from "../../data/classTimeData";
+import ReusableActions from "../common/ReusableActions"; // ✅ Use this
 
 const headers = [
   { label: "Sl", key: "sl" },
@@ -12,7 +12,6 @@ const headers = [
   { label: "Start time", key: "startTime" },
   { label: "Late time", key: "lastTime" },
   { label: "Close time", key: "endTime" },
- 
 ];
 
 export default function ClassTimeTable({ data = classTimeData, setData }) {
@@ -35,10 +34,8 @@ export default function ClassTimeTable({ data = classTimeData, setData }) {
   };
 
   const handleDelete = (row) => {
-    if (confirm("Are you sure you want to delete this class time?")) {
-      setData((prev) => prev.filter((r) => r.sl !== row.sl));
-      alert("Class time deleted successfully ✅");
-    }
+    setData((prev) => prev.filter((r) => r.sl !== row.sl));
+    alert("Class time deleted successfully ✅");
   };
 
   return (
@@ -67,7 +64,7 @@ export default function ClassTimeTable({ data = classTimeData, setData }) {
               </th>
             ))}
             {showAction && (
-              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap md:w-18">
                 Action
               </th>
             )}
@@ -98,13 +95,14 @@ export default function ClassTimeTable({ data = classTimeData, setData }) {
 
                 {showAction && (
                   <td className="px-3 h-8 whitespace-nowrap">
-                    <StudentActions
-                      row={row}
+                    <ReusableActions
+                      item={row}
                       onEdit={(r) => {
                         setSelectedRow(r);
                         setEditModalOpen(true);
                       }}
                       onDelete={handleDelete}
+                      deleteMessage="Are you sure you want to delete this class time?"
                     />
                   </td>
                 )}

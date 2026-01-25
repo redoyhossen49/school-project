@@ -17,8 +17,8 @@ export default function SyllabusTable({ data = [], setData }) {
   const handleEditSubmit = (updatedData) => {
     setData((prev) =>
       prev.map((s) =>
-        s.sl === selectedSyllabus.sl ? { ...s, ...updatedData } : s
-      )
+        s.sl === selectedSyllabus.sl ? { ...s, ...updatedData } : s,
+      ),
     );
     setEditModalOpen(false);
   };
@@ -54,10 +54,10 @@ export default function SyllabusTable({ data = [], setData }) {
               "Section",
               "Session",
               "Subject name",
+              "Subject type",
               "Exam name",
               "Start page",
               "End page",
-             
             ].map((h) => (
               <th
                 key={h}
@@ -67,7 +67,7 @@ export default function SyllabusTable({ data = [], setData }) {
               </th>
             ))}
             {showAction && (
-              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap md:w-18">
                 Action
               </th>
             )}
@@ -87,25 +87,64 @@ export default function SyllabusTable({ data = [], setData }) {
           ) : (
             data.map((s) => (
               <tr
-                key={`${s.class}-${s.group}-${s.section}-${s.subjectName}`}
+                key={`${s.sl}-${s.class}-${s.group}-${s.section}-${s.subjectName}`}
                 className={`border-b ${borderCol} ${hoverRow}`}
               >
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.sl}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.class}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.group}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.section}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.subjectName}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                  {s.subjectType === "theory" ? "Theory" :
-                   s.subjectType === "practical" ? "Practical" : "Theory + Practical"}
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.sl}
                 </td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.fullMarks ?? "-"}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.passMarks ?? "-"}</td>
-                <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>{s.chapters.length}</td>
-                
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.class}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.group}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.section}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.session}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.subjectName}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.subjectType}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.examName}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.startPage}
+                </td>
+                <td
+                  className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {s.endPage}
+                </td>
 
                 {showAction && (
-                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                  <td
+                    className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}
+                  >
                     <ReusableActions
                       item={s}
                       onEdit={(row) => {
@@ -136,11 +175,17 @@ export default function SyllabusTable({ data = [], setData }) {
             { name: "class", label: "Class", type: "text", required: true },
             { name: "group", label: "Group", type: "text" },
             { name: "section", label: "Section", type: "text" },
-            { name: "session", label: "Session", type: "text" },
-            { name: "subjectName", label: "Subject Name", type: "text", required: true },
+            { name: "session", label: "Session", type: "text", required: true },
+            {
+              name: "subjectName",
+              label: "Subject Name",
+              type: "text",
+              required: true,
+            },
             { name: "subjectType", label: "Subject Type", type: "text" },
-            { name: "fullMarks", label: "Full Marks", type: "number" },
-            { name: "passMarks", label: "Pass Marks", type: "number" },
+            { name: "examName", label: "Exam Name", type: "text" },
+            { name: "startPage", label: "Start Page", type: "number" },
+            { name: "endPage", label: "End Page", type: "number" },
           ]}
         />
       )}

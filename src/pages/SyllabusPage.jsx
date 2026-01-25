@@ -1,7 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FiRefreshCw } from "react-icons/fi";
-import { BiChevronDown } from "react-icons/bi";
+
 import { useTheme } from "../context/ThemeContext.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { schoolSyllabusData } from "../data/schoolSyllabusData.js";
@@ -17,20 +16,22 @@ export default function SyllabusPage() {
   const canEdit = localStorage.getItem("role") === "school";
 
   // -------------------- Flatten Syllabus Data --------------------
+
+
   const tableData = useMemo(() => {
-    let sl = 1;
-    return schoolSyllabusData.flatMap((cls) =>
-      cls.subjects.map((sub) => ({
-        sl: sl++,
+    return (
+      schoolSyllabusData?.map((cls) => ({
+        sl: cls.sl,
         class: cls.class,
         group: cls.group,
         section: cls.section,
         session: cls.session,
-        subjectName: sub.subjectName,
-        fullMarks: sub.fullMarks,
-        passMarks: sub.passMarks,
-        chapters: sub.chapters,
-      })),
+        subjectName: cls.subjectName,
+        subjectType: cls.subjectType,
+        examName: cls.examName,
+        startPage: cls.startPage ?? "-",
+        endPage: cls.endPage ?? "-",
+      })) || []
     );
   }, []);
 
@@ -349,7 +350,7 @@ export default function SyllabusPage() {
           {/* -------------------- 1st row: Refresh | Export | Add Syllabus -------------------- */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
             {/* Filter */}
-            <div ref={filterRef} className="relative w-full">
+            <div ref={filterRef} className="relative ">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
                 className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
@@ -377,16 +378,16 @@ export default function SyllabusPage() {
               />
             </div>
 
-            <div ref={exportRef} className="relative w-full md:w-28">
+            <div ref={exportRef} className="relative  ">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex border  items-center justify-between px-3 h-8  text-xs ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex border  items-center justify-between px-3 h-8  text-xs ${borderClr} ${inputBg}`}
               >
                 Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28  border   ${borderClr} ${dropdownBg}
+                  className={`absolute left-0 top-full z-50 mt-2 w-full md:w-28  border   ${borderClr} ${dropdownBg}
   `}
                 >
                   <button
@@ -405,14 +406,57 @@ export default function SyllabusPage() {
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddModalOpen(true)}
-                className="w-full md:w-28 flex items-center   bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Syllabus
               </button>
+            ) : (
+              <div className="relative flex-1" ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center w-full md:w-28 border px-3 h-8 text-xs ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700 text-gray-100"
+                      : "border-gray-300 bg-white text-gray-800"
+                  }`}
+                >
+                  Sort By
+                </button>
+
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border left-0 ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "bg-white border-gray-200 text-gray-900"
+                    }`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("asc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("desc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
+
             <FormModal
               open={addModalOpen}
               title="Add Syllabus"
@@ -431,11 +475,7 @@ export default function SyllabusPage() {
 
         {/* Filters + Sort Row */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0  ">
-          
-
-           
-
-            {/* Sort 
+          {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -479,12 +519,12 @@ export default function SyllabusPage() {
           </div>*/}
 
           {/* -------------------- 3rd row: Search + Pagination -------------------- */}
-          <div className="flex items-center md:justify-between gap-2 ">
+          <div className="flex items-center md:justify-between gap-2 w-full">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search subject..."
-              className={`w-full md:w-64  border  px-3 h-8 text-xs focus:outline-none ${
+              className={`w-full md:w-64 border px-3 h-8 text-xs focus:outline-none ${
                 darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
               }`}
             />

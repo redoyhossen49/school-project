@@ -6,8 +6,8 @@ import ReusableEditModal from "../common/ReusableEditModal";
 const headers = [
   { label: "Sl", key: "sl" },
   { label: "Class", key: "class" },
-  { label: "Subjects ", key: "subjects" },
-  { label: "Students ", key: "totalStudents" },
+  { label: "Subjects", key: "subjects" },
+  { label: "Students", key: "totalStudents" },
   { label: "Total payable", key: "totalPayable" },
   { label: "Payable due", key: "payableDue" },
 ];
@@ -15,7 +15,7 @@ const headers = [
 export default function ClassPaymentTable({ data = [], setData, month }) {
   const { darkMode } = useTheme();
   const userRole = localStorage.getItem("role");
-  const showAction = userRole === "school";
+  const isSchool = userRole === "school";
 
   const borderCol = darkMode ? "border-gray-700" : "border-gray-200";
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
@@ -26,7 +26,9 @@ export default function ClassPaymentTable({ data = [], setData, month }) {
 
   const handleEditSubmit = (updatedData) => {
     setData((prev) =>
-      prev.map((row) => (row.sl === selectedRow.sl ? { ...row, ...updatedData } : row))
+      prev.map((row) =>
+        row.sl === selectedRow.sl ? { ...row, ...updatedData } : row
+      )
     );
     setEditModalOpen(false);
   };
@@ -46,7 +48,7 @@ export default function ClassPaymentTable({ data = [], setData, month }) {
           : "bg-white text-gray-900 border-gray-200"
       }`}
     >
-      <table className="w-full table-auto border-collapse text-xs md:text-sm">
+      <table className="w-full table-auto border-collapse text-xs ">
         {/* ===== HEADER ===== */}
         <thead
           className={`${
@@ -56,16 +58,22 @@ export default function ClassPaymentTable({ data = [], setData, month }) {
           }`}
         >
           <tr>
-            {headers.map((h) => (
-              <th
-                key={h.key}
-                className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
-              >
-                {h.label}
-              </th>
-            ))}
-            {showAction && (
-              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
+            {headers.map((h) => {
+              if (!isSchool && (h.key === "totalPayable" || h.key === "payableDue")) {
+                return null;
+              }
+              return (
+                <th
+                  key={h.key}
+                  className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap `}
+                >
+                  {h.label}
+                </th>
+              );
+            })}
+
+            {isSchool && (
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap md:w-18">
                 Action
               </th>
             )}
@@ -77,7 +85,7 @@ export default function ClassPaymentTable({ data = [], setData, month }) {
           {data.length === 0 ? (
             <tr>
               <td
-                colSpan={showAction ? headers.length + 1 : headers.length}
+                colSpan={isSchool ? headers.length + 1 : headers.length - 2}
                 className="h-8 text-center text-gray-400"
               >
                 No Data Found
@@ -101,41 +109,41 @@ export default function ClassPaymentTable({ data = [], setData, month }) {
 
               return (
                 <tr key={row.sl} className={`border-b ${borderCol} ${hoverRow}`}>
-                  {/* SL */}
                   <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
                     {row.sl}
                   </td>
 
-                  {/* Class */}
                   <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
                     {row.class}
                   </td>
 
-                  {/* Subjects */}
                   <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
                     {row.subjects}
                   </td>
 
-                  {/* Students */}
                   <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
                     {row.totalStudents}
                   </td>
 
-                  {/* Total Payable */}
-                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                    ৳{totalPayable}
-                  </td>
+                  {isSchool && (
+                    <>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                        ৳{totalPayable}
+                      </td>
 
-                  {/* Payable Due */}
-                  <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
-                    {payableDue === 0 ? (
-                      <span className="text-green-600 font-semibold">Paid</span>
-                    ) : (
-                      <span className="text-red-600 font-semibold">৳{payableDue}</span>
-                    )}
-                  </td>
+                      <td className={`px-3 h-8 border-r ${borderCol} whitespace-nowrap`}>
+                        {payableDue === 0 ? (
+                          <span className="text-green-600 font-semibold">Paid</span>
+                        ) : (
+                          <span className="text-red-600 font-semibold">
+                            ৳{payableDue}
+                          </span>
+                        )}
+                      </td>
+                    </>
+                  )}
 
-                  {showAction && (
+                  {isSchool && (
                     <td className="px-3 h-8 whitespace-nowrap">
                       <ReusableActions
                         item={row}

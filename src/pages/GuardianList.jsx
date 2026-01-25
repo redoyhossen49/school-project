@@ -40,12 +40,19 @@ export default function GuardianList() {
   const [exportOpen, setExportOpen] = useState(false);
   const [showSession, setShowSession] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+   const [sortOpenDesktop, setSortOpenDesktop] = useState(false);
+    const [sortOpenMobile, setSortOpenMobile] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [exportOpenDesktop, setExportOpenDesktop] = useState(false);
+const [exportOpenMobile, setExportOpenMobile] = useState(false);
+
 
   const dateDropdownRef = useRef(null);
-  const exportRef = useRef(null);
-  const sortRef = useRef(null);
+  const exportRefDesktop = useRef(null);
+  const exportRefMobile = useRef(null);
+ const sortRefDesktop = useRef(null);
+  const sortRefMobile = useRef(null);
   const filterRef = useRef(null);
 
   const dateOptions = [
@@ -91,10 +98,22 @@ export default function GuardianList() {
         setDateOpen(false);
         setShowSession(false);
       }
-      if (exportRef.current && !exportRef.current.contains(e.target))
-        setExportOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
+       if (exportRefDesktop.current && !exportRefDesktop.current.contains(e.target)) {
+      setExportOpenDesktop(false);
+    }
+    // Mobile export
+    if (exportRefMobile.current && !exportRefMobile.current.contains(e.target)) {
+      setExportOpenMobile(false);
+    }
+      if (
+        sortRefDesktop.current &&
+        !sortRefDesktop.current.contains(e.target)
+      ) {
+        setSortOpenDesktop(false);
+      }
+      if (sortRefMobile.current && !sortRefMobile.current.contains(e.target)) {
+        setSortOpenMobile(false);
+      }
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
     };
@@ -288,16 +307,16 @@ export default function GuardianList() {
               />
             </div>
 
-            <div className="relative w-28" ref={exportRef}>
+            <div className="relative w-28" ref={exportRefDesktop}>
               <button
-                onClick={() => setExportOpen((prev) => !prev)}
+                onClick={() => setExportOpenDesktop(!exportOpenDesktop)}
                 className={buttonClass}
               >
                 Export
               </button>
-              {exportOpen && (
+              {exportOpenDesktop && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28  border  ${
+                  className={`absolute left-0 top-full z-50 mt-2 w-full md:w-28  border  ${
                     darkMode
                       ? "border-gray-500 bg-gray-700"
                       : "border-gray-200 bg-white"
@@ -327,9 +346,9 @@ export default function GuardianList() {
                 Guardian
               </button>
             ) : (
-              <div className="relative flex-1" ref={sortRef}>
+              <div className="relative flex-1" ref={sortRefDesktop}>
                 <button
-                  onClick={() => setSortOpen(!sortOpen)}
+                  onClick={() => setSortOpenDesktop(!sortOpenDesktop)}
                   className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
                     darkMode
                       ? "border-gray-500 bg-gray-700 text-gray-100"
@@ -338,7 +357,7 @@ export default function GuardianList() {
                 >
                   Sort By
                 </button>
-                {sortOpen && (
+                {sortOpenDesktop && (
                   <div
                     className={`absolute mt-2 w-full z-40 border  ${
                       darkMode
@@ -349,7 +368,7 @@ export default function GuardianList() {
                     <button
                       onClick={() => {
                         setSortOrder("oldest");
-                        setSortOpen(false);
+                        setSortOpenDesktop(false);
                       }}
                       className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                     >
@@ -358,7 +377,7 @@ export default function GuardianList() {
                     <button
                       onClick={() => {
                         setSortOrder("newest");
-                        setSortOpen(false);
+                        setSortOpenDesktop(false);
                       }}
                       className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                     >
@@ -400,9 +419,9 @@ export default function GuardianList() {
             />
           </div>
 
-          <div className="relative w-full" ref={exportRef}>
+          <div className="relative w-full" ref={exportRefMobile}>
             <button
-              onClick={() => setExportOpen((prev) => !prev)}
+              onClick={() => setExportOpenMobile(!exportOpenMobile)}
               className={`flex items-center justify-between   w-full  border  px-3 h-8 text-xs  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100"
@@ -411,9 +430,9 @@ export default function GuardianList() {
             >
               Export
             </button>
-            {exportOpen && (
+            {exportOpenMobile && (
               <div
-                className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28  border  ${
+                className={`absolute left-0 top-full z-50 mt-2 w-full md:w-28  border  ${
                   darkMode
                     ? "border-gray-500 bg-gray-700"
                     : "border-gray-200 bg-white"
@@ -443,9 +462,9 @@ export default function GuardianList() {
               Guardian
             </button>
           ) : (
-            <div className="relative w-full" ref={sortRef}>
+            <div className="relative w-full" ref={sortRefMobile}>
               <button
-                onClick={() => setSortOpen(!sortOpen)}
+                onClick={() => setSortOpenMobile(!sortOpenMobile)}
                 className={`w-full flex items-center border px-3 h-8 text-xs ${
                   darkMode
                     ? "border-gray-500 bg-gray-700 text-gray-100"
@@ -454,7 +473,7 @@ export default function GuardianList() {
               >
                 Sort By
               </button>
-              {sortOpen && (
+              {sortOpenMobile && (
                 <div
                   className={`absolute mt-2 w-full z-40 border ${
                     darkMode
@@ -465,7 +484,7 @@ export default function GuardianList() {
                   <button
                     onClick={() => {
                       setSortOrder("oldest");
-                      setSortOpen(false);
+                      setSortOpenMobile(false);
                     }}
                     className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >
@@ -474,7 +493,7 @@ export default function GuardianList() {
                   <button
                     onClick={() => {
                       setSortOrder("newest");
-                      setSortOpen(false);
+                      setSortOpenMobile(false);
                     }}
                     className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >

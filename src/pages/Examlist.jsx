@@ -33,12 +33,11 @@ export default function Examlist() {
   const [sortOrder, setSortOrder] = useState("newest");
   const [sortOpen, setSortOpen] = useState(false);
 
-
   // -------------------- Dropdowns --------------------
   const [monthOpen, setMonthOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  
+
   const [open, setOpen] = useState(false);
 
   const [groupFilter, setGroupFilter] = useState("");
@@ -63,7 +62,7 @@ export default function Examlist() {
   const exportRef = useRef(null);
   const filterRef = useRef(null);
   const statusRef = useRef(null);
- const sortRef = useRef(null);
+  const sortRef = useRef(null);
   const months = [
     "All",
     "January",
@@ -277,39 +276,38 @@ export default function Examlist() {
 
     doc.save("ExamList.pdf");
   };
-const addExamFields = [
-  {
-    key: "class",
-    type: "select",
-    placeholder: "Select Class",
-    options: classOptions,
-  },
-  {
-    key: "group",
-    type: "select",
-    placeholder: "Select Group",
-    options: groupOptions, // class অনুযায়ী পরে set করবে
-  },
-  {
-    key: "section",
-    type: "select",
-    placeholder: "Select Section",
-    options: sectionOptions, // class + group অনুযায়ী পরে set করবে
-  },
-  {
-    key: "session",
-    type: "select",
-    placeholder: "Select Session",
-    options: sessionOptions,
-  },
-  {
-    key: "examName",
-    type: "text",
-    label:"Exam name",
-    placeholder: " Exam Name",
-  },
-];
-
+  const addExamFields = [
+    {
+      key: "class",
+      type: "select",
+      placeholder: "Select Class",
+      options: classOptions,
+    },
+    {
+      key: "group",
+      type: "select",
+      placeholder: "Select Group",
+      options: groupOptions, // class অনুযায়ী পরে set করবে
+    },
+    {
+      key: "section",
+      type: "select",
+      placeholder: "Select Section",
+      options: sectionOptions, // class + group অনুযায়ী পরে set করবে
+    },
+    {
+      key: "session",
+      type: "select",
+      placeholder: "Select Session",
+      options: sessionOptions,
+    },
+    {
+      key: "examName",
+      type: "text",
+      label: "Exam name",
+      placeholder: " Exam Name",
+    },
+  ];
 
   const handleRefresh = () => {
     setClassFilter("");
@@ -370,7 +368,7 @@ const addExamFields = [
 
           {/* Refresh | Export | Add Class */}
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-2">
-              {/* Filter Dropdown */}
+            {/* Filter Dropdown */}
             <div ref={filterRef} className="relative flex-1">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
@@ -426,13 +424,54 @@ const addExamFields = [
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddClassOpen(true)}
                 className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Add exam
               </button>
+            ) : (
+              <div className="relative flex-1 " ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700 text-gray-100"
+                      : "border-gray-200 bg-white text-gray-800"
+                  }`}
+                >
+                  Sort By
+                </button>
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border  ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "bg-white border-gray-200 text-gray-900"
+                    }  left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("asc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("desc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             <FormModal
@@ -448,12 +487,9 @@ const addExamFields = [
 
         {/* / Filter / Sort */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
-          
+          {/* Filter Dropdown */}
 
-            {/* Filter Dropdown */}
-          
-
-            {/* Sort Button 
+          {/* Sort Button 
            <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -497,7 +533,7 @@ const addExamFields = [
           </div>*/}
 
           {/* Search + Pagination */}
-          <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">
+          <div className="flex items-center md:justify-between gap-2 w-full ">
             <input
               value={search}
               onChange={(e) => {

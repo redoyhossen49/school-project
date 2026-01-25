@@ -39,6 +39,9 @@ export default function TeacherList() {
   const [sortOpenMobile, setSortOpenMobile] = useState(false);
 
   const [exportOpen, setExportOpen] = useState(false);
+  const [exportOpenDesktop, setExportOpenDesktop] = useState(false);
+  const [exportOpenMobile, setExportOpenMobile] = useState(false);
+
   const [sortOrder, setSortOrder] = useState("newest");
   // Get all unique designations dynamically from teacherData
   const uniqueDesignations = Array.from(
@@ -60,7 +63,8 @@ export default function TeacherList() {
   const sortRefDesktop = useRef(null);
   const sortRefMobile = useRef(null);
 
-  const exportRef = useRef(null);
+  const exportRefDesktop = useRef(null);
+  const exportRefMobile = useRef(null);
   const filterButtonRef = useRef(); // filter button er ref
 
   const attendanceOptions = ["Presence", "Absence", "Late", "Leave"];
@@ -72,10 +76,25 @@ export default function TeacherList() {
         setAttendanceOpen(false);
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
-      if (sortRef.current && !sortRef.current.contains(e.target))
-        setSortOpen(false);
-      if (exportRef.current && !exportRef.current.contains(e.target))
-        setExportOpen(false);
+      if (
+        sortRefDesktop.current &&
+        !sortRefDesktop.current.contains(e.target)
+      ) {
+        setSortOpenDesktop(false);
+      }
+      if (sortRefMobile.current && !sortRefMobile.current.contains(e.target)) {
+        setSortOpenMobile(false);
+      }
+      if (
+        exportRefDesktop.current &&
+        !exportRefDesktop.current.contains(e.target)
+      )
+        setExportOpenDesktop(false);
+      if (
+        exportRefMobile.current &&
+        !exportRefMobile.current.contains(e.target)
+      )
+        setExportOpenMobile(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -83,12 +102,20 @@ export default function TeacherList() {
 
   // Open only one dropdown at a time
   const handleDropdownClick = (type) => {
-    setAttendanceOpen(type === "attendance" ? (prev) => !prev : false);
-    setFilterOpen(type === "filter" ? (prev) => !prev : false);
-    setSortOpenDesktop(type === "sortDesktop" ? (prev) => !prev : false);
-    setSortOpenMobile(type === "sortMobile" ? (prev) => !prev : false);
-    setExportOpen(type === "export" ? (prev) => !prev : false);
-  };
+  setAttendanceOpen(type === "attendance" ? (prev) => !prev : false);
+  setFilterOpen(type === "filter" ? (prev) => !prev : false);
+  setSortOpenDesktop(type === "sortDesktop" ? (prev) => !prev : false);
+  setSortOpenMobile(type === "sortMobile" ? (prev) => !prev : false);
+
+  if (type === "exportDesktop") {
+    setExportOpenDesktop((prev) => !prev);
+    setExportOpenMobile(false);
+  } else if (type === "exportMobile") {
+    setExportOpenMobile((prev) => !prev);
+    setExportOpenDesktop(false);
+  }
+};
+
 
   const filteredTeachers = teachers
 
@@ -291,12 +318,9 @@ export default function TeacherList() {
               />
             </div>
 
-            <div className="relative" ref={exportRef}>
+            <div className="relative" ref={exportRefDesktop}>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDropdownClick("export");
-                }}
+                onClick={() => handleDropdownClick("exportDesktop")}
                 className={`w-28 flex items-center z-30  border  ${
                   darkMode
                     ? "bg-gray-700 border-gray-500"
@@ -305,9 +329,9 @@ export default function TeacherList() {
               >
                 Export
               </button>
-              {exportOpen && (
+              {exportOpenDesktop && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border   ${
+                  className={`absolute top-full left-0 mt-2 w-28 z-40 border   ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -416,12 +440,9 @@ export default function TeacherList() {
             />
           </div>
 
-          <div className="relative w-full" ref={exportRef}>
+          <div className="relative w-full" ref={exportRefMobile}>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDropdownClick("export");
-              }}
+             onClick={() => handleDropdownClick("exportMobile")}
               className={`w-full flex items-center   border ${
                 darkMode
                   ? "bg-gray-700 border-gray-500"
@@ -430,9 +451,9 @@ export default function TeacherList() {
             >
               Export
             </button>
-            {exportOpen && (
+            {exportOpenMobile && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border  ${
+                className={`absolute top-full left-0 mt-2 w-full z-40 border  ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"

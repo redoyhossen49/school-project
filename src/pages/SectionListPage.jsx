@@ -87,24 +87,30 @@ export default function SectionListPage() {
   ];
 
   // -------------------- Table columns --------------------
-  const columns = [
-    { key: "sl", label: "SL" },
-    { key: "class", label: "Class" },
-    { key: "group", label: "Group" },
-    { key: "section", label: "Section" },
-    { key: "totalStudents", label: "Total Students" },
-    { key: "totalPayable", label: "Total Payable" },
-    { key: "payableDue", label: "Payable Due" },
-  ];
+const columns = [
+  { key: "sl", label: "SL" },
+  { key: "class", label: "Class" },
+  { key: "group", label: "Group" },
+  { key: "section", label: "Section" },
+  { key: "totalStudents", label: "Total students" },
+
+  ...(canEdit
+    ? [
+        { key: "totalPayable", label: "Total payable" },
+        { key: "payableDue", label: "Payable due" },
+      ]
+    : []),
+];
+
 
   // -------------------- Edit modal fields --------------------
   const modalFields = [
     { key: "class", placeholder: "Class" },
     { key: "group", placeholder: "Group" },
     { key: "section", placeholder: "Section" },
-    { key: "totalStudents", placeholder: "Total Students", type: "number" },
-    { key: "totalPayable", placeholder: "Total Payable", type: "number" },
-    { key: "payableDue", placeholder: "Payable Due", type: "number" },
+    { key: "totalStudents", placeholder: "Total students", type: "number" },
+    { key: "totalPayable", placeholder: "Total payable", type: "number" },
+    { key: "payableDue", placeholder: "Payable due", type: "number" },
   ];
 
   // -------------------- Filtered + searched + sorted data --------------------
@@ -120,7 +126,6 @@ export default function SectionListPage() {
           item.section.toLowerCase().includes(search.toLowerCase()),
       )
 
-      .filter((item) => item.class.toLowerCase().includes(search.toLowerCase()))
       .sort((a, b) => (sortOrder === "asc" ? a.sl - b.sl : b.sl - a.sl));
   }, [data, search, classFilter, groupFilter, sectionFilter, sortOrder]);
 
@@ -133,6 +138,9 @@ export default function SectionListPage() {
         setExportOpen(false);
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
+       if (sortRef.current && !sortRef.current.contains(e.target)) {
+      setSortOpen(false);
+    }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -150,33 +158,18 @@ export default function SectionListPage() {
   };
 
   const handleAddSection = (formData) => {
-    const { class: cls, group, section } = formData;
-
-    // Check if class already exists
-    const existingClassIndex = data.findIndex((c) => c.class === cls);
-
-    const newGroup = {
-      name: group,
-      section: section,
-      monthly: [], // initially empty
+    const newRow = {
+      sl: data.length + 1,
+      class: formData.class,
+      group: formData.group,
+      section: formData.section,
+      totalStudents: 0,
+      totalPayable: 0,
+      payableDue: 0,
     };
 
-    let newData = [...data];
-
-    if (existingClassIndex > -1) {
-      // Add to existing class
-      newData[existingClassIndex].groups.push(newGroup);
-    } else {
-      // Add new class
-      newData.push({
-        sl: data.length + 1,
-        class: cls,
-        groups: [newGroup],
-      });
-    }
-
-    setData(newData); // update state
-    setCurrentPage(1); // reset pagination
+    setData((prev) => [...prev, newRow]);
+    setCurrentPage(1);
   };
 
   // -------------------- Pagination --------------------
@@ -269,15 +262,7 @@ Generated Date: ${new Date().toLocaleDateString()}
     doc.text(filterText.trim(), 40, 115);
 
     // ---------------- TABLE ----------------
-    const tableColumn = [
-      "SL",
-      "Class",
-      "Group",
-      "Section",
-      "Total Students",
-      "Total Payable",
-      "Payable Due",
-    ];
+    
 
     const tableRows = data.map((item) => [
       item.sl,
@@ -369,7 +354,7 @@ Generated Date: ${new Date().toLocaleDateString()}
                 onClick={() => setFilterOpen((prev) => !prev)}
                 className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs  ${borderClr} ${inputBg}`}
               >
-                Filter{" "}
+                Filter
               </button>
 
               <FilterDropdown
@@ -391,16 +376,16 @@ Generated Date: ${new Date().toLocaleDateString()}
               />
             </div>
 
-            <div ref={exportRef} className="relative w-full md:w-28">
+            <div ref={exportRef} className="relative  ">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
                 Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-2 w-full md:w-28 border ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
@@ -421,9 +406,9 @@ Generated Date: ${new Date().toLocaleDateString()}
             {canEdit ? (
               <button
                 onClick={() => setAddSectionModalOpen(true)}
-                className="w-full flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
               >
-                section
+                Section
               </button>
             ) : (
               <div className="relative flex-1 w-full md:w-28" ref={sortRef}>
@@ -471,19 +456,19 @@ Generated Date: ${new Date().toLocaleDateString()}
               fields={[
                 {
                   key: "class",
-                  placeholder: "Select Class",
+                  placeholder: "Select class",
                   type: "select",
                   options: classOptions,
                 },
                 {
                   key: "group",
-                  placeholder: "Select Group",
+                  placeholder: "Select group",
                   type: "select",
                   options: groupOptions,
                 },
                 {
                   key: "section",
-                  label: "Type section",
+                  label: "Section name",
                   placeholder: "Section Name",
                   type: "text",
                 },
@@ -493,7 +478,7 @@ Generated Date: ${new Date().toLocaleDateString()}
         </div>
 
         {/* Filters + Sort + Search */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-2 gap-3 md:gap-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
           {/* Sort 
             <div className="relative flex-1 " ref={sortRef}>
               <button
@@ -538,7 +523,7 @@ Generated Date: ${new Date().toLocaleDateString()}
           </div>*/}
 
           {/* Search + Pagination */}
-          <div className="flex items-center md:justify-between gap-2 w-full md:w-auto">
+          <div className="flex items-center md:justify-between gap-2 w-full ">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -560,7 +545,7 @@ Generated Date: ${new Date().toLocaleDateString()}
           columns={columns}
           data={currentData}
           setData={setData}
-          showActionKey={true}
+           showActionKey={true}
           modalFields={modalFields}
         />
       </div>

@@ -41,6 +41,8 @@ export default function ClassTimeList() {
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpenDesktop, setSortOpenDesktop] = useState(false);
   const [sortOpenMobile, setSortOpenMobile] = useState(false);
+  const [exportOpenDesktop, setExportOpenDesktop] = useState(false);
+  const [exportOpenMobile, setExportOpenMobile] = useState(false);
 
   const [sortOrder, setSortOrder] = useState("oldest");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -53,7 +55,8 @@ export default function ClassTimeList() {
   });
 
   const sectionDropdownRef = useRef(null);
-  const exportRef = useRef(null);
+  const exportRefDesktop = useRef(null);
+  const exportRefMobile = useRef(null);
   const sortRefDesktop = useRef(null);
   const sortRefMobile = useRef(null);
   const filterRef = useRef(null);
@@ -66,8 +69,20 @@ export default function ClassTimeList() {
         !sectionDropdownRef.current.contains(e.target)
       )
         setSectionOpen(false);
-      if (exportRef.current && !exportRef.current.contains(e.target))
-        setExportOpen(false);
+
+      if (
+        exportRefDesktop.current &&
+        !exportRefDesktop.current.contains(e.target)
+      ) {
+        setExportOpenDesktop(false);
+      }
+      // Mobile export
+      if (
+        exportRefMobile.current &&
+        !exportRefMobile.current.contains(e.target)
+      ) {
+        setExportOpenMobile(false);
+      }
       if (
         sortRefDesktop.current &&
         !sortRefDesktop.current.contains(e.target)
@@ -240,16 +255,16 @@ export default function ClassTimeList() {
               />
             </div>
 
-            <div className="relative" ref={exportRef}>
+            <div className="relative" ref={exportRefDesktop}>
               <button
-                onClick={() => setExportOpen(!exportOpen)}
+                onClick={() => setExportOpenDesktop(!exportOpenDesktop)}
                 className={buttonClass}
               >
                 Export
               </button>
-              {exportOpen && (
+              {exportOpenDesktop && (
                 <div
-                  className={`absolute left-0 z-50 top-full mt-1 w-28  border  ${
+                  className={`absolute left-0 z-50 top-full mt-2 w-28  border  ${
                     darkMode
                       ? "border-gray-500 bg-gray-700"
                       : "border-gray-200 bg-white"
@@ -360,9 +375,9 @@ export default function ClassTimeList() {
             />
           </div>
 
-          <div className="relative" ref={exportRef}>
+          <div className="relative" ref={exportRefMobile}>
             <button
-              onClick={() => setExportOpen(!exportOpen)}
+              onClick={() => setExportOpenMobile(!exportOpenMobile)}
               className={`flex items-center w-full  border px-3 h-8 text-xs  ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100"
@@ -371,9 +386,9 @@ export default function ClassTimeList() {
             >
               Export
             </button>
-            {exportOpen && (
+            {exportOpenMobile && (
               <div
-                className={`absolute left-0 z-50 top-full mt-1 w-full  border  ${
+                className={`absolute left-0 z-50 top-full mt-2 w-full  border  ${
                   darkMode
                     ? "border-gray-500 bg-gray-700"
                     : "border-gray-200 bg-white"
@@ -464,7 +479,11 @@ export default function ClassTimeList() {
 
       {/* Table */}
       <div className={`p-3 ${darkMode ? "bg-gray-900" : "bg-white"} `}>
-        <ClassTimeTable data={currentClassTimes} setData={setClassTimes} />
+        <ClassTimeTable
+          data={currentClassTimes}
+          setData={setClassTimes}
+          showActionKey={true}
+        />
       </div>
 
       {canEdit && (

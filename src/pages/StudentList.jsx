@@ -76,8 +76,9 @@ export default function StudentsList() {
   const canEdit = userRole === "school";
 
   const [selectedDate, setSelectedDate] = useState("Monthly");
-  const [dateOpen, setDateOpen] = useState(false);
-  const [showSession, setShowSession] = useState(false);
+  const [exportOpenDesktop, setExportOpenDesktop] = useState(false);
+const [exportOpenMobile, setExportOpenMobile] = useState(false);
+
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpenDesktop, setSortOpenDesktop] = useState(false);
   const [sortOpenMobile, setSortOpenMobile] = useState(false);
@@ -98,7 +99,8 @@ export default function StudentsList() {
     "https://ui-avatars.com/api/?name=Student&background=0D8ABC&color=fff";
 
   const dateDropdownRef = useRef(null);
-  const exportRef = useRef(null);
+  const exportRefDesktop = useRef(null);
+  const exportRefMobile = useRef(null);
   const sortRefDesktop = useRef(null);
   const sortRefMobile = useRef(null);
 
@@ -122,16 +124,21 @@ export default function StudentsList() {
         setDateOpen(false);
         setShowSession(false);
       }
-      if (exportRef.current && !exportRef.current.contains(e.target))
-        setExportOpen(false);
+       if (exportRefDesktop.current && !exportRefDesktop.current.contains(e.target)) {
+      setExportOpenDesktop(false);
+    }
+    // Mobile export
+    if (exportRefMobile.current && !exportRefMobile.current.contains(e.target)) {
+      setExportOpenMobile(false);
+    }
       if (
         sortRefDesktop.current &&
         !sortRefDesktop.current.contains(e.target)
       ) {
-        setSortOpen(false);
+        setSortOpenDesktop(false);
       }
       if (sortRefMobile.current && !sortRefMobile.current.contains(e.target)) {
-        setSortOpen(false);
+        setSortOpenMobile(false);
       }
       if (filterRef.current && !filterRef.current.contains(e.target))
         setFilterOpen(false);
@@ -376,16 +383,16 @@ export default function StudentsList() {
               />
             </div>
 
-            <div className="relative" ref={exportRef}>
+            <div className="relative" ref={exportRefDesktop}>
               <button
-                onClick={() => setExportOpen((prev) => !prev)}
+                onClick={() => setExportOpenDesktop((prev) => !prev)}
                 className={`flex items-center justify-between  px-3 h-8 text-xs w-28 border ${borderClr} ${inputBg}`}
               >
                 Export
               </button>
-              {exportOpen && (
+              {exportOpenDesktop && (
                 <div
-                  className={`absolute top-full left-0 mt-1 w-full z-40 border  ${
+                  className={`absolute top-full left-0 mt-2 w-full z-40 border  ${
                     darkMode
                       ? "bg-gray-800 border-gray-700 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
@@ -506,16 +513,16 @@ export default function StudentsList() {
             />
           </div>
 
-          <div className="relative w-full " ref={exportRef}>
+          <div className="relative w-full " ref={exportRefMobile}>
             <button
-              onClick={() => setExportOpen((prev) => !prev)}
+              onClick={() => setExportOpenMobile((prev) => !prev)}
               className={`w-full  flex items-center   px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
             >
               Export
             </button>
-            {exportOpen && (
+            {exportOpenMobile && (
               <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border   ${
+                className={`absolute top-full left-0 mt-2 w-full z-40 border   ${
                   darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-900"
@@ -624,19 +631,7 @@ export default function StudentsList() {
       </div>
 
       {/* ===== EDIT MODAL ===== */}
-      {editingStudent && (
-        <EditStudentModal
-          student={editingStudent}
-          onClose={() => setEditingStudent(null)}
-          onSave={(updated) => {
-            setStudents(
-              students.map((s) => (s.id === updated.id ? updated : s)),
-            );
-            setEditingStudent(null);
-          }}
-        />
-      )}
-
+     
       {/* ===== ADD MODAL ===== */}
       {canEdit && (
         <PageModal

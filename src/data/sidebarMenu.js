@@ -415,11 +415,11 @@ export const sidebarMenu = (role) => {
       children: [
         { title: "Class", path: "classlist" },
         { title: "Group", path: "grouplist" },
-        { title: "Section", path: "/academic/section" },
-        { title: "Session", path: "/academic/session" },
-        { title: "Subject", path: "/academic/subject" },
-        { title: "Syllabus", path: "/academic/syllabus" },
-        { title: "Class Routine", path: "/academic/routine" },
+        { title: "Section", path: "sectionlist" },
+        { title: "Session", path: "sessionlist" },
+        { title: "Subject", path: "subjectlist" },
+        { title: "Syllabus", path: "syllabus" },
+        { title: "Class Routine", path: "classroutine" },
       ],
     },
 
@@ -558,12 +558,12 @@ export const sidebarMenu = (role) => {
       children: [
         { title: "Exam Name", path: "examlist" },
         { title: "Exam Routine", path: "examroutine" },
-        { title: "Grade", path: "/exam/grade" },
-        { title: "Admit Card", path: "/exam/admit" },
-        { title: "Sit Number", path: "/exam/setnumber" },
+        { title: "Grade", path: "examgrade" },
+        { title: "Admit Card", path: "examadmit" },
+        { title: "Seat Number", path: "examsitnumber" },
 
-        { title: "Result Find", path: "/exam/result" },
-        { title: "Certificate", path: "/exam/certificate" },
+        { title: "Result Find", path: "examresult" },
+        { title: "Certificate", path: "examcertificate" },
       ],
     },
 

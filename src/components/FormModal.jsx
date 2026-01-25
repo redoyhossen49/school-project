@@ -6,6 +6,7 @@ export default function FormModal({
   fields = [],
   initialValues = {},
   onClose,
+  onValuesChange,
   onSubmit,
   darkMode = false,
 }) {
@@ -60,7 +61,7 @@ export default function FormModal({
         ];
         updated.examDay = days[dateObj.getDay()];
       }
-
+      onValuesChange?.(updated);
       return updated;
     });
   };
@@ -237,7 +238,11 @@ export default function FormModal({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setFormData((prev) => ({ ...prev, [activeField]: opt }));
+                      setFormData((prev) => {
+                        const updated = { ...prev, [activeField]: opt };
+                        onValuesChange?.(updated); // ✅ ADD
+                        return updated;
+                      });
                       setActiveField(null);
                     }}
                   >

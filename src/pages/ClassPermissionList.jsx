@@ -31,15 +31,26 @@ export default function ClassPermissionList() {
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
+  const [exportOpenDesktop, setExportOpenDesktop] = useState(false);
+const [exportOpenMobile, setExportOpenMobile] = useState(false);
+
   const [sectionOpen, setSectionOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const [sortOpenDesktop, setSortOpenDesktop] = useState(false);
+  const [sortOpenMobile, setSortOpenMobile] = useState(false);
+
   const [sortOrder, setSortOrder] = useState("asc");
   const [filterOpen, setFilterOpen] = useState(false);
 
   const sectionRef = useRef(null);
-  const exportRef = useRef(null);
-  const sortRef = useRef(null);
+  // Separate refs
+  const exportRefDesktop = useRef(null);
+  const exportRefMobile = useRef(null);
+
+  const sortRefDesktop = useRef(null);
+  const sortRefMobile = useRef(null);
+
   const filterRef = useRef(null);
 
   const normalize = (v) => (v ? v.toString().trim().toLowerCase() : "");
@@ -54,13 +65,30 @@ export default function ClassPermissionList() {
   // ===== Close dropdowns on outside click =====
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (sectionRef.current?.contains(e.target)) return;
-      if (filterRef.current?.contains(e.target)) return;
-      if (sortRef.current?.contains(e.target)) return;
+      // Desktop dropdown
+     if (exportRefDesktop.current && !exportRefDesktop.current.contains(e.target)) {
+      setExportOpenDesktop(false);
+    }
+    // Mobile export
+    if (exportRefMobile.current && !exportRefMobile.current.contains(e.target)) {
+      setExportOpenMobile(false);
+    }
 
-      setSectionOpen(false);
-      setFilterOpen(false);
-      setSortOpen(false);
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setFilterOpen(false);
+      }
+      if (
+        sortRefDesktop.current &&
+        !sortRefDesktop.current.contains(e.target)
+      ) {
+        setSortOpenDesktop(false);
+      }
+      if (sortRefMobile.current && !sortRefMobile.current.contains(e.target)) {
+        setSortOpenMobile(false);
+      }
+      if (sectionRef.current && !sectionRef.current.contains(e.target)) {
+        setSectionOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -271,25 +299,25 @@ export default function ClassPermissionList() {
               />
             </div>
 
-            <div className="relative w-28" ref={exportRef}>
+            <div className="relative w-28"  ref={exportRefDesktop}>
               <button
-                onClick={() => setExportOpen((p) => !p)}
+                onClick={() => setExportOpenDesktop((p) => !p)}
                 className={buttonClass}
               >
                 Export
               </button>
-              {exportOpen && (
+              {exportOpenDesktop && (
                 <div
                   className={`${
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-gray-100"
                       : "bg-white border-gray-200 text-gray-900"
-                  } absolute top-full left-0 mt-1 w-28  border md:z-50 `}
+                  } absolute top-full left-0 mt-2 w-28  border md:z-50 `}
                 >
-                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
+                  <button onClick={handleExportPDF}  className="w-full px-3 py-1 text-left text-xs hover:bg-blue-50">
                     PDF
                   </button>
-                  <button className="w-full px-3 py-1 text-left text-sm hover:bg-blue-50">
+                  <button onClick={handleExportExcel} className="w-full px-3 py-1 text-left text-xs hover:bg-blue-50">
                     Excel
                   </button>
                 </div>
@@ -304,21 +332,21 @@ export default function ClassPermissionList() {
                 Permission
               </button>
             ) : (
-              <div className="relative w-28" ref={sortRef}>
+              <div className="relative w-28" ref={sortRefDesktop}>
                 <button
-                  onClick={() => setSortOpen(!sortOpen)}
+                  onClick={() => setSortOpenDesktop((p) => !p)}
                   className={`flex items-center w-28 border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
                 >
                   Sort By
                 </button>
-                {sortOpen && (
+                {sortOpenDesktop && (
                   <div
                     className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
                   >
                     <button
                       onClick={() => {
-                        setSortOrder("oldest");
-                        setSortOpen(false);
+                        setSortOrder("asc");
+                        setSortOpenDesktop(false);
                       }}
                       className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                     >
@@ -326,8 +354,8 @@ export default function ClassPermissionList() {
                     </button>
                     <button
                       onClick={() => {
-                        setSortOrder("newest");
-                        setSortOpen(false);
+                        setSortOrder("desc");
+                        setSortOpenDesktop(false);
                       }}
                       className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                     >
@@ -389,14 +417,14 @@ export default function ClassPermissionList() {
             />
           </div>
 
-          <div className="relative" ref={exportRef}>
+          <div className="relative" ref={exportRefMobile}>
             <button
-              onClick={() => setExportOpen((p) => !p)}
+              onClick={() => setExportOpenMobile((p) => !p)}
               className={buttonClass + " w-full"}
             >
               Export
             </button>
-            {exportOpen && (
+            {exportOpenMobile && (
               <div
                 className={`${
                   darkMode
@@ -406,13 +434,13 @@ export default function ClassPermissionList() {
               >
                 <button
                   onClick={handleExportPDF}
-                  className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50"
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
                 >
                   PDF
                 </button>
                 <button
                   onClick={handleExportExcel}
-                  className="w-full px-3 h-6 text-left text-sm hover:bg-blue-50"
+                  className="w-full px-3 h-6 text-left text-xs hover:bg-blue-50"
                 >
                   Excel
                 </button>
@@ -427,21 +455,21 @@ export default function ClassPermissionList() {
               Permission
             </button>
           ) : (
-            <div className="relative w-full" ref={sortRef}>
+            <div className="relative w-full" ref={sortRefMobile}>
               <button
-                onClick={() => setSortOpen(!sortOpen)}
+                onClick={() => setSortOpenMobile((p) => !p)}
                 className={`flex items-center w-full border px-3 h-8 text-xs ${darkMode ? "border-gray-500 bg-gray-700 text-gray-100" : "border-gray-200 bg-white text-gray-800"}`}
               >
                 Sort By
               </button>
-              {sortOpen && (
+              {sortOpenMobile && (
                 <div
                   className={`absolute mt-2 w-full z-40 border ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100" : "bg-white border-gray-200 text-gray-900"} left-0`}
                 >
                   <button
                     onClick={() => {
-                      setSortOrder("oldest");
-                      setSortOpen(false);
+                      setSortOrder("asc");
+                      setSortOpenMobile(false);
                     }}
                     className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >
@@ -449,8 +477,8 @@ export default function ClassPermissionList() {
                   </button>
                   <button
                     onClick={() => {
-                      setSortOrder("newest");
-                      setSortOpen(false);
+                      setSortOrder("desc");
+                      setSortOpenMobile(false);
                     }}
                     className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
                   >

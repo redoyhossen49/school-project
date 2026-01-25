@@ -68,7 +68,7 @@ export default function ClassRoutineTable({ data = classRoutineData, setData }) 
               </th>
             ))}
             {showAction && (
-              <th className="h-8 px-3 text-left font-semibold whitespace-nowrap">
+              <th className="h-8 px-3 text-left font-semibold whitespace-nowrap md:w-18">
                 Action
               </th>
             )}

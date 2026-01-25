@@ -27,7 +27,15 @@ export default function SessionListPage() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
   const canEdit = localStorage.getItem("role") === "school";
-
+  const [formData, setFormData] = useState({
+    class: "",
+    group: "",
+    section: "",
+    sessionStart: "",
+    sessionEnd: "",
+    showSession: "",
+    totalDays: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("All");
@@ -198,7 +206,15 @@ export default function SessionListPage() {
       label: "Session",
       type: "text",
       placeholder: "Session Start - End",
-      disabled: true, // user cannot type, auto-update
+      readOnly: true,
+    },
+    {
+      key: "totalDays",
+      name: "totalDays",
+      label: "Total Days",
+      type: "number",
+      placeholder: "Total Days",
+      readOnly: true,
     },
   ];
 
@@ -209,39 +225,39 @@ export default function SessionListPage() {
     sessionStart: "",
     sessionEnd: "",
     showSession: "",
+    totalDays: "",
   };
-  const handleAddSession = (formData) => {
-    const startDate = new Date(formData.sessionStart);
-    const endDate = new Date(formData.sessionEnd);
 
-    const startYear = startDate.getFullYear();
-    const endYear = endDate.getFullYear();
-
-    // ✅ Total days calculation (inclusive)
-    const totalDays =
-      startDate && endDate && !isNaN(startDate) && !isNaN(endDate)
-        ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
-        : 0;
-
-    // ✅ showSession auto-update
-    const showSession = `${formData.sessionStart} - ${formData.sessionEnd}`;
+  const handleAddSession = (data) => {
+    const start = new Date(data.sessionStart);
+    const end = new Date(data.sessionEnd);
+    const totalDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    const startYear = start.getFullYear();
+    const endYear = end.getFullYear();
 
     const newSession = {
       sl: sessions.length + 1,
-      class: formData.class,
-      group: formData.group || "",
-      section: formData.section || "",
-      sessionStart: formData.sessionStart,
-      sessionEnd: formData.sessionEnd,
+      class: data.class,
+      group: data.group,
+      section: data.section,
+      sessionStart: data.sessionStart,
+      sessionEnd: data.sessionEnd,
       sessionYear: `${startYear}-${endYear}`,
-      totalDays: totalDays,
-      showSession: showSession,
+      totalDays: totalDays > 0 ? totalDays : 0,
+      showSession: `${data.sessionStart} - ${data.sessionEnd}`,
     };
 
-    // ✅ Add new session to state and reset modal/pagination
     setSessions((prev) => [...prev, newSession]);
     setAddSessionModalOpen(false);
-    setCurrentPage(1);
+    setFormData({
+      class: "",
+      group: "",
+      section: "",
+      sessionStart: "",
+      sessionEnd: "",
+      showSession: "",
+      totalDays: "",
+    });
   };
 
   // -------------------- Export Functions --------------------
@@ -309,7 +325,7 @@ export default function SessionListPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold">Session list</h2>
-            <p className="text-xs text-400">
+            <p className="text-xs text-gray-400">
               <Link to="/school/dashboard" className="hover:text-blue-700">
                 Dashboard
               </Link>{" "}
@@ -430,10 +446,34 @@ export default function SessionListPage() {
             <FormModal
               open={addSessionModalOpen}
               title="Add Session"
-              initialValues={initialValues}
+              initialValues={formData}
               onClose={() => setAddSessionModalOpen(false)}
               onSubmit={handleAddSession}
               fields={addSessionFields}
+              onValuesChange={(updatedFormData) => {
+                if (
+                  updatedFormData.sessionStart &&
+                  updatedFormData.sessionEnd
+                ) {
+                  const start = new Date(updatedFormData.sessionStart);
+                  const end = new Date(updatedFormData.sessionEnd);
+
+                  const diffTime = end - start;
+                  const diffDays =
+                    Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                  const startYear = start.getFullYear(); // 2025
+                  const endYearShort = String(end.getFullYear()).slice(-2); // 26
+
+                  setFormData({
+                    ...updatedFormData,
+                    showSession: `${startYear}-${endYearShort}`, // ✅ 2025-26
+                    totalDays: diffDays > 0 ? diffDays : 0,
+                  });
+                } else {
+                  setFormData(updatedFormData);
+                }
+              }}
             />
           </div>
         </div>
@@ -484,7 +524,7 @@ export default function SessionListPage() {
           </div>*/}
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:mt-0 w-full md:w-auto">
+          <div className="flex items-center gap-2 md:justify-between w-full ">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}

@@ -85,20 +85,20 @@ export default function ClassRoutinePage() {
     ),
   );
   const teacherOptions = Array.from(
-  new Set(classRoutineData.map((item) => item.teacher))
-)
-// -------------------- Dynamic Subject Options --------------------
-const getSubjectOptions = (selectedClass, selectedGroup, selectedSection) => {
-  return Array.from(
-    new Set(
-      classRoutineData
-        .filter(s => !selectedClass || s.class === selectedClass)
-        .filter(s => !selectedGroup || s.group === selectedGroup)
-        .filter(s => !selectedSection || s.section === selectedSection)
-        .map(s => s.subject)
-    )
+    new Set(classRoutineData.map((item) => item.teacher)),
   );
-};
+  // -------------------- Dynamic Subject Options --------------------
+  const getSubjectOptions = (selectedClass, selectedGroup, selectedSection) => {
+    return Array.from(
+      new Set(
+        classRoutineData
+          .filter((s) => !selectedClass || s.class === selectedClass)
+          .filter((s) => !selectedGroup || s.group === selectedGroup)
+          .filter((s) => !selectedSection || s.section === selectedSection)
+          .map((s) => s.subject),
+      ),
+    );
+  };
 
   const filterFields = [
     {
@@ -154,45 +154,98 @@ const getSubjectOptions = (selectedClass, selectedGroup, selectedSection) => {
     const id = routineData.length + 1;
     setRoutineData([...routineData, { id, ...newRoutine }]);
   };
-const weekDays = ["Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const weekDays = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
 
- const routineFields = [
-  { key: "class", name: "class", label: "Class", type: "select", required: true, options: classOptions, placeholder: "Select Class" },
-  { key: "group", name: "group", label: "Group", type: "select", required: false, options: groupOptions, placeholder: "Select Group" },
-  { key: "section", name: "section", label: "Section", type: "select", required: false, options: sectionOptions, placeholder: "Select Section" },
-  { key: "teacher", name: "teacher", label: "Teacher", type: "select", required: true, options: teacherOptions, placeholder: "Select Teacher" },
-   {
-    key: "subject",
-    name: "subject",
-    label: "Subject",
-    type: "select",
-    required: true,
-    options: getSubjectOptions(filters.class, filters.group, filters.section), // dynamic
-    placeholder: "Select Subject",
-  },
-  { key: "classStartTime", name: "classStartTime", label: "Class Start Time",  type:"time", required: true, placeholder: "Start time" },
-  { key: "classEndTime", name: "classEndTime", label: "Class End Time", type: "time", required: true, placeholder: "End  time" },
-  {
-  key: "dayStart",
-  name: "dayStart",
-  label: "Day Start",
-  type: "select", // ✅ select type
-  required: true,
-  placeholder: "Select start day",
-  options: weekDays, // ✅ dropdown options
-},
-{
-  key: "dayEnd",
-  name: "dayEnd",
-  label: "Day End",
-  type: "select", // ✅ select type
-  required: true,
-  placeholder: "Select end day",
-  options: weekDays, // ✅ dropdown options
-},
-
-];
-
+  const routineFields = [
+    {
+      key: "class",
+      name: "class",
+      label: "Class",
+      type: "select",
+      required: true,
+      options: classOptions,
+      placeholder: "Select Class",
+    },
+    {
+      key: "group",
+      name: "group",
+      label: "Group",
+      type: "select",
+      required: false,
+      options: groupOptions,
+      placeholder: "Select Group",
+    },
+    {
+      key: "section",
+      name: "section",
+      label: "Section",
+      type: "select",
+      required: false,
+      options: sectionOptions,
+      placeholder: "Select Section",
+    },
+    {
+      key: "teacher",
+      name: "teacher",
+      label: "Teacher",
+      type: "select",
+      required: true,
+      options: teacherOptions,
+      placeholder: "Select Teacher",
+    },
+    {
+      key: "subject",
+      name: "subject",
+      label: "Subject",
+      type: "select",
+      required: true,
+      options: getSubjectOptions(filters.class, filters.group, filters.section), // dynamic
+      placeholder: "Select Subject",
+    },
+    {
+      key: "classStartTime",
+      name: "classStartTime",
+      label: "Class Start Time",
+      type: "time",
+      required: true,
+      placeholder: "Start time",
+    },
+    {
+      key: "classEndTime",
+      name: "classEndTime",
+      label: "Class End Time",
+      type: "time",
+      required: true,
+      placeholder: "End  time",
+    },
+    {
+      key: "dayStart",
+      name: "dayStart",
+      label: "Day Start",
+      type: "select", // ✅ select type
+      required: true,
+      placeholder: "Select start day",
+      options: weekDays, // ✅ dropdown options
+    },
+    {
+      key: "dayEnd",
+      name: "dayEnd",
+      label: "Day End",
+      type: "select", // ✅ select type
+      required: true,
+      placeholder: "Select end day",
+      options: weekDays, // ✅ dropdown options
+    },
+  ];
 
   const exportExcel = (data) => {
     if (!data.length) return;
@@ -285,17 +338,17 @@ const weekDays = ["Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday
     setTimeStart(""); // reset Start Time
     setTimeEnd(""); // reset End Time
   };
-const initialRoutineValues = {
-  class: "",
-  group: "",
-  section: "",
-  subject: "",
-  teacher: "",
-  classStartTime: "",
-  classEndTime: "",
-  dayStart: "",
-  dayEnd: "",
-};
+  const initialRoutineValues = {
+    class: "",
+    group: "",
+    section: "",
+    subject: "",
+    teacher: "",
+    classStartTime: "",
+    classEndTime: "",
+    dayStart: "",
+    dayEnd: "",
+  };
 
   // ===================== RENDER =====================
   return (
@@ -319,7 +372,7 @@ const initialRoutineValues = {
 
           {/* -------------------- 1st row: Refresh | Export | Add Routine -------------------- */}
           <div className="grid grid-cols-3 gap-2">
-             {/* Filter */}
+            {/* Filter */}
             <div ref={filterRef} className="relative ">
               <button
                 onClick={() => setFilterOpen((prev) => !prev)}
@@ -327,7 +380,7 @@ const initialRoutineValues = {
                   darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
                 }`}
               >
-                Filter 
+                Filter
               </button>
 
               <FilterDropdown
@@ -357,37 +410,80 @@ const initialRoutineValues = {
                   darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
                 }`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full border  ${
-                    darkMode ? "border-gray-500 bg-gray-700" : "border-gray-300"
-                  }`}
+                  className={`absolute mt-2 w-full z-40 border  ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "bg-white border-gray-200 text-gray-900"
+                    }  left-0`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
-                    className="block w-full px-3 py-1text-left text-xs hover:bg-blue-50"
+                    className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                   PDF
+                    PDF
                   </button>
                   <button
                     onClick={() => exportExcel(filteredData)}
                     className="block w-full px-3 py-1 text-left text-xs hover:bg-blue-50"
                   >
-                 Excel
+                    Excel
                   </button>
                 </div>
               )}
             </div>
 
-            {canEdit && (
+            {canEdit ? (
               <button
                 onClick={() => setAddRoutineOpen(true)}
                 className="w-full flex items-center   bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Routine
               </button>
+            ) : (
+              <div className="relative flex-1 " ref={sortRef}>
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`flex items-center  md:w-28  w-full  border  px-3 h-8 text-xs   ${
+                    darkMode
+                      ? "border-gray-500 bg-gray-700 text-gray-100"
+                      : "border-gray-200 bg-white text-gray-800"
+                  }`}
+                >
+                  Sort By
+                </button>
+                {sortOpen && (
+                  <div
+                    className={`absolute mt-2 w-full z-40 border  ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700 text-gray-100"
+                        : "bg-white border-gray-200 text-gray-900"
+                    }  left-0`}
+                  >
+                    <button
+                      onClick={() => {
+                        setSortOrder("asc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSortOrder("desc");
+                        setSortOpen(false);
+                      }}
+                      className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                    >
+                      Last
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
             <FormModal
               open={addRoutineOpen}
@@ -405,11 +501,7 @@ const initialRoutineValues = {
 
         {/* -------------------- 2nd row: All | Filter | Sort -------------------- */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 ">
-         
-
-           
-
-            {/* Sort 
+          {/* Sort 
            <div className="relative flex-1 " ref={sortRef}>
               <button
                 onClick={() => setSortOpen(!sortOpen)}
@@ -453,7 +545,7 @@ const initialRoutineValues = {
           </div> */}
 
           {/* -------------------- 3rd row: Search + Pagination -------------------- */}
-          <div className="flex items-center md:justify-between gap-2">
+          <div className="flex items-center md:justify-between gap-2 w-full">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}

@@ -68,7 +68,7 @@ export default function SessionTable({ data = [], setData, month }) {
               </th>
             ))}
             {showAction && (
-              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
+              <th className="px-3 h-8 text-left font-semibold whitespace-nowrap md:w-18">
                 Action
               </th>
             )}

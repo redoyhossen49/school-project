@@ -99,7 +99,7 @@ export default function ReusableTable({
 
                 {showAction && (
                   <td
-                    className={`h-8 px-3 border-r ${borderCol} whitespace-nowrap`}
+                    className={`h-8 px-3 border-r ${borderCol} whitespace-nowrap md:w-18`}
                   >
                     <div className="flex items-center gap-1 h-full">
                       <ReusableActions

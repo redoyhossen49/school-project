@@ -451,7 +451,7 @@ export default function SubjectListPage() {
           </div>*/}
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="flex items-center gap-2 w-full md:justify-between">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
