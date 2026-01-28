@@ -46,7 +46,7 @@ export default function ClassTimeTable({ data = classTimeData, setData }) {
           : "bg-white text-gray-900 border-gray-200"
       }`}
     >
-      <table className="w-full table-auto border-collapse text-xs md:text-sm">
+      <table className="w-full table-auto border-collapse text-xs ">
         <thead
           className={`${
             darkMode

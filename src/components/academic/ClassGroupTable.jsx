@@ -29,11 +29,11 @@ export default function ClassGroupTable({
           ? {
               ...c,
               groups: c.groups.map((g) =>
-                g.name === selectedRow.groupName ? { ...g, ...updatedData } : g
+                g.name === selectedRow.groupName ? { ...g, ...updatedData } : g,
               ),
             }
-          : c
-      )
+          : c,
+      ),
     );
     setEditModalOpen(false);
   };
@@ -44,8 +44,8 @@ export default function ClassGroupTable({
         prev.map((c) =>
           c.sl === row.classSl
             ? { ...c, groups: c.groups.filter((g) => g.name !== row.groupName) }
-            : c
-        )
+            : c,
+        ),
       );
       alert("Group deleted successfully ✅");
     }
@@ -63,21 +63,47 @@ export default function ClassGroupTable({
         {/* ================= HEADER ================= */}
         <thead className={`${bgHeader} border-b ${borderCol}`}>
           <tr>
-            <th className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}>SL</th>
-            <th className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}>Class</th>
-            <th className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}>Group</th>
-            <th className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}>Subjects</th>
-            <th className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}>Students</th>
+            <th
+              className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}
+            >
+              Sl
+            </th>
+            <th
+              className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}
+            >
+              Class
+            </th>
+            <th
+              className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}
+            >
+              Group
+            </th>
+            <th
+              className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}
+            >
+              Subjects
+            </th>
+            <th
+              className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}
+            >
+              Students
+            </th>
 
             {isSchool && (
               <>
-                <th className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}>
-                  Total Payable
+                <th
+                  className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}
+                >
+                  Total payable
                 </th>
-                <th className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}>
-                  Payable Due
+                <th
+                  className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol} ${textHeader}`}
+                >
+                  Payable due
                 </th>
-                <th className={`px-3 h-8 text-left whitespace-nowrap md:w-18 ${textHeader}`}>
+                <th
+                  className={`px-3 h-8 text-left whitespace-nowrap md:w-18 ${textHeader}`}
+                >
                   Action
                 </th>
               </>
@@ -98,81 +124,86 @@ export default function ClassGroupTable({
             </tr>
           ) : (
             data.map((c) =>
-              c.groups
-                .filter((g) => !groupFilter || g.name === groupFilter)
-                .map((g) => {
-                  const monthData =
-                    month === "All"
-                      ? {
-                          paid: g.monthly.reduce((a, b) => a + b.paid, 0),
-                          due: g.monthly.reduce((a, b) => a + b.due, 0),
-                        }
-                      : g.monthly.find((m) => m.month === month) || {
-                          paid: 0,
-                          due: 0,
-                        };
+              c.groups.map((g) => {
+                const monthData =
+                  month === "All"
+                    ? {
+                        paid: g.monthly.reduce((a, b) => a + b.paid, 0),
+                        due: g.monthly.reduce((a, b) => a + b.due, 0),
+                      }
+                    : g.monthly.find((m) => m.month === month) || {
+                        paid: 0,
+                        due: 0,
+                      };
 
-                  const totalPayable =
-                    month === "All"
-                      ? g.totalPayable
-                      : monthData.paid + monthData.due;
-
-                  const payableDue =
-                    month === "All"
-                      ? g.monthly.reduce((a, b) => a + b.due, 0)
-                      : monthData.due;
-
-                  const rowData = {
-                    classSl: c.sl,
-                    groupName: g.name,
-                    subjects: g.subjects,
-                    totalStudents: g.totalStudents,
-                    totalPayable,
-                    payableDue,
-                  };
-
-                  return (
-                    <tr
-                      key={`${c.sl}-${g.name}`}
-                      className={`border-b ${borderCol} ${hoverRow}`}
+                return (
+                  <tr
+                    key={`${c.sl}-${g.name}`}
+                    className={`border-b ${borderCol} ${hoverRow}`}
+                  >
+                    <td
+                      className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}
                     >
-                      <td className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}>{c.sl}</td>
-                      <td className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}>{c.class}</td>
-                      <td className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}>{g.name}</td>
-                      <td className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}>{g.subjects}</td>
-                      <td className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}>{g.totalStudents}</td>
+                      {c.sl}
+                    </td>
+                    <td
+                      className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}
+                    >
+                      {c.class}
+                    </td>
+                    <td
+                      className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}
+                    >
+                      {g.name}
+                    </td>
+                    <td
+                      className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}
+                    >
+                      {g.subjects}
+                    </td>
+                    <td
+                      className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}
+                    >
+                      {g.totalStudents}
+                    </td>
 
-                      {isSchool && (
-                        <>
-                          <td className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}>
-                            ৳{totalPayable}
-                          </td>
+                    {isSchool && (
+                      <>
+                        <td
+                          className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}
+                        >
+                          ৳{totalPayable}
+                        </td>
 
-                          <td className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}>
-                            {payableDue === 0 ? (
-                              <span className="text-green-600 font-semibold">Paid</span>
-                            ) : (
-                              <span className="text-red-600 font-semibold">
-                                ৳{payableDue}
-                              </span>
-                            )}
-                          </td>
+                        <td
+                          className={`px-3 h-8 text-left whitespace-nowrap border-r ${borderCol}`}
+                        >
+                          {payableDue === 0 ? (
+                            <span className="text-green-600 font-semibold">
+                              Paid
+                            </span>
+                          ) : (
+                            <span className="text-red-600 font-semibold">
+                              ৳{payableDue}
+                            </span>
+                          )}
+                        </td>
 
-                          <td className="px-3 h-8 text-left whitespace-nowrap">
-                            <ReusableActions
-                              item={rowData}
-                              onEdit={(row) => {
-                                setSelectedRow(row);
-                                setEditModalOpen(true);
-                              }}
-                              onDelete={handleDelete}
-                            />
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  );
-                })
+                        <td className="px-3 h-8 text-left whitespace-nowrap">
+                          <ReusableActions
+                            item={rowData}
+                            onEdit={(row) => {
+                              setSelectedRow(row);
+                              setEditModalOpen(true);
+                            }}
+                            onDelete={handleDelete}
+                          />
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                );
+              }),
             )
           )}
         </tbody>
@@ -187,7 +218,12 @@ export default function ClassGroupTable({
           onClose={() => setEditModalOpen(false)}
           onSubmit={handleEditSubmit}
           fields={[
-            { name: "groupName", label: "Group Name", type: "text", required: true },
+            {
+              name: "groupName",
+              label: "Group Name",
+              type: "text",
+              required: true,
+            },
             { name: "subjects", label: "Subjects", type: "number" },
             { name: "totalStudents", label: "Total Students", type: "number" },
             { name: "totalPayable", label: "Total Payable", type: "number" },

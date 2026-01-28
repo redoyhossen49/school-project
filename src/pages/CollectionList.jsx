@@ -81,7 +81,17 @@ export default function CollectionList() {
     group: "",
     section: "",
     session: "",
+    studentId: "",
   });
+  const [studentFound, setStudentFound] = useState(false);
+  const [formData, setFormData] = useState({
+    student_id: "",
+    class: "",
+    group: "",
+    section: "",
+    session: "",
+  });
+
   const [editingCollection, setEditingCollection] = useState(null);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [showFindModal, setShowFindModal] = useState(false);
@@ -118,13 +128,18 @@ export default function CollectionList() {
         c.group?.toLowerCase().includes(search.toLowerCase()) ||
         c.fees_type?.toLowerCase().includes(search.toLowerCase()),
     )
+
     .filter((c) => {
       // Regular filters
       if (filters.className && c.class !== filters.className) return false;
       if (filters.group && c.group !== filters.group) return false;
       if (filters.section && c.section !== filters.section) return false;
       if (filters.session && c.session !== filters.session) return false;
-
+      if (
+        filters.studentId &&
+        !String(c.student_id).includes(filters.studentId)
+      )
+        return false;
       // Find modal filters (Paid/Due) - only apply when Finding button is clicked
       if (appliedFindFilterType === "Paid") {
         if ((c.total_due || 0) !== 0) return false;
@@ -723,22 +738,6 @@ export default function CollectionList() {
     setSelectedCollections([]);
   };
 
-  const handleRefresh = async () => {
-    try {
-      const data = await getCollectionsAPI();
-      setCollections(data);
-    } catch (error) {
-      console.error("Error refreshing collections:", error);
-      setCollections(collectionData);
-    }
-    setSearch("");
-    setFilters({ className: "", group: "", section: "", session: "" });
-    setSortOrder("newest");
-    setFindFilterType("");
-    setAppliedFindFilterType("");
-    setCurrentPage(1);
-  };
-
   // Generate dynamic options from collectionData
   const getUniqueOptions = (data, key) => {
     return Array.from(new Set(data.map((item) => item[key]))).filter(Boolean);
@@ -1067,6 +1066,7 @@ export default function CollectionList() {
     const { darkMode } = useTheme();
     const [isModalClosing, setIsModalClosing] = useState(false);
     const [isModalOpening, setIsModalOpening] = useState(false);
+    const [studentFound, setStudentFound] = useState(false);
 
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split("T")[0];
@@ -1233,6 +1233,20 @@ export default function CollectionList() {
           session: "",
         }));
       }
+    }, [formData.student_id]);
+    useEffect(() => {
+      if (!formData.student_id) {
+        setStudentFound(false);
+        return;
+      }
+
+      const typedId = formData.student_id.trim().toUpperCase();
+
+      const studentExists = collectionData.some(
+        (item) => item.student_id.toUpperCase() === typedId,
+      );
+
+      setStudentFound(studentExists);
     }, [formData.student_id]);
 
     // Calculate fees amounts based on selected fees types
@@ -1515,14 +1529,14 @@ export default function CollectionList() {
     return (
       <>
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-6 transition-opacity duration-300 ${
             isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
           }`}
           onClick={handleClose}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`${modalBg} ${textColor} w-full max-w-[320px] border ${borderClr} p-6 max-h-[550px] overflow-y-auto transition-all duration-300 transform ${
+            className={`${modalBg} ${textColor} w-72 border ${borderClr} p-6 rounded max-h-[550px] overflow-y-auto transition-all duration-300 transform ${
               isModalOpening && !isModalClosing
                 ? "scale-100 opacity-100 translate-y-0"
                 : "scale-95 opacity-0 translate-y-4"
@@ -1543,60 +1557,41 @@ export default function CollectionList() {
                 type="text"
               />
 
-              {/* Class */}
-              <Input
-                label="Class"
-                name="class"
-                value={formData.class}
-                onChange={handleChange}
-                type="text"
-                readOnly
-                inputClassName={`${readOnlyBg} cursor-not-allowed`}
-              />
+              {studentFound && (
+                <div className="space-y-4 py-2">
+                  <Input
+                    label="Class"
+                    name="class"
+                    value={formData.class}
+                    onChange={handleChange}
+                    type="text"
+                  />
 
-              {/* Group */}
-              <Input
-                label="Group"
-                name="group"
-                value={formData.group}
-                onChange={handleChange}
-                type="text"
-                readOnly
-                inputClassName={`${readOnlyBg} cursor-not-allowed`}
-              />
+                  <Input
+                    label="Group"
+                    name="group"
+                    value={formData.group}
+                    onChange={handleChange}
+                    type="text"
+                  />
 
-              {/* Section */}
-              <Input
-                label="Section"
-                name="section"
-                value={formData.section}
-                onChange={handleChange}
-                type="text"
-                readOnly
-                inputClassName={`${readOnlyBg} cursor-not-allowed`}
-              />
+                  <Input
+                    label="Section"
+                    name="section"
+                    value={formData.section}
+                    onChange={handleChange}
+                    type="text"
+                  />
 
-              {/* Session */}
-              <Input
-                label="Session"
-                name="session"
-                value={formData.session}
-                onChange={handleChange}
-                type="text"
-                readOnly
-                inputClassName={`${readOnlyBg} cursor-not-allowed`}
-              />
-
-              {/* Student Name */}
-              <Input
-                label="Student Name"
-                name="student_name"
-                value={formData.student_name}
-                onChange={handleChange}
-                type="text"
-                readOnly
-                inputClassName={`${readOnlyBg} cursor-not-allowed`}
-              />
+                  <Input
+                    label="Session"
+                    name="session"
+                    value={formData.session}
+                    onChange={handleChange}
+                    type="text"
+                  />
+                </div>
+              )}
 
               {/* SELECT FEES TYPE - Table Format */}
               <div className="relative w-full">
@@ -1683,7 +1678,7 @@ export default function CollectionList() {
                                 </div>
                               </div>
                               <label
-                                className={`text-sm cursor-pointer ${
+                                className={`text-xs cursor-pointer ${
                                   darkMode ? "text-gray-200" : "text-gray-700"
                                 }`}
                                 onClick={(e) => {
@@ -1698,7 +1693,7 @@ export default function CollectionList() {
 
                           {/* Payable Column */}
                           <td
-                            className={`border-r ${borderClr} text-sm text-right py-2 px-2 ${
+                            className={`border-r ${borderClr} text-xs py-2 px-2 ${
                               darkMode ? "text-gray-200" : "text-gray-700"
                             }`}
                           >
@@ -1707,7 +1702,7 @@ export default function CollectionList() {
 
                           {/* Due Column */}
                           <td
-                            className={`text-sm text-right py-2 px-2 ${
+                            className={`text-xs py-2 px-2 ${
                               hasDue
                                 ? darkMode
                                   ? "text-red-400"
@@ -1717,7 +1712,7 @@ export default function CollectionList() {
                                   : "text-gray-500"
                             }`}
                           >
-                            <div className="flex items-center justify-end gap-1">
+                            <div className="flex items-center  gap-1">
                               <span>{dueAmount.toFixed(0)}</span>
                             </div>
                           </td>
@@ -2011,125 +2006,6 @@ export default function CollectionList() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-28 flex items-center border ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-200"
-              } px-3 h-8 text-xs`}
-            >
-              Refresh
-            </button>
-
-            <div className="relative" ref={exportRef}>
-              <button
-                onClick={() => setExportOpen((prev) => !prev)}
-                className={`w-28 flex items-center border ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-500"
-                    : "bg-white border-gray-200"
-                } px-3 h-8 text-xs`}
-              >
-                Export
-              </button>
-              {exportOpen && (
-                <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  ${
-                    darkMode
-                      ? "bg-gray-800 border-gray-700 text-gray-100"
-                      : "bg-white border-gray-200 text-gray-900"
-                  }`}
-                >
-                  <button
-                    onClick={() => exportPDF(filteredCollections)}
-                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
-                  >
-                    Export PDF
-                  </button>
-                  <button
-                    onClick={() => exportExcel(filteredCollections)}
-                    className="w-full px-3 h-8 text-left text-sm hover:bg-gray-100"
-                  >
-                    Export Excel
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {canEdit && (
-              <button
-                onClick={() => setShowCollectionModal(true)}
-                className="w-28 flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
-              >
-                Collection
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Buttons */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={handleRefresh}
-            className={`w-full flex items-center gap-2 border ${
-              darkMode
-                ? "bg-gray-700 border-gray-500"
-                : "bg-white border-gray-200"
-            } px-3 h-8 text-xs`}
-          >
-            Refresh
-          </button>
-
-          <div className="relative w-full" ref={exportRef}>
-            <button
-              onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full flex items-center border ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-200"
-              } px-3 h-8 text-xs`}
-            >
-              Export
-            </button>
-            {exportOpen && (
-              <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border  ${
-                  darkMode
-                    ? "bg-gray-800 border-gray-700 text-gray-100"
-                    : "bg-white border-gray-200 text-gray-900"
-                }`}
-              >
-                <button
-                  onClick={() => exportPDF(filteredCollections)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
-                >
-                  PDF
-                </button>
-                <button
-                  onClick={() => exportExcel(filteredCollections)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
-                >
-                  Excel
-                </button>
-              </div>
-            )}
-          </div>
-
-          {canEdit && (
-            <button
-              onClick={() => setShowCollectionModal(true)}
-              className="w-full flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
-            >
-              Collection
-            </button>
-          )}
-        </div>
-
-        {/* Filters + Search */}
-        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2">
-          <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
-            {/* Find Button */}
             <div className="relative flex-1 md:flex-none">
               <button
                 onClick={() => setShowFindModal(true)}
@@ -2183,6 +2059,12 @@ export default function CollectionList() {
                     options: sessionOptions,
                     placeholder: "Select Session",
                   },
+                  {
+                    key: "studentId",
+                    label: "Student ID",
+                    type: "text", // 🔥 important
+                    placeholder: "Enter Student ID",
+                  },
                 ]}
                 selected={filters}
                 setSelected={setFilters}
@@ -2194,57 +2076,109 @@ export default function CollectionList() {
               />
             </div>
 
-            {/* Sort Dropdown */}
-            <div className="relative flex-1 md:flex-none" ref={sortRef}>
+            {canEdit && (
               <button
-                onClick={() => setSortOpen((prev) => !prev)}
-                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
-                    : "bg-white border-gray-300 hover:bg-gray-100"
-                }`}
+                onClick={() => setShowCollectionModal(true)}
+                className="w-28 flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
               >
-                Sort By
+                Collection
               </button>
-              {sortOpen && (
-                <div
-                  className={`absolute left-0 mt-2 md:w-36 z-40 w-full border ${
-                    darkMode
-                      ? "bg-gray-800 text-gray-100 border-gray-700"
-                      : "bg-white text-gray-900 border-gray-200"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setSortOrder("newest");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
-                  >
-                    First
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOrder("oldest");
-                      setSortOpen(false);
-                    }}
-                    className="w-full px-3 h-6 text-xs text-left hover:bg-gray-100"
-                  >
-                    Last
-                  </button>
-                </div>
-              )}
-            </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Buttons */}
+        <div className="grid grid-cols-3 gap-2 md:hidden">
+          <div className="relative flex-1 md:flex-none">
+            <button
+              onClick={() => setShowFindModal(true)}
+              className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                  : "bg-white border-gray-300 hover:bg-gray-100"
+              }`}
+            >
+              Find
+            </button>
           </div>
 
+          {/* Filter Button */}
+          <div className="relative flex-1 md:flex-none" ref={filterRef}>
+            <button
+              onClick={() => setFilterOpen((prev) => !prev)}
+              className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                  : "bg-white border-gray-300 hover:bg-gray-100"
+              }`}
+            >
+              Filter
+            </button>
+
+            <FilterDropdown
+              title="Filter Collections"
+              fields={[
+                {
+                  key: "className",
+                  label: "Class",
+                  options: classOptions,
+                  placeholder: "Select Class",
+                },
+                {
+                  key: "group",
+                  label: "Group",
+                  options: groupOptions,
+                  placeholder: "Select Group",
+                },
+                {
+                  key: "section",
+                  label: "Section",
+                  options: sectionOptions,
+                  placeholder: "Select Section",
+                },
+                {
+                  key: "session",
+                  label: "Session",
+                  options: sessionOptions,
+                  placeholder: "Select Session",
+                },
+                {
+                  key: "studentId",
+                  label: "Student ID",
+                  type: "text", // 🔥 important
+                  placeholder: "Enter Student ID",
+                },
+              ]}
+              selected={filters}
+              setSelected={setFilters}
+              darkMode={darkMode}
+              isOpen={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              onApply={() => setCurrentPage(1)}
+              buttonRef={filterRef}
+            />
+          </div>
+
+          {canEdit && (
+            <button
+              onClick={() => setShowCollectionModal(true)}
+              className="w-full flex items-center bg-blue-600 px-3 h-8 text-xs text-white"
+            >
+              Collection
+            </button>
+          )}
+        </div>
+
+        {/* Filters + Search */}
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2">
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-96 md:mt-0">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:justify-between md:mt-0">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by student id, class, fees type..."
-              className={`w-full px-3 h-8 text-xs border ${
+              className={`w-full md:w-64 px-3 h-8 text-xs border ${
                 darkMode
                   ? "border-gray-500 bg-gray-700 text-gray-100 placeholder:text-gray-400"
                   : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400"
@@ -2268,7 +2202,10 @@ export default function CollectionList() {
         {/* Download Button - Always Visible */}
         <div className="mb-3 flex items-center gap-2">
           <button
-            onClick={handleDownloadMultipleSlips}
+            onClick={() => {
+              alert("CLICKED");
+              handleDownloadMultipleSlips();
+            }}
             disabled={selectedCollections.length === 0}
             className={`px-4 h-8 text-[12px] font-medium rounded transition-colors ${
               selectedCollections.length > 0

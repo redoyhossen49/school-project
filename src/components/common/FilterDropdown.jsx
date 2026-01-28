@@ -72,7 +72,7 @@ export default function FilterDropdown({
         <div
           ref={containerRef}
           onMouseDown={(e) => e.stopPropagation()}
-          className={`relative w-64 max-w-md rounded border  p-5
+          className={`relative w-64 min-h-[35vh]  max-w-md rounded border  p-6
             ${
               darkMode
                 ? "bg-gray-800 text-gray-100 border-gray-600"
@@ -80,7 +80,7 @@ export default function FilterDropdown({
             }`}
         >
           {/* Title */}
-          <h3 className="text-sm text-center font-semibold mb-4">{title}</h3>
+          <h3 className="text-sm text-center font-semibold my-3">{title}</h3>
 
           {/* Fields */}
           <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
@@ -127,7 +127,7 @@ export default function FilterDropdown({
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 my-4">
             <button
               type="button"
               onClick={() => {
@@ -188,7 +188,7 @@ export default function FilterDropdown({
                     : "bg-white border-gray-300 text-gray-900"
                 }`}
               >
-                <ul className="flex flex-col text-sm">
+                <ul className="flex flex-col text-xs">
                   <li>
                     <button
                       type="button"

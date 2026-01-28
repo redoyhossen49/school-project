@@ -24,13 +24,14 @@ export default function Examlist() {
     group: "",
     section: "",
   });
-  const [classData, setClassData] = useState(examData);
+  const [examList, setExamList] = useState(examData);
+ 
   const [addClassOpen, setAddClassOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("All");
+ 
   const [classFilter, setClassFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("newest");
+  const [sortOrder, setSortOrder] = useState("oldest");
   const [sortOpen, setSortOpen] = useState(false);
 
   // -------------------- Dropdowns --------------------
@@ -63,21 +64,7 @@ export default function Examlist() {
   const filterRef = useRef(null);
   const statusRef = useRef(null);
   const sortRef = useRef(null);
-  const months = [
-    "All",
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+
 
   const classOptions = Array.from(new Set(examData.map((c) => c.Class)));
 
@@ -134,6 +121,12 @@ export default function Examlist() {
     },
   ];
 
+  // -------------------- State --------------------
+  const [addExamOpen, setAddExamOpen] = useState(false); // Add Exam modal
+  const [selectedExam, setSelectedExam] = useState(null); // For editing if needed
+
+  // -------------------- Handle Add Exam --------------------
+
   // -------------------- Outside Click --------------------
   useEffect(() => {
     const handler = (e) => {
@@ -165,50 +158,44 @@ export default function Examlist() {
 
   // -------------------- Filter + Sort + Search --------------------
   const filteredData = useMemo(() => {
-    let data = examData
+    return examList
       .filter((item) => (classFilter ? item.Class === classFilter : true))
       .filter((item) => (groupFilter ? item.Group === groupFilter : true))
       .filter((item) => (sectionFilter ? item.Section === sectionFilter : true))
       .filter((item) => (sessionFilter ? item.Session === sessionFilter : true))
       .filter((item) => (examFilter ? item["Exam Name"] === examFilter : true))
       .filter((item) =>
-        statusFilter && statusFilter !== "All"
-          ? item.Status === statusFilter
-          : true,
+        statusFilter && statusFilter !== "All" ? item.Status === statusFilter : true
       )
       .filter((item) =>
-        search
-          ? item["Exam Name"].toLowerCase().includes(search.toLowerCase())
-          : true,
-      );
-
-    // Sort by SL
-    data.sort((a, b) => (sortOrder === "newest" ? b.SL - a.SL : a.SL - b.SL));
-
-    return data;
+        search ? item["Exam Name"].toLowerCase().includes(search.toLowerCase()) : true
+      )
+      .sort((a, b) => a.SL - b.SL);
   }, [
+    examList,
     classFilter,
     groupFilter,
+    sectionFilter,
     sessionFilter,
     examFilter,
     statusFilter,
     search,
-    sortOrder,
   ]);
+
 
   // -------------------- Pagination --------------------
   const perPage = 20;
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / perPage));
+ const totalPages = Math.max(1, Math.ceil(filteredData.length / perPage));
 
   // Auto-adjust currentPage if filteredData shrinks
-  useEffect(() => {
+ useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
     if (currentPage < 1) setCurrentPage(1);
-  }, [totalPages, currentPage]);
+  }, [currentPage, totalPages]);
 
   const currentData = filteredData.slice(
     (currentPage - 1) * perPage,
-    currentPage * perPage,
+    currentPage * perPage
   );
 
   const exportExcel = (data) => {
@@ -276,36 +263,47 @@ export default function Examlist() {
 
     doc.save("ExamList.pdf");
   };
+  const editExamFields = [
+    { name: "Class", label: "Class", type: "text", required: true },
+    { name: "Group", label: "Group", type: "text" },
+    { name: "Section", label: "Section", type: "text" },
+    { name: "Session", label: "Session", type: "text" },
+    { name: "Exam Name", label: "Exam Name", type: "text", required: true },
+    { name: "Total Exam", label: "Total Exam", type: "number" },
+    { name: "Upcoming Exam Fee", label: "Upcoming Exam Fee", type: "number" },
+    { name: "Exam Fee Due", label: "Exam Fee Due", type: "number" },
+  ];
+
   const addExamFields = [
     {
       key: "class",
       type: "select",
-      placeholder: "Select Class",
+      placeholder: "Select class",
       options: classOptions,
     },
     {
       key: "group",
       type: "select",
-      placeholder: "Select Group",
-      options: groupOptions, // class অনুযায়ী পরে set করবে
+      placeholder: "Select group",
+      options: groupOptions,
     },
     {
       key: "section",
       type: "select",
-      placeholder: "Select Section",
-      options: sectionOptions, // class + group অনুযায়ী পরে set করবে
+      placeholder: "Select section",
+      options: sectionOptions,
     },
     {
       key: "session",
       type: "select",
-      placeholder: "Select Session",
+      placeholder: "Select session",
       options: sessionOptions,
     },
     {
       key: "examName",
       type: "text",
       label: "Exam name",
-      placeholder: " Exam Name",
+      placeholder: "Exam name",
     },
   ];
 
@@ -321,24 +319,42 @@ export default function Examlist() {
   };
 
   const handleAddClass = (data) => {
-    const exists = classData.some(
-      (c) => c.class.toLowerCase() === data.className.toLowerCase(),
+    const exists = examList.some(
+      (e) =>
+        e.Class.toLowerCase() === (data.class || "").toLowerCase() &&
+        e["Exam Name"].toLowerCase() === (data.examName || "").toLowerCase()
     );
-    if (exists) {
-      alert("Class already exists");
-      return;
-    }
-    setClassData((prev) => [
-      ...prev,
-      {
-        sl: prev.length + 1,
-        class: data.className,
-        monthly: [],
-      },
-    ]);
-    setCurrentPage(1);
-  };
+    if (exists) return alert("This class and exam already exists");
 
+    const newSL = examList.length ? Math.max(...examList.map((e) => e.SL)) + 1 : 1;
+
+    const newExam = {
+      SL: newSL,
+      Class: data.class || "",
+      Group: data.group || "",
+      Section: data.section || "",
+      Session: data.session || "",
+      "Exam Name": data.examName || "",
+      "Total Exam": 0,
+      "Upcoming Exam Fee": 0,
+      "Exam Fee Due": 0,
+      Status: "Pending",
+    };
+
+    setExamList((prev) => [...prev, newExam]);
+
+    // Reset filters so new row shows
+    setClassFilter("");
+    setGroupFilter("");
+    setSectionFilter("");
+    setSessionFilter("");
+    setExamFilter("");
+    setStatusFilter("All");
+    setSearch("");
+
+    setAddClassOpen(false);
+    setCurrentPage(Math.ceil((examList.length + 1) / perPage));
+  };
   // -------------------- Styles --------------------
   const cardBg = darkMode
     ? "bg-gray-900 text-gray-100"
@@ -427,9 +443,9 @@ export default function Examlist() {
             {canEdit ? (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
-                Add exam
+                Exam
               </button>
             ) : (
               <div className="relative flex-1 " ref={sortRef}>
@@ -478,7 +494,13 @@ export default function Examlist() {
               open={addClassOpen}
               title="Add exam"
               fields={addExamFields}
-              initialValues={{ className: "" }}
+              initialValues={{
+                class: "",
+                group: "",
+                section: "",
+                session: "",
+                examName: "",
+              }}
               onClose={() => setAddClassOpen(false)}
               onSubmit={handleAddClass}
             />
@@ -556,11 +578,10 @@ export default function Examlist() {
       <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ReusableTable
           columns={columns}
-          data={currentData.map((item, idx) => ({
-            ...item,
-            id: (currentPage - 1) * perPage + idx + 1,
-          }))}
+          data={currentData}
+          setData={setExamList}
           showActionKey={canEdit}
+          modalFields={editExamFields} // 👈 THIS LINE
         />
       </div>
     </div>

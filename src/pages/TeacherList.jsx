@@ -102,20 +102,19 @@ export default function TeacherList() {
 
   // Open only one dropdown at a time
   const handleDropdownClick = (type) => {
-  setAttendanceOpen(type === "attendance" ? (prev) => !prev : false);
-  setFilterOpen(type === "filter" ? (prev) => !prev : false);
-  setSortOpenDesktop(type === "sortDesktop" ? (prev) => !prev : false);
-  setSortOpenMobile(type === "sortMobile" ? (prev) => !prev : false);
+    setAttendanceOpen(type === "attendance" ? (prev) => !prev : false);
+    setFilterOpen(type === "filter" ? (prev) => !prev : false);
+    setSortOpenDesktop(type === "sortDesktop" ? (prev) => !prev : false);
+    setSortOpenMobile(type === "sortMobile" ? (prev) => !prev : false);
 
-  if (type === "exportDesktop") {
-    setExportOpenDesktop((prev) => !prev);
-    setExportOpenMobile(false);
-  } else if (type === "exportMobile") {
-    setExportOpenMobile((prev) => !prev);
-    setExportOpenDesktop(false);
-  }
-};
-
+    if (type === "exportDesktop") {
+      setExportOpenDesktop((prev) => !prev);
+      setExportOpenMobile(false);
+    } else if (type === "exportMobile") {
+      setExportOpenMobile((prev) => !prev);
+      setExportOpenDesktop(false);
+    }
+  };
 
   const filteredTeachers = teachers
 
@@ -358,7 +357,7 @@ export default function TeacherList() {
                 onClick={() => setIsAddTeacherModalOpen(true)}
                 className="w-28 flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
               >
-                Add Teacher
+                Teacher
               </button>
             ) : (
               <div className="relative flex-1" ref={sortRefDesktop}>
@@ -442,7 +441,7 @@ export default function TeacherList() {
 
           <div className="relative w-full" ref={exportRefMobile}>
             <button
-             onClick={() => handleDropdownClick("exportMobile")}
+              onClick={() => handleDropdownClick("exportMobile")}
               className={`w-full flex items-center   border ${
                 darkMode
                   ? "bg-gray-700 border-gray-500"

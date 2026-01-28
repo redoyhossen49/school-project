@@ -146,27 +146,20 @@ export const generateAdmitCardHTML = (row) => {
         </div>
       </div>
 
-      <div class="subjects-wrapper">
-        <h3 class="subjects-header">Subject Name</h3>
-        <div class="subjects-container">
-          <div class="subjects-grid">
-            ${subjectDetails.map((subject, index) => `
-              <div class="subject-item">${subject.subjectName}</div>
-            `).join("")}
-          </div>
-        </div>
-      </div>
+    
 
       <footer class="footer">
+       <div class="copyright">
+        <p>&copy; ${new Date().getFullYear()} Astha Academic. All rights reserved.</p>
+      </div>
         <div class="sig-box">
           <img src="${headteacherSignature}" alt="Headteacher Signature" class="signature-image" />
           <div class="sig-text">Principal's Signature</div>
         </div>
+        
       </footer>
       
-      <div class="copyright">
-        <p>&copy; ${new Date().getFullYear()} Astha Academic. All rights reserved.</p>
-      </div>
+     
     </div>
   `;
 };

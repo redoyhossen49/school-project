@@ -22,13 +22,14 @@ export default function ClasssectionTable({ data = [], setData, month }) {
           ? {
               ...c,
               groups: c.groups.map((g) =>
-                g.name === selectedRow.groupName && g.section === selectedRow.sectionName
+                g.name === selectedRow.groupName &&
+                g.section === selectedRow.sectionName
                   ? { ...g, ...updatedData }
-                  : g
+                  : g,
               ),
             }
-          : c
-      )
+          : c,
+      ),
     );
     setEditModalOpen(false);
   };
@@ -41,11 +42,14 @@ export default function ClasssectionTable({ data = [], setData, month }) {
             ? {
                 ...c,
                 groups: c.groups.filter(
-                  (g) => !(g.name === row.groupName && g.section === row.sectionName)
+                  (g) =>
+                    !(
+                      g.name === row.groupName && g.section === row.sectionName
+                    ),
                 ),
               }
-            : c
-        )
+            : c,
+        ),
       );
       alert("Group/Section deleted successfully ✅");
     }
@@ -56,22 +60,32 @@ export default function ClasssectionTable({ data = [], setData, month }) {
       <table className="w-full table-auto border-collapse text-sm">
         <thead
           className={`${
-            darkMode ? "bg-gray-800 border-b border-gray-700" : "bg-gray-100 border-b border-gray-200"
+            darkMode
+              ? "bg-gray-800 border-b border-gray-700"
+              : "bg-gray-100 border-b border-gray-200"
           }`}
         >
           <tr>
-            {["Sl", "Class", "Group name", "Section name", "Total Student", "Total Payable", "Payable Due"].map(
-              (h) => (
-                <th
-                  key={h}
-                  className={`px-3 py-2 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
-                >
-                  {h}
-                </th>
-              )
-            )}
+            {[
+              "Sl",
+              "Class",
+              "Group name",
+              "Section name",
+              "Total student",
+              "Total Payable",
+              "Payable due",
+            ].map((h) => (
+              <th
+                key={h}
+                className={`px-3 py-2 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
+              >
+                {h}
+              </th>
+            ))}
             {showAction && (
-              <th className="px-3 py-2 text-left font-semibold whitespace-nowrap md:w-18">Action</th>
+              <th className="px-3 py-2 text-left font-semibold whitespace-nowrap md:w-18">
+                Action
+              </th>
             )}
           </tr>
         </thead>
@@ -92,10 +106,19 @@ export default function ClasssectionTable({ data = [], setData, month }) {
                         paid: g.monthly.reduce((a, b) => a + b.paid, 0),
                         due: g.monthly.reduce((a, b) => a + b.due, 0),
                       }
-                    : g.monthly.find((m) => m.month === month) || { paid: 0, due: 0 };
+                    : g.monthly.find((m) => m.month === month) || {
+                        paid: 0,
+                        due: 0,
+                      };
 
-                const totalPayable = month === "All" ? g.totalPayable : monthData.paid + monthData.due;
-                const payableDue = month === "All" ? g.monthly.reduce((a, b) => a + b.due, 0) : monthData.due;
+                const totalPayable =
+                  month === "All"
+                    ? g.totalPayable
+                    : monthData.paid + monthData.due;
+                const payableDue =
+                  month === "All"
+                    ? g.monthly.reduce((a, b) => a + b.due, 0)
+                    : monthData.due;
 
                 const rowData = {
                   ...c,
@@ -107,18 +130,51 @@ export default function ClasssectionTable({ data = [], setData, month }) {
                 };
 
                 return (
-                  <tr key={`${c.sl}-${g.name}-${g.section}`} className={`border-b ${borderCol} ${hoverRow}`}>
-                    <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{c.sl}</td>
-                    <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{c.class}</td>
-                    <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{g.name}</td>
-                    <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{g.section}</td>
-                    <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>{g.totalStudents}</td>
-                    <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>৳{totalPayable}</td>
-                    <td className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}>
+                  <tr
+                    key={`${c.sl}-${g.name}-${g.section}`}
+                    className={`border-b ${borderCol} ${hoverRow}`}
+                  >
+                    <td
+                      className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    >
+                      {c.sl}
+                    </td>
+                    <td
+                      className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    >
+                      {c.class}
+                    </td>
+                    <td
+                      className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    >
+                      {g.name}
+                    </td>
+                    <td
+                      className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    >
+                      {g.section}
+                    </td>
+                    <td
+                      className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    >
+                      {g.totalStudents}
+                    </td>
+                    <td
+                      className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    >
+                      ৳{totalPayable}
+                    </td>
+                    <td
+                      className={`px-3 py-2 border-r ${borderCol} whitespace-nowrap`}
+                    >
                       {payableDue === 0 ? (
-                        <span className="text-green-600 font-semibold">Paid</span>
+                        <span className="text-green-600 font-semibold">
+                          Paid
+                        </span>
                       ) : (
-                        <span className="text-red-600 font-semibold">৳{payableDue}</span>
+                        <span className="text-red-600 font-semibold">
+                          ৳{payableDue}
+                        </span>
                       )}
                     </td>
                     {showAction && (
@@ -135,7 +191,7 @@ export default function ClasssectionTable({ data = [], setData, month }) {
                     )}
                   </tr>
                 );
-              })
+              }),
             )
           )}
         </tbody>
@@ -150,7 +206,12 @@ export default function ClasssectionTable({ data = [], setData, month }) {
           onClose={() => setEditModalOpen(false)}
           onSubmit={handleEditSubmit}
           fields={[
-            { name: "groupName", label: "Group Name", type: "text", required: true },
+            {
+              name: "groupName",
+              label: "Group Name",
+              type: "text",
+              required: true,
+            },
             { name: "sectionName", label: "Section Name", type: "text" },
             { name: "totalStudents", label: "Total Students", type: "number" },
             { name: "totalPayable", label: "Total Payable", type: "number" },

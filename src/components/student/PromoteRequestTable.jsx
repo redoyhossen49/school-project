@@ -6,23 +6,23 @@ import { promoteRequestData } from "../../data/promoteRequestData";
 
 const headers = [
   { label: "Sl", key: "sl" },
-  { label: "ID Number", key: "idNumber" },
-  { label: "Student Name", key: "studentName" },
-  { label: "Father's Name", key: "fatherName" },
+  { label: "ID number", key: "idNumber" },
+  { label: "Student name", key: "studentName" },
+  { label: "Father's name", key: "fatherName" },
 
-  { label: "From Class", key: "fromClass" },
-  { label: "From Group", key: "fromGroup" },
-  { label: "From Section", key: "fromSection" },
-  { label: "From Session", key: "fromSession" },
+  { label: "From class", key: "fromClass" },
+  { label: "From group", key: "fromGroup" },
+  { label: "From section", key: "fromSection" },
+  { label: "From session", key: "fromSession" },
 
-  { label: "To Class", key: "toClass" },
-  { label: "To Group", key: "toGroup" },
-  { label: "To Section", key: "toSection" },
-  { label: "To Session", key: "toSession" },
+  { label: "To class", key: "toClass" },
+  { label: "To group", key: "toGroup" },
+  { label: "To section", key: "toSection" },
+  { label: "To session", key: "toSession" },
 
-  { label: "Promote Fee", key: "promoteFee" },
-  { label: "Promote Date", key: "promoteDate" },
-  { label: "Payment Type", key: "paymentType" },
+  { label: "Promote fee", key: "promoteFee" },
+  { label: "Promote date", key: "promoteDate" },
+  { label: "Payment type", key: "paymentType" },
 
   { label: "Status", key: "status" },
 ];
@@ -107,7 +107,7 @@ export default function PromoteRequestTable({
           : "bg-white text-gray-900 border-gray-200"
       }`}
     >
-      <table className="w-full table-auto border-collapse text-xs md:text-sm">
+      <table className="w-full table-auto border-collapse text-xs ">
         <thead
           className={`${
             darkMode

@@ -12,14 +12,14 @@ const headers = [
   "Group",
   "Section",
   "Session",
-  "Fees Type",
+  "Fees type",
   "Total payable",
   "Payable due",
   "Pay type",
   "Type amount",
   "Total due",
-  "Pay Date",
-  "Pay Method",
+  "Pay date",
+  "Pay method",
 ];
 
 export default function CollectiontTable({ data, setData, onEdit, onDelete, onView, selectedCollections = [], onSelectionChange }) {

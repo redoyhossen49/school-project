@@ -61,14 +61,14 @@ export default function FindCollectionModal({
 
   return (
     <div
-      className={`fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-60 flex items-center justify-center bg-black/30 p-4 transition-opacity duration-300 ${
         isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
       }`}
       onClick={handleClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`${modalBg} ${textColor} w-full max-w-[250px] border ${borderClr} p-4 transition-all duration-300 transform ${
+        className={`${modalBg} ${textColor} w-full max-w-[250px] rounded border ${borderClr} p-4 transition-all duration-300 transform ${
           isModalOpening && !isModalClosing
             ? "scale-100 opacity-100 translate-y-0"
             : "scale-95 opacity-0 translate-y-4"
@@ -130,7 +130,7 @@ export default function FindCollectionModal({
               className={`w-[50%] text-xs py-2 border ${borderClr} ${
                 darkMode
                   ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                  : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                  : "bg-white hover:bg-gray-100 text-gray-800"
               } transition font-medium`}
             >
               Close
@@ -143,8 +143,8 @@ export default function FindCollectionModal({
                 filterType
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : darkMode
-                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "bg-gray-600 text-gray-200 cursor-not-allowed"
+                  : "bg-green-600 text-white cursor-not-allowed"
               }`}
             >
               Finding

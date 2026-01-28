@@ -96,7 +96,7 @@ export default function AddTeacherModal({ open, onClose, onAdd }) {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center  p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center  p-4 bg-black/30"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -104,7 +104,7 @@ export default function AddTeacherModal({ open, onClose, onAdd }) {
           ${darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-700"}
           w-72
           max-h-[70vh] overflow-y-auto
-          rounded-lg shadow-xl
+          rounded
           border ${darkMode ? "border-gray-600" : "border-gray-200"}
           p-6
         `}

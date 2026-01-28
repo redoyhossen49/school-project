@@ -19,7 +19,13 @@ export default function ExamRoutineList() {
   const canEdit = localStorage.getItem("role") === "school";
 
   // -------------------- State --------------------
-  const [classData, setClassData] = useState(examRoutineData);
+  const [examData, setExamData] = useState(
+    examRoutineData.map((item, idx) => ({
+      SL: idx + 1,
+      ...item,
+    })),
+  );
+
   const [addClassOpen, setAddClassOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -60,23 +66,6 @@ export default function ExamRoutineList() {
   const sortRef = useRef(null);
   const exportRef = useRef(null);
   const filterRef = useRef(null);
-  const statusRef = useRef(null);
-
-  const months = [
-    "All",
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   // Class Options
   const classOptions = Array.from(new Set(examRoutineData.map((c) => c.Class)));
@@ -213,8 +202,7 @@ export default function ExamRoutineList() {
 
   // -------------------- Filtered + Sorted Data --------------------
   const filteredData = useMemo(() => {
-    // 1️⃣ Apply filters first
-    const data = examRoutineData.filter(
+    const data = examData.filter(
       (d) =>
         (classFilter ? d.Class === classFilter : true) &&
         (groupFilter ? d.Group === groupFilter : true) &&
@@ -223,16 +211,20 @@ export default function ExamRoutineList() {
         (examFilter ? d["Exam Name"] === examFilter : true) &&
         (statusFilter && statusFilter !== "All"
           ? d.Status === statusFilter
+          : true) &&
+        (search
+          ? Object.values(d)
+              .join(" ")
+              .toLowerCase()
+              .includes(search.toLowerCase())
           : true),
     );
 
-    // 2️⃣ Apply sorting by Exam Date
     return data.sort((a, b) => {
       const dateA = new Date(a["Exam Date"]);
       const dateB = new Date(b["Exam Date"]);
 
-      if (sortOrder === "newest") return dateB - dateA; // newest first
-      return dateA - dateB; // oldest first
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
     });
   }, [
     classFilter,
@@ -242,6 +234,8 @@ export default function ExamRoutineList() {
     examFilter,
     statusFilter,
     sortOrder,
+    search,
+    examData, // important!
   ]);
 
   // -------------------- Pagination --------------------
@@ -297,6 +291,26 @@ export default function ExamRoutineList() {
     "Friday",
     "Saturday",
     "Sunday",
+  ];
+  const editExamRoutineFields = [
+    { name: "Class", label: "Class", required: true },
+    { name: "Group", label: "Group", required: true },
+    { name: "Section", label: "Section", required: true },
+    { name: "Session", label: "Session", required: true },
+    { name: "Exam Name", label: "Exam Name", required: true },
+    { name: "Subject", label: "Subject", required: true },
+    { name: "Exam Date", label: "Exam Date", type: "date" },
+    { name: "Exam Day", label: "Exam Day" },
+    { name: "Start Time", label: "Start Time", type: "time" },
+    { name: "End Time", label: "End Time", type: "time" },
+    { name: "Total Hour", label: "Total Hour" },
+    { name: "Total Mark", label: "Total Mark" },
+    {
+      name: "Status",
+      label: "Status",
+      type: "select",
+      options: ["Pending", "Completed"],
+    },
   ];
 
   const addExamRoutineFields = [
@@ -374,12 +388,12 @@ export default function ExamRoutineList() {
       placeholder: "Total hour",
       readOnly: true,
     },
+
     {
       key: "totalMark",
       label: "Total mark",
       type: "text",
       placeholder: "Total mark",
-      readOnly: true,
     },
   ];
 
@@ -417,22 +431,42 @@ export default function ExamRoutineList() {
 
   // -------------------- Add Class Handler --------------------
   const handleAddClass = (data) => {
-    const exists = classData.some(
-      (c) => c.class.toLowerCase() === data.class.toLowerCase(),
+    const exists = examData.some(
+      (r) =>
+        r.Class === data.class &&
+        r.Group === data.group &&
+        r.Section === data.section &&
+        r["Exam Name"] === data.examName &&
+        r.Subject === data.subject &&
+        r["Exam Date"] === data.examDate,
     );
+
     if (exists) {
-      alert("Class already exists");
+      alert("This exam routine already exists");
       return;
     }
-    setClassData((prev) => [
+
+    setExamData((prev) => [
       ...prev,
       {
-        sl: prev.length + 1,
-        class: data.class,
-        monthly: [],
+        Class: data.class,
+        Group: data.group,
+        Section: data.section,
+        Session: data.session,
+        "Exam Name": data.examName,
+        Subject: data.subject,
+        "Exam Date": data.examDate,
+        "Exam Day": data.examDay,
+        "Start Time": data.startTime,
+        "End Time": data.endTime,
+        "Total Hour": data.totalHour,
+        "Total Mark": data.totalMark,
+        Status: "Pending", // default status
       },
     ]);
-    setCurrentPage(1);
+
+    setAddClassOpen(false); // close the modal
+    setCurrentPage(1); // go to first page
   };
 
   // -------------------- Styles --------------------
@@ -497,13 +531,13 @@ export default function ExamRoutineList() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full md:w-28 flex items-center  border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
                 Export
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-2 w-full md:w-28 border ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => exportPDF(filteredData)}
@@ -524,7 +558,7 @@ export default function ExamRoutineList() {
             {canEdit ? (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Routine
               </button>
@@ -582,12 +616,11 @@ export default function ExamRoutineList() {
                 totalMark: "",
               }}
               onClose={() => setAddClassOpen(false)}
-              onSubmit={handleAddClass}
+              onSubmit={handleAddClass} // ← updated
               onChange={(field, value, formValues, setFormValues) => {
-                // 1️⃣ Update the field normally
-                setFormValues({ ...formValues, [field]: value });
+                const updatedValues = { ...formValues, [field]: value };
 
-                // 2️⃣ Auto-calc Exam Day only when examDate changes
+                // Auto-calc Exam Day
                 if (field === "examDate" && value) {
                   const dateObj = new Date(value);
                   const days = [
@@ -599,11 +632,23 @@ export default function ExamRoutineList() {
                     "Friday",
                     "Saturday",
                   ];
-                  setFormValues((prev) => ({
-                    ...prev,
-                    examDay: days[dateObj.getDay()],
-                  }));
+                  updatedValues.examDay = days[dateObj.getDay()];
                 }
+
+                // Auto-calc Total Hour
+                const start = updatedValues.startTime;
+                const end = updatedValues.endTime;
+                if (start && end) {
+                  const [sh, sm] = start.split(":").map(Number);
+                  const [eh, em] = end.split(":").map(Number);
+
+                  let totalMinutes = (eh - sh) * 60 + (em - sm);
+                  if (totalMinutes < 0) totalMinutes += 24 * 60; // overnight
+
+                  updatedValues.totalHour = (totalMinutes / 60).toFixed(2);
+                }
+
+                setFormValues(updatedValues);
               }}
             />
           </div>
@@ -678,12 +723,10 @@ export default function ExamRoutineList() {
       <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ReusableTable
           columns={columns}
-          data={currentData.map((item, idx) => ({
-            ...item,
-            id: (currentPage - 1) * perPage + idx + 1,
-            SL: (currentPage - 1) * perPage + idx + 1,
-          }))}
+          data={examData}
           showActionKey={canEdit}
+          modalFields={editExamRoutineFields}
+          setData={setExamData} // so edit modal can update the main data
         />
       </div>
     </div>

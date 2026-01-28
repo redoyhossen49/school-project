@@ -21,13 +21,15 @@ const loadFeeTypes = () => {
     try {
       const parsedData = JSON.parse(storedData);
       // Merge with static data, avoiding duplicates by sl
-      const staticMap = new Map(feeTypeData.map(item => [item.sl, item]));
-      parsedData.forEach(item => {
+      const staticMap = new Map(feeTypeData.map((item) => [item.sl, item]));
+      parsedData.forEach((item) => {
         if (!staticMap.has(item.sl)) {
           staticMap.set(item.sl, item);
         }
       });
-      return Array.from(staticMap.values()).sort((a, b) => (a.sl || 0) - (b.sl || 0));
+      return Array.from(staticMap.values()).sort(
+        (a, b) => (a.sl || 0) - (b.sl || 0),
+      );
     } catch (e) {
       console.error("Error loading fee types from localStorage:", e);
       return feeTypeData;
@@ -57,10 +59,16 @@ export default function FeeTypeList() {
   const userRole = localStorage.getItem("role");
   const canEdit = userRole === "school";
 
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef(null);
+
+  // default newest / desc
+  const [sortOrder, setSortOrder] = useState("desc");
+
   const [selectedDate, setSelectedDate] = useState("Monthly");
   const [dateOpen, setDateOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState("newest");
+
   const [filterOpen, setFilterOpen] = useState(false);
   const [showFeeListModal, setShowFeeListModal] = useState(false);
   const [feeListSearch, setFeeListSearch] = useState("");
@@ -80,7 +88,7 @@ export default function FeeTypeList() {
   const [isModalClosing, setIsModalClosing] = useState(false);
   const [isModalOpening, setIsModalOpening] = useState(false);
   const [feesName, setFeesName] = useState("");
-  
+
   // Add Fees Type Modal states
   const [isAddModalClosing, setIsAddModalClosing] = useState(false);
   const [isAddModalOpening, setIsAddModalOpening] = useState(false);
@@ -171,14 +179,21 @@ export default function FeeTypeList() {
 
   // Update fee list when fees are updated
   useEffect(() => {
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Handle custom event "feesUpdated" dispatched when fees are updated.
+     * If fee list modal is open, update the fee list with the latest fees.
+     * @returns {void}
+     */
+    /*******  9ffd0b21-1283-47c6-8f85-4f0a737f40bd  *******/
     const handleFeesUpdated = () => {
       if (showFeeListModal) {
         setFeeList(loadFeeList());
       }
     };
-    
-    window.addEventListener('feesUpdated', handleFeesUpdated);
-    return () => window.removeEventListener('feesUpdated', handleFeesUpdated);
+
+    window.addEventListener("feesUpdated", handleFeesUpdated);
+    return () => window.removeEventListener("feesUpdated", handleFeesUpdated);
   }, [showFeeListModal]);
 
   // Handle close with animation
@@ -254,12 +269,13 @@ export default function FeeTypeList() {
 
   // ===== Filter + Sort Logic =====
   const filteredFees = fees
-    .filter((f) => 
-      f.class?.toLowerCase().includes(search.toLowerCase()) ||
-      f.group?.toLowerCase().includes(search.toLowerCase()) ||
-      f.section?.toLowerCase().includes(search.toLowerCase()) ||
-      f.session?.toLowerCase().includes(search.toLowerCase()) ||
-      f.fees_type?.toLowerCase().includes(search.toLowerCase())
+    .filter(
+      (f) =>
+        f.class?.toLowerCase().includes(search.toLowerCase()) ||
+        f.group?.toLowerCase().includes(search.toLowerCase()) ||
+        f.section?.toLowerCase().includes(search.toLowerCase()) ||
+        f.session?.toLowerCase().includes(search.toLowerCase()) ||
+        f.fees_type?.toLowerCase().includes(search.toLowerCase()),
     )
     .filter((f) => {
       // Cumulative filtering: only apply if value is selected
@@ -269,15 +285,17 @@ export default function FeeTypeList() {
       if (filters.session && f.session !== filters.session) return false;
       return true;
     })
-    .sort((a, b) => {
-      return sortOrder === "oldest" ? a.sl - b.sl : b.sl - a.sl;
-    });
+    .sort((a, b) =>
+      sortOrder === "asc"
+        ? (a.sl || 0) - (b.sl || 0)
+        : (b.sl || 0) - (a.sl || 0),
+    );
 
   const totalFees = filteredFees.length;
   const totalPages = Math.ceil(totalFees / feesPerPage);
   const currentFees = filteredFees.slice(
     (currentPage - 1) * feesPerPage,
-    currentPage * feesPerPage
+    currentPage * feesPerPage,
   );
 
   // ===== EXPORT EXCEL =====
@@ -293,7 +311,10 @@ export default function FeeTypeList() {
       "Fees Type": f.fees_type,
       Amount: f.fees_amount,
       "Total Payable": f.total_payable || f.fees_amount,
-      "Payable Due": f.payable_due !== undefined ? f.payable_due : (f.total_payable || f.fees_amount),
+      "Payable Due":
+        f.payable_due !== undefined
+          ? f.payable_due
+          : f.total_payable || f.fees_amount,
       "Payable Last Date": f.payable_last_date || "N/A",
     }));
 
@@ -315,11 +336,11 @@ export default function FeeTypeList() {
       "Group",
       "Section",
       "Session",
-      "Fees Type",
+      "Fees type",
       "Amount",
-      "Total Payable",
-      "Payable Due",
-      "Payable Last Date",
+      "Total payable",
+      "Payable due",
+      "Payable date",
     ];
 
     const rows = data.map((f, i) => [
@@ -331,7 +352,9 @@ export default function FeeTypeList() {
       f.fees_type,
       f.fees_amount,
       f.total_payable || f.fees_amount,
-      f.payable_due !== undefined ? f.payable_due : (f.total_payable || f.fees_amount),
+      f.payable_due !== undefined
+        ? f.payable_due
+        : f.total_payable || f.fees_amount,
       f.payable_last_date || "N/A",
     ]);
 
@@ -367,18 +390,18 @@ export default function FeeTypeList() {
       // Update fees type options when fees are updated
       setFeesTypeOptions(getFeesTypeOptions());
     };
-    
+
     // Listen for custom storage event (for same-window updates)
-    window.addEventListener('feeTypesUpdated', handleCustomStorageChange);
-    window.addEventListener('feesUpdated', handleCustomStorageChange);
-    
+    window.addEventListener("feeTypesUpdated", handleCustomStorageChange);
+    window.addEventListener("feesUpdated", handleCustomStorageChange);
+
     // Also listen for storage events (when localStorage changes in another tab/window)
-    window.addEventListener('storage', handleCustomStorageChange);
-    
+    window.addEventListener("storage", handleCustomStorageChange);
+
     return () => {
-      window.removeEventListener('feeTypesUpdated', handleCustomStorageChange);
-      window.removeEventListener('feesUpdated', handleCustomStorageChange);
-      window.removeEventListener('storage', handleCustomStorageChange);
+      window.removeEventListener("feeTypesUpdated", handleCustomStorageChange);
+      window.removeEventListener("feesUpdated", handleCustomStorageChange);
+      window.removeEventListener("storage", handleCustomStorageChange);
     };
   }, []);
 
@@ -414,36 +437,41 @@ export default function FeeTypeList() {
   // Get group options based on selected class
   const getGroupOptions = (selectedClass) => {
     if (!selectedClass) return getUniqueOptions(getAllFeeTypeData(), "group");
-    const filtered = getAllFeeTypeData().filter(item => item.class === selectedClass);
+    const filtered = getAllFeeTypeData().filter(
+      (item) => item.class === selectedClass,
+    );
     return getUniqueOptions(filtered, "group");
   };
 
   // Get section options based on selected class and group
   const getSectionOptions = (selectedClass, selectedGroup) => {
-    if (!selectedClass && !selectedGroup) return getUniqueOptions(getAllFeeTypeData(), "section");
+    if (!selectedClass && !selectedGroup)
+      return getUniqueOptions(getAllFeeTypeData(), "section");
     let filtered = getAllFeeTypeData();
-    if (selectedClass) filtered = filtered.filter(item => item.class === selectedClass);
-    if (selectedGroup) filtered = filtered.filter(item => item.group === selectedGroup);
+    if (selectedClass)
+      filtered = filtered.filter((item) => item.class === selectedClass);
+    if (selectedGroup)
+      filtered = filtered.filter((item) => item.group === selectedGroup);
     return getUniqueOptions(filtered, "section");
   };
 
   const sessionOptions = getUniqueOptions(getAllFeeTypeData(), "session");
-  
+
   // For filter dropdown - use all options (not filtered)
   const groupOptions = getUniqueOptions(getAllFeeTypeData(), "group");
   const sectionOptions = getUniqueOptions(getAllFeeTypeData(), "section");
-  
+
   // Get fees type options from both static data (feesTypeData.js) and localStorage - make it dynamic
   const getFeesTypeOptions = () => {
     const staticFeesTypeOptions = feesTypeData || [];
     const createdFees = loadFees();
-    const createdFeesNames = createdFees.map(fee => fee.name).filter(Boolean);
+    const createdFeesNames = createdFees.map((fee) => fee.name).filter(Boolean);
     // Merge and remove duplicates
     return [...new Set([...staticFeesTypeOptions, ...createdFeesNames])];
   };
 
   const [feesTypeOptions, setFeesTypeOptions] = useState(getFeesTypeOptions());
-  
+
   // Handle add fee form submit
   const handleAddFeeFormSubmit = (formData) => {
     // Validate required fields
@@ -462,14 +490,15 @@ export default function FeeTypeList() {
     // Get existing data from localStorage
     const storedData = localStorage.getItem("feeTypes");
     const existingData = storedData ? JSON.parse(storedData) : [];
-    
+
     // Generate new serial number
-    const maxSl = existingData.length > 0 
-      ? Math.max(...existingData.map(item => item.sl || 0))
-      : feeTypeData.length > 0
-      ? Math.max(...feeTypeData.map(item => item.sl || 0))
-      : 0;
-    
+    const maxSl =
+      existingData.length > 0
+        ? Math.max(...existingData.map((item) => item.sl || 0))
+        : feeTypeData.length > 0
+          ? Math.max(...feeTypeData.map((item) => item.sl || 0))
+          : 0;
+
     // Create new fee type entry
     // Note: total_payable and payable_due will be calculated by backend
     const newFeeType = {
@@ -490,14 +519,14 @@ export default function FeeTypeList() {
     localStorage.setItem("feeTypes", JSON.stringify(updatedData));
 
     // Dispatch custom event to notify other components
-    window.dispatchEvent(new Event('feeTypesUpdated'));
+    window.dispatchEvent(new Event("feeTypesUpdated"));
 
     // Update local state
     setFees(loadFeeTypes());
-    
+
     console.log("FEE TYPE DATA SAVED TO LOCALSTORAGE 👉", newFeeType);
     alert("Fee Type Added Successfully ✅");
-    
+
     // Close modal after submission
     handleAddModalClose();
   };
@@ -523,22 +552,28 @@ export default function FeeTypeList() {
         payable_last_date: formData.payable_last_date || "",
         // total_payable and payable_due will be calculated by backend - not included here
       };
-      const updatedFees = fees.map((f) => (f.sl === editingFee.sl ? updatedFee : f));
+      const updatedFees = fees.map((f) =>
+        f.sl === editingFee.sl ? updatedFee : f,
+      );
       setFees(updatedFees);
-      
+
       // Save to localStorage (only items that are not in static data)
       const storedData = localStorage.getItem("feeTypes");
       const existingData = storedData ? JSON.parse(storedData) : [];
-      const isFromStorage = existingData.some(item => item.sl === editingFee.sl);
-      
+      const isFromStorage = existingData.some(
+        (item) => item.sl === editingFee.sl,
+      );
+
       if (isFromStorage) {
         // Update in localStorage
-        const updatedStorage = existingData.map((f) => (f.sl === editingFee.sl ? updatedFee : f));
+        const updatedStorage = existingData.map((f) =>
+          f.sl === editingFee.sl ? updatedFee : f,
+        );
         saveFeeTypes(updatedStorage);
         // Dispatch custom event to notify other components
-        window.dispatchEvent(new Event('feeTypesUpdated'));
+        window.dispatchEvent(new Event("feeTypesUpdated"));
       }
-      
+
       setEditingFee(null);
       alert("Fee type updated successfully ✅");
     }
@@ -554,12 +589,13 @@ export default function FeeTypeList() {
     // Get existing fees data from localStorage
     const storedData = localStorage.getItem("fees");
     const existingFees = storedData ? JSON.parse(storedData) : [];
-    
+
     // Generate new ID
-    const maxId = existingFees.length > 0 
-      ? Math.max(...existingFees.map(item => item.id || 0))
-      : 0;
-    
+    const maxId =
+      existingFees.length > 0
+        ? Math.max(...existingFees.map((item) => item.id || 0))
+        : 0;
+
     // Create new fees entry
     const newFee = {
       id: maxId + 1,
@@ -572,11 +608,11 @@ export default function FeeTypeList() {
     localStorage.setItem("fees", JSON.stringify(updatedFees));
 
     // Dispatch custom event
-    window.dispatchEvent(new Event('feesUpdated'));
+    window.dispatchEvent(new Event("feesUpdated"));
 
     console.log("FEES DATA SAVED TO LOCALSTORAGE 👉", newFee);
     alert("Fees Created Successfully ✅");
-    
+
     // Reset form and close modal
     setFeesName("");
     handleCreateFeesClose();
@@ -586,6 +622,15 @@ export default function FeeTypeList() {
   const handleEditFeeName = (fee) => {
     setEditingFeeName(fee);
   };
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Handle update fee name
   const handleUpdateFeeName = () => {
@@ -596,30 +641,34 @@ export default function FeeTypeList() {
 
     const storedData = localStorage.getItem("fees");
     const existingFees = storedData ? JSON.parse(storedData) : [];
-    
+
     // Check if it's a static fee
     if (editingFeeName.isStatic) {
       // Convert static fee to dynamic fee in localStorage
-      const maxId = existingFees.length > 0 
-        ? Math.max(...existingFees.map(item => item.id || 0))
-        : 0;
-      
+      const maxId =
+        existingFees.length > 0
+          ? Math.max(...existingFees.map((item) => item.id || 0))
+          : 0;
+
       const newFee = {
         id: maxId + 1,
         name: editingFeeName.name.trim(),
         createdAt: new Date().toISOString(),
       };
-      
+
       // Add to localStorage and mark original static as deleted
       const updatedFees = [...existingFees, newFee];
       localStorage.setItem("fees", JSON.stringify(updatedFees));
-      
+
       // Mark original static fee as deleted
       const deletedStaticFees = getDeletedStaticFees();
       // Extract index from static ID (e.g., "static-0" -> 0)
-      const staticIndex = parseInt(editingFeeName.id.replace('static-', ''));
+      const staticIndex = parseInt(editingFeeName.id.replace("static-", ""));
       const originalStaticFeeName = feesTypeData[staticIndex];
-      if (originalStaticFeeName && !deletedStaticFees.includes(originalStaticFeeName)) {
+      if (
+        originalStaticFeeName &&
+        !deletedStaticFees.includes(originalStaticFeeName)
+      ) {
         saveDeletedStaticFees([...deletedStaticFees, originalStaticFeeName]);
       }
     } else {
@@ -627,14 +676,14 @@ export default function FeeTypeList() {
       const updatedFees = existingFees.map((f) =>
         f.id === editingFeeName.id
           ? { ...f, name: editingFeeName.name.trim() }
-          : f
+          : f,
       );
       localStorage.setItem("fees", JSON.stringify(updatedFees));
     }
-    
-    window.dispatchEvent(new Event('feesUpdated'));
+
+    window.dispatchEvent(new Event("feesUpdated"));
     setFeeList(loadFeeList());
-    
+
     setEditingFeeName(null);
     alert("Fee name updated successfully ✅");
   };
@@ -658,10 +707,10 @@ export default function FeeTypeList() {
       const updatedFees = existingFees.filter((f) => f.id !== id);
       localStorage.setItem("fees", JSON.stringify(updatedFees));
     }
-    
-    window.dispatchEvent(new Event('feesUpdated'));
+
+    window.dispatchEvent(new Event("feesUpdated"));
     setFeeList(loadFeeList());
-    
+
     alert("Fee deleted successfully ✅");
   };
 
@@ -759,16 +808,50 @@ export default function FeeTypeList() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`w-28 flex items-center border ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-gray-200"
-              } px-3 h-8 text-xs`}
-            >
-              Refresh
-            </button>
+            <div className="relative flex-1" ref={sortRef}>
+              <button
+                onClick={() => setSortOpen(!sortOpen)}
+                className={`flex items-center md:w-28 w-full border px-3 h-8 text-xs ${
+                  darkMode
+                    ? "border-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-200 bg-white text-gray-800"
+                }`}
+              >
+                Sort By
+              </button>
+
+              {sortOpen && (
+                <div
+                  className={`absolute mt-2 w-full z-40 border left-0 ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-100"
+                      : "bg-white border-gray-200 text-gray-900"
+                  }`}
+                >
+                  <button
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setSortOpen(false);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    First
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setSortOpen(false);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+                  >
+                    Last
+                  </button>
+                </div>
+              )}
+            </div>
 
             <div className="relative" ref={exportRef}>
               <button
@@ -779,7 +862,7 @@ export default function FeeTypeList() {
                     : "bg-white border-gray-200"
                 } px-3 h-8 text-xs`}
               >
-                Export 
+                Export
               </button>
               {exportOpen && (
                 <div
@@ -818,16 +901,51 @@ export default function FeeTypeList() {
 
         {/* Mobile Buttons */}
         <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={handleRefresh}
-            className={`w-full flex items-center gap-2 border ${
-              darkMode
-                ? "bg-gray-700 border-gray-500"
-                : "bg-white border-gray-200"
-            } px-3 h-8 text-xs`}
-          >
-            Refresh
-          </button>
+         <div className="relative flex-1" ref={sortRef}>
+  <button
+    onClick={() => setSortOpen(!sortOpen)}
+    className={`flex items-center md:w-28 w-full border px-3 h-8 text-xs ${
+      darkMode
+        ? "border-gray-500 bg-gray-700 text-gray-100"
+        : "border-gray-200 bg-white text-gray-800"
+    }`}
+  >
+    Sort By
+  </button>
+
+  {sortOpen && (
+    <div
+      className={`absolute mt-2 w-full z-40 border left-0 ${
+        darkMode
+          ? "bg-gray-800 border-gray-700 text-gray-100"
+          : "bg-white border-gray-200 text-gray-900"
+      }`}
+    >
+      <button
+        onClick={() => {
+          setSortOrder("asc");
+          setSortOpen(false);
+          setCurrentPage(1);
+        }}
+        className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+      >
+        First
+      </button>
+
+      <button
+        onClick={() => {
+          setSortOrder("desc");
+          setSortOpen(false);
+          setCurrentPage(1);
+        }}
+        className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100"
+      >
+        Last
+      </button>
+    </div>
+  )}
+</div>
+
 
           <div className="relative w-full" ref={exportRef}>
             <button
@@ -1006,23 +1124,28 @@ export default function FeeTypeList() {
       />
 
       {/* Add Fee Type Modal - Custom */}
-      {(!showAddModal && !isAddModalClosing) ? null : (
+      {!showAddModal && !isAddModalClosing ? null : (
         <div
-          className={`fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
-            isAddModalOpening && !isAddModalClosing ? "opacity-100" : "opacity-0"
+          className={`fixed inset-0 z-60 flex items-center justify-center bg-black/30 p-6 transition-opacity duration-300 ${
+            isAddModalOpening && !isAddModalClosing
+              ? "opacity-100"
+              : "opacity-0"
           }`}
           onClick={handleAddModalClose}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`${darkMode ? "bg-gray-800" : "bg-white"} ${darkMode ? "text-gray-100" : "text-gray-800"} w-full max-w-[320px] max-h-[550px] border ${borderClr} p-4 transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${
+            className={`${darkMode ? "bg-gray-800" : "bg-white"} ${darkMode ? "text-gray-100" : "text-gray-800"} w-72 rounded max-h-[550px] border ${borderClr} p-6 transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${
               isAddModalOpening && !isAddModalClosing
                 ? "scale-100 opacity-100 translate-y-0"
                 : "scale-95 opacity-0 translate-y-4"
             }`}
           >
             {/* Title */}
-            <h2 className="text-base font-semibold text-center mb-4"> Fees Type</h2>
+            <h2 className="text-base font-semibold text-center mb-4">
+              {" "}
+              Fees Type
+            </h2>
 
             <div className="space-y-3">
               {/* Class Field */}
@@ -1105,7 +1228,7 @@ export default function FeeTypeList() {
                       <option key={option} value={option}>
                         {option}
                       </option>
-                    )
+                    ),
                   )}
                 </select>
               </div>
@@ -1137,7 +1260,10 @@ export default function FeeTypeList() {
                 <select
                   value={addFormData.fees_type}
                   onChange={(e) =>
-                    setAddFormData({ ...addFormData, fees_type: e.target.value })
+                    setAddFormData({
+                      ...addFormData,
+                      fees_type: e.target.value,
+                    })
                   }
                   className={`w-full h-8 border ${borderClr} ${
                     darkMode
@@ -1160,9 +1286,12 @@ export default function FeeTypeList() {
                   type="number"
                   value={addFormData.fees_amount}
                   onChange={(e) =>
-                    setAddFormData({ ...addFormData, fees_amount: e.target.value })
+                    setAddFormData({
+                      ...addFormData,
+                      fees_amount: e.target.value,
+                    })
                   }
-                  placeholder="Type Amount"
+                  placeholder=" Amount"
                   className={`w-full h-8 border ${borderClr} ${
                     darkMode
                       ? "bg-gray-700 text-white placeholder-gray-400"
@@ -1174,11 +1303,14 @@ export default function FeeTypeList() {
               {/* Payable Last Date Field */}
               <div className="pt-2">
                 <Input
-                  label="Payable Last Date"
+                  label="Payable Date"
                   name="payable_last_date"
                   value={addFormData.payable_last_date}
                   onChange={(e) =>
-                    setAddFormData({ ...addFormData, payable_last_date: e.target.value })
+                    setAddFormData({
+                      ...addFormData,
+                      payable_last_date: e.target.value,
+                    })
                   }
                   type="date"
                   placeholder="Payable Last Date"
@@ -1198,7 +1330,7 @@ export default function FeeTypeList() {
                   className={`w-[50%] text-[12px] h-8 border ${borderClr} ${
                     darkMode
                       ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                      : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                      : "bg-white hover:bg-gray-100 text-gray-800"
                   } transition font-medium`}
                 >
                   Close
@@ -1223,8 +1355,8 @@ export default function FeeTypeList() {
                     addFormData.fees_amount
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : darkMode
-                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        ? "bg-blue-600 text-white cursor-not-allowed"
+                        : "bg-blue-600 text-white cursor-not-allowed"
                   }`}
                 >
                   Add
@@ -1236,7 +1368,7 @@ export default function FeeTypeList() {
       )}
 
       {/* Create Fees Modal */}
-      {(!showCreateFeesModal && !isModalClosing) ? null : (
+      {!showCreateFeesModal && !isModalClosing ? null : (
         <div
           className={`fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
             isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
@@ -1252,7 +1384,9 @@ export default function FeeTypeList() {
             }`}
           >
             {/* Title */}
-            <h2 className="text-base font-semibold text-center mb-4">Create Fees</h2>
+            <h2 className="text-base font-semibold text-center mb-4">
+              Create Fees
+            </h2>
 
             <div className="space-y-3">
               {/* Input Field */}
@@ -1296,8 +1430,8 @@ export default function FeeTypeList() {
                     feesName.trim()
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : darkMode
-                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
                   Create
@@ -1309,10 +1443,12 @@ export default function FeeTypeList() {
       )}
 
       {/* Fee List Modal */}
-      {(!showFeeListModal && !feeListModalClosing) ? null : (
+      {!showFeeListModal && !feeListModalClosing ? null : (
         <div
           className={`fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${
-            feeListModalOpening && !feeListModalClosing ? "opacity-100" : "opacity-0"
+            feeListModalOpening && !feeListModalClosing
+              ? "opacity-100"
+              : "opacity-0"
           }`}
           onClick={handleFeeListModalClose}
         >
@@ -1372,31 +1508,49 @@ export default function FeeTypeList() {
             </div>
 
             {/* Table */}
-            <div className={`border ${borderClr} overflow-x-auto ${
-              darkMode ? "bg-gray-900" : "bg-white"
-            }`}>
+            <div
+              className={`border ${borderClr} overflow-x-auto ${
+                darkMode ? "bg-gray-900" : "bg-white"
+              }`}
+            >
               <table className="w-full border-collapse text-xs">
-                <thead className={`${
-                  darkMode
-                    ? "bg-gray-800 border-b border-gray-700"
-                    : "bg-gray-100 border-b border-gray-200"
-                }`}>
+                <thead
+                  className={`${
+                    darkMode
+                      ? "bg-gray-800 border-b border-gray-700"
+                      : "bg-gray-100 border-b border-gray-200"
+                  }`}
+                >
                   <tr>
-                    <th className={`px-3 h-8 text-left font-semibold border-r ${borderClr} ${
-                      darkMode ? "text-gray-200" : "text-gray-800"
-                    }`}>SI</th>
-                    <th className={`px-3 h-8 text-left font-semibold border-r ${borderClr} ${
-                      darkMode ? "text-gray-200" : "text-gray-800"
-                    }`}>Fee Name</th>
-                    <th className={`px-3 h-8 text-left font-semibold ${
-                      darkMode ? "text-gray-200" : "text-gray-800"
-                    }`}>Action</th>
+                    <th
+                      className={`px-3 h-8 text-left font-semibold border-r ${borderClr} ${
+                        darkMode ? "text-gray-200" : "text-gray-800"
+                      }`}
+                    >
+                      SI
+                    </th>
+                    <th
+                      className={`px-3 h-8 text-left font-semibold border-r ${borderClr} ${
+                        darkMode ? "text-gray-200" : "text-gray-800"
+                      }`}
+                    >
+                      Fee name
+                    </th>
+                    <th
+                      className={`px-3 h-8 text-left font-semibold ${
+                        darkMode ? "text-gray-200" : "text-gray-800"
+                      }`}
+                    >
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {(() => {
                     const filteredFees = feeList.filter((fee) =>
-                      fee.name?.toLowerCase().includes(feeListSearch.toLowerCase())
+                      fee.name
+                        ?.toLowerCase()
+                        .includes(feeListSearch.toLowerCase()),
                     );
 
                     // Sort: fees being edited should appear first
@@ -1411,9 +1565,12 @@ export default function FeeTypeList() {
                     if (sortedFees.length === 0) {
                       return (
                         <tr>
-                          <td colSpan="3" className={`px-3 h-8 text-center border-r ${borderClr} ${
-                            darkMode ? "text-gray-400" : "text-gray-500"
-                          }`}>
+                          <td
+                            colSpan="3"
+                            className={`px-3 h-8 text-center border-r ${borderClr} ${
+                              darkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          >
                             No fees found
                           </td>
                         </tr>
@@ -1427,14 +1584,18 @@ export default function FeeTypeList() {
                           darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50"
                         }`}
                       >
-                        <td className={`px-3 h-8 border-r ${borderClr} ${
-                          darkMode ? "text-gray-200" : "text-gray-800"
-                        }`}>
+                        <td
+                          className={`px-3 h-8 border-r ${borderClr} ${
+                            darkMode ? "text-gray-200" : "text-gray-800"
+                          }`}
+                        >
                           {index + 1}
                         </td>
-                        <td className={`px-3 h-8 border-r ${borderClr} ${
-                          darkMode ? "text-gray-200" : "text-gray-800"
-                        }`}>
+                        <td
+                          className={`px-3 h-8 border-r ${borderClr} ${
+                            darkMode ? "text-gray-200" : "text-gray-800"
+                          }`}
+                        >
                           {editingFeeName?.id === fee.id ? (
                             <input
                               type="text"
@@ -1461,9 +1622,11 @@ export default function FeeTypeList() {
                             fee.name
                           )}
                         </td>
-                        <td className={`px-3 h-8 ${
-                          darkMode ? "text-gray-200" : "text-gray-800"
-                        }`}>
+                        <td
+                          className={`px-3 h-8 ${
+                            darkMode ? "text-gray-200" : "text-gray-800"
+                          }`}
+                        >
                           {editingFeeName?.id === fee.id ? (
                             <div className="flex gap-2">
                               <button
@@ -1503,7 +1666,6 @@ export default function FeeTypeList() {
                 </tbody>
               </table>
             </div>
-
           </div>
         </div>
       )}

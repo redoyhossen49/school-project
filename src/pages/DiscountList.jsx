@@ -330,349 +330,181 @@ export default function DiscountList() {
     : "bg-white text-gray-800";
 
   // DiscountModal Component (similar to FeesCollectionModal)
-  function DiscountModal({
-    open,
-    onClose,
-    onSubmit,
-  }) {
-    const { darkMode } = useTheme();
-    const [isModalClosing, setIsModalClosing] = useState(false);
-    const [isModalOpening, setIsModalOpening] = useState(false);
+ function DiscountModal({ open, onClose, onSubmit }) {
+  const { darkMode } = useTheme();
+  const [isModalOpening, setIsModalOpening] = useState(false);
+  const [isModalClosing, setIsModalClosing] = useState(false);
 
-    // Handle modal opening animation
-    useEffect(() => {
-      if (open) {
-        setIsModalClosing(false);
-        setTimeout(() => {
-          setIsModalOpening(true);
-        }, 0);
-      } else {
-        setIsModalOpening(false);
-      }
-    }, [open]);
-
-    const classOptions = getUniqueOptions(discountData, "class");
-    const groupOptions = getUniqueOptions(discountData, "group");
-    const sectionOptions = getUniqueOptions(discountData, "section");
-    const sessionOptions = getUniqueOptions(discountData, "session");
-    const studentNameOptions = getUniqueOptions(discountData, "student_name");
-    const feesTypeOptions = getUniqueOptions(feeTypeData, "fees_type");
-    const discountTypeOptions = ["Fix", "Percentage"];
-
-    const [formData, setFormData] = useState({
-      class: "",
-      group: "",
-      section: "",
-      session: "",
-      student_name: "",
-      fees_type: "",
-      total_fees: "",
-      discount_type: "Fix",
-      discount_amount: "",
-      total_after_discount: "",
-      start_date: "",
-      end_date: "",
-    });
-
-    // Find matching fee type record to get total fees amount
-    const matchingFeeTypeRecord = useMemo(() => {
-      if (!formData.fees_type || !formData.class || !formData.group || !formData.section || !formData.session) {
-        return null;
-      }
-      return feeTypeData.find(
-        (item) =>
-          item.class === formData.class &&
-          item.group === formData.group &&
-          item.section === formData.section &&
-          item.session === formData.session &&
-          item.fees_type === formData.fees_type
-      );
-    }, [formData.fees_type, formData.class, formData.group, formData.section, formData.session]);
-
-    // Auto-populate total fees when fees_type is selected
-    useEffect(() => {
-      if (matchingFeeTypeRecord) {
-        setFormData((prev) => ({
-          ...prev,
-          total_fees: matchingFeeTypeRecord.fees_amount?.toString() || "",
-        }));
-      } else if (formData.fees_type && formData.class && formData.group && formData.section && formData.session) {
-        setFormData((prev) => ({
-          ...prev,
-          total_fees: "",
-        }));
-      }
-    }, [matchingFeeTypeRecord]);
-
-    // Calculate total after discount
-    useEffect(() => {
-      const totalFees = parseFloat(formData.total_fees) || 0;
-      const discountAmount = parseFloat(formData.discount_amount) || 0;
-
-      if (formData.discount_type === "Fix") {
-        const totalAfterDiscount = Math.max(0, totalFees - discountAmount);
-        setFormData((prev) => ({
-          ...prev,
-          total_after_discount: totalAfterDiscount.toString(),
-        }));
-      } else if (formData.discount_type === "Percentage") {
-        const discountPercent = discountAmount / 100;
-        const totalAfterDiscount = Math.max(0, totalFees * (1 - discountPercent));
-        setFormData((prev) => ({
-          ...prev,
-          total_after_discount: totalAfterDiscount.toFixed(),
-        }));
-      }
-    }, [formData.total_fees, formData.discount_amount, formData.discount_type]);
-
-    // Reset form when modal closes
-    useEffect(() => {
-      if (!open) {
-        setFormData({
-          class: "",
-          group: "",
-          section: "",
-          session: "",
-          student_name: "",
-          fees_type: "",
-          total_fees: "",
-          discount_type: "Fix",
-          discount_amount: "",
-          total_after_discount: "",
-          start_date: "",
-          end_date: "",
-        });
-      }
-    }, [open]);
-
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSave = (e) => {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      // Validate required fields
-      const requiredFields = [
-        "class",
-        "group",
-        "section",
-        "session",
-        "student_name",
-        "fees_type",
-        "total_fees",
-        "discount_type",
-        "discount_amount",
-        "start_date",
-        "end_date",
-      ];
-
-      for (let field of requiredFields) {
-        if (!formData[field]) {
-          alert(`${field.replace("_", " ")} is required`);
-          return;
-        }
-      }
-
-      if (onSubmit) {
-        onSubmit(formData);
-      }
-      handleClose();
-    };
-
-    // Handle close with animation
-    const handleClose = () => {
-      setIsModalClosing(true);
+  useEffect(() => {
+    if (open) {
+      setIsModalClosing(false);
+      setTimeout(() => setIsModalOpening(true), 0);
+    } else {
       setIsModalOpening(false);
-      setTimeout(() => {
-        onClose();
-        setIsModalClosing(false);
-      }, 300);
-    };
+    }
+  }, [open]);
 
-    const borderClr = darkMode ? "border-gray-600" : "border-gray-300";
-    const inputBg = darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800";
-    const readOnlyBg = darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-600";
-    const modalBg = darkMode ? "bg-gray-800" : "bg-white";
-    const textColor = darkMode ? "text-gray-100" : "text-gray-800";
+  const classOptions = getUniqueOptions(discountData, "class");
+  const groupOptions = getUniqueOptions(discountData, "group");
+  const sectionOptions = getUniqueOptions(discountData, "section");
+  const sessionOptions = getUniqueOptions(discountData, "session");
+  const studentOptions = getUniqueOptions(discountData, "student_name");
+  const feesTypeOptions = getUniqueOptions(feeTypeData, "fees_type");
 
-    if (!open && !isModalClosing) return null;
+  const [formData, setFormData] = useState({
+    class: "",
+    group: "",
+    section: "",
+    session: "",
+    student_name: "",
+    fees_type: "",
+    total_fees: "",
+    discount_type: "Fix",
+    discount_amount: "",
+    total_after_discount: "",
+    start_date: "",
+    end_date: "",
+  });
 
-    return (
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300 ${isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"
-          }`}
-        onClick={handleClose}
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleClose = () => {
+    setIsModalClosing(true);
+    setIsModalOpening(false);
+    setTimeout(() => {
+      onClose();
+      setIsModalClosing(false);
+    }, 300);
+  };
+
+  if (!open && !isModalClosing) return null;
+
+  const border = darkMode ? "border-gray-600" : "border-gray-300";
+  const bg = darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800";
+  const labelBg = darkMode ? "bg-gray-800" : "bg-white";
+
+  /** Floating Select Component */
+  const FloatingSelect = ({ label, name, value, options }) => (
+    <div className="relative w-full">
+      <select
+        name={name}
+        value={value}
+        onChange={handleChange}
+        className={`peer w-full h-8 px-2 text-xs border  outline-none ${border} ${bg}`}
       >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className={`${modalBg} ${textColor} w-full max-w-[320px] border ${borderClr} p-6 max-h-[550px] overflow-y-auto hide-scrollbar transition-all duration-300 transform ${isModalOpening && !isModalClosing
-            ? "scale-100 opacity-100 translate-y-0"
-            : "scale-95 opacity-0 translate-y-4"
-            }`}
-        >
-          {/* Title */}
-          <h2 className="text-base font-semibold text-center mb-4">Add Discount</h2>
+        <option value=""></option>
+        {options.map((op, i) => (
+          <option key={i} value={op}>{op}</option>
+        ))}
+      </select>
 
-          <div
-            className="space-y-4"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && e.target.tagName !== "BUTTON") {
-                e.preventDefault();
-              }
-            }}
-          >
-            {/* Select Class */}
-            <Input
-              label="Select Class"
-              name="class"
-              value={formData.class}
-              onChange={handleChange}
-              type="select"
-              options={classOptions}
+      <label
+        className={`absolute left-2 px-1 text-xs transition-all 
+        peer-focus:-top-2 peer-focus:text-blue-600
+        ${value ? "-top-2" : "top-2.5"}
+        ${labelBg}`}
+      >
+        {label}
+      </label>
+    </div>
+  );
+
+  /** Floating Input */
+  const FloatingInput = ({ label, name, type = "text", value, readOnly }) => (
+    <div className="relative w-full">
+      <input
+        type={type}
+        name={name}
+        value={value}
+        readOnly={readOnly}
+        onChange={handleChange}
+        className={`peer w-full h-8 px-2 text-xs border  outline-none ${border} ${bg}`}
+      />
+      <label
+        className={`absolute left-2 px-1 text-xs transition-all
+        peer-focus:-top-2 peer-focus:text-blue-600
+        ${value ? "-top-2" : "top-2.5"}
+        ${labelBg}`}
+      >
+        {label}
+      </label>
+    </div>
+  );
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30 transition-opacity
+      ${isModalOpening && !isModalClosing ? "opacity-100" : "opacity-0"}`}
+      onClick={handleClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`${bg} w-72 p-6 max-h-[80vh] overflow-y-auto  rounded border ${border}
+        transform transition-all
+        ${isModalOpening && !isModalClosing ? "scale-100" : "scale-95"}`}
+      >
+        <h2 className="text-center font-semibold mb-4">Add Discount</h2>
+
+        <div className="space-y-4">
+
+          <FloatingSelect label="Class" name="class" value={formData.class} options={classOptions} />
+          <FloatingSelect label="Group" name="group" value={formData.group} options={groupOptions} />
+          <FloatingSelect label="Section" name="section" value={formData.section} options={sectionOptions} />
+          <FloatingSelect label="Session" name="session" value={formData.session} options={sessionOptions} />
+          <FloatingSelect label="Student" name="student_name" value={formData.student_name} options={studentOptions} />
+          <FloatingSelect label="Fees Type" name="fees_type" value={formData.fees_type} options={feesTypeOptions} />
+
+          <FloatingInput label="Total Fees" name="total_fees" value={formData.total_fees} readOnly />
+
+          <div className="grid grid-cols-2 gap-2">
+            <FloatingSelect
+              label="Discount Type"
+              name="discount_type"
+              value={formData.discount_type}
+              options={["Fix", "Percentage"]}
             />
-
-            {/* Select Group */}
-            <Input
-              label="Select Group"
-              name="group"
-              value={formData.group}
-              onChange={handleChange}
-              type="select"
-              options={groupOptions}
+            <FloatingInput
+              label="Discount Amount"
+              name="discount_amount"
+              type="number"
+              value={formData.discount_amount}
             />
-
-            {/* Select Section */}
-            <Input
-              label="Select Section"
-              name="section"
-              value={formData.section}
-              onChange={handleChange}
-              type="select"
-              options={sectionOptions}
-            />
-
-            {/* Select Session Year */}
-            <Input
-              label="Select Session Year"
-              name="session"
-              value={formData.session}
-              onChange={handleChange}
-              type="select"
-              options={sessionOptions}
-            />
-
-            {/* Select Student */}
-            <Input
-              label="Select Student"
-              name="student_name"
-              value={formData.student_name}
-              onChange={handleChange}
-              type="select"
-              options={studentNameOptions}
-            />
-
-            {/* Select Fees Type */}
-            <Input
-              label="Select Fees Type"
-              name="fees_type"
-              value={formData.fees_type}
-              onChange={handleChange}
-              type="select"
-              options={feesTypeOptions}
-            />
-
-            {/* TOTAL FEES - Read-only */}
-            <div className="relative w-full">
-              <Input
-                label="TOTAL FEES"
-                name="total_fees"
-                value={formData.total_fees}
-                onChange={handleChange}
-                type="text"
-                readOnly
-              />
-            </div>
-
-            {/* DISCOUNT TYPE and DISCOUNT AMOUNT */}
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                label="DISCOUNT TYPE"
-                name="discount_type"
-                value={formData.discount_type}
-                onChange={handleChange}
-                type="select"
-                options={discountTypeOptions}
-              />
-              <Input
-                label="DISCOUNT AMOUNT"
-                name="discount_amount"
-                value={formData.discount_amount}
-                onChange={handleChange}
-                type="number"
-                step="0.02"
-              />
-            </div>
-
-            {/* TOTAL AFTER DISCOUNT - Read-only */}
-            <div className="relative w-full pt-2">
-              <Input
-                label="TOTAL AFTER DISCOUNT"
-                name="total_after_discount"
-                value={formData.total_after_discount}
-                onChange={handleChange}
-                type="text"
-                readOnly
-              />
-            </div>
-
-            {/* START DATE and CLOSE DATE */}
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <Input
-                label="START DATE"
-                name="start_date"
-                value={formData.start_date}
-                onChange={handleChange}
-                type="date"
-              />
-              <Input
-                label="CLOSE DATE"
-                name="end_date"
-                value={formData.end_date}
-                onChange={handleChange}
-                type="date"
-              />
-            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              className={`flex-1 text-[12px] h-8 border ${borderClr} ${darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                } transition`}
-            >
-              Close
-            </button>
+          <FloatingInput
+            label="Total After Discount"
+            name="total_after_discount"
+            value={formData.total_after_discount}
+            readOnly
+          />
 
-            <button
-              type="button"
-              onClick={handleSave}
-              className="flex-1 text-[12px] h-8 bg-blue-600 text-white hover:bg-blue-700 transition font-semibold"
-            >
-              Add
-            </button>
+          <div className="grid grid-cols-2 gap-2">
+            <FloatingInput label="Start Date" name="start_date" type="date" value={formData.start_date} />
+            <FloatingInput label="Close Date" name="end_date" type="date" value={formData.end_date} />
           </div>
         </div>
+
+        <div className="flex gap-3 mt-5">
+          <button
+            onClick={handleClose}
+            className="flex-1 h-8 text-xs border border-gray-300  hover:bg-gray-100"
+          >
+            Close
+          </button>
+          <button
+            onClick={() => onSubmit?.(formData)}
+            className="flex-1 h-8 text-xs bg-blue-600 text-white "
+          >
+            Add
+          </button>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   // Handle discount form submit
   const handleDiscountFormSubmit = async (formData) => {
@@ -726,108 +558,7 @@ export default function DiscountList() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-2">
-            <button
-              onClick={handleRefresh}
-              className={`flex items-center   px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
-            >
-              Refresh
-            </button>
-
-            <div className="relative" ref={exportRef}>
-              <button
-                onClick={() => setExportOpen((prev) => !prev)}
-                className={`flex items-center justify-between  px-3 h-8 text-xs w-24  border ${borderClr} ${inputBg}`}
-              >
-                Export
-              </button>
-              {exportOpen && (
-                <div
-                  className={`absolute top-full left-0 mt-1 w-28 z-40 border  ${darkMode
-                    ? "bg-gray-800 border-gray-700 text-gray-100"
-                    : "bg-white border-gray-200 text-gray-900"
-                    }`}
-                >
-                  <button
-                    onClick={() => exportPDF(filteredDiscounts)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Export PDF
-                  </button>
-                  <button
-                    onClick={() => exportExcel(filteredDiscounts)}
-                    className="w-full px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Export Excel
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {canEdit && (
-              <button
-                onClick={() => setShowDiscountModal(true)}
-                className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
-              >
-                Discount
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Buttons */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
-          <button
-            onClick={handleRefresh}
-            className={`w-full  flex items-center  px-3 h-8 text-sm   border ${borderClr} ${inputBg}`}
-          >
-            Refresh
-          </button>
-
-          <div className="relative w-full " ref={exportRef}>
-            <button
-              onClick={() => setExportOpen((prev) => !prev)}
-              className={`w-full  flex items-center   px-3 h-8 text-xs   border ${borderClr} ${inputBg}`}
-            >
-              Export
-            </button>
-            {exportOpen && (
-              <div
-                className={`absolute top-full left-0 mt-1 w-full z-40 border   ${darkMode
-                  ? "bg-gray-800 border-gray-700 text-gray-100"
-                  : "bg-white border-gray-200 text-gray-900"
-                  }`}
-              >
-                <button
-                  onClick={() => exportPDF(filteredDiscounts)}
-                  className="w-full px-3 h-6 text-left text-xs hover:bg-gray-100 "
-                >
-                  Export PDF
-                </button>
-                <button
-                  onClick={() => exportExcel(filteredDiscounts)}
-                  className="w-full px-3 h-8 text-left text-xs hover:bg-gray-100 "
-                >
-                  Export Excel
-                </button>
-              </div>
-            )}
-          </div>
-
-          {canEdit && (
-            <button
-              onClick={() => setShowDiscountModal(true)}
-              className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
-            >
-              Discount
-            </button>
-          )}
-        </div>
-
-        {/* Filters + Search */}
-        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2">
-          <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 w-full md:w-auto">
-            {/* Find Button */}
-            <div className="relative flex-1 md:flex-none">
+           <div className="relative flex-1 md:flex-none">
               <button
                 onClick={() => {
                   setFindFilterType(appliedFindFilterType || "");
@@ -842,8 +573,83 @@ export default function DiscountList() {
               </button>
             </div>
 
-            {/* Filter Button */}
-            <div className="relative flex-1 md:flex-none" ref={filterRef}>
+           <div className="relative flex-1 md:flex-none" ref={filterRef}>
+              <button
+                ref={filterButtonRef}
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${darkMode
+                  ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                  : "bg-white border-gray-300 hover:bg-gray-100"
+                  }`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter Discounts"
+                fields={[
+                  {
+                    key: "className",
+                    label: "Class",
+                    options: classOptions,
+                    placeholder: "Select Class",
+                  },
+                  {
+                    key: "group",
+                    label: "Group",
+                    options: groupOptions,
+                    placeholder: "Select Group",
+                  },
+                  {
+                    key: "section",
+                    label: "Section",
+                    options: sectionOptions,
+                    placeholder: "Select Section",
+                  },
+                  {
+                    key: "session",
+                    label: "Session",
+                    options: sessionOptions,
+                    placeholder: "Select Session",
+                  },
+                ]}
+                selected={filters}
+                setSelected={setFilters}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={() => setCurrentPage(1)}
+                buttonRef={filterButtonRef}
+              />
+            </div>
+            {canEdit && (
+              <button
+                onClick={() => setShowDiscountModal(true)}
+                className="flex items-center w-28  bg-blue-600 px-3 py-2 text-xs text-white"
+              >
+                Discount
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Buttons */}
+        <div className="grid grid-cols-3 gap-2 md:hidden">
+          <div className="relative flex-1 md:flex-none">
+              <button
+                onClick={() => {
+                  setFindFilterType(appliedFindFilterType || "");
+                  setShowFindModal(true);
+                }}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${darkMode
+                  ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                  : "bg-white border-gray-300 hover:bg-gray-100"
+                  }`}
+              >
+                Find
+              </button>
+            </div>
+          <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
                 ref={filterButtonRef}
                 onClick={() => setFilterOpen((prev) => !prev)}
@@ -893,7 +699,87 @@ export default function DiscountList() {
               />
             </div>
 
-            {/* Sort Dropdown */}
+          {canEdit && (
+            <button
+              onClick={() => setShowDiscountModal(true)}
+              className="w-full flex items-center  bg-blue-600 px-3 h-8 text-xs text-white"
+            >
+              Discount
+            </button>
+          )}
+        </div>
+
+        {/* Filters + Search */}
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-2">
+
+            {/* Find Button 
+            <div className="relative flex-1 md:flex-none">
+              <button
+                onClick={() => {
+                  setFindFilterType(appliedFindFilterType || "");
+                  setShowFindModal(true);
+                }}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${darkMode
+                  ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                  : "bg-white border-gray-300 hover:bg-gray-100"
+                  }`}
+              >
+                Find
+              </button>
+            </div>*/}
+
+            {/* Filter Button 
+            <div className="relative flex-1 md:flex-none" ref={filterRef}>
+              <button
+                ref={filterButtonRef}
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`w-full md:w-28 flex items-center border px-3 h-8 text-xs ${darkMode
+                  ? "bg-gray-700 border-gray-600 hover:bg-gray-500"
+                  : "bg-white border-gray-300 hover:bg-gray-100"
+                  }`}
+              >
+                Filter
+              </button>
+
+              <FilterDropdown
+                title="Filter Discounts"
+                fields={[
+                  {
+                    key: "className",
+                    label: "Class",
+                    options: classOptions,
+                    placeholder: "Select Class",
+                  },
+                  {
+                    key: "group",
+                    label: "Group",
+                    options: groupOptions,
+                    placeholder: "Select Group",
+                  },
+                  {
+                    key: "section",
+                    label: "Section",
+                    options: sectionOptions,
+                    placeholder: "Select Section",
+                  },
+                  {
+                    key: "session",
+                    label: "Session",
+                    options: sessionOptions,
+                    placeholder: "Select Session",
+                  },
+                ]}
+                selected={filters}
+                setSelected={setFilters}
+                darkMode={darkMode}
+                isOpen={filterOpen}
+                onClose={() => setFilterOpen(false)}
+                onApply={() => setCurrentPage(1)}
+                buttonRef={filterButtonRef}
+              />
+            </div> */}
+
+            {/* Sort Dropdown 
             <div className="relative flex-1 md:flex-none" ref={sortRef}>
               <button
                 onClick={() => setSortOpen((prev) => !prev)}
@@ -931,11 +817,11 @@ export default function DiscountList() {
                   </button>
                 </div>
               )}
-            </div>
-          </div>
+            </div>*/}
+          
 
           {/* Search + Pagination */}
-          <div className="flex items-center gap-2 md:w-auto">
+          <div className="flex items-center gap-2 w-full md:justify-between">
             <input
               type="text"
               value={search}

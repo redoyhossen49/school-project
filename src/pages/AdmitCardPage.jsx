@@ -79,6 +79,7 @@ export default function AdmitCardPage() {
   // Admit Card Modal States
   const [admitCardSelections, setAdmitCardSelections] = useState({
     class: "",
+    group: "",
     section: "",
     session: "",
     exam: "",
@@ -443,7 +444,7 @@ export default function AdmitCardPage() {
             }
             .watermark {
               position: absolute;
-              top: 50%;
+              top: 60%;
               left: 50%;
               transform: translate(-50%, -50%) rotate(-45deg);
               opacity: 0.1;
@@ -451,7 +452,7 @@ export default function AdmitCardPage() {
               pointer-events: none;
             }
             .watermark img {
-              width: 600px;
+              width: 300px;
               height: auto;
               object-fit: contain;
             }
@@ -575,12 +576,14 @@ export default function AdmitCardPage() {
               border: none;
               font-size: 12px;
               background-color: transparent;
-            }
-            .footer {
-              margin-top: 5%;
-              display: flex;
-              justify-content: flex-end;
-            }
+            } 
+           .footer {
+  margin-top: 2%;
+  display: flex;
+  justify-content: space-between; /* spreads the two divs */
+  align-items: center; /* vertically centers items inside each div */
+}
+
             .sig-box {
               text-align: center;
               width: 250px;
@@ -597,7 +600,7 @@ export default function AdmitCardPage() {
             .signature-image {
               width: 150px;
               height: auto;
-              max-height: 50px;
+              max-height: 40px;
               object-fit: contain;
               margin-bottom: 5px;
               -webkit-print-color-adjust: exact;
@@ -668,7 +671,7 @@ export default function AdmitCardPage() {
             }
               .watermark {
                 position: absolute !important;
-                top: 50% !important;
+                top: 60% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) rotate(-45deg) !important;
                 opacity: 0.08 !important;
@@ -676,7 +679,7 @@ export default function AdmitCardPage() {
                 pointer-events: none !important;
               }
               .watermark img {
-                width: 600px !important;
+                width: 300px !important;
                 height: auto !important;
                 object-fit: contain !important;
               }
@@ -692,6 +695,12 @@ export default function AdmitCardPage() {
                 border: 1px solid #999 !important;
                 background: #fff !important;
               }
+                .footer {
+  margin-top: 2%;
+  display: flex;
+  justify-content: space-between; /* spreads the two divs */
+  align-items: center; /* vertically centers items inside each div */
+}
               .student-photo {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -1159,7 +1168,7 @@ export default function AdmitCardPage() {
               pointer-events: none;
             }
             .watermark img {
-              width: 600px;
+              width: 300px;
               height: auto;
               object-fit: contain;
             }
@@ -1289,9 +1298,9 @@ export default function AdmitCardPage() {
               background-color: transparent;
             }
             .footer {
-              margin-top: 5%;
+              margin-top: 2%;
               display: flex;
-              justify-content: flex-end;
+              justify-content: space-between;
             }
             .sig-box {
               text-align: center;
@@ -1447,7 +1456,7 @@ export default function AdmitCardPage() {
                 pointer-events: none !important;
               }
               .watermark img {
-                width: 400px !important;
+                width: 300px !important;
                 height: auto !important;
                 object-fit: contain !important;
               }
@@ -1718,7 +1727,7 @@ export default function AdmitCardPage() {
               </button>
               {exportOpen && (
                 <div
-                  className={`absolute left-0 top-full z-50 mt-1 w-full md:w-28 border  ${borderClr} ${dropdownBg}`}
+                  className={`absolute left-0 top-full z-50 mt-2 w-full md:w-28 border  ${borderClr} ${dropdownBg}`}
                 >
                   <button
                     onClick={() => {
@@ -1745,7 +1754,7 @@ export default function AdmitCardPage() {
             {canEdit ? (
               <button
                 onClick={() => setAdmitCardModalOpen(true)}
-                className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Admit Card
               </button>
@@ -1934,7 +1943,7 @@ export default function AdmitCardPage() {
               <tr>
                 <td
                   colSpan={columns.length + 2}
-                  className={`h-10 px-3 border-b ${borderClr}`}
+                  className={`h-10 px-3 border-b bg-white ${borderClr}`}
                 >
                   <div className="flex items-center justify-between">
                     <button
@@ -2070,21 +2079,12 @@ export default function AdmitCardPage() {
       {admitCardModalOpen && (
         <AdmitCardModal
           open={admitCardModalOpen}
-          onClose={() => {
-            setAdmitCardModalOpen(false);
-            setAdmitCardSelections({
-              class: "",
-              group: "",
-              section: "",
-              session: "",
-              exam: "",
-            });
-          }}
+          onClose={() => setAdmitCardModalOpen(false)}
           selections={admitCardSelections}
           setSelections={setAdmitCardSelections}
           classOptions={classOptions}
           groupOptions={groupOptions}
-          sectionOptions={filteredSectionOptions}
+          sectionOptions={filteredSectionOptions} // filtered
           sessionOptions={sessionOptions}
           examOptions={examOptions}
           filteredStudents={filteredStudentsForAdmitCard}

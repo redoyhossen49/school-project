@@ -88,7 +88,7 @@ export default function SectionListPage() {
 
   // -------------------- Table columns --------------------
 const columns = [
-  { key: "sl", label: "SL" },
+  { key: "sl", label: "Sl" },
   { key: "class", label: "Class" },
   { key: "group", label: "Group" },
   { key: "section", label: "Section" },

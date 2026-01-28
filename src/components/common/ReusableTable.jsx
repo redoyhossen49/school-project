@@ -9,7 +9,7 @@ export default function ReusableTable({
   setData,
   showActionKey = false,
   modalFields = [], // Edit modal এর fields
-  extraProps = {},  // ReusableActions-এর extra props
+  extraProps = {}, // ReusableActions-এর extra props
 }) {
   const { darkMode } = useTheme();
   const borderCol = darkMode ? "border-gray-700" : "border-gray-300";
@@ -22,16 +22,16 @@ export default function ReusableTable({
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const handleEditSubmit = (updatedData) => {
+   const handleEditSubmit = (updatedData) => {
     setData((prev) =>
-      prev.map((r) => (r.sl === selectedRow.sl ? { ...r, ...updatedData } : r))
+      prev.map((r) => (r.SL === selectedRow.SL ? { ...r, ...updatedData } : r))
     );
     setEditModalOpen(false);
   };
 
   const handleDelete = (row) => {
     if (confirm("Are you sure you want to delete this item?")) {
-      setData((prev) => prev.filter((r) => r.sl !== row.sl));
+      setData((prev) => prev.filter((r) => r.SL !== row.SL));
       alert("Item deleted successfully ✅");
     }
   };
@@ -103,7 +103,7 @@ export default function ReusableTable({
                   >
                     <div className="flex items-center gap-1 h-full">
                       <ReusableActions
-                        rowData={row}
+                        item={row}
                         onEdit={(r) => {
                           setSelectedRow(r);
                           setEditModalOpen(true);

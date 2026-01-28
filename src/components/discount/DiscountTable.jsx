@@ -8,12 +8,12 @@ const headers = [
   "Group",
   "Section",
   "Session",
-  "Student Name",
-  "Fees Type",
+  "Student name",
+  "Fees type",
   "Regular",
   "Discount",
-  "Total Payable",
-  "Payable Due",
+  "Total payable",
+  "Payable due",
 ];
 
 export default function DiscountTable({ data, setData, onEdit, onDelete }) {

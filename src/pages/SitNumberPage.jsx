@@ -464,7 +464,7 @@ export default function SitNumberPage() {
               <>
                 <button
                   onClick={() => setSeatPlanModalOpen(true)}
-                  className="w-full flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
+                  className="w-full md:w-28 flex items-center  bg-blue-600 text-white px-3 h-8 text-xs"
                 >
                   Seat plan
                 </button>

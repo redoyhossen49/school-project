@@ -44,8 +44,8 @@ export default function ClassRoutinePage() {
   const exportRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [addRoutineOpen, setAddRoutineOpen] = useState(false);
-  const [routineData, setRoutineData] = useState(classRoutineData); // start with original data
-
+  const [routineData, setRoutineData] = useState(classRoutineData); 
+  
   useEffect(() => {
     const handler = (e) => {
       if (filterRef.current && !filterRef.current.contains(e.target)) {

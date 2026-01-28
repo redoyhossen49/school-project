@@ -1,6 +1,7 @@
 export const gradeData = [
     
     {
+        "sl": 1,
         "Class": "9",
         "Group": "Science",
         "Subject": "Mathematics",
@@ -10,6 +11,7 @@ export const gradeData = [
         "GradePoint": 5.0
     },
     {
+         "sl": 2,
         "Class": "9",
         "Group": "Science",
         "Subject": "Physics",
@@ -19,6 +21,7 @@ export const gradeData = [
         "GradePoint": 4.0
     },
     {
+         "sl": 3,
         "Class": "9",
         "Group": "Arts",
         "Subject": "History",
@@ -29,6 +32,7 @@ export const gradeData = [
     },
    
     {
+         "sl": 4,
         "Class": "10",
         "Group": "Science",
         "Subject": "Chemistry",
@@ -38,6 +42,7 @@ export const gradeData = [
         "GradePoint": 3.5
     },
     {
+         "sl": 5,
         "Class": "10",
         "Group": "Science",
         "Subject": "Biology",
@@ -47,6 +52,7 @@ export const gradeData = [
         "GradePoint": 3.0
     },
     {
+         "sl": 6,
         "Class": "10",
         "Group": "Arts",
         "Subject": "Geography",
@@ -57,6 +63,7 @@ export const gradeData = [
     },
    
     {
+         "sl": 7,
         "Class": "11",
         "Group": "Science",
         "Subject": "Mathematics",
@@ -66,6 +73,7 @@ export const gradeData = [
         "GradePoint": 4.0
     },
     {
+         "sl": 8,
         "Class": "11",
         "Group": "Commerce",
         "Subject": "Accounting",
@@ -76,6 +84,7 @@ export const gradeData = [
     },
     
     {
+         "sl": 9,
         "Class": "12",
         "Group": "Science",
         "Subject": "Physics",
@@ -85,6 +94,7 @@ export const gradeData = [
         "GradePoint": 5.0
     },
     {
+         "sl": 10,
         "Class": "12",
         "Group": "Commerce",
         "Subject": "Business Studies",

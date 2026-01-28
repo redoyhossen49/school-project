@@ -122,7 +122,7 @@ export default function EditAdmitCardModal({
       <div
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
-        className={`${modalBg} ${textColor} w-full max-w-[600px] border ${borderClr} p-6 max-h-[90vh] overflow-y-auto transition-all duration-300 transform ${
+        className={`${modalBg} ${textColor} w-72 rounded border ${borderClr} p-6 max-h-[90vh] overflow-y-auto transition-all duration-300 transform ${
           isModalOpening && !isModalClosing
             ? "scale-100 opacity-100 translate-y-0"
             : "scale-95 opacity-0 translate-y-4"

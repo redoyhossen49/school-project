@@ -245,7 +245,7 @@ export default function GradeList() {
 
   // -------------------- Columns --------------------
   const columns = [
-    { key: "SL", label: "Sl" },
+    { key: "sl", label: "Sl" },
     { key: "Class", label: "Class" },
     { key: "Group", label: "Group" },
     { key: "Subject", label: "Subject" },
@@ -258,47 +258,87 @@ export default function GradeList() {
   // -------------------- Add Class Modal --------------------
   const addGradeFields = [
     {
-      key: "class",
+      key: "Class",
       type: "select",
       placeholder: "Class",
       options: classOptions,
     },
     {
-      key: "group",
+      key: "Group",
       type: "select",
       placeholder: "Group",
       options: groupOptions,
     },
     {
-      key: "subject",
+      key: "Subject",
       type: "select",
       placeholder: "Subject",
       options: subjectOptions,
     },
     {
-      key: "letterGrade",
+      key: "LetterGrade",
       type: "text",
       label: "Grade name",
-      placeholder: " Grade name",
+      placeholder: "Grade name",
     },
     {
-      key: "maxNumber",
+      key: "MaxNumber",
       type: "number",
       label: "Max mark",
       placeholder: "Max mark",
     },
     {
-      key: "minNumber",
+      key: "MinNumber",
       type: "number",
       label: "Min mark",
       placeholder: "Min mark",
     },
     {
-      key: "gradePoint",
+      key: "GradePoint",
       type: "number",
       label: "Point no",
-      placeholder: " Point no",
+      placeholder: "Point no",
     },
+  ];
+
+  const editGradeFields = [
+    {
+      name: "Class",
+      label: "Class",
+      required: true,
+      type: "select",
+      options: classOptions,
+    },
+    {
+      name: "Group",
+      label: "Group",
+      required: true,
+      type: "select",
+      options: (formData) =>
+        data
+          .filter((i) => (formData.Class ? i.Class === formData.Class : true))
+          .map((i) => i.Group)
+          .filter((v, i, a) => a.indexOf(v) === i),
+    },
+    {
+      name: "Subject",
+      label: "Subject",
+      required: true,
+      type: "select",
+      options: (formData) =>
+        data
+          .filter(
+            (i) =>
+              (!formData.Class || i.Class === formData.Class) &&
+              (!formData.Group || i.Group === formData.Group),
+          )
+          .map((i) => i.Subject)
+          .filter((v, i, a) => a.indexOf(v) === i),
+    },
+    { name: "LetterGrade", label: "Grade", required: true },
+    { name: "MaxNumber", label: "Max Mark", type: "number" },
+    { name: "MinNumber", label: "Min Mark", type: "number" },
+    { name: "GradePoint", label: "Grade Point", type: "number" },
   ];
 
   const handleAddClass = (newEntry) => {
@@ -365,7 +405,7 @@ export default function GradeList() {
             <div ref={exportRef} className="relative w-full md:w-28">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className={`w-full flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
+                className={`w-full   flex items-center border px-3 h-8 text-xs ${borderClr} ${inputBg}`}
               >
                 Export
               </button>
@@ -392,7 +432,7 @@ export default function GradeList() {
             {canEdit ? (
               <button
                 onClick={() => setAddClassOpen(true)}
-                className="w-full flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
+                className="w-full md:w-28 flex items-center bg-blue-600 text-white px-3 h-8 text-xs"
               >
                 Grade
               </button>
@@ -448,6 +488,7 @@ export default function GradeList() {
               onSubmit={(newEntry) => {
                 setData((prev) => [...prev, newEntry]);
                 setCurrentPage(1);
+                setAddClassOpen(false);
               }}
             />
           </div>
@@ -522,12 +563,10 @@ export default function GradeList() {
       <div className={` p-3 overflow-x-auto ${cardBg}`}>
         <ReusableTable
           columns={columns}
-          data={currentData.map((item, idx) => ({
-            ...item,
-            id: (currentPage - 1) * perPage + idx + 1,
-            SL: (currentPage - 1) * perPage + idx + 1,
-          }))}
+          data={data}
+          setData={setData}
           showActionKey={canEdit}
+          modalFields={editGradeFields}
         />
       </div>
     </div>

@@ -4,12 +4,12 @@ import StudentActions from "./StudentActions";
 import ReusableEditModal from "../common/ReusableEditModal";
 
 const headers = [
-  "Sl No",
-  "Roll No",
-  "Student ID",
+  "Sl ",
+  "Roll ",
+  "Student id",
   "Password",
   "Name",
-  "Gender",
+
   "Father name",
   "Mother name",
   "Class",
@@ -17,10 +17,10 @@ const headers = [
   "Section",
   "Session",
   "Phone",
-  "Fees due",
-  "Status",
+  "Admission fee",
+  "Login type",
   "Join date",
-  "Date of birth",
+  "Status",
 ];
 
 export default function StudentTable({ data, setData }) {
@@ -29,6 +29,7 @@ export default function StudentTable({ data, setData }) {
   const hoverRow = darkMode ? "hover:bg-gray-800" : "hover:bg-gray-50";
   const userRole = localStorage.getItem("role"); // "school"
   const showAction = userRole === "school";
+  const isSchool = userRole === "school";
 
   const [editingStudent, setEditingStudent] = useState(null);
 
@@ -42,6 +43,12 @@ export default function StudentTable({ data, setData }) {
   };
 
   const handleEdit = (student) => setEditingStudent(student);
+
+  const handleStatusChange = (id, newStatus) => {
+    setData((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status: newStatus } : s)),
+    );
+  };
 
   const handleDelete = (id) => {
     if (confirm("Are you sure you want to delete this student?")) {
@@ -72,14 +79,20 @@ export default function StudentTable({ data, setData }) {
           }`}
         >
           <tr>
-            {headers.map((h) => (
-              <th
-                key={h}
-                className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
-              >
-                {h}
-              </th>
-            ))}
+            {headers.map((h) => {
+              if ((h === "Password" || h === "Date of birth") && !isSchool) {
+                return null;
+              }
+
+              return (
+                <th
+                  key={h}
+                  className={`px-3 h-8 text-left font-semibold border-r ${borderCol} whitespace-nowrap`}
+                >
+                  {h}
+                </th>
+              );
+            })}
             {showAction && (
               <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
                 Action
@@ -106,21 +119,19 @@ export default function StudentTable({ data, setData }) {
               >
                 {s.studentId}
               </td>
-              <td
-                className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}
-              >
-                {s.password}
-              </td>
+              {isSchool && (
+                <td
+                  className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}
+                >
+                  {s.password}
+                </td>
+              )}
               <td
                 className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}
               >
                 {s.student_name}
               </td>
-              <td
-                className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}
-              >
-                {s.gender}
-              </td>
+
               <td
                 className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}
               >
@@ -172,21 +183,13 @@ export default function StudentTable({ data, setData }) {
                   </span>
                 )}
               </td>
-              <td
-                className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}
-              >
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
                 <span
-                  className={`inline-flex items-center h-4 px-2 text-[10px] font-semibold ${
-                    s.status === "Active"
-                      ? darkMode
-                        ? "text-green-500"
-                        : "text-green-700"
-                      : darkMode
-                        ? "text-red-600"
-                        : "text-red-700"
+                  className={`font-semibold ${
+                    s.loginType === "Active" ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  ● {s.status}
+                  {s.loginType || "-"}
                 </span>
               </td>
               <td
@@ -194,10 +197,19 @@ export default function StudentTable({ data, setData }) {
               >
                 {formatDateShort(s.joinDate)}
               </td>
-              <td
-                className={`px-3 h-8 border-r whitespace-nowrap ${borderCol}`}
-              >
-                {formatDateShort(s.dob)}
+
+              <td className={`px-3 h-8 border-r ${borderCol}`}>
+                <span
+                  className={`font-semibold ${
+                    s.status === "approved"
+                      ? "text-green-600"
+                      : s.status === "pending"
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                  }`}
+                >
+                  {s.status || "-"}
+                </span>
               </td>
 
               {showAction && (
@@ -206,6 +218,7 @@ export default function StudentTable({ data, setData }) {
                     student={s}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onStatusChange={handleStatusChange}
                   />
                 </td>
               )}

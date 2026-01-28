@@ -4,7 +4,6 @@ export const formatDate = (dateStr) => {
   const options = { day: "2-digit", month: "short", year: "numeric" };
   return date.toLocaleDateString("en-US", options); // e.g., "10 Jan 2026"
 };
-
 export const studentData = [
   {
     id: 1,
@@ -23,10 +22,13 @@ export const studentData = [
     email: "janet@example.com",
     password: "123456",
     feesDue: 1200,
-    gender: "Female",
-    status: "Active",
-    joinDate: "2026-01-10", // raw ISO string
-    dob: "2015-01-10",      // raw ISO string
+    
+
+    loginType: "Active",
+    status: "approved",
+
+    joinDate: "2026-01-10",
+
     guardian: {
       name: "Robert Smith",
       relation: "Father",
@@ -39,45 +41,12 @@ export const studentData = [
       email: "robert@example.com",
     },
   },
-  {
-    id: 2,
-    admissionNo: "AD1002",
-    studentId: "STU1002",
-    rollNo: 102,
-    student_name: "Joann",
-    photo: "https://i.pravatar.cc/40?img=2",
-    fatherName: "David Miller",
-    motherName: "Sara Miller",
-    className: "10",
-    group: "Science",
-    section: "A",
-    session: "2025-26",
-    phone: "01710000002",
-    email: "joann@example.com",
-    password: "123456",
-    feesDue: 200,
-    gender: "Male",
-    status: "Active",
-    joinDate: "2026-01-09",
-    dob: "2014-08-19",
-    guardian: {
-      name: "Sara Miller",
-      relation: "Mother",
-      photo: "https://i.pravatar.cc/40?img=12",
-      division: "Dhaka",
-      district: "Narayanganj",
-      upazila: "Sonargaon",
-      village: "Panam",
-      phone: "01711111112",
-      email: "sara@example.com",
-    },
-  },
 
   // ===== AUTO GENERATED (3 – 32) =====
   ...Array.from({ length: 30 }, (_, i) => {
     const id = i + 3;
     const joinDay = ((id % 28) + 1).toString().padStart(2, "0");
-    const dobMonth = ((id % 9) + 1).toString().padStart(2, "0");
+
     return {
       id,
       admissionNo: `AD10${id}`,
@@ -95,10 +64,13 @@ export const studentData = [
       email: `student${id}@example.com`,
       password: "123456",
       feesDue: id % 2 === 0 ? 0 : 1500,
-      gender: id % 2 === 0 ? "Male" : "Female",
-      status: id % 3 === 0 ? "Inactive" : "Active",
-      joinDate: `2025-12-${joinDay}`, // raw ISO string
-      dob: `2014-${dobMonth}-15`,      // raw ISO string
+      
+
+      loginType: id % 3 === 0 ? "Inactive" : "Active",
+      status: ["pending", "approved", "rejected"][id % 3],
+
+      joinDate: `2025-12-${joinDay}`,
+
       guardian: {
         name: `Guardian ${id}`,
         relation: id % 2 === 0 ? "Father" : "Mother",

@@ -108,7 +108,7 @@ export default function AddStudentPage({ modal = false, onClose, onSave }) {
     <div
       className={`${
         modal ? "w-72 p-6" : "py-2 px-2 md:px-0 min-h-screen"
-      } flex flex-col items-center space-y-4 ${
+      } rounded flex flex-col items-center space-y-4 ${
         darkMode ? "bg-gray-800" : "bg-white"
       }`}
     >

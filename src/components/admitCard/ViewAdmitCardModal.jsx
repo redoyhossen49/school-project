@@ -63,7 +63,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
             }
             .watermark {
               position: absolute;
-              top: 50%;
+              top: 60%;
               left: 50%;
               transform: translate(-50%, -50%) rotate(-45deg);
               opacity: 0.08;
@@ -71,7 +71,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               pointer-events: none;
             }
             .watermark img {
-              width: 600px;
+              width: 300px;
               height: auto;
               object-fit: contain;
             }
@@ -200,11 +200,12 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               font-size: 12px;
               background-color: transparent;
             }
-            .footer {
-              margin-top: 5%;
-              display: flex;
-              justify-content: flex-end;
-            }
+           .footer {
+  margin-top: 2%;
+  display: flex;
+  justify-content: space-between; /* spreads the two divs */
+  align-items: center; /* vertically centers items inside each div */
+}
             .sig-box {
               text-align: center;
               width: 250px;
@@ -292,7 +293,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               }
               .watermark {
                 position: absolute !important;
-                top: 50% !important;
+                top: 60% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) rotate(-45deg) !important;
                 opacity: 0.08 !important;
@@ -300,7 +301,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
                 pointer-events: none !important;
               }
               .watermark img {
-                width: 600px !important;
+                width: 300px !important;
                 height: auto !important;
                 object-fit: contain !important;
               }
@@ -323,6 +324,12 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
                 border: 1px solid gray !important;
                 border-radius: 300px !important;
               }
+                .footer {
+  margin-top: 2%;
+  display: flex;
+  justify-content: space-between; /* spreads the two divs */
+  align-items: center; /* vertically centers items inside each div */
+}
             }
           </style>
         </head>
@@ -356,8 +363,9 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center ${isModalClosing ? "animate-fadeOut" : "animate-fadeIn"
-        }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center ${
+        isModalClosing ? "animate-fadeOut" : "animate-fadeIn"
+      }`}
       style={{
         backgroundColor: "rgba(0, 0, 0, 0.5)",
       }}
@@ -365,29 +373,38 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
     >
       <div
         ref={modalRef}
-        className={`${cardBg} ${textColor} max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col ${isModalOpening ? "animate-scaleIn" : isModalClosing ? "animate-scaleOut" : ""
-          }`}
+        className={`${cardBg} ${textColor} max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col ${
+          isModalOpening
+            ? "animate-scaleIn"
+            : isModalClosing
+              ? "animate-scaleOut"
+              : ""
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between p-4 border-b ${borderClr}`}>
+        <div
+          className={`flex items-center justify-between p-4 border-b ${borderClr}`}
+        >
           <h2 className="text-[12px] font-semibold">{row.StudentName}</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className={`px-3 py-1 text-xs border ${borderClr} ${darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                } transition`}
+              className={`px-3 py-1 text-xs border ${borderClr} ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                  : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+              } transition`}
             >
               Print
             </button>
             <button
               onClick={handleClose}
-              className={`px-3 py-1 text-xs border ${borderClr} ${darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                } transition`}
+              className={`px-3 py-1 text-xs border ${borderClr} ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200"
+                  : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+              } transition`}
             >
               Close
             </button>
@@ -429,7 +446,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
             }
             .watermark {
               position: absolute;
-              top: 50%;
+              top: 60%;
               left: 50%;
               transform: translate(-50%, -50%) rotate(-45deg);
               opacity: 0.08;
@@ -437,7 +454,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               pointer-events: none;
             }
             .watermark img {
-              width: 600px;
+              width: 300px;
               height: auto;
               object-fit: contain;
             }
@@ -566,11 +583,12 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               font-size: 12px;
               background-color: transparent;
             }
-            .footer {
-              margin-top: 5%;
-              display: flex;
-              justify-content: flex-end;
-            }
+           .footer {
+  margin-top: 2%;
+  display: flex;
+  justify-content: space-between; /* spreads the two divs */
+  align-items: center; /* vertically centers items inside each div */
+}
             .sig-box {
               text-align: center;
               width: 250px;
@@ -658,7 +676,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
               }
               .watermark {
                 position: absolute !important;
-                top: 50% !important;
+                top: 60% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) rotate(-45deg) !important;
                 opacity: 0.08 !important;
@@ -666,7 +684,7 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
                 pointer-events: none !important;
               }
               .watermark img {
-                width: 600px !important;
+                width: 300px !important;
                 height: auto !important;
                 object-fit: contain !important;
               }
@@ -689,6 +707,12 @@ export default function ViewAdmitCardModal({ open, onClose, row, darkMode }) {
                 border: 1px solid gray !important;
                 border-radius: 300px !important;
               }
+                .footer {
+  margin-top: 2%;
+  display: flex;
+  justify-content: space-between; /* spreads the two divs */
+  align-items: center; /* vertically centers items inside each div */
+}
             }
       `}</style>
     </div>

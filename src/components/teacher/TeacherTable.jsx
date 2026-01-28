@@ -5,11 +5,12 @@ import ReusableEditModal from "../common/ReusableEditModal";
 
 const headers = [
   "Id number",
+  "Password",
   "Name",
   "Designation",
   "Phone",
   "Email",
-  "Password",
+
   "Absence",
   "Present",
   "Late",
@@ -42,8 +43,8 @@ export default function TeacherTable({ data, setData }) {
   const handleEditSubmit = (updatedData) => {
     setData((prev) =>
       prev.map((t) =>
-        t.id === selectedTeacher.id ? { ...t, ...updatedData } : t
-      )
+        t.id === selectedTeacher.id ? { ...t, ...updatedData } : t,
+      ),
     );
     setEditModalOpen(false);
   };
@@ -66,16 +67,20 @@ export default function TeacherTable({ data, setData }) {
           }`}
         >
           <tr>
-            {headers.map((h, i) => (
-              <th
-                key={h}
-                className={`px-3 h-8 text-left font-semibold whitespace-nowrap ${
-                  i !== headers.length ? `border-r ${borderCol}` : ""
-                }`}
-              >
-                {h}
-              </th>
-            ))}
+            {headers.map((h) => {
+              // Password শুধু school হলে দেখাবে
+              if (h === "Password" && userRole !== "school") return null;
+
+              return (
+                <th
+                  key={h}
+                  className={`px-3 h-8 text-left font-semibold whitespace-nowrap border-r ${borderCol}`}
+                >
+                  {h}
+                </th>
+              );
+            })}
+
             {showAction && (
               <th className="px-3 h-8 text-left font-semibold whitespace-nowrap">
                 Action
@@ -88,12 +93,23 @@ export default function TeacherTable({ data, setData }) {
         <tbody>
           {data.map((t) => (
             <tr key={t.id} className={`border-b ${borderCol} ${hoverRow}`}>
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.idNumber}
               </td>
+              {userRole === "school" && (
+                <td
+                  className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+                >
+                  {t.password || "-"}
+                </td>
+              )}
 
               {/* Name + Photo */}
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 <div className="flex items-center gap-2">
                   {t.photo ? (
                     <img
@@ -108,11 +124,15 @@ export default function TeacherTable({ data, setData }) {
                 </div>
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.designation}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.phone ? (
                   <a
                     href={`tel:${t.phone}`}
@@ -125,7 +145,9 @@ export default function TeacherTable({ data, setData }) {
                 )}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.email ? (
                   <a
                     href={`mailto:${t.email}`}
@@ -138,31 +160,39 @@ export default function TeacherTable({ data, setData }) {
                 )}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
-                {t.password || "-"}
-              </td>
-
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.absence || 0}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.present || 0}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.late || 0}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.leave || 0}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 ৳{t.totalPayable || 0}
               </td>
 
-              <td className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}>
+              <td
+                className={`px-3 h-8 whitespace-nowrap border-r ${borderCol}`}
+              >
                 {t.payableDue === 0 ? (
                   <span className="text-green-600 font-semibold">Paid</span>
                 ) : (
@@ -201,8 +231,18 @@ export default function TeacherTable({ data, setData }) {
           onClose={() => setEditModalOpen(false)}
           onSubmit={handleEditSubmit}
           fields={[
-            { name: "teacherName", label: "Name", type: "text", required: true },
-            { name: "designation", label: "Designation", type: "text", required: true },
+            {
+              name: "teacherName",
+              label: "Name",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "designation",
+              label: "Designation",
+              type: "text",
+              required: true,
+            },
             { name: "phone", label: "Phone", type: "text" },
             { name: "email", label: "Email", type: "text" },
             { name: "password", label: "Password", type: "text" },

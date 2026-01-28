@@ -224,7 +224,7 @@ export default function SitNumberTable({
                flex-direction: column;
                overflow: visible;
                margin: 5px;
-               border-radius: 8px;
+               
              }
              .watermark {
                position: absolute;
@@ -525,7 +525,7 @@ export default function SitNumberTable({
             <tr>
               <td
                 colSpan={columns.length + 2}
-                className={`h-10 px-3 border-b ${borderCol}`}
+                className={`h-10 px-3 border-b bg-white ${borderCol}`}
               >
                 <div className="flex items-center justify-between">
                   <button

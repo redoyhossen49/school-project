@@ -1,4 +1,4 @@
-export const feeTypeData = [
+ export const feeTypeData = [
   {
     sl: 1,
     group_name: "Science",

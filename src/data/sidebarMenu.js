@@ -402,10 +402,7 @@ export const sidebarMenu = (role) => {
       icon: TbUserShield,
       children: [
         { title: "Guardian List", path: "guardianlist" },
-        {
-          title: "Complain",
-          path: "/guardian/complain",
-        },
+        
       ],
     },
 
@@ -419,7 +416,7 @@ export const sidebarMenu = (role) => {
         { title: "Session", path: "sessionlist" },
         { title: "Subject", path: "subjectlist" },
         { title: "Syllabus", path: "syllabus" },
-        { title: "Class Routine", path: "classroutine" },
+        { title: "Class Routine", path: "routine" },
       ],
     },
 

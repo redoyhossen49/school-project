@@ -20,7 +20,11 @@ export default function GroupListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("All");
-  const [groupFilter, setGroupFilter] = useState("");
+  const [groupFilter, setGroupFilter] = useState({
+    className: "",
+    group: "",
+  });
+
   const [sortOrder, setSortOrder] = useState("asc");
 
   const [monthOpen, setMonthOpen] = useState(false);
@@ -36,22 +40,6 @@ export default function GroupListPage() {
   const exportRef = useRef(null);
   const sortRef = useRef(null);
   const buttonRef = useRef(null);
-
-  const months = [
-    "All",
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   const groupOptions = ["All Groups", "Group A", "Group B"];
 
@@ -151,45 +139,31 @@ export default function GroupListPage() {
     alert("Group added successfully ✅");
   };
 
-  // Refresh
-  const handleRefresh = () => {
-    setSelectedMonth("All");
-    setSearch("");
-    setGroupFilter("");
-    setSortOrder("asc");
-    setCurrentPage(1);
-  };
-
   // Filter + Sort + Month
   const filteredData = data
     .map((item) => {
-      let groups = item.groups.filter((g) =>
-        search ? g.name.toLowerCase().includes(search.toLowerCase()) : true,
-      );
-
-      if (groupFilter && groupFilter !== "All Groups") {
-        groups = groups.filter((g) => g.name === groupFilter);
+      // class filter
+      if (groupFilter.className) {
+        if (item.class !== groupFilter.className) return null;
       }
 
-      if (selectedMonth && selectedMonth !== "All") {
-        groups = groups.map((g) => ({
-          ...g,
-          monthly: g.monthly.filter((m) => m.month === selectedMonth),
-        }));
+      let groups = [...item.groups];
+
+      // group filter
+      if (groupFilter.group) {
+        groups = groups.filter((g) => g.name === groupFilter.group);
       }
 
-      // Sort groups by name based on sortOrder
-      groups.sort((a, b) => {
-        if (sortOrder === "asc") {
-          return a.name.localeCompare(b.name);
-        } else {
-          return b.name.localeCompare(a.name);
-        }
-      });
+      // search
+      if (search) {
+        groups = groups.filter((g) =>
+          g.name.toLowerCase().includes(search.toLowerCase()),
+        );
+      }
 
-      return { ...item, groups };
+      return groups.length ? { ...item, groups } : null;
     })
-    .filter((item) => item.groups.length > 0);
+    .filter(Boolean);
 
   // Pagination
   const perPage = 10;
@@ -198,6 +172,9 @@ export default function GroupListPage() {
     (currentPage - 1) * perPage,
     currentPage * perPage,
   );
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [groupFilter, search]);
 
   // Export Excel
   const exportExcel = (data) => {
@@ -302,24 +279,21 @@ export default function GroupListPage() {
 
               {/* FilterDropdown */}
               <FilterDropdown
-                title="Filter Sections"
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 selected={groupFilter}
                 setSelected={setGroupFilter}
-                darkMode={darkMode}
-                buttonRef={buttonRef}
-                onApply={(filters) => console.log("Applied Filters:", filters)}
+                onApply={() => setIsOpen(false)}
                 fields={[
                   {
-                    key: "class",
+                    key: "className",
                     placeholder: "Select Class",
-                    options: ["Class 1", "Class 2", "Class 3"],
+                    options: classGroupData.map((d) => d.class),
                   },
                   {
                     key: "group",
                     placeholder: "Select Group",
-                    options: ["Science", "Commerce", "Arts"],
+                    options: ["Group A", "Group B"],
                   },
                 ]}
               />

@@ -47,7 +47,7 @@ export default function FormModal({
     setFormData((prev) => {
       const updated = { ...prev, [key]: value };
 
-      // Auto-calc examDay when examDate changes
+      // 1️⃣ Auto-calc examDay when examDate changes
       if (key === "examDate" && value) {
         const dateObj = new Date(value);
         const days = [
@@ -61,11 +61,27 @@ export default function FormModal({
         ];
         updated.examDay = days[dateObj.getDay()];
       }
+
+      // 2️⃣ Auto-calc totalHour if startTime or endTime changed
+      const start = key === "startTime" ? value : updated.startTime;
+      const end = key === "endTime" ? value : updated.endTime;
+
+      if (start && end) {
+        const [sh, sm] = start.split(":").map(Number);
+        const [eh, em] = end.split(":").map(Number);
+
+        let totalMinutes = (eh - sh) * 60 + (em - sm);
+        if (totalMinutes < 0) totalMinutes += 24 * 60; // handle overnight
+
+        updated.totalHour = (totalMinutes / 60).toFixed(2); // show as decimal
+      } else {
+        updated.totalHour = ""; // clear if incomplete
+      }
+
       onValuesChange?.(updated);
       return updated;
     });
   };
-
   const openDropdown = (key) => {
     const el = fieldRefs.current[key];
     if (!el) return;

@@ -33,7 +33,6 @@ export default function Input({
 
   /* ================= SELECT ================= */
   if (type === "select") {
-
     const updateDropdownPosition = () => {
       if (!selectRef.current) return;
       const rect = selectRef.current.getBoundingClientRect();
@@ -82,18 +81,18 @@ export default function Input({
           }}
           className={`
             h-8 px-2 text-[12px] flex items-center justify-between border
-            ${darkMode
-              ? "bg-gray-700 text-gray-200 border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"}
+            ${
+              darkMode
+                ? "bg-gray-700 text-gray-200 border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+            }
             ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
             ${error ? "border-red-500" : ""}
             ${className}
           `}
         >
-          <span className={value ? "" : "text-gray-400"}>
-            {value || label}
-          </span>
-           <span className="h-4 w-4">&#9662;</span>
+          <span className={value ? "" : "text-gray-400"}>{value || label}</span>
+          <span className="h-4 w-4">&#9662;</span>
         </div>
 
         {open && !disabled && (
@@ -101,9 +100,11 @@ export default function Input({
             style={dropdownStyle}
             className={`
               w-full max-h-48 overflow-y-auto border
-              ${darkMode
-                ? "bg-gray-700 border-gray-600"
-                : "bg-white border-gray-300"}
+              ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
+              }
             `}
           >
             {options.map((opt, i) => (
@@ -115,9 +116,11 @@ export default function Input({
                 }}
                 className={`
                   px-2 py-1 text-[12px] cursor-pointer
-                  ${darkMode
-                    ? "hover:bg-gray-600 text-gray-200"
-                    : "hover:bg-indigo-100 text-gray-700"}
+                  ${
+                    darkMode
+                      ? "hover:bg-gray-600 text-gray-200"
+                      : "hover:bg-indigo-100 text-gray-700"
+                  }
                 `}
               >
                 {opt}
@@ -146,9 +149,11 @@ export default function Input({
         {...rest}
         className={`
           peer h-8 w-full px-2 text-[12px] border focus:outline-none
-          ${darkMode
-            ? "bg-gray-500 text-white border-gray-600 focus:border-indigo-500"
-            : "bg-white text-gray-900 border-gray-300 focus:border-indigo-600"}
+          ${
+            darkMode
+              ? "bg-gray-500 text-white border-gray-600 focus:border-indigo-500"
+              : "bg-white text-gray-900 border-gray-300 focus:border-indigo-600"
+          }
           ${error ? "border-red-500" : ""}
           ${className}
         `}
@@ -157,7 +162,7 @@ export default function Input({
       {/* Floating Label */}
       <label
         className={`
-          absolute left-2 top-1/2 -translate-y-1/2 text-[12px]
+          absolute text-xs left-2 top-1/2 -translate-y-1/2 text-[12px]
           pointer-events-none transition-all duration-200
           ${darkMode ? "text-white" : "text-gray-400"}
 
@@ -171,9 +176,11 @@ export default function Input({
 
           peer-not-placeholder-shown:-top-1
           peer-not-placeholder-shown:px-1
-          ${darkMode
-            ? "peer-not-placeholder-shown:bg-gray-700 peer-not-placeholder-shown:text-white"
-            : "peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:text-indigo-600"}
+          ${
+            darkMode
+              ? "peer-not-placeholder-shown:bg-gray-700 peer-not-placeholder-shown:text-white"
+              : "peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:text-gray-600"
+          }
         `}
       >
         {label}

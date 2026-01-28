@@ -7,11 +7,11 @@ const headers = [
     "Group",
     "Section",
     "Session",
-    "Fees Type",
+    "Fees type",
     "Amount",
-    "Total Payable",
-    "Payable Due",
-    "Payable Last Date",
+    "Total payable",
+    "Payable due",
+    "Payable date",
 ];
 
 export default function FeeTypeTable({ data, setData, onEdit }) {

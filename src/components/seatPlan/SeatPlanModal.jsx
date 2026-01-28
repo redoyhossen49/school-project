@@ -225,33 +225,52 @@ export default function SeatPlanModal({ open, onClose }) {
 
         <hr>
 
-        <div class="details-grid">
-          <div class="detail-item">
-            <span class="label">Name</span>
-            <span class="value">: ${student.student_name}</span>
+       <div class="details-grid">
+          <div class="left-column">
+            <div class="detail-item">
+              <span class="label">Class</span>
+              <span class="value">: ${student.className || student.Class || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Group</span>
+              <span class="value">: ${student.group || student.Group || "---"}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Section</span>
+              <span class="value">: ${student.section || student.Section || "N/A"}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Session</span>
+              <span class="value">: ${student.session || student.Session || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Exam Name</span>
+              <span class="value">: ${student.examName || student.ExamName || ""}</span>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="label">Class</span>
-            <span class="value">: ${student.className}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">ID Number</span>
-            <span class="value">: ${student.studentId}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Group</span>
-            <span class="value">: ${student.group || "---"}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Roll</span>
-            <span class="value">: ${student.rollNo}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Section</span>
-            <span class="value">: ${student.section || "N/A"}</span>
+          <div class="right-column">
+            <div class="detail-item">
+              <span class="label">Exam Year</span>
+              <span class="value">: ${student.examYear || student.ExamYear || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Student Name</span>
+              <span class="value">: ${student.studentName || student.student_name || student.StudentName || student.name || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">ID Number</span>
+              <span class="value">: ${student.idNumber || student.IDNumber || student.studentId || student.student_id || student.ID || student.id || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Roll Number</span>
+              <span class="value">: ${student.rollNo || student.RollNo || student.roll_no || student.roll || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Seat Number</span>
+              <span class="value">: ${student.seatNumber || student.SeatNumber || student.seat_number || seatNumber || ""}</span>
+            </div>
           </div>
         </div>
-      </div>
     `;
   };
 
